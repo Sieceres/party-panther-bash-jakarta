@@ -6,7 +6,8 @@ import { PromoCard } from "@/components/PromoCard";
 import { CreateEventForm } from "@/components/CreateEventForm";
 import { UserProfile } from "@/components/UserProfile";
 import { Button } from "@/components/ui/button";
-import { Calendar, Star } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar, Filter } from "lucide-react";
 
 // Mock data
 const mockEvents = [
@@ -62,7 +63,10 @@ const mockPromos = [
     image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&h=300&fit=crop",
     category: "Drinks",
     originalPrice: "IDR 200K",
-    discountedPrice: "IDR 100K"
+    discountedPrice: "IDR 100K",
+    day: "friday",
+    area: "south",
+    drinkType: "cocktails"
   },
   {
     id: "2",
@@ -74,7 +78,10 @@ const mockPromos = [
     image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop",
     category: "Entry",
     originalPrice: "IDR 150K",
-    discountedPrice: "FREE"
+    discountedPrice: "FREE",
+    day: "friday",
+    area: "central",
+    drinkType: "all"
   },
   {
     id: "3",
@@ -86,13 +93,56 @@ const mockPromos = [
     image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=400&h=300&fit=crop",
     category: "Ladies Night",
     originalPrice: "IDR 250K",
-    discountedPrice: "FREE"
+    discountedPrice: "FREE",
+    day: "wednesday",
+    area: "west",
+    drinkType: "beer"
+  },
+  {
+    id: "4",
+    title: "Wine Wednesday Special",
+    description: "Premium wines at unbeatable prices every Wednesday!",
+    discount: "40% OFF",
+    venue: "Cork & Screw",
+    validUntil: "Every Wednesday",
+    image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&h=300&fit=crop",
+    category: "Wine",
+    originalPrice: "IDR 300K",
+    discountedPrice: "IDR 180K",
+    day: "wednesday",
+    area: "north",
+    drinkType: "wine"
+  },
+  {
+    id: "5",
+    title: "Saturday Night Shots",
+    description: "Buy 2 get 1 free on all premium shots!",
+    discount: "BUY 2 GET 1",
+    venue: "Shot Bar Jakarta",
+    validUntil: "Every Saturday",
+    image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop",
+    category: "Shots",
+    originalPrice: "IDR 150K",
+    discountedPrice: "IDR 100K",
+    day: "saturday",
+    area: "east",
+    drinkType: "spirits"
   }
 ];
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("home");
   const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [dayFilter, setDayFilter] = useState("all");
+  const [areaFilter, setAreaFilter] = useState("all");
+  const [drinkTypeFilter, setDrinkTypeFilter] = useState("all");
+
+  const filteredPromos = mockPromos.filter((promo) => {
+    const dayMatch = dayFilter === "all" || promo.day === dayFilter;
+    const areaMatch = areaFilter === "all" || promo.area === areaFilter;
+    const drinkMatch = drinkTypeFilter === "all" || promo.drinkType === drinkTypeFilter;
+    return dayMatch && areaMatch && drinkMatch;
+  });
 
   const renderContent = () => {
     switch (activeSection) {
@@ -141,8 +191,61 @@ const Index = () => {
                 <p className="text-muted-foreground">Save money while partying with these exclusive deals</p>
               </div>
 
+              {/* Filter Controls */}
+              <div className="flex flex-col sm:flex-row gap-4 p-4 bg-card rounded-lg border">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Filter by:</span>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                  <Select value={dayFilter} onValueChange={setDayFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Day of week" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Days</SelectItem>
+                      <SelectItem value="monday">Monday</SelectItem>
+                      <SelectItem value="tuesday">Tuesday</SelectItem>
+                      <SelectItem value="wednesday">Wednesday</SelectItem>
+                      <SelectItem value="thursday">Thursday</SelectItem>
+                      <SelectItem value="friday">Friday</SelectItem>
+                      <SelectItem value="saturday">Saturday</SelectItem>
+                      <SelectItem value="sunday">Sunday</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={areaFilter} onValueChange={setAreaFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Area" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Areas</SelectItem>
+                      <SelectItem value="north">North Jakarta</SelectItem>
+                      <SelectItem value="south">South Jakarta</SelectItem>
+                      <SelectItem value="east">East Jakarta</SelectItem>
+                      <SelectItem value="west">West Jakarta</SelectItem>
+                      <SelectItem value="central">Central Jakarta</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={drinkTypeFilter} onValueChange={setDrinkTypeFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Drink type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Drinks</SelectItem>
+                      <SelectItem value="cocktails">Cocktails</SelectItem>
+                      <SelectItem value="beer">Beer</SelectItem>
+                      <SelectItem value="wine">Wine</SelectItem>
+                      <SelectItem value="spirits">Spirits</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockPromos.map((promo) => (
+                {filteredPromos.map((promo) => (
                   <PromoCard key={promo.id} promo={promo} />
                 ))}
               </div>
