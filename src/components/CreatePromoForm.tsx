@@ -6,25 +6,29 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, Upload } from "lucide-react";
+import { Star, CalendarIcon, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
-export const CreateEventForm = () => {
+export const CreatePromoForm = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [eventDate, setEventDate] = useState<Date>();
+  const [validUntilDate, setValidUntilDate] = useState<Date>();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    time: "",
+    discount: "",
     venue: "",
-    price: "",
-    capacity: "",
+    originalPrice: "",
+    discountedPrice: "",
     category: "",
     image: ""
   });
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -38,10 +42,6 @@ export const CreateEventForm = () => {
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -50,22 +50,22 @@ export const CreateEventForm = () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     toast({
-      title: "Event Created! 🎉",
-      description: "Your event has been submitted for review and will be live soon.",
+      title: "Promo Created! 🎉",
+      description: "Your promo has been submitted for review and will be live soon.",
     });
 
     // Reset form
     setFormData({
       title: "",
       description: "",
-      time: "",
+      discount: "",
       venue: "",
-      price: "",
-      capacity: "",
+      originalPrice: "",
+      discountedPrice: "",
       category: "",
       image: ""
     });
-    setEventDate(undefined);
+    setValidUntilDate(undefined);
 
     setIsSubmitting(false);
   };
@@ -75,22 +75,22 @@ export const CreateEventForm = () => {
       <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2 text-2xl">
-            <CalendarIcon className="w-6 h-6 text-primary" />
-            <span>Create New Event</span>
+            <Star className="w-6 h-6 text-primary" />
+            <span>Create New Promo</span>
           </CardTitle>
           <p className="text-muted-foreground">
-            Share your amazing event with Jakarta's party community!
+            Share exclusive deals and discounts with Jakarta's party community!
           </p>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Event Title */}
+            {/* Promo Title */}
             <div className="space-y-2">
-              <Label htmlFor="title">Event Title *</Label>
+              <Label htmlFor="title">Promo Title *</Label>
               <Input
                 id="title"
-                placeholder="Amazing Party Night at..."
+                placeholder="50% Off Weekend Party at..."
                 value={formData.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
                 required
@@ -102,7 +102,7 @@ export const CreateEventForm = () => {
               <Label htmlFor="description">Description *</Label>
               <Textarea
                 id="description"
-                placeholder="Tell people what makes your event special..."
+                placeholder="Tell people about this amazing deal..."
                 value={formData.description}
                 onChange={(e) => handleInputChange("description", e.target.value)}
                 rows={4}
@@ -110,28 +110,76 @@ export const CreateEventForm = () => {
               />
             </div>
 
-            {/* Date and Time */}
+            {/* Discount and Venue */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Event Date *</Label>
+                <Label htmlFor="discount">Discount *</Label>
+                <Input
+                  id="discount"
+                  placeholder="50% OFF"
+                  value={formData.discount}
+                  onChange={(e) => handleInputChange("discount", e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="venue">Venue *</Label>
+                <Input
+                  id="venue"
+                  placeholder="Club/Bar/Restaurant name"
+                  value={formData.venue}
+                  onChange={(e) => handleInputChange("venue", e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Pricing */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="originalPrice">Original Price *</Label>
+                <Input
+                  id="originalPrice"
+                  placeholder="IDR 200,000"
+                  value={formData.originalPrice}
+                  onChange={(e) => handleInputChange("originalPrice", e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="discountedPrice">Discounted Price *</Label>
+                <Input
+                  id="discountedPrice"
+                  placeholder="IDR 100,000"
+                  value={formData.discountedPrice}
+                  onChange={(e) => handleInputChange("discountedPrice", e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Valid Until and Category */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Valid Until *</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !eventDate && "text-muted-foreground"
+                        !validUntilDate && "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {eventDate ? format(eventDate, "dd/MM/yyyy") : "Pick a date"}
+                      {validUntilDate ? format(validUntilDate, "dd/MM/yyyy") : "Pick a date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={eventDate}
-                      onSelect={setEventDate}
+                      selected={validUntilDate}
+                      onSelect={setValidUntilDate}
                       initialFocus
                       className="pointer-events-auto"
                     />
@@ -139,66 +187,19 @@ export const CreateEventForm = () => {
                 </Popover>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="time">Time (24h format) *</Label>
+                <Label htmlFor="category">Category</Label>
                 <Input
-                  id="time"
-                  type="time"
-                  value={formData.time}
-                  onChange={(e) => handleInputChange("time", e.target.value)}
-                  required
+                  id="category"
+                  placeholder="Drinks, Food, Entry..."
+                  value={formData.category}
+                  onChange={(e) => handleInputChange("category", e.target.value)}
                 />
               </div>
-            </div>
-
-            {/* Venue */}
-            <div className="space-y-2">
-              <Label htmlFor="venue">Venue *</Label>
-              <Input
-                id="venue"
-                placeholder="Club/Bar/Restaurant name and address"
-                value={formData.venue}
-                onChange={(e) => handleInputChange("venue", e.target.value)}
-                required
-              />
-            </div>
-
-            {/* Price and Capacity */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="price">Ticket Price</Label>
-                <Input
-                  id="price"
-                  placeholder="IDR 150,000 or Free"
-                  value={formData.price}
-                  onChange={(e) => handleInputChange("price", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="capacity">Capacity</Label>
-                <Input
-                  id="capacity"
-                  type="number"
-                  placeholder="100"
-                  value={formData.capacity}
-                  onChange={(e) => handleInputChange("capacity", e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Category */}
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Input
-                id="category"
-                placeholder="Nightclub, Bar, Rooftop, Live Music..."
-                value={formData.category}
-                onChange={(e) => handleInputChange("category", e.target.value)}
-              />
             </div>
 
             {/* Image Upload */}
             <div className="space-y-2">
-              <Label htmlFor="image">Event Image</Label>
+              <Label htmlFor="image">Promo Image</Label>
               <div className="flex items-center space-x-4">
                 <Input
                   id="image"
@@ -230,7 +231,7 @@ export const CreateEventForm = () => {
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 neon-glow"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Creating Event..." : "Create Event"}
+              {isSubmitting ? "Creating Promo..." : "Create Promo"}
             </Button>
           </form>
         </CardContent>

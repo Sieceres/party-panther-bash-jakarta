@@ -4,11 +4,13 @@ import { Hero } from "@/components/Hero";
 import { EventCard } from "@/components/EventCard";
 import { PromoCard } from "@/components/PromoCard";
 import { CreateEventForm } from "@/components/CreateEventForm";
+import { CreatePromoForm } from "@/components/CreatePromoForm";
 import { UserProfile } from "@/components/UserProfile";
 import { BlogSection } from "@/components/BlogSection";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Filter } from "lucide-react";
+import { Calendar, Filter, Star } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data
 const mockEvents = [
@@ -132,8 +134,10 @@ const mockPromos = [
 ];
 
 const Index = () => {
+  const { toast } = useToast();
   const [activeSection, setActiveSection] = useState("home");
   const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [showCreatePromo, setShowCreatePromo] = useState(false);
   const [dayFilter, setDayFilter] = useState("all");
   const [areaFilter, setAreaFilter] = useState("all");
   const [drinkTypeFilter, setDrinkTypeFilter] = useState("all");
@@ -144,6 +148,22 @@ const Index = () => {
     const drinkMatch = drinkTypeFilter === "all" || promo.drinkType === drinkTypeFilter;
     return dayMatch && areaMatch && drinkMatch;
   });
+
+  const handleJoinEvent = (eventId: string) => {
+    const event = mockEvents.find(e => e.id === eventId);
+    toast({
+      title: "Successfully joined event! 🎉",
+      description: `You're now registered for "${event?.title}". See you there!`,
+    });
+  };
+
+  const handleClaimPromo = (promoId: string) => {
+    const promo = mockPromos.find(p => p.id === promoId);
+    toast({
+      title: "Promo claimed! 🎊",
+      description: `"${promo?.title}" has been added to your account. Show this at the venue.`,
+    });
+  };
 
   const renderContent = () => {
     switch (activeSection) {
@@ -176,7 +196,7 @@ const Index = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {mockEvents.map((event) => (
-                  <EventCard key={event.id} event={event} />
+                  <EventCard key={event.id} event={event} onJoin={handleJoinEvent} />
                 ))}
               </div>
             </div>
@@ -187,10 +207,25 @@ const Index = () => {
         return (
           <div className="pt-20 px-4">
             <div className="container mx-auto space-y-8">
-              <div>
-                <h2 className="text-4xl font-bold gradient-text mb-2">Hot Promos</h2>
-                <p className="text-muted-foreground">Save money while partying with these exclusive deals</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-4xl font-bold gradient-text mb-2">Hot Promos</h2>
+                  <p className="text-muted-foreground">Save money while partying with these exclusive deals</p>
+                </div>
+                <Button
+                  onClick={() => setShowCreatePromo(!showCreatePromo)}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  <Star className="w-4 h-4 mr-2" />
+                  Create Promo
+                </Button>
               </div>
+
+              {showCreatePromo && (
+                <div className="mb-8">
+                  <CreatePromoForm />
+                </div>
+              )}
 
               {/* Filter Controls */}
               <div className="flex flex-col sm:flex-row gap-4 p-4 bg-card rounded-lg border">
@@ -247,7 +282,7 @@ const Index = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredPromos.map((promo) => (
-                  <PromoCard key={promo.id} promo={promo} />
+                  <PromoCard key={promo.id} promo={promo} onClaim={handleClaimPromo} />
                 ))}
               </div>
             </div>
