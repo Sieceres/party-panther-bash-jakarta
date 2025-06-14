@@ -63,9 +63,9 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				neon: {
-					pink: 'hsl(var(--neon-pink))',
 					blue: 'hsl(var(--neon-blue))',
-					purple: 'hsl(var(--neon-purple))',
+					cyan: 'hsl(var(--neon-cyan))',
+					indigo: 'hsl(var(--neon-indigo))',
 					green: 'hsl(var(--neon-green))'
 				},
 				party: {

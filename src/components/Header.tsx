@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, Star, User, LogIn, LogOut } from "lucide-react";
+import { Calendar, Star, User, LogIn, LogOut, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
@@ -65,6 +65,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     { id: 'home', label: 'Home', icon: Star },
     { id: 'events', label: 'Events', icon: Calendar },
     { id: 'promos', label: 'Promos', icon: Star },
+    { id: 'blog', label: 'Blog', icon: BookOpen },
     { id: 'profile', label: 'Profile', icon: User }
   ];
 

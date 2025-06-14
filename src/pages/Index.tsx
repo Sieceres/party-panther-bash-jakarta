@@ -5,6 +5,7 @@ import { EventCard } from "@/components/EventCard";
 import { PromoCard } from "@/components/PromoCard";
 import { CreateEventForm } from "@/components/CreateEventForm";
 import { UserProfile } from "@/components/UserProfile";
+import { BlogSection } from "@/components/BlogSection";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, Filter } from "lucide-react";
@@ -249,6 +250,15 @@ const Index = () => {
                   <PromoCard key={promo.id} promo={promo} />
                 ))}
               </div>
+            </div>
+          </div>
+        );
+      
+      case "blog":
+        return (
+          <div className="pt-20 px-4">
+            <div className="container mx-auto">
+              <BlogSection />
             </div>
           </div>
         );

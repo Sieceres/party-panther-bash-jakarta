@@ -11,8 +11,8 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full party-gradient blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-neon-blue blur-3xl opacity-20"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-neon-purple blur-3xl opacity-15"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-neon-cyan blur-3xl opacity-20"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-neon-indigo blur-3xl opacity-15"></div>
       </div>
 
       <div className="relative z-10 text-center space-y-8 px-4">
@@ -46,9 +46,8 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
           </Button>
           <Button
             size="lg"
-            variant="outline"
             onClick={() => onSectionChange('promos')}
-            className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-3 rounded-full"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full neon-glow"
           >
             <Star className="w-5 h-5 mr-2" />
             Find Promos
@@ -58,15 +57,15 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-8 pt-16 max-w-md mx-auto">
           <div className="text-center">
-            <div className="text-3xl font-bold text-neon-pink">500+</div>
+            <div className="text-3xl font-bold text-neon-blue">500+</div>
             <div className="text-sm text-muted-foreground">Events</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-neon-blue">200+</div>
+            <div className="text-3xl font-bold text-neon-cyan">200+</div>
             <div className="text-sm text-muted-foreground">Venues</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-neon-purple">1000+</div>
+            <div className="text-3xl font-bold text-neon-indigo">1000+</div>
             <div className="text-sm text-muted-foreground">Members</div>
           </div>
         </div>

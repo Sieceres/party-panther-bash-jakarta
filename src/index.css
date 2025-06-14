@@ -15,8 +15,8 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 315 100% 65%;
-    --primary-foreground: 240 10% 3.9%;
+    --primary: 210 100% 60%;
+    --primary-foreground: 0 0% 98%;
 
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
@@ -32,23 +32,23 @@
 
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 315 100% 65%;
+    --ring: 210 100% 60%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 240 10% 3.9%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 315 100% 65%;
+    --sidebar-primary: 210 100% 60%;
     --sidebar-primary-foreground: 240 10% 3.9%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 315 100% 65%;
+    --sidebar-ring: 210 100% 60%;
 
     /* Party theme colors */
-    --neon-pink: 315 100% 65%;
-    --neon-blue: 193 100% 65%;
-    --neon-purple: 267 100% 65%;
+    --neon-blue: 210 100% 60%;
+    --neon-cyan: 193 100% 65%;
+    --neon-indigo: 240 100% 70%;
     --neon-green: 123 100% 65%;
     
     --party-dark: 240 10% 3.9%;
@@ -66,7 +66,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 315 100% 65%;
+    --primary: 210 100% 60%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 4.8% 95.9%;
@@ -83,7 +83,7 @@
 
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 315 100% 65%;
+    --ring: 210 100% 60%;
 
     --party-dark: 0 0% 100%;
     --party-darker: 240 4.8% 95.9%;
@@ -107,11 +107,11 @@
   }
   
   .party-gradient {
-    background: linear-gradient(135deg, hsl(var(--neon-pink)), hsl(var(--neon-purple)), hsl(var(--neon-blue)));
+    background: linear-gradient(135deg, hsl(var(--neon-blue)), hsl(var(--neon-indigo)), hsl(var(--neon-cyan)));
   }
   
   .gradient-text {
-    background: linear-gradient(135deg, hsl(var(--neon-pink)), hsl(var(--neon-blue)));
+    background: linear-gradient(135deg, hsl(var(--neon-blue)), hsl(var(--neon-cyan)));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
