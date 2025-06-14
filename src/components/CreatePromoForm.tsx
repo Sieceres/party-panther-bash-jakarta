@@ -20,8 +20,6 @@ export const CreatePromoForm = () => {
     description: "",
     discount: "",
     venue: "",
-    originalPrice: "",
-    discountedPrice: "",
     category: "",
     image: ""
   });
@@ -60,8 +58,6 @@ export const CreatePromoForm = () => {
       description: "",
       discount: "",
       venue: "",
-      originalPrice: "",
-      discountedPrice: "",
       category: "",
       image: ""
     });
@@ -134,29 +130,6 @@ export const CreatePromoForm = () => {
               </div>
             </div>
 
-            {/* Pricing */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="originalPrice">Original Price *</Label>
-                <Input
-                  id="originalPrice"
-                  placeholder="IDR 200,000"
-                  value={formData.originalPrice}
-                  onChange={(e) => handleInputChange("originalPrice", e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="discountedPrice">Discounted Price *</Label>
-                <Input
-                  id="discountedPrice"
-                  placeholder="IDR 100,000"
-                  value={formData.discountedPrice}
-                  onChange={(e) => handleInputChange("discountedPrice", e.target.value)}
-                  required
-                />
-              </div>
-            </div>
 
             {/* Valid Until and Category */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
