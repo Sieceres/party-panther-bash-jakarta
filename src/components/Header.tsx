@@ -119,7 +119,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                 className="flex items-center space-x-2"
               >
                 <LogIn className="w-4 h-4" />
-                <span>Sign In</span>
+                <span>Sign In/Sign Up</span>
               </Button>
             )}
           </nav>
@@ -184,7 +184,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                   className="justify-start"
                 >
                   <LogIn className="w-4 h-4 mr-2" />
-                  Sign In
+                  Sign In/Sign Up
                 </Button>
               )}
             </div>
