@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star } from "lucide-react";
+import { Star, MessageSquare } from "lucide-react";
+import { ReviewsList } from "./ReviewsList";
 
 interface Promo {
   id: string;
@@ -22,6 +24,15 @@ interface PromoCardProps {
 }
 
 export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
+  const [showReviews, setShowReviews] = useState(false);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+
+  const handleReviewsChange = (avgRating: number, total: number) => {
+    setAverageRating(avgRating);
+    setTotalReviews(total);
+  };
+
   return (
     <Card className="group hover:scale-105 transition-all duration-300 bg-card border-border hover:border-neon-pink/50 overflow-hidden">
       {/* Promo Image */}
@@ -67,21 +78,42 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
         </div>
 
         {/* Rating/Reviews */}
-        <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-          <Star className="w-4 h-4 text-yellow-400 fill-current" />
-          <span>4.5</span>
-          <span>•</span>
-          <span>128 reviews</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+            <span>{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
+            <span>•</span>
+            <span>{totalReviews} {totalReviews === 1 ? "review" : "reviews"}</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowReviews(!showReviews)}
+            className="text-xs"
+          >
+            <MessageSquare className="w-4 h-4 mr-1" />
+            {showReviews ? "Hide" : "Reviews"}
+          </Button>
         </div>
       </CardContent>
 
-      <CardFooter>
+      <CardFooter className="flex-col space-y-4">
         <Button
-          className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold neon-glow"
+          className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold"
           onClick={() => onClaim?.(promo.id)}
         >
           Claim Promo
         </Button>
+        
+        {/* Reviews Section */}
+        {showReviews && (
+          <div className="w-full">
+            <ReviewsList 
+              promoId={promo.id} 
+              onReviewsChange={handleReviewsChange}
+            />
+          </div>
+        )}
       </CardFooter>
     </Card>
   );
