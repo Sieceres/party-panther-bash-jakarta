@@ -19,7 +19,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         {/* Main Title */}
         <div className="space-y-4">
           <div className="flex items-center justify-center space-x-4 mb-6">
-            <div className="w-16 h-16 rounded-full party-gradient flex items-center justify-center neon-glow">
+            <div className="w-16 h-16 rounded-full party-gradient flex items-center justify-center">
               <span className="text-4xl">🐾</span>
             </div>
           </div>
@@ -39,7 +39,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
           <Button
             size="lg"
             onClick={() => onSectionChange('events')}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full neon-glow"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full"
           >
             <Calendar className="w-5 h-5 mr-2" />
             Explore Events
@@ -47,7 +47,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
           <Button
             size="lg"
             onClick={() => onSectionChange('promos')}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full neon-glow"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full"
           >
             <Star className="w-5 h-5 mr-2" />
             Find Promos
