@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, Upload, MapPin } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { GoogleMap } from "./GoogleMap";
 import { supabase } from "@/integrations/supabase/client";
+import { BasicEventInfo } from "./form-components/BasicEventInfo";
+import { EventDateTime } from "./form-components/EventDateTime";
+import { EventVenue } from "./form-components/EventVenue";
+import { EventPricing } from "./form-components/EventPricing";
+import { EventOrganizer } from "./form-components/EventOrganizer";
+import { ImageUpload } from "./form-components/ImageUpload";
 
 export const CreateEventForm = () => {
   const { toast } = useToast();
@@ -30,19 +28,6 @@ export const CreateEventForm = () => {
     image: ""
   });
   const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
-  const [showMap, setShowMap] = useState(false);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        handleInputChange("image", result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -129,196 +114,50 @@ export const CreateEventForm = () => {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Event Title */}
-            <div className="space-y-2">
-              <Label htmlFor="title">Event Title *</Label>
-              <Input
-                id="title"
-                placeholder="Amazing Party Night at..."
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                required
-              />
-            </div>
+            <BasicEventInfo
+              title={formData.title}
+              description={formData.description}
+              onTitleChange={(value) => handleInputChange("title", value)}
+              onDescriptionChange={(value) => handleInputChange("description", value)}
+            />
 
-            {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="description">Description *</Label>
-              <Textarea
-                id="description"
-                placeholder="Tell people what makes your event special..."
-                value={formData.description}
-                onChange={(e) => handleInputChange("description", e.target.value)}
-                rows={4}
-                required
-              />
-            </div>
+            <EventDateTime
+              eventDate={eventDate}
+              time={formData.time}
+              onDateChange={setEventDate}
+              onTimeChange={(value) => handleInputChange("time", value)}
+            />
 
-            {/* Date and Time */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Event Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !eventDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {eventDate ? format(eventDate, "dd/MM/yyyy") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={eventDate}
-                      onSelect={setEventDate}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="time">Time *</Label>
-                <Input
-                  id="time"
-                  type="time"
-                  value={formData.time}
-                  onChange={(e) => handleInputChange("time", e.target.value)}
-                  required
-                />
-              </div>
-            </div>
+            <EventVenue
+              venue={formData.venue}
+              address={formData.address}
+              location={location}
+              onVenueChange={(value) => handleInputChange("venue", value)}
+              onAddressChange={(value) => handleInputChange("address", value)}
+              onLocationChange={setLocation}
+            />
 
-            {/* Venue */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="venue">Venue Name *</Label>
-                <Input
-                  id="venue"
-                  placeholder="Club/Bar/Restaurant name"
-                  value={formData.venue}
-                  onChange={(e) => handleInputChange("venue", e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  placeholder="Full address"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange("address", e.target.value)}
-                />
-              </div>
-            </div>
+            <EventPricing
+              price={formData.price}
+              capacity={formData.capacity}
+              onPriceChange={(value) => handleInputChange("price", value)}
+              onCapacityChange={(value) => handleInputChange("capacity", value)}
+            />
 
-            {/* Location Selection */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Location (Optional)</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowMap(!showMap)}
-                >
-                  <MapPin className="w-4 h-4 mr-2" />
-                  {showMap ? "Hide Map" : "Select Location"}
-                </Button>
-              </div>
-              {location && (
-                <p className="text-sm text-muted-foreground">
-                  Selected: {location.address}
-                </p>
-              )}
-              {showMap && (
-                <GoogleMap
-                  onLocationSelect={setLocation}
-                  height="300px"
-                />
-              )}
-            </div>
+            <EventOrganizer
+              organizer={formData.organizer}
+              whatsapp={formData.whatsapp}
+              onOrganizerChange={(value) => handleInputChange("organizer", value)}
+              onWhatsappChange={(value) => handleInputChange("whatsapp", value)}
+            />
 
-            {/* Price and Capacity */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="price">Ticket Price</Label>
-                <Input
-                  id="price"
-                  placeholder="IDR 150,000 or Free"
-                  value={formData.price}
-                  onChange={(e) => handleInputChange("price", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="capacity">Capacity</Label>
-                <Input
-                  id="capacity"
-                  type="number"
-                  placeholder="100"
-                  value={formData.capacity}
-                  onChange={(e) => handleInputChange("capacity", e.target.value)}
-                />
-              </div>
-            </div>
+            <ImageUpload
+              label="Event Image"
+              imageUrl={formData.image}
+              onImageChange={(value) => handleInputChange("image", value)}
+              inputId="event-image"
+            />
 
-            {/* Organizer Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="organizer">Organizer Name *</Label>
-                <Input
-                  id="organizer"
-                  placeholder="Your name or organization"
-                  value={formData.organizer}
-                  onChange={(e) => handleInputChange("organizer", e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="whatsapp">WhatsApp (Optional)</Label>
-                <Input
-                  id="whatsapp"
-                  placeholder="+62..."
-                  value={formData.whatsapp}
-                  onChange={(e) => handleInputChange("whatsapp", e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Image Upload */}
-            <div className="space-y-2">
-              <Label htmlFor="image">Event Image</Label>
-              <div className="flex items-center space-x-4">
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => document.getElementById('image')?.click()}
-                  className="flex items-center space-x-2"
-                >
-                  <Upload className="w-4 h-4" />
-                  <span>Upload Image</span>
-                </Button>
-                {formData.image && (
-                  <div className="w-16 h-16 rounded border overflow-hidden">
-                    <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Submit Button */}
             <Button
               type="submit"
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 neon-glow"
