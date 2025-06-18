@@ -1,0 +1,234 @@
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Calendar, MapPin, Users, Clock, ArrowLeft, Star } from "lucide-react";
+import { GoogleMap } from "./GoogleMap";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  venue_name: string;
+  venue_address: string;
+  venue_latitude: number;
+  venue_longitude: number;
+  price_amount: number;
+  price_currency: string;
+  max_attendees: number;
+  image_url: string;
+  organizer_name: string;
+  organizer_whatsapp: string;
+  created_at: string;
+}
+
+export const EventDetailPage = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      if (!id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) throw error;
+        setEvent(data);
+      } catch (error) {
+        console.error('Error fetching event:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load event details",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvent();
+  }, [id, toast]);
+
+  const handleJoinEvent = () => {
+    toast({
+      title: "Successfully joined event! 🎉",
+      description: `You're now registered for "${event?.title}". See you there!`,
+    });
+  };
+
+  const handleContactOrganizer = () => {
+    if (event?.organizer_whatsapp) {
+      const message = `Hi! I'm interested in your event: ${event.title}`;
+      const whatsappUrl = `https://wa.me/${event.organizer_whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background pt-20 px-4">
+        <div className="container mx-auto">
+          <div className="text-center">Loading event details...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="min-h-screen bg-background pt-20 px-4">
+        <div className="container mx-auto">
+          <div className="text-center">Event not found</div>
+        </div>
+      </div>
+    );
+  }
+
+  const markers = event.venue_latitude && event.venue_longitude ? [{
+    lat: Number(event.venue_latitude),
+    lng: Number(event.venue_longitude),
+    title: event.venue_name
+  }] : [];
+
+  return (
+    <div className="min-h-screen bg-background pt-20 px-4">
+      <div className="container mx-auto max-w-4xl">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="mb-6"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Event Image */}
+            {event.image_url && (
+              <div className="aspect-video rounded-lg overflow-hidden">
+                <img 
+                  src={event.image_url} 
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            {/* Event Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-3xl gradient-text">{event.title}</CardTitle>
+                <div className="flex items-center space-x-4 text-muted-foreground">
+                  <div className="flex items-center space-x-1">
+                    <Calendar className="w-4 h-4" />
+                    <span>{event.date}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Clock className="w-4 h-4" />
+                    <span>{event.time}</span>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground leading-relaxed">
+                  {event.description}
+                </p>
+                
+                <Separator />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold">Venue</h4>
+                    <div className="flex items-start space-x-2">
+                      <MapPin className="w-4 h-4 mt-1 text-muted-foreground" />
+                      <div>
+                        <p className="font-medium">{event.venue_name}</p>
+                        <p className="text-sm text-muted-foreground">{event.venue_address}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="font-semibold">Organizer</h4>
+                    <p>{event.organizer_name}</p>
+                    {event.organizer_whatsapp && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleContactOrganizer}
+                        className="text-xs"
+                      >
+                        Contact via WhatsApp
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {markers.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-semibold">Location</h4>
+                    <GoogleMap
+                      center={{ lat: Number(event.venue_latitude), lng: Number(event.venue_longitude) }}
+                      markers={markers}
+                      height="300px"
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Event Info</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Price</span>
+                  <Badge className="bg-primary text-primary-foreground text-lg px-3 py-1">
+                    {event.price_amount ? `${event.price_currency} ${event.price_amount.toLocaleString()}` : 'Free'}
+                  </Badge>
+                </div>
+                
+                {event.max_attendees && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Capacity</span>
+                    <div className="flex items-center space-x-1">
+                      <Users className="w-4 h-4" />
+                      <span>{event.max_attendees}</span>
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  onClick={handleJoinEvent}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  Join Event
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

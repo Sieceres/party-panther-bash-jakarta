@@ -2,6 +2,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, User, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Event {
   id: string;
@@ -23,6 +24,8 @@ interface EventCardProps {
 }
 
 export const EventCard = ({ event, onJoin }: EventCardProps) => {
+  const navigate = useNavigate();
+
   return (
     <Card className="group hover:scale-105 transition-all duration-300 bg-card border-border hover:border-primary/50 overflow-hidden">
       {/* Event Image */}
@@ -77,9 +80,16 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
         </div>
       </CardContent>
 
-      <CardFooter>
+      <CardFooter className="flex gap-2">
         <Button
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+          variant="outline"
+          className="flex-1"
+          onClick={() => navigate(`/event/${event.id}`)}
+        >
+          View Details
+        </Button>
+        <Button
+          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={() => onJoin?.(event.id)}
         >
           Join Event

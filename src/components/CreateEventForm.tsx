@@ -6,10 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, Upload } from "lucide-react";
+import { Calendar as CalendarIcon, Upload, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { GoogleMap } from "./GoogleMap";
+import { supabase } from "@/integrations/supabase/client";
 
 export const CreateEventForm = () => {
   const { toast } = useToast();
@@ -20,11 +22,15 @@ export const CreateEventForm = () => {
     description: "",
     time: "",
     venue: "",
+    address: "",
     price: "",
     capacity: "",
-    category: "",
+    organizer: "",
+    whatsapp: "",
     image: ""
   });
+  const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  const [showMap, setShowMap] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -46,28 +52,66 @@ export const CreateEventForm = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to create an event.",
+          variant: "destructive"
+        });
+        return;
+      }
 
-    toast({
-      title: "Event Created! 🎉",
-      description: "Your event has been submitted for review and will be live soon.",
-    });
+      const { error } = await supabase.from('events').insert({
+        title: formData.title,
+        description: formData.description,
+        date: eventDate?.toISOString().split('T')[0],
+        time: formData.time,
+        venue_name: formData.venue,
+        venue_address: formData.address,
+        venue_latitude: location?.lat,
+        venue_longitude: location?.lng,
+        price_amount: formData.price ? parseInt(formData.price.replace(/[^0-9]/g, '')) : null,
+        max_attendees: formData.capacity ? parseInt(formData.capacity) : null,
+        organizer_name: formData.organizer,
+        organizer_whatsapp: formData.whatsapp,
+        image_url: formData.image,
+        created_by: user.id
+      });
 
-    // Reset form
-    setFormData({
-      title: "",
-      description: "",
-      time: "",
-      venue: "",
-      price: "",
-      capacity: "",
-      category: "",
-      image: ""
-    });
-    setEventDate(undefined);
+      if (error) throw error;
 
-    setIsSubmitting(false);
+      toast({
+        title: "Event Created! 🎉",
+        description: "Your event has been submitted for review and will be live soon.",
+      });
+
+      // Reset form
+      setFormData({
+        title: "",
+        description: "",
+        time: "",
+        venue: "",
+        address: "",
+        price: "",
+        capacity: "",
+        organizer: "",
+        whatsapp: "",
+        image: ""
+      });
+      setEventDate(undefined);
+      setLocation(null);
+    } catch (error) {
+      console.error('Error creating event:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create event. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -139,7 +183,7 @@ export const CreateEventForm = () => {
                 </Popover>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="time">Time (24h format) *</Label>
+                <Label htmlFor="time">Time *</Label>
                 <Input
                   id="time"
                   type="time"
@@ -151,15 +195,53 @@ export const CreateEventForm = () => {
             </div>
 
             {/* Venue */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="venue">Venue Name *</Label>
+                <Input
+                  id="venue"
+                  placeholder="Club/Bar/Restaurant name"
+                  value={formData.venue}
+                  onChange={(e) => handleInputChange("venue", e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  placeholder="Full address"
+                  value={formData.address}
+                  onChange={(e) => handleInputChange("address", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Location Selection */}
             <div className="space-y-2">
-              <Label htmlFor="venue">Venue *</Label>
-              <Input
-                id="venue"
-                placeholder="Club/Bar/Restaurant name and address"
-                value={formData.venue}
-                onChange={(e) => handleInputChange("venue", e.target.value)}
-                required
-              />
+              <div className="flex items-center justify-between">
+                <Label>Location (Optional)</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowMap(!showMap)}
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  {showMap ? "Hide Map" : "Select Location"}
+                </Button>
+              </div>
+              {location && (
+                <p className="text-sm text-muted-foreground">
+                  Selected: {location.address}
+                </p>
+              )}
+              {showMap && (
+                <GoogleMap
+                  onLocationSelect={setLocation}
+                  height="300px"
+                />
+              )}
             </div>
 
             {/* Price and Capacity */}
@@ -185,15 +267,27 @@ export const CreateEventForm = () => {
               </div>
             </div>
 
-            {/* Category */}
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Input
-                id="category"
-                placeholder="Nightclub, Bar, Rooftop, Live Music..."
-                value={formData.category}
-                onChange={(e) => handleInputChange("category", e.target.value)}
-              />
+            {/* Organizer Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="organizer">Organizer Name *</Label>
+                <Input
+                  id="organizer"
+                  placeholder="Your name or organization"
+                  value={formData.organizer}
+                  onChange={(e) => handleInputChange("organizer", e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="whatsapp">WhatsApp (Optional)</Label>
+                <Input
+                  id="whatsapp"
+                  placeholder="+62..."
+                  value={formData.whatsapp}
+                  onChange={(e) => handleInputChange("whatsapp", e.target.value)}
+                />
+              </div>
             </div>
 
             {/* Image Upload */}

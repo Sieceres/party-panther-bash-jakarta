@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, MessageSquare } from "lucide-react";
 import { ReviewsList } from "./ReviewsList";
+import { useNavigate } from "react-router-dom";
 
 interface Promo {
   id: string;
@@ -24,6 +25,7 @@ interface PromoCardProps {
 }
 
 export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
+  const navigate = useNavigate();
   const [showReviews, setShowReviews] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
@@ -98,12 +100,21 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
       </CardContent>
 
       <CardFooter className="flex-col space-y-4">
-        <Button
-          className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold"
-          onClick={() => onClaim?.(promo.id)}
-        >
-          Claim Promo
-        </Button>
+        <div className="flex gap-2 w-full">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => navigate(`/promo/${promo.id}`)}
+          >
+            View Details
+          </Button>
+          <Button
+            className="flex-1 bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold"
+            onClick={() => onClaim?.(promo.id)}
+          >
+            Claim Promo
+          </Button>
+        </div>
         
         {/* Reviews Section */}
         {showReviews && (
