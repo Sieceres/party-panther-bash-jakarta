@@ -9,35 +9,231 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      event_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          event_id: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          event_id: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_comments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_tag_assignments: {
+        Row: {
+          event_id: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_tag_assignments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_tag_assignments_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "event_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_tags: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          created_at: string
+          created_by: string
+          date: string
+          description: string | null
+          id: string
+          image_url: string | null
+          max_attendees: number | null
+          organizer_name: string
+          organizer_whatsapp: string | null
+          price_amount: number | null
+          price_currency: string | null
+          time: string
+          title: string
+          updated_at: string
+          venue_address: string | null
+          venue_latitude: number | null
+          venue_longitude: number | null
+          venue_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          date: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          max_attendees?: number | null
+          organizer_name: string
+          organizer_whatsapp?: string | null
+          price_amount?: number | null
+          price_currency?: string | null
+          time: string
+          title: string
+          updated_at?: string
+          venue_address?: string | null
+          venue_latitude?: number | null
+          venue_longitude?: number | null
+          venue_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          date?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          max_attendees?: number | null
+          organizer_name?: string
+          organizer_whatsapp?: string | null
+          price_amount?: number | null
+          price_currency?: string | null
+          time?: string
+          title?: string
+          updated_at?: string
+          venue_address?: string | null
+          venue_latitude?: number | null
+          venue_longitude?: number | null
+          venue_name?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           bio: string | null
+          business_name: string | null
           created_at: string
           display_name: string | null
           id: string
+          is_verified: boolean | null
+          profile_type: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          business_name?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
+          is_verified?: boolean | null
+          profile_type?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          business_name?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
+          is_verified?: boolean | null
+          profile_type?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      promo_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          promo_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          promo_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          promo_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_comments_promo_id_fkey"
+            columns: ["promo_id"]
+            isOneToOne: false
+            referencedRelation: "promos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       promo_reviews: {
         Row: {
@@ -69,15 +265,111 @@ export type Database = {
         }
         Relationships: []
       }
+      promos: {
+        Row: {
+          area: string | null
+          category: string | null
+          created_at: string
+          created_by: string
+          day_of_week: string | null
+          description: string
+          discount_text: string
+          discounted_price_amount: number | null
+          drink_type: string | null
+          id: string
+          image_url: string | null
+          original_price_amount: number | null
+          price_currency: string | null
+          title: string
+          updated_at: string
+          valid_until: string | null
+          venue_address: string | null
+          venue_latitude: number | null
+          venue_longitude: number | null
+          venue_name: string
+        }
+        Insert: {
+          area?: string | null
+          category?: string | null
+          created_at?: string
+          created_by: string
+          day_of_week?: string | null
+          description: string
+          discount_text: string
+          discounted_price_amount?: number | null
+          drink_type?: string | null
+          id?: string
+          image_url?: string | null
+          original_price_amount?: number | null
+          price_currency?: string | null
+          title: string
+          updated_at?: string
+          valid_until?: string | null
+          venue_address?: string | null
+          venue_latitude?: number | null
+          venue_longitude?: number | null
+          venue_name: string
+        }
+        Update: {
+          area?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string
+          day_of_week?: string | null
+          description?: string
+          discount_text?: string
+          discounted_price_amount?: number | null
+          drink_type?: string | null
+          id?: string
+          image_url?: string | null
+          original_price_amount?: number | null
+          price_currency?: string | null
+          title?: string
+          updated_at?: string
+          valid_until?: string | null
+          venue_address?: string | null
+          venue_latitude?: number | null
+          venue_longitude?: number | null
+          venue_name?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "user" | "admin" | "superadmin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -192,6 +484,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["user", "admin", "superadmin"],
+    },
   },
 } as const
