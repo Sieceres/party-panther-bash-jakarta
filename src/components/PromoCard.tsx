@@ -17,6 +17,9 @@ interface Promo {
   category: string;
   originalPrice: string;
   discountedPrice: string;
+  day: string;
+  area: string;
+  drinkType: string;
 }
 
 interface PromoCardProps {
