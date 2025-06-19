@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { EventCard } from "@/components/EventCard";
@@ -9,8 +9,10 @@ import { UserProfile } from "@/components/UserProfile";
 import { BlogSection } from "@/components/BlogSection";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Filter, Star } from "lucide-react";
+import { Calendar, Filter, Star, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 // Mock data
 const mockEvents = [
@@ -135,40 +137,168 @@ const mockPromos = [
 
 const Index = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("home");
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showCreatePromo, setShowCreatePromo] = useState(false);
   const [dayFilter, setDayFilter] = useState("all");
   const [areaFilter, setAreaFilter] = useState("all");
   const [drinkTypeFilter, setDrinkTypeFilter] = useState("all");
+  const [events, setEvents] = useState<any[]>([]);
+  const [promos, setPromos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredPromos = mockPromos.filter((promo) => {
-    const dayMatch = dayFilter === "all" || promo.day === dayFilter;
-    const areaMatch = areaFilter === "all" || promo.area === areaFilter;
-    const drinkMatch = drinkTypeFilter === "all" || promo.drinkType === drinkTypeFilter;
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const { data: eventsData } = await supabase
+        .from('events')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
+      
+      const { data: promosData } = await supabase
+        .from('promos')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      setEvents(eventsData || []);
+      setPromos(promosData || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredPromos = promos.filter((promo) => {
+    const dayMatch = dayFilter === "all" || promo.day_of_week?.toLowerCase() === dayFilter;
+    const areaMatch = areaFilter === "all" || promo.area?.toLowerCase().includes(areaFilter);
+    const drinkMatch = drinkTypeFilter === "all" || promo.drink_type?.toLowerCase() === drinkTypeFilter;
     return dayMatch && areaMatch && drinkMatch;
   });
 
   const handleJoinEvent = (eventId: string) => {
-    const event = mockEvents.find(e => e.id === eventId);
-    toast({
-      title: "Successfully joined event! 🎉",
-      description: `You're now registered for "${event?.title}". See you there!`,
-    });
+    navigate(`/event/${eventId}`);
   };
 
   const handleClaimPromo = (promoId: string) => {
-    const promo = mockPromos.find(p => p.id === promoId);
-    toast({
-      title: "Promo claimed! 🎊",
-      description: `"${promo?.title}" has been added to your account. Show this at the venue.`,
-    });
+    navigate(`/promo/${promoId}`);
   };
 
   const renderContent = () => {
     switch (activeSection) {
       case "home":
-        return <Hero onSectionChange={setActiveSection} />;
+        return (
+          <div>
+            <Hero onSectionChange={setActiveSection} />
+            {/* Sample Events Section */}
+            <div className="py-16 px-4 bg-background">
+              <div className="container mx-auto">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="text-3xl font-bold gradient-text mb-2">Featured Events</h2>
+                    <p className="text-muted-foreground">Don't miss these amazing upcoming events</p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setActiveSection("events")}
+                    className="flex items-center space-x-2"
+                  >
+                    <span>See more</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+                
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="animate-pulse bg-card rounded-lg h-64"></div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {events.map((event) => (
+                      <EventCard 
+                        key={event.id} 
+                        event={{
+                          id: event.id,
+                          title: event.title,
+                          date: new Date(event.date).toLocaleDateString(),
+                          time: event.time,
+                          venue: event.venue_name,
+                          price: "Free",
+                          image: event.image_url,
+                          organizer: event.organizer_name || "Anonymous",
+                          attendees: 0,
+                          rating: 0,
+                          tags: []
+                        }} 
+                        onJoin={handleJoinEvent} 
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Sample Promos Section */}
+            <div className="py-16 px-4 bg-muted/30">
+              <div className="container mx-auto">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="text-3xl font-bold gradient-text mb-2">Hot Promos</h2>
+                    <p className="text-muted-foreground">Save money while partying with these exclusive deals</p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setActiveSection("promos")}
+                    className="flex items-center space-x-2"
+                  >
+                    <span>See more</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+                
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="animate-pulse bg-card rounded-lg h-64"></div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {promos.map((promo) => (
+                      <PromoCard 
+                        key={promo.id} 
+                        promo={{
+                          id: promo.id,
+                          title: promo.title,
+                          description: promo.description,
+                          discount: promo.discount_text,
+                          venue: promo.venue_name,
+                          validUntil: promo.valid_until || "Limited time",
+                          image: promo.image_url,
+                          category: promo.category,
+                          originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : "N/A",
+                          discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : "FREE",
+                          day: promo.day_of_week || "",
+                          area: promo.area || "",
+                          drinkType: promo.drink_type || ""
+                        }} 
+                        onClaim={handleClaimPromo} 
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
       
       case "events":
         return (
@@ -195,8 +325,24 @@ const Index = () => {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockEvents.map((event) => (
-                  <EventCard key={event.id} event={event} onJoin={handleJoinEvent} />
+                {events.map((event) => (
+                  <EventCard 
+                    key={event.id} 
+                    event={{
+                      id: event.id,
+                      title: event.title,
+                      date: new Date(event.date).toLocaleDateString(),
+                      time: event.time,
+                      venue: event.venue_name,
+                      price: "Free",
+                      image: event.image_url,
+                      organizer: event.organizer_name || "Anonymous",
+                      attendees: 0,
+                      rating: 0,
+                      tags: []
+                    }} 
+                    onJoin={handleJoinEvent} 
+                  />
                 ))}
               </div>
             </div>

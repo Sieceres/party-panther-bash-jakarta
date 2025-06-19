@@ -9,6 +9,35 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      event_attendees: {
+        Row: {
+          event_id: string
+          id: string
+          joined_at: string | null
+          user_id: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          joined_at?: string | null
+          user_id: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          joined_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_attendees_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_comments: {
         Row: {
           comment: string
@@ -107,7 +136,7 @@ export type Database = {
           id: string
           image_url: string | null
           max_attendees: number | null
-          organizer_name: string
+          organizer_name: string | null
           organizer_whatsapp: string | null
           price_amount: number | null
           price_currency: string | null
@@ -127,7 +156,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           max_attendees?: number | null
-          organizer_name: string
+          organizer_name?: string | null
           organizer_whatsapp?: string | null
           price_amount?: number | null
           price_currency?: string | null
@@ -147,7 +176,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           max_attendees?: number | null
-          organizer_name?: string
+          organizer_name?: string | null
           organizer_whatsapp?: string | null
           price_amount?: number | null
           price_currency?: string | null
@@ -364,8 +393,8 @@ export type Database = {
     }
     Functions: {
       get_user_role: {
-        Args: { _user_id: string }
-        Returns: Database["public"]["Enums"]["user_role"]
+        Args: Record<PropertyKey, never> | { _user_id: string }
+        Returns: string
       }
     }
     Enums: {

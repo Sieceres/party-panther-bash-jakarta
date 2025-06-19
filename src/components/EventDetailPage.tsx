@@ -63,11 +63,52 @@ export const EventDetailPage = () => {
     fetchEvent();
   }, [id, toast]);
 
-  const handleJoinEvent = () => {
-    toast({
-      title: "Successfully joined event! 🎉",
-      description: `You're now registered for "${event?.title}". See you there!`,
-    });
+  const handleJoinEvent = async () => {
+    if (!event) return;
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to join this event.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('event_attendees')
+        .insert({
+          event_id: event.id,
+          user_id: user.id
+        });
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast({
+            title: "Already joined!",
+            description: "You're already registered for this event.",
+            variant: "destructive"
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      toast({
+        title: "Successfully joined event! 🎉",
+        description: `You're now registered for "${event.title}". See you there!`,
+      });
+    } catch (error) {
+      console.error('Error joining event:', error);
+      toast({
+        title: "Error",
+        description: "Failed to join event. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleContactOrganizer = () => {
@@ -202,21 +243,11 @@ export const EventDetailPage = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Price</span>
+                  <span className="text-muted-foreground">Entry</span>
                   <Badge className="bg-primary text-primary-foreground text-lg px-3 py-1">
-                    {event.price_amount ? `${event.price_currency} ${event.price_amount.toLocaleString()}` : 'Free'}
+                    Free
                   </Badge>
                 </div>
-                
-                {event.max_attendees && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Capacity</span>
-                    <div className="flex items-center space-x-1">
-                      <Users className="w-4 h-4" />
-                      <span>{event.max_attendees}</span>
-                    </div>
-                  </div>
-                )}
 
                 <Button
                   onClick={handleJoinEvent}

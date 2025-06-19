@@ -4,12 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { BasicEventInfo } from "./form-components/BasicEventInfo";
 import { EventDateTime } from "./form-components/EventDateTime";
 import { EventVenue } from "./form-components/EventVenue";
-import { EventPricing } from "./form-components/EventPricing";
 import { EventOrganizer } from "./form-components/EventOrganizer";
 import { ImageUpload } from "./form-components/ImageUpload";
+import { EventBasicInfo } from "./form-components/EventBasicInfo";
 
 export const CreateEventForm = () => {
   const { toast } = useToast();
@@ -21,8 +20,6 @@ export const CreateEventForm = () => {
     time: "",
     venue: "",
     address: "",
-    price: "",
-    capacity: "",
     organizer: "",
     whatsapp: "",
     image: ""
@@ -57,9 +54,7 @@ export const CreateEventForm = () => {
         venue_address: formData.address,
         venue_latitude: location?.lat,
         venue_longitude: location?.lng,
-        price_amount: formData.price ? parseInt(formData.price.replace(/[^0-9]/g, '')) : null,
-        max_attendees: formData.capacity ? parseInt(formData.capacity) : null,
-        organizer_name: formData.organizer,
+        organizer_name: formData.organizer || null,
         organizer_whatsapp: formData.whatsapp,
         image_url: formData.image,
         created_by: user.id
@@ -79,8 +74,6 @@ export const CreateEventForm = () => {
         time: "",
         venue: "",
         address: "",
-        price: "",
-        capacity: "",
         organizer: "",
         whatsapp: "",
         image: ""
@@ -114,7 +107,7 @@ export const CreateEventForm = () => {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <BasicEventInfo
+            <EventBasicInfo
               title={formData.title}
               description={formData.description}
               onTitleChange={(value) => handleInputChange("title", value)}
@@ -135,13 +128,6 @@ export const CreateEventForm = () => {
               onVenueChange={(value) => handleInputChange("venue", value)}
               onAddressChange={(value) => handleInputChange("address", value)}
               onLocationChange={setLocation}
-            />
-
-            <EventPricing
-              price={formData.price}
-              capacity={formData.capacity}
-              onPriceChange={(value) => handleInputChange("price", value)}
-              onCapacityChange={(value) => handleInputChange("capacity", value)}
             />
 
             <EventOrganizer

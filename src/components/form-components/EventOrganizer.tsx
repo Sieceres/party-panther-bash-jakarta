@@ -12,13 +12,12 @@ export const EventOrganizer = ({ organizer, whatsapp, onOrganizerChange, onWhats
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label htmlFor="organizer">Organizer Name *</Label>
+        <Label htmlFor="organizer">Organizer Name</Label>
         <Input
           id="organizer"
-          placeholder="Your name or organization"
+          placeholder="Your name or organization (optional)"
           value={organizer}
           onChange={(e) => onOrganizerChange(e.target.value)}
-          required
         />
       </div>
       <div className="space-y-2">
