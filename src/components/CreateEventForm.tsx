@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { BasicEventInfo } from "./form-components/BasicEventInfo";
 import { EventDateTime } from "./form-components/EventDateTime";
 import { EventVenue } from "./form-components/EventVenue";
 import { EventOrganizer } from "./form-components/EventOrganizer";
 import { ImageUpload } from "./form-components/ImageUpload";
-import { EventBasicInfo } from "./form-components/EventBasicInfo";
 
 export const CreateEventForm = () => {
   const { toast } = useToast();
@@ -107,7 +107,7 @@ export const CreateEventForm = () => {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <EventBasicInfo
+            <BasicEventInfo
               title={formData.title}
               description={formData.description}
               onTitleChange={(value) => handleInputChange("title", value)}

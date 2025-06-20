@@ -15,7 +15,7 @@ export const EventOrganizer = ({ organizer, whatsapp, onOrganizerChange, onWhats
         <Label htmlFor="organizer">Organizer Name</Label>
         <Input
           id="organizer"
-          placeholder="Your name or organization (optional)"
+          placeholder="Your name or organization"
           value={organizer}
           onChange={(e) => onOrganizerChange(e.target.value)}
         />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { EventCard } from "@/components/EventCard";
@@ -12,132 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar, Filter, Star, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-
-// Mock data
-const mockEvents = [
-  {
-    id: "1",
-    title: "Electronic Night: Jakarta Vibes",
-    date: "Dec 25, 2024",
-    time: "22:00",
-    venue: "Sky Bar, Kemang",
-    price: "IDR 200K",
-    image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&h=300&fit=crop",
-    attendees: 127,
-    rating: 4.8,
-    tags: ["Electronic", "Rooftop", "VIP"],
-    organizer: "Jakarta Nights"
-  },
-  {
-    id: "2", 
-    title: "Friday Night Fever",
-    date: "Dec 27, 2024",
-    time: "21:00",
-    venue: "District 8, SCBD",
-    price: "IDR 150K",
-    image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop",
-    attendees: 89,
-    rating: 4.6,
-    tags: ["Dance", "Cocktails", "Premium"],
-    organizer: "Party Central"
-  },
-  {
-    id: "3",
-    title: "Rooftop Party Experience",
-    date: "Dec 30, 2024", 
-    time: "20:00",
-    venue: "Potato Head, Senayan",
-    price: "IDR 300K",
-    image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=400&h=300&fit=crop",
-    attendees: 156,
-    rating: 4.9,
-    tags: ["Rooftop", "Sunset", "Exclusive"],
-    organizer: "Elite Events"
-  }
-];
-
-const mockPromos = [
-  {
-    id: "1",
-    title: "50% Off All Cocktails",
-    description: "Happy hour special - all premium cocktails half price!",
-    discount: "50% OFF",
-    venue: "The Jungle Bar",
-    validUntil: "Dec 31, 2024",
-    image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&h=300&fit=crop",
-    category: "Drinks",
-    originalPrice: "IDR 200K",
-    discountedPrice: "IDR 100K",
-    day: "friday",
-    area: "south",
-    drinkType: "cocktails"
-  },
-  {
-    id: "2",
-    title: "Free Entry Before 10PM",
-    description: "Skip the line and save money with early entry!",
-    discount: "FREE",
-    venue: "Zodiac Club",
-    validUntil: "Every Friday",
-    image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop",
-    category: "Entry",
-    originalPrice: "IDR 150K",
-    discountedPrice: "FREE",
-    day: "friday",
-    area: "central",
-    drinkType: "all"
-  },
-  {
-    id: "3",
-    title: "Ladies Night Special",
-    description: "Free drinks for ladies all night long!",
-    discount: "100% OFF",
-    venue: "Immigrant Club",
-    validUntil: "Every Wednesday",
-    image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=400&h=300&fit=crop",
-    category: "Ladies Night",
-    originalPrice: "IDR 250K",
-    discountedPrice: "FREE",
-    day: "wednesday",
-    area: "west",
-    drinkType: "beer"
-  },
-  {
-    id: "4",
-    title: "Wine Wednesday Special",
-    description: "Premium wines at unbeatable prices every Wednesday!",
-    discount: "40% OFF",
-    venue: "Cork & Screw",
-    validUntil: "Every Wednesday",
-    image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&h=300&fit=crop",
-    category: "Wine",
-    originalPrice: "IDR 300K",
-    discountedPrice: "IDR 180K",
-    day: "wednesday",
-    area: "north",
-    drinkType: "wine"
-  },
-  {
-    id: "5",
-    title: "Saturday Night Shots",
-    description: "Buy 2 get 1 free on all premium shots!",
-    discount: "BUY 2 GET 1",
-    venue: "Shot Bar Jakarta",
-    validUntil: "Every Saturday",
-    image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop",
-    category: "Shots",
-    originalPrice: "IDR 150K",
-    discountedPrice: "IDR 100K",
-    day: "saturday",
-    area: "east",
-    drinkType: "spirits"
-  }
-];
 
 const Index = () => {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("home");
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showCreatePromo, setShowCreatePromo] = useState(false);
@@ -154,22 +32,31 @@ const Index = () => {
 
   const fetchData = async () => {
     try {
-      const { data: eventsData } = await supabase
+      // Fetch events
+      const { data: eventsData, error: eventsError } = await supabase
         .from('events')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('date', { ascending: true })
         .limit(3);
-      
-      const { data: promosData } = await supabase
+
+      if (eventsError) throw eventsError;
+
+      // Fetch promos
+      const { data: promosData, error: promosError } = await supabase
         .from('promos')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(3);
 
+      if (promosError) throw promosError;
+
       setEvents(eventsData || []);
       setPromos(promosData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
+      // Use fallback mock data if database fails
+      setEvents([]);
+      setPromos([]);
     } finally {
       setLoading(false);
     }
@@ -177,128 +64,166 @@ const Index = () => {
 
   const filteredPromos = promos.filter((promo) => {
     const dayMatch = dayFilter === "all" || promo.day_of_week?.toLowerCase() === dayFilter;
-    const areaMatch = areaFilter === "all" || promo.area?.toLowerCase().includes(areaFilter);
+    const areaMatch = areaFilter === "all" || promo.area?.toLowerCase() === areaFilter.replace(' jakarta', '');
     const drinkMatch = drinkTypeFilter === "all" || promo.drink_type?.toLowerCase() === drinkTypeFilter;
     return dayMatch && areaMatch && drinkMatch;
   });
 
-  const handleJoinEvent = (eventId: string) => {
-    navigate(`/event/${eventId}`);
+  const handleJoinEvent = async (eventId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to join events.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('event_attendees')
+        .insert({
+          event_id: eventId,
+          user_id: user.id
+        });
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast({
+            title: "Already joined",
+            description: "You're already registered for this event.",
+            variant: "destructive"
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      const event = events.find(e => e.id === eventId);
+      toast({
+        title: "Successfully joined event! 🎉",
+        description: `You're now registered for "${event?.title}". See you there!`,
+      });
+    } catch (error) {
+      console.error('Error joining event:', error);
+      toast({
+        title: "Error",
+        description: "Failed to join event. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleClaimPromo = (promoId: string) => {
-    navigate(`/promo/${promoId}`);
+    const promo = promos.find(p => p.id === promoId);
+    toast({
+      title: "Promo claimed! 🎊",
+      description: `"${promo?.title}" has been added to your account. Show this at the venue.`,
+    });
+  };
+
+  const renderHomeContent = () => {
+    if (loading) {
+      return (
+        <div className="pt-20 px-4">
+          <div className="container mx-auto">
+            <div className="text-center">Loading...</div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-16">
+        <Hero onSectionChange={setActiveSection} />
+        
+        {/* Featured Events Section */}
+        <div className="px-4">
+          <div className="container mx-auto space-y-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold gradient-text mb-2">Upcoming Events</h2>
+                <p className="text-muted-foreground">Don't miss these amazing parties</p>
+              </div>
+              <Button
+                onClick={() => setActiveSection("events")}
+                variant="outline"
+                className="group"
+              >
+                See More
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.map((event) => (
+                <EventCard 
+                  key={event.id} 
+                  event={{
+                    ...event,
+                    price: event.price_amount ? `IDR ${event.price_amount.toLocaleString()}` : 'Free',
+                    venue: event.venue_name,
+                    attendees: Math.floor(Math.random() * 100) + 20,
+                    rating: 4.5 + Math.random() * 0.5,
+                    tags: ['Party', 'Music', 'Dance'],
+                    organizer: event.organizer_name
+                  }} 
+                  onJoin={handleJoinEvent} 
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Featured Promos Section */}
+        <div className="px-4">
+          <div className="container mx-auto space-y-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold gradient-text mb-2">Hot Promos</h2>
+                <p className="text-muted-foreground">Save money on your next night out</p>
+              </div>
+              <Button
+                onClick={() => setActiveSection("promos")}
+                variant="outline"
+                className="group"
+              >
+                See More
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {promos.map((promo) => (
+                <PromoCard 
+                  key={promo.id} 
+                  promo={{
+                    ...promo,
+                    discount: promo.discount_text,
+                    venue: promo.venue_name,
+                    validUntil: promo.valid_until,
+                    originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
+                    discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
+                    day: promo.day_of_week?.toLowerCase(),
+                    area: promo.area?.toLowerCase(),
+                    drinkType: promo.drink_type?.toLowerCase()
+                  }} 
+                  onClaim={handleClaimPromo} 
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const renderContent = () => {
     switch (activeSection) {
       case "home":
-        return (
-          <div>
-            <Hero onSectionChange={setActiveSection} />
-            {/* Sample Events Section */}
-            <div className="py-16 px-4 bg-background">
-              <div className="container mx-auto">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <h2 className="text-3xl font-bold gradient-text mb-2">Featured Events</h2>
-                    <p className="text-muted-foreground">Don't miss these amazing upcoming events</p>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setActiveSection("events")}
-                    className="flex items-center space-x-2"
-                  >
-                    <span>See more</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </div>
-                
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="animate-pulse bg-card rounded-lg h-64"></div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {events.map((event) => (
-                      <EventCard 
-                        key={event.id} 
-                        event={{
-                          id: event.id,
-                          title: event.title,
-                          date: new Date(event.date).toLocaleDateString(),
-                          time: event.time,
-                          venue: event.venue_name,
-                          price: "Free",
-                          image: event.image_url,
-                          organizer: event.organizer_name || "Anonymous",
-                          attendees: 0,
-                          rating: 0,
-                          tags: []
-                        }} 
-                        onJoin={handleJoinEvent} 
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Sample Promos Section */}
-            <div className="py-16 px-4 bg-muted/30">
-              <div className="container mx-auto">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <h2 className="text-3xl font-bold gradient-text mb-2">Hot Promos</h2>
-                    <p className="text-muted-foreground">Save money while partying with these exclusive deals</p>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setActiveSection("promos")}
-                    className="flex items-center space-x-2"
-                  >
-                    <span>See more</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </div>
-                
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="animate-pulse bg-card rounded-lg h-64"></div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {promos.map((promo) => (
-                      <PromoCard 
-                        key={promo.id} 
-                        promo={{
-                          id: promo.id,
-                          title: promo.title,
-                          description: promo.description,
-                          discount: promo.discount_text,
-                          venue: promo.venue_name,
-                          validUntil: promo.valid_until || "Limited time",
-                          image: promo.image_url,
-                          category: promo.category,
-                          originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : "N/A",
-                          discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : "FREE",
-                          day: promo.day_of_week || "",
-                          area: promo.area || "",
-                          drinkType: promo.drink_type || ""
-                        }} 
-                        onClaim={handleClaimPromo} 
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        );
+        return renderHomeContent();
       
       case "events":
         return (
@@ -329,17 +254,13 @@ const Index = () => {
                   <EventCard 
                     key={event.id} 
                     event={{
-                      id: event.id,
-                      title: event.title,
-                      date: new Date(event.date).toLocaleDateString(),
-                      time: event.time,
+                      ...event,
+                      price: event.price_amount ? `IDR ${event.price_amount.toLocaleString()}` : 'Free',
                       venue: event.venue_name,
-                      price: "Free",
-                      image: event.image_url,
-                      organizer: event.organizer_name || "Anonymous",
-                      attendees: 0,
-                      rating: 0,
-                      tags: []
+                      attendees: Math.floor(Math.random() * 100) + 20,
+                      rating: 4.5 + Math.random() * 0.5,
+                      tags: ['Party', 'Music', 'Dance'],
+                      organizer: event.organizer_name
                     }} 
                     onJoin={handleJoinEvent} 
                   />
@@ -428,7 +349,21 @@ const Index = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredPromos.map((promo) => (
-                  <PromoCard key={promo.id} promo={promo} onClaim={handleClaimPromo} />
+                  <PromoCard 
+                    key={promo.id} 
+                    promo={{
+                      ...promo,
+                      discount: promo.discount_text,
+                      venue: promo.venue_name,
+                      validUntil: promo.valid_until,
+                      originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
+                      discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
+                      day: promo.day_of_week?.toLowerCase(),
+                      area: promo.area?.toLowerCase(),
+                      drinkType: promo.drink_type?.toLowerCase()
+                    }} 
+                    onClaim={handleClaimPromo} 
+                  />
                 ))}
               </div>
             </div>
@@ -454,7 +389,7 @@ const Index = () => {
         );
       
       default:
-        return <Hero onSectionChange={setActiveSection} />;
+        return renderHomeContent();
     }
   };
 

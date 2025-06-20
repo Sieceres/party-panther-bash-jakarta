@@ -47,6 +47,7 @@ export const ReviewsList = ({ promoId, onReviewsChange }: ReviewsListProps) => {
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
+      onReviewsChange?.(0, 0);
     } finally {
       setLoading(false);
     }

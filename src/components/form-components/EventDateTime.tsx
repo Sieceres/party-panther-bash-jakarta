@@ -48,9 +48,9 @@ export const EventDateTime = ({ eventDate, time, onDateChange, onTimeChange }: E
         <Input
           id="time"
           type="time"
-          step="60"
           value={time}
           onChange={(e) => onTimeChange(e.target.value)}
+          step="60"
           required
         />
       </div>
