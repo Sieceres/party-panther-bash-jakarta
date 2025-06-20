@@ -19,6 +19,17 @@ const Index = () => {
   const [activeSection, setActiveSection] = useState("home");
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showCreatePromo, setShowCreatePromo] = useState(false);
+
+  // Cancel create forms when section changes
+  const handleSectionChange = (section: string) => {
+    if (section !== "events") {
+      setShowCreateEvent(false);
+    }
+    if (section !== "promos") {
+      setShowCreatePromo(false);
+    }
+    setActiveSection(section);
+  };
   const [dayFilter, setDayFilter] = useState("all");
   const [areaFilter, setAreaFilter] = useState("all");
   const [drinkTypeFilter, setDrinkTypeFilter] = useState("all");
@@ -28,6 +39,13 @@ const Index = () => {
 
   useEffect(() => {
     fetchData();
+    
+    // Handle URL section parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const section = urlParams.get('section');
+    if (section && ['home', 'events', 'promos', 'blog', 'profile'].includes(section)) {
+      setActiveSection(section);
+    }
   }, []);
 
   const fetchData = async () => {
@@ -36,8 +54,7 @@ const Index = () => {
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
         .select('*')
-        .order('date', { ascending: true })
-        .limit(3);
+        .order('date', { ascending: true });
 
       if (eventsError) throw eventsError;
 
@@ -45,11 +62,13 @@ const Index = () => {
       const { data: promosData, error: promosError } = await supabase
         .from('promos')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(3);
+        .order('created_at', { ascending: false });
 
       if (promosError) throw promosError;
 
+      console.log('Fetched events:', eventsData);
+      console.log('Fetched promos:', promosData);
+      
       setEvents(eventsData || []);
       setPromos(promosData || []);
     } catch (error) {
@@ -137,47 +156,9 @@ const Index = () => {
 
     return (
       <div className="space-y-16">
-        <Hero onSectionChange={setActiveSection} />
+        <Hero onSectionChange={handleSectionChange} />
         
-        {/* Featured Events Section */}
-        <div className="px-4">
-          <div className="container mx-auto space-y-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-3xl font-bold gradient-text mb-2">Upcoming Events</h2>
-                <p className="text-muted-foreground">Don't miss these amazing parties</p>
-              </div>
-              <Button
-                onClick={() => setActiveSection("events")}
-                variant="outline"
-                className="group"
-              >
-                See More
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((event) => (
-                <EventCard 
-                  key={event.id} 
-                  event={{
-                    ...event,
-                    price: event.price_amount ? `IDR ${event.price_amount.toLocaleString()}` : 'Free',
-                    venue: event.venue_name,
-                    attendees: Math.floor(Math.random() * 100) + 20,
-                    rating: 4.5 + Math.random() * 0.5,
-                    tags: ['Party', 'Music', 'Dance'],
-                    organizer: event.organizer_name
-                  }} 
-                  onJoin={handleJoinEvent} 
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Featured Promos Section */}
+        {/* Featured Promos Section - Moved to top */}
         <div className="px-4">
           <div className="container mx-auto space-y-8">
             <div className="flex items-center justify-between">
@@ -186,7 +167,7 @@ const Index = () => {
                 <p className="text-muted-foreground">Save money on your next night out</p>
               </div>
               <Button
-                onClick={() => setActiveSection("promos")}
+                onClick={() => handleSectionChange("promos")}
                 variant="outline"
                 className="group"
               >
@@ -196,7 +177,7 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {promos.map((promo) => (
+              {promos.slice(0, 3).map((promo) => (
                 <PromoCard 
                   key={promo.id} 
                   promo={{
@@ -211,6 +192,44 @@ const Index = () => {
                     drinkType: promo.drink_type?.toLowerCase()
                   }} 
                   onClaim={handleClaimPromo} 
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Featured Events Section - Moved to bottom */}
+        <div className="px-4">
+          <div className="container mx-auto space-y-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold gradient-text mb-2">Upcoming Events</h2>
+                <p className="text-muted-foreground">Don't miss these amazing parties</p>
+              </div>
+              <Button
+                onClick={() => handleSectionChange("events")}
+                variant="outline"
+                className="group"
+              >
+                See More
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.slice(0, 3).map((event) => (
+                <EventCard 
+                  key={event.id} 
+                  event={{
+                    ...event,
+                    price: event.price_amount ? `IDR ${event.price_amount.toLocaleString()}` : 'Free',
+                    venue: event.venue_name,
+                    attendees: Math.floor(Math.random() * 100) + 20,
+                    rating: 4.5 + Math.random() * 0.5,
+                    tags: ['Party', 'Music', 'Dance'],
+                    organizer: event.organizer_name
+                  }} 
+                  onJoin={handleJoinEvent} 
                 />
               ))}
             </div>
@@ -395,7 +414,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header activeSection={activeSection} onSectionChange={setActiveSection} />
+      <Header activeSection={activeSection} onSectionChange={handleSectionChange} />
       {renderContent()}
     </div>
   );

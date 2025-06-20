@@ -150,11 +150,11 @@ export const EventDetailPage = () => {
       <div className="container mx-auto max-w-4xl">
         <Button
           variant="ghost"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/?section=events')}
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
+          Back to Events
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
