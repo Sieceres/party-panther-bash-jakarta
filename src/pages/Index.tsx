@@ -1,16 +1,11 @@
+
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { Hero } from "@/components/Hero";
-import { EventCard } from "@/components/EventCard";
-import { PromoCard } from "@/components/PromoCard";
-import { CreateEventForm } from "@/components/CreateEventForm";
-import { CreatePromoForm } from "@/components/CreatePromoForm";
-import { UserProfile } from "@/components/UserProfile";
+import { HomeContent } from "@/components/sections/HomeContent";
+import { EventsSection } from "@/components/sections/EventsSection";
+import { PromosSection } from "@/components/sections/PromosSection";
 import { BlogSection } from "@/components/BlogSection";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Filter, Star, ArrowRight } from "lucide-react";
+import { UserProfile } from "@/components/UserProfile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -30,6 +25,7 @@ const Index = () => {
     }
     setActiveSection(section);
   };
+
   const [dayFilter, setDayFilter] = useState("all");
   const [areaFilter, setAreaFilter] = useState("all");
   const [drinkTypeFilter, setDrinkTypeFilter] = useState("all");
@@ -143,250 +139,45 @@ const Index = () => {
     });
   };
 
-  const renderHomeContent = () => {
-    if (loading) {
-      return (
-        <div className="pt-20 px-4">
-          <div className="container mx-auto">
-            <div className="text-center">Loading...</div>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-16">
-        <Hero onSectionChange={handleSectionChange} />
-        
-        {/* Featured Promos Section - Moved to top */}
-        <div className="px-4">
-          <div className="container mx-auto space-y-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-3xl font-bold gradient-text mb-2">Hot Promos</h2>
-                <p className="text-muted-foreground">Save money on your next night out</p>
-              </div>
-              <Button
-                onClick={() => handleSectionChange("promos")}
-                variant="outline"
-                className="group"
-              >
-                See More
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {promos.slice(0, 3).map((promo) => (
-                <PromoCard 
-                  key={promo.id} 
-                  promo={{
-                    ...promo,
-                    discount: promo.discount_text,
-                    venue: promo.venue_name,
-                    validUntil: promo.valid_until,
-                    originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
-                    discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
-                    day: promo.day_of_week?.toLowerCase(),
-                    area: promo.area?.toLowerCase(),
-                    drinkType: promo.drink_type?.toLowerCase()
-                  }} 
-                  onClaim={handleClaimPromo} 
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Featured Events Section - Moved to bottom */}
-        <div className="px-4">
-          <div className="container mx-auto space-y-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-3xl font-bold gradient-text mb-2">Upcoming Events</h2>
-                <p className="text-muted-foreground">Don't miss these amazing parties</p>
-              </div>
-              <Button
-                onClick={() => handleSectionChange("events")}
-                variant="outline"
-                className="group"
-              >
-                See More
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.slice(0, 3).map((event) => (
-                <EventCard 
-                  key={event.id} 
-                  event={{
-                    ...event,
-                    price: event.price_amount ? `IDR ${event.price_amount.toLocaleString()}` : 'Free',
-                    venue: event.venue_name,
-                    attendees: Math.floor(Math.random() * 100) + 20,
-                    rating: 4.5 + Math.random() * 0.5,
-                    tags: ['Party', 'Music', 'Dance'],
-                    organizer: event.organizer_name
-                  }} 
-                  onJoin={handleJoinEvent} 
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   const renderContent = () => {
     switch (activeSection) {
       case "home":
-        return renderHomeContent();
+        return (
+          <HomeContent
+            loading={loading}
+            events={events}
+            promos={promos}
+            onSectionChange={handleSectionChange}
+            onJoinEvent={handleJoinEvent}
+            onClaimPromo={handleClaimPromo}
+          />
+        );
       
       case "events":
         return (
-          <div className="pt-20 px-4">
-            <div className="container mx-auto space-y-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-4xl font-bold gradient-text mb-2">Jakarta Events</h2>
-                  <p className="text-muted-foreground">Discover the hottest parties and events in the city</p>
-                </div>
-                <Button
-                  onClick={() => setShowCreateEvent(!showCreateEvent)}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Create Event
-                </Button>
-              </div>
-
-              {showCreateEvent && (
-                <div className="mb-8">
-                  <CreateEventForm />
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {events.map((event) => (
-                  <EventCard 
-                    key={event.id} 
-                    event={{
-                      ...event,
-                      price: event.price_amount ? `IDR ${event.price_amount.toLocaleString()}` : 'Free',
-                      venue: event.venue_name,
-                      attendees: Math.floor(Math.random() * 100) + 20,
-                      rating: 4.5 + Math.random() * 0.5,
-                      tags: ['Party', 'Music', 'Dance'],
-                      organizer: event.organizer_name
-                    }} 
-                    onJoin={handleJoinEvent} 
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
+          <EventsSection
+            events={events}
+            showCreateEvent={showCreateEvent}
+            onToggleCreateEvent={() => setShowCreateEvent(!showCreateEvent)}
+            onJoinEvent={handleJoinEvent}
+          />
         );
       
       case "promos":
         return (
-          <div className="pt-20 px-4">
-            <div className="container mx-auto space-y-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-4xl font-bold gradient-text mb-2">Hot Promos</h2>
-                  <p className="text-muted-foreground">Save money while partying with these exclusive deals</p>
-                </div>
-                <Button
-                  onClick={() => setShowCreatePromo(!showCreatePromo)}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  <Star className="w-4 h-4 mr-2" />
-                  Create Promo
-                </Button>
-              </div>
-
-              {showCreatePromo && (
-                <div className="mb-8">
-                  <CreatePromoForm />
-                </div>
-              )}
-
-              {/* Filter Controls */}
-              <div className="flex flex-col sm:flex-row gap-4 p-4 bg-card rounded-lg border">
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Filter by:</span>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row gap-4 flex-1">
-                  <Select value={dayFilter} onValueChange={setDayFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Day of week" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Days</SelectItem>
-                      <SelectItem value="monday">Monday</SelectItem>
-                      <SelectItem value="tuesday">Tuesday</SelectItem>
-                      <SelectItem value="wednesday">Wednesday</SelectItem>
-                      <SelectItem value="thursday">Thursday</SelectItem>
-                      <SelectItem value="friday">Friday</SelectItem>
-                      <SelectItem value="saturday">Saturday</SelectItem>
-                      <SelectItem value="sunday">Sunday</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={areaFilter} onValueChange={setAreaFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Area" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Areas</SelectItem>
-                      <SelectItem value="north">North Jakarta</SelectItem>
-                      <SelectItem value="south">South Jakarta</SelectItem>
-                      <SelectItem value="east">East Jakarta</SelectItem>
-                      <SelectItem value="west">West Jakarta</SelectItem>
-                      <SelectItem value="central">Central Jakarta</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={drinkTypeFilter} onValueChange={setDrinkTypeFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Drink type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Drinks</SelectItem>
-                      <SelectItem value="cocktails">Cocktails</SelectItem>
-                      <SelectItem value="beer">Beer</SelectItem>
-                      <SelectItem value="wine">Wine</SelectItem>
-                      <SelectItem value="spirits">Spirits</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredPromos.map((promo) => (
-                  <PromoCard 
-                    key={promo.id} 
-                    promo={{
-                      ...promo,
-                      discount: promo.discount_text,
-                      venue: promo.venue_name,
-                      validUntil: promo.valid_until,
-                      originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
-                      discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
-                      day: promo.day_of_week?.toLowerCase(),
-                      area: promo.area?.toLowerCase(),
-                      drinkType: promo.drink_type?.toLowerCase()
-                    }} 
-                    onClaim={handleClaimPromo} 
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
+          <PromosSection
+            promos={promos}
+            filteredPromos={filteredPromos}
+            showCreatePromo={showCreatePromo}
+            dayFilter={dayFilter}
+            areaFilter={areaFilter}
+            drinkTypeFilter={drinkTypeFilter}
+            onToggleCreatePromo={() => setShowCreatePromo(!showCreatePromo)}
+            onClaimPromo={handleClaimPromo}
+            onDayFilterChange={setDayFilter}
+            onAreaFilterChange={setAreaFilter}
+            onDrinkTypeFilterChange={setDrinkTypeFilter}
+          />
         );
       
       case "blog":
@@ -408,7 +199,16 @@ const Index = () => {
         );
       
       default:
-        return renderHomeContent();
+        return (
+          <HomeContent
+            loading={loading}
+            events={events}
+            promos={promos}
+            onSectionChange={handleSectionChange}
+            onJoinEvent={handleJoinEvent}
+            onClaimPromo={handleClaimPromo}
+          />
+        );
     }
   };
 
