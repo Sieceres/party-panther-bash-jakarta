@@ -94,14 +94,14 @@ export const PromosSection = ({
 
             <Select value={drinkTypeFilter} onValueChange={onDrinkTypeFilterChange}>
               <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Drink type" />
+                <SelectValue placeholder="Promo type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Drinks</SelectItem>
-                <SelectItem value="cocktails">Cocktails</SelectItem>
-                <SelectItem value="beer">Beer</SelectItem>
-                <SelectItem value="wine">Wine</SelectItem>
-                <SelectItem value="spirits">Spirits</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="Free Flow">Free Flow</SelectItem>
+                <SelectItem value="Ladies Night">Ladies Night</SelectItem>
+                <SelectItem value="Bottle Promo">Bottle Promo</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -116,12 +116,13 @@ export const PromosSection = ({
                 discount: promo.discount_text,
                 venue: promo.venue_name,
                 validUntil: promo.valid_until,
+                image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
                 originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
                 discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
                 day: promo.day_of_week?.toLowerCase(),
                 area: promo.area?.toLowerCase(),
                 drinkType: promo.drink_type?.toLowerCase()
-              }} 
+              }}
               onClaim={onClaimPromo} 
             />
           ))}

@@ -92,13 +92,19 @@ export const UserProfile = () => {
 
     setSaving(true);
     try {
+      const profileData = {
+        user_id: user.id,
+        display_name: editForm.display_name || null,
+        bio: editForm.bio || null,
+        avatar_url: editForm.avatar_url || null,
+        updated_at: new Date().toISOString()
+      };
+
       const { error } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
-          display_name: editForm.display_name || null,
-          bio: editForm.bio || null,
-          avatar_url: editForm.avatar_url || null,
+        .upsert(profileData, { 
+          onConflict: 'user_id',
+          ignoreDuplicates: false 
         });
 
       if (error) {

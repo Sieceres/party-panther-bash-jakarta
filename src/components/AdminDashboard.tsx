@@ -14,7 +14,6 @@ interface Event {
   venue_name: string;
   organizer_name: string;
   created_at: string;
-  max_attendees: number;
 }
 
 interface Promo {
@@ -48,7 +47,7 @@ export const AdminDashboard = () => {
   const fetchData = async () => {
     try {
       const [eventsData, promosData, usersData] = await Promise.all([
-        supabase.from('events').select('id, title, date, venue_name, organizer_name, created_at, max_attendees').order('created_at', { ascending: false }),
+        supabase.from('events').select('id, title, date, venue_name, organizer_name, created_at').order('created_at', { ascending: false }),
         supabase.from('promos').select('id, title, venue_name, discount_text, valid_until, created_at').order('created_at', { ascending: false }),
         supabase.from('profiles').select('id, display_name, profile_type, created_at, is_verified').order('created_at', { ascending: false })
       ]);
@@ -214,9 +213,6 @@ export const AdminDashboard = () => {
                           <span>{event.venue_name}</span>
                           <span>by {event.organizer_name}</span>
                         </div>
-                        {event.max_attendees && (
-                          <Badge variant="outline">Max: {event.max_attendees} attendees</Badge>
-                        )}
                       </div>
                       <div className="flex items-center space-x-2">
                         <Button variant="outline" size="sm">

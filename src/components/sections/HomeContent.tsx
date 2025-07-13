@@ -63,6 +63,7 @@ export const HomeContent = ({
                   discount: promo.discount_text,
                   venue: promo.venue_name,
                   validUntil: promo.valid_until,
+                  image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
                   originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
                   discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
                   day: promo.day_of_week?.toLowerCase(),
@@ -100,8 +101,9 @@ export const HomeContent = ({
                 key={event.id} 
                 event={{
                   ...event,
-                  price: event.price_amount ? `IDR ${event.price_amount.toLocaleString()}` : 'Free',
+                  price: 'Free',
                   venue: event.venue_name,
+                  image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
                   attendees: Math.floor(Math.random() * 100) + 20,
                   rating: 4.5 + Math.random() * 0.5,
                   tags: ['Party', 'Music', 'Dance'],

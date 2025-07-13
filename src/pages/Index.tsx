@@ -80,8 +80,8 @@ const Index = () => {
   const filteredPromos = promos.filter((promo) => {
     const dayMatch = dayFilter === "all" || promo.day_of_week?.toLowerCase() === dayFilter;
     const areaMatch = areaFilter === "all" || promo.area?.toLowerCase() === areaFilter.replace(' jakarta', '');
-    const drinkMatch = drinkTypeFilter === "all" || promo.drink_type?.toLowerCase() === drinkTypeFilter;
-    return dayMatch && areaMatch && drinkMatch;
+    const promoTypeMatch = drinkTypeFilter === "all" || promo.promo_type === drinkTypeFilter;
+    return dayMatch && areaMatch && promoTypeMatch;
   });
 
   const handleJoinEvent = async (eventId: string) => {

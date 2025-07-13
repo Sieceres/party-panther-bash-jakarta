@@ -52,6 +52,7 @@ export const EventDateTime = ({ eventDate, time, onDateChange, onTimeChange }: E
           onChange={(e) => onTimeChange(e.target.value)}
           step="60"
           required
+          className="[&::-webkit-calendar-picker-indicator]:cursor-pointer"
         />
       </div>
     </div>

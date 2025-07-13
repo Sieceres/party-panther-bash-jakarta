@@ -19,9 +19,6 @@ interface Event {
   venue_address: string;
   venue_latitude: number;
   venue_longitude: number;
-  price_amount: number;
-  price_currency: string;
-  max_attendees: number;
   image_url: string;
   organizer_name: string;
   organizer_whatsapp: string;

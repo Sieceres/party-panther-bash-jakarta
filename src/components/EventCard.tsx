@@ -12,6 +12,7 @@ interface Event {
   venue: string;
   price: string;
   image: string;
+  image_url?: string;
   attendees: number;
   rating: number;
   tags: string[];
@@ -31,9 +32,12 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
       {/* Event Image */}
       <div className="relative h-48 overflow-hidden">
         <img
-          src={event.image}
+          src={event.image || event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop'}
           alt={event.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          onError={(e) => {
+            e.currentTarget.src = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop';
+          }}
         />
         <div className="absolute top-4 left-4">
           <Badge className="bg-primary text-primary-foreground font-semibold">

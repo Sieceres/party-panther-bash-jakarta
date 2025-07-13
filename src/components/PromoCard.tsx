@@ -14,6 +14,7 @@ interface Promo {
   venue: string;
   validUntil: string;
   image: string;
+  image_url?: string;
   category: string;
   originalPrice: string;
   discountedPrice: string;
@@ -43,9 +44,12 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
       {/* Promo Image */}
       <div className="relative h-48 overflow-hidden">
         <img
-          src={promo.image}
+          src={promo.image || promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop'}
           alt={promo.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          onError={(e) => {
+            e.currentTarget.src = 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop';
+          }}
         />
         <div className="absolute top-4 left-4">
           <Badge className="bg-neon-pink text-black font-bold text-lg px-3 py-1 neon-glow">
@@ -84,7 +88,7 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
 
         {/* Rating/Reviews */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+        <div className="flex items-center space-x-1 text-sm text-muted-foreground">
             <Star className="w-4 h-4 text-yellow-400 fill-current" />
             <span>{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
             <span>•</span>

@@ -140,10 +140,8 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
-          max_attendees: number | null
           organizer_name: string | null
           organizer_whatsapp: string | null
-          price_amount: number | null
           price_currency: string | null
           time: string
           title: string
@@ -160,10 +158,8 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
-          max_attendees?: number | null
           organizer_name?: string | null
           organizer_whatsapp?: string | null
-          price_amount?: number | null
           price_currency?: string | null
           time: string
           title: string
@@ -180,10 +176,8 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
-          max_attendees?: number | null
           organizer_name?: string | null
           organizer_whatsapp?: string | null
-          price_amount?: number | null
           price_currency?: string | null
           time?: string
           title?: string
@@ -314,6 +308,7 @@ export type Database = {
           image_url: string | null
           original_price_amount: number | null
           price_currency: string | null
+          promo_type: string | null
           title: string
           updated_at: string
           valid_until: string | null
@@ -336,6 +331,7 @@ export type Database = {
           image_url?: string | null
           original_price_amount?: number | null
           price_currency?: string | null
+          promo_type?: string | null
           title: string
           updated_at?: string
           valid_until?: string | null
@@ -358,6 +354,7 @@ export type Database = {
           image_url?: string | null
           original_price_amount?: number | null
           price_currency?: string | null
+          promo_type?: string | null
           title?: string
           updated_at?: string
           valid_until?: string | null
@@ -400,6 +397,10 @@ export type Database = {
       get_user_role: {
         Args: Record<PropertyKey, never> | { _user_id: string }
         Returns: string
+      }
+      is_admin_or_superadmin: {
+        Args: { _user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
