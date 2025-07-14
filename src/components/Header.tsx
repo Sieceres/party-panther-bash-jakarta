@@ -63,8 +63,8 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
 
   const menuItems = [
     { id: 'home', label: 'Home', icon: Star },
-    { id: 'events', label: 'Events', icon: Calendar },
     { id: 'promos', label: 'Promos', icon: Star },
+    { id: 'events', label: 'Events', icon: Calendar },
     { id: 'blog', label: 'Blog', icon: BookOpen },
     { id: 'profile', label: 'Profile', icon: User }
   ];

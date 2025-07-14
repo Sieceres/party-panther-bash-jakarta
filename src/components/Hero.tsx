@@ -54,21 +54,6 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
           </Button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-8 pt-16 max-w-md mx-auto">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-neon-blue">500+</div>
-            <div className="text-sm text-muted-foreground">Events</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-neon-cyan">200+</div>
-            <div className="text-sm text-muted-foreground">Venues</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-neon-indigo">1000+</div>
-            <div className="text-sm text-muted-foreground">Members</div>
-          </div>
-        </div>
       </div>
     </section>
   );
