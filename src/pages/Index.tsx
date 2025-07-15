@@ -9,6 +9,7 @@ import { UserProfile } from "@/components/UserProfile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "../integrations/supabase/types";
+import { Footer } from "@/components/Footer";
 
 const Index = () => {
   const { toast } = useToast();
@@ -47,7 +48,7 @@ const Index = () => {
     // Handle URL section parameter
     const urlParams = new URLSearchParams(window.location.search);
     const section = urlParams.get('section');
-    if (section && ['home', 'events', 'promos', 'blog', 'profile'].includes(section)) {
+    if (section && ['home', 'events', 'promos', 'blog', 'profile', 'contact'].includes(section)) {
       setActiveSection(section);
     }
   }, []);
@@ -241,6 +242,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header activeSection={activeSection} onSectionChange={handleSectionChange} />
       {renderContent()}
+      <Footer />
     </div>
   );
 };
