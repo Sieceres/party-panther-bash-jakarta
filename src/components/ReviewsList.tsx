@@ -142,29 +142,28 @@ export const ReviewsList = ({ promoId, onReviewsChange }: ReviewsListProps) => {
           <h3 className="font-semibold">Reviews ({reviews.length})</h3>
           {reviews.map((review) => (
             <div key={review.id} className="p-4 bg-card rounded-lg border space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div className="flex">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < review.rating
-                            ? "text-yellow-400 fill-current"
-                            : "text-muted-foreground"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm font-medium">
-                    Anonymous
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(review.created_at).toLocaleDateString()}
-                  </span>
+              <div className="flex items-center space-x-2">
+                <div className="flex">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-4 h-4 ${
+                        i < review.rating
+                          ? "text-yellow-400 fill-current"
+                          : "text-muted-foreground"
+                      }`}
+                    />
+                  ))}
                 </div>
-                
-                {/* Edit/Delete buttons for user's own review */}
+                <span className="text-sm font-medium">
+                  Anonymous
+                </span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-muted-foreground">
+                  {new Date(review.created_at).toLocaleDateString()}
+                </span>
                 {currentUser?.id === review.user_id && !editingReview && !showReviewForm && (
                   <div className="flex items-center space-x-1">
                     <Button
