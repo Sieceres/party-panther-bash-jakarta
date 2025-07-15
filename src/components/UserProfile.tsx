@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { Tables } from "../integrations/supabase/types";
+import { ImageUpload } from "./form-components/ImageUpload";
 
 // ... (interface Profile remains the same)
 
@@ -306,15 +307,12 @@ export const UserProfile = () => {
                       className="min-h-[60px]"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="avatar_url">Avatar URL</Label>
-                    <Input
-                      id="avatar_url"
-                      value={editForm.avatar_url}
-                      onChange={(e) => setEditForm({ ...editForm, avatar_url: e.target.value })}
-                      placeholder="https://example.com/your-avatar.jpg"
-                    />
-                  </div>
+                  <ImageUpload
+                    label="Avatar"
+                    imageUrl={editForm.avatar_url}
+                    onImageChange={(url) => setEditForm({ ...editForm, avatar_url: url })}
+                    inputId="avatar-upload"
+                  />
                 </div>
               ) : (
                 <div>
