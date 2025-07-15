@@ -4,20 +4,17 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, User, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
+import { Tables } from "../integrations/supabase/types";
+
+interface Event extends Tables<'events'> {
   venue: string;
   price: string;
   image: string;
-  image_url?: string;
   attendees: number;
   rating: number;
   tags: string[];
   organizer: string;
-  isJoined?: boolean; // Added isJoined property
+  isJoined?: boolean;
 }
 
 interface EventCardProps {
@@ -96,7 +93,6 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
         <Button
           className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={() => onJoin?.(event.id)}
-          disabled={event.isJoined} // Disable button if already joined
         >
           {event.isJoined ? 'Joined' : 'Join Event'} {/* Change text based on isJoined */}
         </Button>

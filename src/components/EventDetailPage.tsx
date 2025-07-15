@@ -31,6 +31,7 @@ export const EventDetailPage = () => {
   const { toast } = useToast();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasJoined, setHasJoined] = useState(false); // New state for joined status
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -45,6 +46,22 @@ export const EventDetailPage = () => {
 
         if (error) throw error;
         setEvent(data);
+
+        // Check if the current user has already joined this event
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: attendeeData, error: attendeeError } = await supabase
+            .from('event_attendees')
+            .select('*')
+            .eq('event_id', id)
+            .eq('user_id', user.id)
+            .single();
+
+          if (attendeeData && !attendeeError) {
+            setHasJoined(true);
+          }
+        }
+
       } catch (error) {
         console.error('Error fetching event:', error);
         toast({
@@ -62,18 +79,23 @@ export const EventDetailPage = () => {
 
   const handleJoinEvent = async () => {
     if (!event) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to join this event.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (hasJoined) {
+      handleUnjoinEvent(user.id);
+      return;
+    }
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to join this event.",
-          variant: "destructive"
-        });
-        return;
-      }
-
       const { error } = await supabase
         .from('event_attendees')
         .insert({
@@ -88,6 +110,7 @@ export const EventDetailPage = () => {
             description: "You're already registered for this event.",
             variant: "destructive"
           });
+          setHasJoined(true);
         } else {
           throw error;
         }
@@ -98,11 +121,39 @@ export const EventDetailPage = () => {
         title: "Successfully joined event! 🎉",
         description: `You're now registered for "${event.title}". See you there!`,
       });
+      setHasJoined(true);
     } catch (error) {
       console.error('Error joining event:', error);
       toast({
         title: "Error",
         description: "Failed to join event. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUnjoinEvent = async (userId: string) => {
+    if (!event) return;
+
+    try {
+      const { error } = await supabase
+        .from('event_attendees')
+        .delete()
+        .eq('event_id', event.id)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Successfully unjoined event!",
+        description: `You've unjoined "${event.title}".`,
+      });
+      setHasJoined(false);
+    } catch (error) {
+      console.error('Error unjoining event:', error);
+      toast({
+        title: "Error",
+        description: "Failed to unjoin event. Please try again.",
         variant: "destructive"
       });
     }
@@ -250,7 +301,7 @@ export const EventDetailPage = () => {
                   onClick={handleJoinEvent}
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
-                  Join Event
+                  {hasJoined ? "Joined" : "Join Event"}
                 </Button>
               </CardContent>
             </Card>

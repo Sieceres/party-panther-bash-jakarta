@@ -146,7 +146,12 @@ const Index = () => {
         description: `You're now registered for "${event?.title}". See you there!`,
       });
 
-      fetchData(user.id); // Re-fetch data after successful join
+      // Update the specific event's isJoined status in the state
+      setEvents(prevEvents =>
+        prevEvents.map(e =>
+          e.id === eventId ? { ...e, isJoined: true } : e
+        )
+      );
     } catch (error) {
       console.error('Error joining event:', error);
       toast({
@@ -186,6 +191,7 @@ const Index = () => {
             showCreateEvent={showCreateEvent}
             onToggleCreateEvent={() => setShowCreateEvent(!showCreateEvent)}
             onJoinEvent={handleJoinEvent}
+            loading={loading} // Pass loading state
           />
         );
       

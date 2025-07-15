@@ -4,19 +4,22 @@ import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/EventCard";
 import { CreateEventForm } from "@/components/CreateEventForm";
 import { Calendar } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface EventsSectionProps {
   events: Tables<'events'>[];
   showCreateEvent: boolean;
   onToggleCreateEvent: () => void;
   onJoinEvent: (eventId: string) => void;
+  loading: boolean; // Added loading prop
 }
 
-export const EventsSection = ({ 
-  events, 
-  showCreateEvent, 
-  onToggleCreateEvent, 
-  onJoinEvent 
+export const EventsSection = ({
+  events,
+  showCreateEvent,
+  onToggleCreateEvent,
+  onJoinEvent,
+  loading
 }: EventsSectionProps) => {
   return (
     <div className="pt-20 px-4">
@@ -42,22 +45,28 @@ export const EventsSection = ({
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event) => (
-            <EventCard 
-              key={event.id} 
-              event={{
-                ...event,
-                price: 'Free',
-                venue: event.venue_name,
-                image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
-                attendees: Math.floor(Math.random() * 100) + 20,
-                rating: 4.5 + Math.random() * 0.5,
-                tags: ['Party', 'Music', 'Dance'],
-                organizer: event.organizer_name
-              }}
-              onJoin={onJoinEvent} 
-            />
-          ))}
+          {loading ? (
+            Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-[350px] w-full rounded-xl" />
+            ))
+          ) : (
+            events.map((event) => (
+              <EventCard 
+                key={event.id} 
+                event={{
+                  ...event,
+                  price: 'Free',
+                  venue: event.venue_name,
+                  image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
+                  attendees: Math.floor(Math.random() * 100) + 20,
+                  rating: 4.5 + Math.random() * 0.5,
+                  tags: ['Party', 'Music', 'Dance'],
+                  organizer: event.organizer_name
+                }}
+                onJoin={onJoinEvent} 
+              />
+            ))
+          )}
         </div>
       </div>
     </div>
