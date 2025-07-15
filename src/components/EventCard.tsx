@@ -17,6 +17,7 @@ interface Event {
   rating: number;
   tags: string[];
   organizer: string;
+  isJoined?: boolean; // Added isJoined property
 }
 
 interface EventCardProps {
@@ -95,8 +96,9 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
         <Button
           className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={() => onJoin?.(event.id)}
+          disabled={event.isJoined} // Disable button if already joined
         >
-          Join Event
+          {event.isJoined ? 'Joined' : 'Join Event'} {/* Change text based on isJoined */}
         </Button>
       </CardFooter>
     </Card>

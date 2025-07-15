@@ -33,9 +33,16 @@ const Index = () => {
   const [events, setEvents] = useState<Tables<'events'>[]>([]);
   const [promos, setPromos] = useState<Tables<'promos'>[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null); // Added user state
 
   useEffect(() => {
-    fetchData();
+    const fetchUserAndData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      fetchData(user?.id); // Pass user ID to fetchData
+    };
+
+    fetchUserAndData();
     
     // Handle URL section parameter
     const urlParams = new URLSearchParams(window.location.search);
@@ -45,7 +52,7 @@ const Index = () => {
     }
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (currentUserId?: string) => { // Modified to accept currentUserId
     try {
       // Fetch events
       const { data: eventsData, error: eventsError } = await supabase
@@ -55,6 +62,22 @@ const Index = () => {
 
       if (eventsError) throw eventsError;
 
+      let joinedEventIds: string[] = [];
+      if (currentUserId) {
+        const { data: attendeesData, error: attendeesError } = await supabase
+          .from('event_attendees')
+          .select('event_id')
+          .eq('user_id', currentUserId);
+
+        if (attendeesError) throw attendeesError;
+        joinedEventIds = attendeesData.map(attendee => attendee.event_id);
+      }
+
+      const eventsWithJoinStatus = eventsData.map(event => ({
+        ...event,
+        isJoined: joinedEventIds.includes(event.id)
+      }));
+
       // Fetch promos
       const { data: promosData, error: promosError } = await supabase
         .from('promos')
@@ -63,10 +86,10 @@ const Index = () => {
 
       if (promosError) throw promosError;
 
-      console.log('Fetched events:', eventsData);
+      console.log('Fetched events:', eventsWithJoinStatus);
       console.log('Fetched promos:', promosData);
       
-      setEvents(eventsData || []);
+      setEvents(eventsWithJoinStatus || []);
       setPromos(promosData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -87,8 +110,7 @@ const Index = () => {
 
   const handleJoinEvent = async (eventId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      if (!user) { // Use the user from state
         toast({
           title: "Authentication required",
           description: "Please sign in to join events.",
@@ -122,6 +144,8 @@ const Index = () => {
         title: "Successfully joined event! 🎉",
         description: `You're now registered for "${event?.title}". See you there!`,
       });
+
+      fetchData(user.id); // Re-fetch data after successful join
     } catch (error) {
       console.error('Error joining event:', error);
       toast({
