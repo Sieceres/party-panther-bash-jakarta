@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Star } from "lucide-react";
+import { MapPin, ArrowLeft, Star, Share2 } from "lucide-react";
 import { GoogleMap } from "./GoogleMap";
 import { ReviewsList } from "./ReviewsList";
 import { supabase } from "@/integrations/supabase/client";
@@ -257,6 +257,20 @@ export const PromoDetailPage = () => {
                   className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold"
                 >
                   Claim Promo
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast({
+                      title: "Link Copied!",
+                      description: "Promo link copied to clipboard.",
+                    });
+                  }}
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share Promo
                 </Button>
               </CardContent>
             </Card>

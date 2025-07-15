@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, MapPin, Users, Clock, ArrowLeft, Star } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, ArrowLeft, Star, Share2 } from "lucide-react";
 import { GoogleMap } from "./GoogleMap";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -315,6 +315,20 @@ export const EventDetailPage = () => {
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   {hasJoined ? "Joined" : "Join Event"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast({
+                      title: "Link Copied!",
+                      description: "Event link copied to clipboard.",
+                    });
+                  }}
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share Event
                 </Button>
               </CardContent>
             </Card>

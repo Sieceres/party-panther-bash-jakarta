@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Star, Users, MapPin, Trash2, Edit, Eye } from "lucide-react";
+import { Calendar, Star, Users, MapPin, Trash2, Edit, Eye, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -37,6 +38,7 @@ interface User {
 
 export const AdminDashboard = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [events, setEvents] = useState<Event[]>([]);
   const [promos, setPromos] = useState<Promo[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -207,9 +209,18 @@ export const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-background pt-20 px-4">
       <div className="container mx-auto space-y-8">
-        <div>
-          <h1 className="text-4xl font-bold gradient-text mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage events, promos, and users</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold gradient-text mb-2">Admin Dashboard</h1>
+            <p className="text-muted-foreground">Manage events, promos, and users</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/profile')}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Profile
+          </Button>
         </div>
 
         {/* Stats Cards */}
