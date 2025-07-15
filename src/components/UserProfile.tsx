@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,8 @@ interface Profile {
   bio: string | null;
   created_at: string;
   updated_at: string;
+  is_admin: boolean;
+  is_super_admin: boolean;
 }
 
 export const UserProfile = () => {
@@ -32,6 +35,7 @@ export const UserProfile = () => {
     avatar_url: ''
   });
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const fetchUserProfile = useCallback(async () => {
     try {
@@ -42,6 +46,7 @@ export const UserProfile = () => {
           description: "Please sign in to view your profile.",
           variant: "destructive",
         });
+        setLoading(false);
         return;
       }
 
@@ -49,7 +54,7 @@ export const UserProfile = () => {
 
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('*, is_admin, is_super_admin')
         .eq('user_id', user.id)
         .single();
 
@@ -294,6 +299,15 @@ export const UserProfile = () => {
                     <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
                       Share Profile
                     </Button>
+                    {(profile?.is_admin || profile?.is_super_admin) && (
+                      <Button
+                        variant="outline"
+                        className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                        onClick={() => navigate('/admin')}
+                      >
+                        Admin Dashboard
+                      </Button>
+                    )}
                   </>
                 )}
               </div>

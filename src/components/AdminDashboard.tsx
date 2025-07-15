@@ -31,6 +31,8 @@ interface User {
   profile_type: string;
   created_at: string;
   is_verified: boolean;
+  is_admin: boolean;
+  is_super_admin: boolean;
 }
 
 export const AdminDashboard = () => {
@@ -46,7 +48,7 @@ export const AdminDashboard = () => {
       const [eventsData, promosData, usersData] = await Promise.all([
         supabase.from('events').select('id, title, date, venue_name, organizer_name, created_at').order('created_at', { ascending: false }),
         supabase.from('promos').select('id, title, venue_name, discount_text, valid_until, created_at').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('id, display_name, profile_type, created_at, is_verified').order('created_at', { ascending: false })
+        supabase.from('profiles').select('id, display_name, profile_type, created_at, is_verified, is_admin, is_super_admin').order('created_at', { ascending: false })
       ]);
 
       if (eventsData.error) throw eventsData.error;
@@ -133,6 +135,60 @@ export const AdminDashboard = () => {
       toast({
         title: "Error",
         description: "Failed to verify user",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSetAdmin = async (userId: string, isAdmin: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_admin: isAdmin })
+        .eq('id', userId);
+      
+      if (error) throw error;
+      
+      setUsers(users.map(user => 
+        user.id === userId ? { ...user, is_admin: isAdmin } : user
+      ));
+      
+      toast({
+        title: "Success",
+        description: `User ${isAdmin ? 'granted' : 'revoked'} admin privileges.`
+      });
+    } catch (error) {
+      console.error('Error setting admin:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update user role.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSetSuperAdmin = async (userId: string, isSuperAdmin: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_super_admin: isSuperAdmin })
+        .eq('id', userId);
+      
+      if (error) throw error;
+      
+      setUsers(users.map(user => 
+        user.id === userId ? { ...user, is_super_admin: isSuperAdmin } : user
+      ));
+      
+      toast({
+        title: "Success",
+        description: `User ${isSuperAdmin ? 'granted' : 'revoked'} super admin privileges.`
+      });
+    } catch (error) {
+      console.error('Error setting super admin:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update user role.",
         variant: "destructive"
       });
     }
@@ -299,6 +355,16 @@ export const AdminDashboard = () => {
                               Verified
                             </Badge>
                           )}
+                          {user.is_admin && (
+                            <Badge variant="destructive">
+                              Admin
+                            </Badge>
+                          )}
+                          {user.is_super_admin && (
+                            <Badge variant="destructive">
+                              Super Admin
+                            </Badge>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -311,6 +377,20 @@ export const AdminDashboard = () => {
                             Verify
                           </Button>
                         )}
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleSetAdmin(user.id, !user.is_admin)}
+                        >
+                          {user.is_admin ? 'Revoke Admin' : 'Make Admin'}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleSetSuperAdmin(user.id, !user.is_super_admin)}
+                        >
+                          {user.is_super_admin ? 'Revoke Super Admin' : 'Make Super Admin'}
+                        </Button>
                         <Button variant="outline" size="sm">
                           <Eye className="w-4 h-4" />
                         </Button>

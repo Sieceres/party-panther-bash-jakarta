@@ -197,6 +197,8 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          is_admin: boolean
+          is_super_admin: boolean
           is_verified: boolean | null
           profile_type: string | null
           updated_at: string
@@ -209,6 +211,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_admin?: boolean
+          is_super_admin?: boolean
           is_verified?: boolean | null
           profile_type?: string | null
           updated_at?: string
@@ -221,6 +225,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_admin?: boolean
+          is_super_admin?: boolean
           is_verified?: boolean | null
           profile_type?: string | null
           updated_at?: string
