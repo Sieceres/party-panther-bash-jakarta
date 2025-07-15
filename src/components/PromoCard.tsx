@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Star, MessageSquare } from "lucide-react";
 import { ReviewsList } from "./ReviewsList";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 interface Promo {
   id: string;
@@ -124,14 +125,12 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
         </div>
         
         {/* Reviews Section */}
-        {showReviews && (
-          <div className="w-full">
-            <ReviewsList 
-              promoId={promo.id} 
-              onReviewsChange={handleReviewsChange}
-            />
-          </div>
-        )}
+        <div className={cn("w-full", { "hidden": !showReviews })}>
+          <ReviewsList 
+            promoId={promo.id} 
+            onReviewsChange={handleReviewsChange}
+          />
+        </div>
       </CardFooter>
     </Card>
   );
