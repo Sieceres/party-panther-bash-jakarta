@@ -25,10 +25,14 @@ interface EventCardProps {
 export const EventCard = ({ event, onJoin }: EventCardProps) => {
   const navigate = useNavigate();
 
+  const handleCardClick = () => {
+    navigate(`/event/${event.id}`);
+  };
+
   return (
     <Card className="group hover:scale-105 transition-all duration-300 bg-card border-border hover:border-primary/50 overflow-hidden">
       {/* Event Image */}
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden cursor-pointer" onClick={handleCardClick}>
         <img
           src={event.image || event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop'}
           alt={event.title}
@@ -48,7 +52,7 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
         </div>
       </div>
 
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 cursor-pointer" onClick={handleCardClick}>
         <h3 className="font-bold text-lg line-clamp-2 group-hover:text-primary transition-colors">
           {event.title}
         </h3>

@@ -35,6 +35,10 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
 
+  const handleCardClick = () => {
+    navigate(`/promo/${promo.id}`);
+  };
+
   const handleReviewsChange = (avgRating: number, total: number) => {
     setAverageRating(avgRating);
     setTotalReviews(total);
@@ -43,7 +47,7 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
   return (
     <Card className="group hover:scale-105 transition-all duration-300 bg-card border-border hover:border-neon-pink/50 overflow-hidden">
       {/* Promo Image */}
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden cursor-pointer" onClick={handleCardClick}>
         <img
           src={promo.image || promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop'}
           alt={promo.title}
@@ -64,7 +68,7 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
         </div>
       </div>
 
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 cursor-pointer" onClick={handleCardClick}>
         <h3 className="font-bold text-lg line-clamp-2 group-hover:text-neon-pink transition-colors">
           {promo.title}
         </h3>
