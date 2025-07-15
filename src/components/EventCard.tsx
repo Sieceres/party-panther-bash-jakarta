@@ -46,7 +46,7 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
         </div>
         <div className="absolute top-4 right-4 flex items-center space-x-1 bg-black/50 rounded-full px-2 py-1">
           <Star className="w-3 h-3 text-yellow-400 fill-current" />
-          <span className="text-white text-xs font-medium">{event.rating}</span>
+          <span className="text-white text-xs font-medium">{event.rating.toFixed(2)}</span>
         </div>
       </div>
 
