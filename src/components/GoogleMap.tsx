@@ -8,7 +8,7 @@ interface GoogleMapProps {
   height?: string;
 }
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyC8VSPvDyRnEQ06vbuhpdJrB9HB_j8GQa0";
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 export const GoogleMap = ({ 
   center = { lat: -6.2088, lng: 106.8456 }, // Jakarta center
