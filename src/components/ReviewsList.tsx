@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { User } from "@supabase/supabase-js"; 
 import { Star, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,12 +22,12 @@ interface ReviewsListProps {
 export const ReviewsList = ({ promoId, onReviewsChange }: ReviewsListProps) => {
   const { toast } = useToast();
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingReview, setEditingReview] = useState<Review | null>(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('promo_reviews')
@@ -51,17 +52,17 @@ export const ReviewsList = ({ promoId, onReviewsChange }: ReviewsListProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [promoId, onReviewsChange]);
 
-  const fetchCurrentUser = async () => {
+  const fetchCurrentUser = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setCurrentUser(user);
-  };
+  }, []);
 
   useEffect(() => {
     fetchReviews();
     fetchCurrentUser();
-  }, [promoId]);
+  }, [fetchReviews, fetchCurrentUser]);
 
   const handleDeleteReview = async (reviewId: string) => {
     try {

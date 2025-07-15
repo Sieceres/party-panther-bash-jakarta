@@ -1,11 +1,12 @@
 
+import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/EventCard";
 import { CreateEventForm } from "@/components/CreateEventForm";
 import { Calendar } from "lucide-react";
 
 interface EventsSectionProps {
-  events: any[];
+  events: Tables<'events'>[];
   showCreateEvent: boolean;
   onToggleCreateEvent: () => void;
   onJoinEvent: (eventId: string) => void;

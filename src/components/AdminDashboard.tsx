@@ -41,10 +41,7 @@ export const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+    const fetchData = async () => {
     try {
       const [eventsData, promosData, usersData] = await Promise.all([
         supabase.from('events').select('id, title, date, venue_name, organizer_name, created_at').order('created_at', { ascending: false }),
@@ -70,6 +67,9 @@ export const AdminDashboard = () => {
       setLoading(false);
     }
   };
+
+  fetchData();
+}, [toast]);
 
   const handleDeleteEvent = async (id: string) => {
     try {

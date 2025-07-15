@@ -1,4 +1,5 @@
 
+import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { PromoCard } from "@/components/PromoCard";
 import { CreatePromoForm } from "@/components/CreatePromoForm";
@@ -6,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Filter, Star } from "lucide-react";
 
 interface PromosSectionProps {
-  promos: any[];
-  filteredPromos: any[];
+  promos: Tables<'promos'>[];
+  filteredPromos: Tables<'promos'>[];
   showCreatePromo: boolean;
   dayFilter: string;
   areaFilter: string;

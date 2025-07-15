@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Calendar, Star, User, LogIn, LogOut, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,7 +65,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     { id: 'home', label: 'Home', icon: Star },
     { id: 'promos', label: 'Promos', icon: Star },
     { id: 'events', label: 'Events', icon: Calendar },
-    { id: 'blog', label: 'Blog', icon: BookOpen },
+    { id: 'blog', label: 'Blog', icon: BookOpen, hidden: true },
     { id: 'profile', label: 'Profile', icon: User }
   ];
 
@@ -74,16 +74,16 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
+          <Link to="/" className="flex items-center space-x-3" onClick={() => onSectionChange('home')}>
             <div className="w-10 h-10 rounded-full party-gradient flex items-center justify-center">
               <span className="text-2xl">🐾</span>
             </div>
             <h1 className="text-2xl font-bold gradient-text">Party Panther</h1>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            {menuItems.map((item) => {
+            {menuItems.filter(item => !item.hidden).map((item) => {
               const Icon = item.icon;
               return (
                 <Button
@@ -143,7 +143,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
         {isMenuOpen && (
           <nav className="md:hidden py-4 border-t border-border">
             <div className="flex flex-col space-y-2">
-              {menuItems.map((item) => {
+              {menuItems.filter(item => !item.hidden).map((item) => {
                 const Icon = item.icon;
                 return (
                   <Button

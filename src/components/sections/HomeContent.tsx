@@ -1,4 +1,5 @@
 
+import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Hero } from "@/components/Hero";
 import { EventCard } from "@/components/EventCard";
@@ -7,8 +8,8 @@ import { ArrowRight } from "lucide-react";
 
 interface HomeContentProps {
   loading: boolean;
-  events: any[];
-  promos: any[];
+  events: Tables<'events'>[];
+  promos: Tables<'promos'>[];
   onSectionChange: (section: string) => void;
   onJoinEvent: (eventId: string) => void;
   onClaimPromo: (promoId: string) => void;
@@ -33,7 +34,7 @@ export const HomeContent = ({
   }
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-8">
       <Hero onSectionChange={onSectionChange} />
       
       {/* Featured Promos Section - Moved to top */}

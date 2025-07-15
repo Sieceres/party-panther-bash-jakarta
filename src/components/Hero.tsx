@@ -7,7 +7,7 @@ interface HeroProps {
 
 export const Hero = ({ onSectionChange }: HeroProps) => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full party-gradient blur-3xl"></div>

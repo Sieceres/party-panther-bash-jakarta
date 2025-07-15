@@ -74,6 +74,54 @@ export const BlogSection = () => {
   ];
 
   useEffect(() => {
+    // Mock data for demonstration - replace with actual Ghost API integration
+    const mockPosts: BlogPost[] = [
+      {
+        id: "1",
+        title: "Jakarta's Hottest New Venues Opening This Month",
+        excerpt: "Discover the newest and most exciting party destinations that are about to transform Jakarta's nightlife scene...",
+        slug: "jakarta-hottest-new-venues-opening",
+        published_at: "2024-12-20T10:00:00Z",
+        feature_image: "https://images.unsplash.com/photo-1556909114-4e1b89e1a72d?w=600&h=400&fit=crop",
+        tags: [{ name: "venues" }, { name: "nightlife" }],
+        authors: [{ name: "Party Panther Team" }],
+        reading_time: 5
+      },
+      {
+        id: "2", 
+        title: "How to Score the Best Drink Deals in Jakarta",
+        excerpt: "Our insider guide to finding the best happy hours, ladies nights, and exclusive drink promotions across the city...",
+        slug: "best-drink-deals-jakarta-guide",
+        published_at: "2024-12-18T14:30:00Z",
+        feature_image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&h=400&fit=crop",
+        tags: [{ name: "deals" }, { name: "drinks" }],
+        authors: [{ name: "Jakarta Insider" }],
+        reading_time: 7
+      },
+      {
+        id: "3",
+        title: "Weekend Party Guide: December 2024",
+        excerpt: "Your complete guide to the hottest weekend events happening this month, from rooftop parties to underground raves...",
+        slug: "weekend-party-guide-december-2024",
+        published_at: "2024-12-15T09:00:00Z", 
+        feature_image: "https://images.unsplash.com/photo-1493676304819-0d7a8d026dcf?w=600&h=400&fit=crop",
+        tags: [{ name: "events" }, { name: "weekend" }],
+        authors: [{ name: "Event Curator" }],
+        reading_time: 8
+      },
+      {
+        id: "4",
+        title: "The Ultimate Jakarta Nightlife Survival Guide",
+        excerpt: "Everything you need to know about partying safely and stylishly in Jakarta, from dress codes to transportation tips...",
+        slug: "jakarta-nightlife-survival-guide",
+        published_at: "2024-12-12T16:00:00Z",
+        feature_image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&h=400&fit=crop",
+        tags: [{ name: "tips" }, { name: "safety" }],
+        authors: [{ name: "Nightlife Expert" }],
+        reading_time: 10
+      }
+    ];
+
     // Simulate API call
     const fetchPosts = async () => {
       try {

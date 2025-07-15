@@ -8,6 +8,7 @@ import { BlogSection } from "@/components/BlogSection";
 import { UserProfile } from "@/components/UserProfile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "../integrations/supabase/types";
 
 const Index = () => {
   const { toast } = useToast();
@@ -29,8 +30,8 @@ const Index = () => {
   const [dayFilter, setDayFilter] = useState("all");
   const [areaFilter, setAreaFilter] = useState("all");
   const [drinkTypeFilter, setDrinkTypeFilter] = useState("all");
-  const [events, setEvents] = useState<any[]>([]);
-  const [promos, setPromos] = useState<any[]>([]);
+  const [events, setEvents] = useState<Tables<'events'>[]>([]);
+  const [promos, setPromos] = useState<Tables<'promos'>[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
