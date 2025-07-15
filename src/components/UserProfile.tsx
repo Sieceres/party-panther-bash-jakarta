@@ -6,10 +6,24 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { User, Star, Calendar, Link as LinkIcon, Edit, Save, X } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { Tables } from "../integrations/supabase/types";
+
+// ... (interface Profile remains the same)
 
 interface Profile {
   id: string;
@@ -29,6 +43,7 @@ export const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [userEvents, setUserEvents] = useState<Tables<'events'>[]>([]);
   const [editForm, setEditForm] = useState({
     display_name: '',
     bio: '',
@@ -38,6 +53,7 @@ export const UserProfile = () => {
   const navigate = useNavigate();
 
   const fetchUserProfile = useCallback(async () => {
+    // ... (fetchUserProfile remains the same)
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -76,6 +92,25 @@ export const UserProfile = () => {
           avatar_url: profile.avatar_url || ''
         });
       }
+
+      // Fetch events created by the user
+      const { data: eventsData, error: eventsError } = await supabase
+        .from('events')
+        .select('*')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false });
+
+      if (eventsError) {
+        console.error('Error fetching user events:', eventsError);
+        toast({
+          title: "Error",
+          description: "Failed to load your created events.",
+          variant: "destructive",
+        });
+      } else {
+        setUserEvents(eventsData || []);
+      }
+
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -93,6 +128,7 @@ export const UserProfile = () => {
   }, [fetchUserProfile]);
 
   const handleSaveProfile = async () => {
+    // ... (handleSaveProfile remains the same)
     if (!user) return;
 
     setSaving(true);
@@ -142,7 +178,8 @@ export const UserProfile = () => {
   };
 
   const handleCancelEdit = () => {
-    if (profile) {
+    // ... (handleCancelEdit remains the same)
+     if (profile) {
       setEditForm({
         display_name: profile.display_name || '',
         bio: profile.bio || '',
@@ -152,6 +189,35 @@ export const UserProfile = () => {
     setIsEditing(false);
   };
 
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('delete-event', {
+        body: { event_id: eventId },
+      });
+
+      if (error) {
+        throw new Error(`Function invocation failed: ${error.message}`);
+      }
+
+      toast({
+        title: "Success",
+        description: "Event deleted successfully!",
+      });
+
+      // Refresh the event list
+      setUserEvents(userEvents.filter(event => event.id !== eventId));
+
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      toast({
+        title: "Error",
+        description: `Failed to delete event: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  // ... (loading and !user checks remain the same)
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto space-y-6">
@@ -185,6 +251,17 @@ export const UserProfile = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* ... (Back to Home button and Profile Header remain the same) */}
+      
+      <Button
+        variant="ghost"
+        onClick={() => navigate('/')}
+        className="mb-6"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Home
+      </Button>
+
       {/* Profile Header */}
       <Card className="bg-card border-border">
         <CardContent className="pt-6">
@@ -316,6 +393,69 @@ export const UserProfile = () => {
         </CardContent>
       </Card>
 
+      {/* User's Created Events */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <h3 className="font-semibold flex items-center space-x-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            <span>Your Created Events</span>
+          </h3>
+        </CardHeader>
+        <CardContent>
+          {userEvents.length === 0 ? (
+            <p className="text-muted-foreground">You haven't created any events yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {userEvents.map((event) => (
+                <div key={event.id} className="flex items-center justify-between border-b pb-2 last:pb-0 last:border-b-0">
+                  <div>
+                    <p className="font-medium">{event.title}</p>
+                    <p className="text-sm text-muted-foreground">{event.date} at {event.time}</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/edit-event/${event.id}`)}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the event
+                            and all associated data (attendees, comments, etc.).
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeleteEvent(event.id)}>
+                            Continue
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ... (Badges, User Info, Recent Activity cards remain the same) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Badges */}
         <Card className="bg-card border-border">

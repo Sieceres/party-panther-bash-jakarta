@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ interface Event {
   organizer_name: string;
   organizer_whatsapp: string;
   created_at: string;
+  is_recurrent: boolean | null; // Added is_recurrent
 }
 
 export const EventDetailPage = () => {
@@ -32,6 +33,19 @@ export const EventDetailPage = () => {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasJoined, setHasJoined] = useState(false); // New state for joined status
+
+  const memoizedCenter = useMemo(() => {
+    if (event?.venue_latitude && event?.venue_longitude) {
+      return { lat: Number(event.venue_latitude), lng: Number(event.venue_longitude) };
+    }
+    return undefined;
+  }, [event]);
+
+  const markers = useMemo(() => (event?.venue_latitude && event?.venue_longitude ? [{
+    lat: Number(event.venue_latitude),
+    lng: Number(event.venue_longitude),
+    title: event.venue_name
+  }] : []), [event]);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -55,7 +69,7 @@ export const EventDetailPage = () => {
             .select('*')
             .eq('event_id', id)
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
 
           if (attendeeData && !attendeeError) {
             setHasJoined(true);
@@ -187,16 +201,6 @@ export const EventDetailPage = () => {
     );
   }
 
-  const markers = event.venue_latitude && event.venue_longitude ? [{
-    lat: Number(event.venue_latitude),
-    lng: Number(event.venue_longitude),
-    title: event.venue_name
-  }] : [];
-
-  console.log("Event Latitude:", event.venue_latitude);
-  console.log("Event Longitude:", event.venue_longitude);
-  console.log("Markers array:", markers);
-
   return (
     <div className="min-h-screen bg-background pt-20 px-4">
       <div className="container mx-auto max-w-4xl">
@@ -236,6 +240,11 @@ export const EventDetailPage = () => {
                     <Clock className="w-4 h-4" />
                     <span>{event.time}</span>
                   </div>
+                  {event.is_recurrent && (
+                    <Badge variant="secondary" className="text-xs">
+                      Recurrent Event
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -277,7 +286,7 @@ export const EventDetailPage = () => {
                   <div className="space-y-2">
                     <h4 className="font-semibold">Location</h4>
                     <GoogleMap
-                      center={{ lat: Number(event.venue_latitude), lng: Number(event.venue_longitude) }}
+                      center={memoizedCenter}
                       markers={markers}
                       height="300px"
                     />

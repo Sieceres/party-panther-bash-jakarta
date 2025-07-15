@@ -10,6 +10,8 @@ import { EventDetailPage } from "./components/EventDetailPage";
 import { PromoDetailPage } from "./components/PromoDetailPage";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { Contact } from "./pages/Contact";
+import { EditEventPage } from "./pages/EditEventPage";
+import { UserProfile } from "./components/UserProfile"; // Import UserProfile
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/promo/:id" element={<PromoDetailPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/edit-event/:id" element={<EditEventPage />} />
+          <Route path="/profile" element={<UserProfile />} /> {/* New route for user profile */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

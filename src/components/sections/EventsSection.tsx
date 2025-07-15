@@ -2,7 +2,7 @@
 import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/EventCard";
-import { CreateEventForm } from "@/components/CreateEventForm";
+import { EventForm } from "@/components/EventForm";
 import { Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -40,7 +40,7 @@ export const EventsSection = ({
 
         {showCreateEvent && (
           <div className="mb-8">
-            <CreateEventForm />
+            <EventForm />
           </div>
         )}
 

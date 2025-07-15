@@ -140,6 +140,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          is_recurrent: boolean | null
           organizer_name: string | null
           organizer_whatsapp: string | null
           price_currency: string | null
@@ -158,6 +159,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          is_recurrent?: boolean | null
           organizer_name?: string | null
           organizer_whatsapp?: string | null
           price_currency?: string | null
@@ -176,6 +178,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          is_recurrent?: boolean | null
           organizer_name?: string | null
           organizer_whatsapp?: string | null
           price_currency?: string | null
