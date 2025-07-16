@@ -3,8 +3,12 @@ import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/EventCard";
 import { EventForm } from "@/components/EventForm";
-import { Calendar } from "lucide-react";
+import { Calendar, Lock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { User } from "@supabase/supabase-js";
 
 interface EventsSectionProps {
   events: Tables<'events'>[];
@@ -21,6 +25,28 @@ export const EventsSection = ({
   onJoinEvent,
   loading
 }: EventsSectionProps) => {
+  const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
+
+  const handleCreateEventClick = () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to create an event.",
+        variant: "destructive"
+      });
+      return;
+    }
+    onToggleCreateEvent();
+  };
   return (
     <div className="pt-20 px-4">
       <div className="container mx-auto space-y-8">
@@ -30,11 +56,20 @@ export const EventsSection = ({
             <p className="text-muted-foreground">Discover the hottest parties and events in the city</p>
           </div>
           <Button
-            onClick={onToggleCreateEvent}
+            onClick={handleCreateEventClick}
             className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
-            <Calendar className="w-4 h-4 mr-2" />
-            Create Event
+            {user ? (
+              <>
+                <Calendar className="w-4 h-4 mr-2" />
+                Create Event
+              </>
+            ) : (
+              <>
+                <Lock className="w-4 h-4 mr-2" />
+                Login to Create Event
+              </>
+            )}
           </Button>
         </div>
 

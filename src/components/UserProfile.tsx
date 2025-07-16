@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2 } from "lucide-react";
+import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -45,6 +45,7 @@ export const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userEvents, setUserEvents] = useState<Tables<'events'>[]>([]);
+  const [userPromos, setUserPromos] = useState<Tables<'promos'>[]>([]);
   const [editForm, setEditForm] = useState({
     display_name: '',
     bio: '',
@@ -110,6 +111,24 @@ export const UserProfile = () => {
         });
       } else {
         setUserEvents(eventsData || []);
+      }
+
+      // Fetch promos created by the user
+      const { data: promosData, error: promosError } = await supabase
+        .from('promos')
+        .select('*')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false });
+
+      if (promosError) {
+        console.error('Error fetching user promos:', promosError);
+        toast({
+          title: "Error",
+          description: "Failed to load your created promos.",
+          variant: "destructive",
+        });
+      } else {
+        setUserPromos(promosData || []);
       }
 
     } catch (error) {
@@ -213,6 +232,34 @@ export const UserProfile = () => {
       toast({
         title: "Error",
         description: `Failed to delete event: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeletePromo = async (promoId: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('delete-promo', {
+        body: { promo_id: promoId },
+      });
+
+      if (error) {
+        throw new Error(`Function invocation failed: ${error.message}`);
+      }
+
+      toast({
+        title: "Success",
+        description: "Promo deleted successfully!",
+      });
+
+      // Refresh the promo list
+      setUserPromos(userPromos.filter(promo => promo.id !== promoId));
+
+    } catch (error) {
+      console.error('Error deleting promo:', error);
+      toast({
+        title: "Error",
+        description: `Failed to delete promo: ${error.message}`,
         variant: "destructive",
       });
     }
@@ -440,6 +487,73 @@ export const UserProfile = () => {
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction onClick={() => handleDeleteEvent(event.id)}>
+                            Continue
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* User's Created Promos */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <h3 className="font-semibold flex items-center space-x-2">
+            <Gift className="w-5 h-5 text-primary" />
+            <span>Your Created Promos</span>
+          </h3>
+        </CardHeader>
+        <CardContent>
+          {userPromos.length === 0 ? (
+            <p className="text-muted-foreground">You haven't created any promos yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {userPromos.map((promo) => (
+                <div key={promo.id} className="flex items-center justify-between border-b pb-2 last:pb-0 last:border-b-0">
+                  <div>
+                    <p className="font-medium">{promo.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {promo.venue_name} • {promo.discount_text}
+                      {promo.valid_until && (
+                        <> • Valid until {new Date(promo.valid_until).toLocaleDateString()}</>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/edit-promo/${promo.id}`)}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the promo
+                            and all associated data (reviews, comments, etc.).
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeletePromo(promo.id)}>
                             Continue
                           </AlertDialogAction>
                         </AlertDialogFooter>

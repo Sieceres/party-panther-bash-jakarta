@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { PromoCard } from "@/components/PromoCard";
 import { CreatePromoForm } from "@/components/CreatePromoForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Filter, Star } from "lucide-react";
+import { Filter, Star, Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { User } from "@supabase/supabase-js";
 
 interface PromosSectionProps {
   promos: Tables<'promos'>[];
@@ -32,6 +36,28 @@ export const PromosSection = ({
   onAreaFilterChange,
   onDrinkTypeFilterChange
 }: PromosSectionProps) => {
+  const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
+
+  const handleCreatePromoClick = () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to create a promo.",
+        variant: "destructive"
+      });
+      return;
+    }
+    onToggleCreatePromo();
+  };
   return (
     <div className="pt-20 px-4">
       <div className="container mx-auto space-y-8">
@@ -41,11 +67,20 @@ export const PromosSection = ({
             <p className="text-muted-foreground">Save money while partying with these exclusive deals</p>
           </div>
           <Button
-            onClick={onToggleCreatePromo}
+            onClick={handleCreatePromoClick}
             className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
-            <Star className="w-4 h-4 mr-2" />
-            Create Promo
+            {user ? (
+              <>
+                <Star className="w-4 h-4 mr-2" />
+                Create Promo
+              </>
+            ) : (
+              <>
+                <Lock className="w-4 h-4 mr-2" />
+                Login to Create Promo
+              </>
+            )}
           </Button>
         </div>
 

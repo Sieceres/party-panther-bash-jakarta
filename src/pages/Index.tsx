@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "../integrations/supabase/types";
 import { Footer } from "@/components/Footer";
+import { User } from "@supabase/supabase-js";
 
 const Index = () => {
   const { toast } = useToast();
@@ -34,7 +35,7 @@ const Index = () => {
   const [events, setEvents] = useState<Tables<'events'>[]>([]);
   const [promos, setPromos] = useState<Tables<'promos'>[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null); // Added user state
+  const [user, setUser] = useState<User | null>(null); // Added user state
 
   useEffect(() => {
     const fetchUserAndData = async () => {
