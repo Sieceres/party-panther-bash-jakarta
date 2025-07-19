@@ -25,6 +25,7 @@ interface Promo {
   valid_until: string;
   day_of_week: string;
   category: string;
+  promo_type: string;
   image_url: string;
   area: string;
   drink_type: string;
@@ -144,6 +145,11 @@ export const PromoDetailPage = () => {
                       </Badge>
                       {promo.category && (
                         <Badge variant="secondary">{promo.category}</Badge>
+                      )}
+                      {promo.promo_type && (
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary">
+                          {promo.promo_type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </Badge>
                       )}
                     </div>
                   </div>

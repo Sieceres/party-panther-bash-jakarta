@@ -11,11 +11,13 @@ import { cn } from "@/lib/utils";
 interface PromoDetailsProps {
   validUntilDate: Date | undefined;
   category: string;
+  promoType: string;
   dayOfWeek: string;
   area: string;
   drinkType: string;
   onValidUntilChange: (date: Date | undefined) => void;
   onCategoryChange: (category: string) => void;
+  onPromoTypeChange: (type: string) => void;
   onDayOfWeekChange: (day: string) => void;
   onAreaChange: (area: string) => void;
   onDrinkTypeChange: (type: string) => void;
@@ -24,11 +26,13 @@ interface PromoDetailsProps {
 export const PromoDetails = ({ 
   validUntilDate, 
   category, 
+  promoType,
   dayOfWeek, 
   area, 
   drinkType,
   onValidUntilChange, 
   onCategoryChange, 
+  onPromoTypeChange,
   onDayOfWeekChange, 
   onAreaChange, 
   onDrinkTypeChange 
@@ -71,6 +75,21 @@ export const PromoDetails = ({
             onChange={(e) => onCategoryChange(e.target.value)}
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="promoType">Promo Type *</Label>
+        <Select value={promoType} onValueChange={onPromoTypeChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select promo type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="free-flow">Free Flow</SelectItem>
+            <SelectItem value="ladies-night">Ladies Night</SelectItem>
+            <SelectItem value="bottle-promo">Bottle Promo</SelectItem>
+            <SelectItem value="other">Other</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

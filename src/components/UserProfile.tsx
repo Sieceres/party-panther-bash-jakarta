@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -32,6 +33,11 @@ interface Profile {
   display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  gender: string | null;
+  age: number | null;
+  instagram: string | null;
+  whatsapp: string | null;
+  party_style: string | null;
   created_at: string;
   updated_at: string;
   is_admin: boolean;
@@ -49,7 +55,12 @@ export const UserProfile = () => {
   const [editForm, setEditForm] = useState({
     display_name: '',
     bio: '',
-    avatar_url: ''
+    avatar_url: '',
+    gender: '',
+    age: '',
+    instagram: '',
+    whatsapp: '',
+    party_style: ''
   });
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -93,7 +104,12 @@ export const UserProfile = () => {
         setEditForm({
           display_name: profile.display_name || '',
           bio: profile.bio || '',
-          avatar_url: profile.avatar_url || ''
+          avatar_url: profile.avatar_url || '',
+          gender: profile.gender || '',
+          age: profile.age?.toString() || '',
+          instagram: profile.instagram || '',
+          whatsapp: profile.whatsapp || '',
+          party_style: profile.party_style || ''
         });
       }
 
@@ -161,6 +177,11 @@ export const UserProfile = () => {
         display_name: editForm.display_name || null,
         bio: editForm.bio || null,
         avatar_url: editForm.avatar_url || null,
+        gender: editForm.gender || null,
+        age: editForm.age ? parseInt(editForm.age) : null,
+        instagram: editForm.instagram || null,
+        whatsapp: editForm.whatsapp || null,
+        party_style: editForm.party_style || null,
         updated_at: new Date().toISOString()
       };
 
@@ -355,6 +376,83 @@ export const UserProfile = () => {
                       className="min-h-[60px]"
                     />
                   </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="gender">Gender (optional)</Label>
+                      <Select value={editForm.gender} onValueChange={(value) => setEditForm({ ...editForm, gender: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="non-binary">Non-binary</SelectItem>
+                          <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="age">Age (optional)</Label>
+                      <Input
+                        id="age"
+                        type="number"
+                        min="18"
+                        max="100"
+                        value={editForm.age}
+                        onChange={(e) => setEditForm({ ...editForm, age: e.target.value })}
+                        placeholder="Enter your age"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="party_style">Party Style (optional)</Label>
+                    <Select value={editForm.party_style} onValueChange={(value) => setEditForm({ ...editForm, party_style: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="What's your party vibe?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="clubbing">Clubbing</SelectItem>
+                        <SelectItem value="rooftop-parties">Rooftop Parties</SelectItem>
+                        <SelectItem value="underground-raves">Underground Raves</SelectItem>
+                        <SelectItem value="beach-parties">Beach Parties</SelectItem>
+                        <SelectItem value="live-music">Live Music</SelectItem>
+                        <SelectItem value="cocktail-lounges">Cocktail Lounges</SelectItem>
+                        <SelectItem value="casual-hangouts">Casual Hangouts</SelectItem>
+                        <SelectItem value="vip-experiences">VIP Experiences</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="instagram">Instagram Handle (optional)</Label>
+                      <Input
+                        id="instagram"
+                        value={editForm.instagram}
+                        onChange={(e) => setEditForm({ ...editForm, instagram: e.target.value })}
+                        placeholder="@yourusername"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="whatsapp">WhatsApp Number (optional)</Label>
+                      <Input
+                        id="whatsapp"
+                        value={editForm.whatsapp}
+                        onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })}
+                        placeholder="+62 XXX XXX XXXX"
+                      />
+                    </div>
+                    {(editForm.instagram || editForm.whatsapp) && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                        <p className="text-sm text-amber-800">
+                          <strong>Privacy Notice:</strong> By making your Instagram or WhatsApp visible on your profile, you understand that it is visible to anyone online and that they can contact you on these platforms.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
                   <ImageUpload
                     label="Avatar"
                     imageUrl={editForm.avatar_url}
@@ -369,6 +467,53 @@ export const UserProfile = () => {
                   <p className="text-sm text-muted-foreground mt-2 max-w-md">
                     {profile?.bio || "Jakarta party enthusiast | Always looking for the next great party! 🎉"}
                   </p>
+                  
+                  {/* Additional Profile Info */}
+                  <div className="mt-4 space-y-2">
+                    {(profile?.gender || profile?.age) && (
+                      <div className="flex gap-4 text-sm text-muted-foreground">
+                        {profile?.gender && (
+                          <span className="capitalize">{profile.gender.replace('-', ' ')}</span>
+                        )}
+                        {profile?.age && (
+                          <span>{profile.age} years old</span>
+                        )}
+                      </div>
+                    )}
+                    
+                    {profile?.party_style && (
+                      <div className="text-sm">
+                        <Badge variant="secondary" className="bg-primary/10 text-primary">
+                          {profile.party_style.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    {(profile?.instagram || profile?.whatsapp) && (
+                      <div className="flex gap-3 text-sm">
+                        {profile?.instagram && (
+                          <a 
+                            href={`https://instagram.com/${profile.instagram.replace('@', '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:text-primary/80 transition-colors"
+                          >
+                            📸 {profile.instagram}
+                          </a>
+                        )}
+                        {profile?.whatsapp && (
+                          <a 
+                            href={`https://wa.me/${profile.whatsapp.replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:text-primary/80 transition-colors"
+                          >
+                            💬 WhatsApp
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -381,10 +526,6 @@ export const UserProfile = () => {
                 <div className="text-center">
                   <div className="text-2xl font-bold text-neon-cyan">3</div>
                   <div className="text-xs text-muted-foreground">Events Created</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-neon-indigo">4.8</div>
-                  <div className="text-xs text-muted-foreground">Rating</div>
                 </div>
               </div>
 
@@ -458,12 +599,12 @@ export const UserProfile = () => {
         <CardHeader>
           <h3 className="font-semibold flex items-center space-x-2">
             <Calendar className="w-5 h-5 text-primary" />
-            <span>Your Created Events</span>
+            <span>Created Events</span>
           </h3>
         </CardHeader>
         <CardContent>
           {userEvents.length === 0 ? (
-            <p className="text-muted-foreground">You haven't created any events yet.</p>
+            <p className="text-muted-foreground">Haven't created any events yet.</p>
           ) : (
             <div className="space-y-4">
               {userEvents.map((event) => (
@@ -520,12 +661,12 @@ export const UserProfile = () => {
         <CardHeader>
           <h3 className="font-semibold flex items-center space-x-2">
             <Gift className="w-5 h-5 text-primary" />
-            <span>Your Created Promos</span>
+            <span>Created Promos</span>
           </h3>
         </CardHeader>
         <CardContent>
           {userPromos.length === 0 ? (
-            <p className="text-muted-foreground">You haven't created any promos yet.</p>
+            <p className="text-muted-foreground">Haven't created any promos yet.</p>
           ) : (
             <div className="space-y-4">
               {userPromos.map((promo) => (

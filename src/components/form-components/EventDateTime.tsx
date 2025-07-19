@@ -38,6 +38,7 @@ export const EventDateTime = ({ eventDate, time, onDateChange, onTimeChange }: E
               selected={eventDate}
               onSelect={onDateChange}
               initialFocus
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
               className="pointer-events-auto"
             />
           </PopoverContent>

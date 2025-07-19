@@ -84,6 +84,22 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         return;
       }
 
+      // Validate event date is not in the past
+      if (eventDate && formData.time) {
+        const eventDateTime = new Date(`${eventDate.toISOString().split('T')[0]}T${formData.time}`);
+        const now = new Date();
+        
+        if (eventDateTime < now) {
+          toast({
+            title: "Invalid date",
+            description: "Cannot create an event in the past. Please select a future date and time.",
+            variant: "destructive"
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       const eventData = {
         title: formData.title,
         description: formData.description,

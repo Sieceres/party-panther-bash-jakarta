@@ -22,6 +22,7 @@ export const CreatePromoForm = () => {
     venue: "",
     address: "",
     category: "",
+    promoType: "",
     originalPrice: "",
     discountedPrice: "",
     dayOfWeek: "",
@@ -50,6 +51,17 @@ export const CreatePromoForm = () => {
         return;
       }
 
+      // Validate required fields
+      if (!formData.promoType) {
+        toast({
+          title: "Missing required field",
+          description: "Please select a promo type.",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const { error } = await supabase.from('promos').insert({
         title: formData.title,
         description: formData.description,
@@ -59,6 +71,7 @@ export const CreatePromoForm = () => {
         venue_latitude: location?.lat,
         venue_longitude: location?.lng,
         category: formData.category,
+        promo_type: formData.promoType,
         original_price_amount: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
         discounted_price_amount: formData.discountedPrice ? parseFloat(formData.discountedPrice) : null,
         price_currency: "IDR",
@@ -85,6 +98,7 @@ export const CreatePromoForm = () => {
         venue: "",
         address: "",
         category: "",
+        promoType: "",
         originalPrice: "",
         discountedPrice: "",
         dayOfWeek: "",
@@ -152,11 +166,13 @@ export const CreatePromoForm = () => {
             <PromoDetails
               validUntilDate={validUntilDate}
               category={formData.category}
+              promoType={formData.promoType}
               dayOfWeek={formData.dayOfWeek}
               area={formData.area}
               drinkType={formData.drinkType}
               onValidUntilChange={setValidUntilDate}
               onCategoryChange={(value) => handleInputChange("category", value)}
+              onPromoTypeChange={(value) => handleInputChange("promoType", value)}
               onDayOfWeekChange={(value) => handleInputChange("dayOfWeek", value)}
               onAreaChange={(value) => handleInputChange("area", value)}
               onDrinkTypeChange={(value) => handleInputChange("drinkType", value)}
