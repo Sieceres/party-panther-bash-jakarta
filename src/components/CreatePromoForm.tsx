@@ -15,6 +15,7 @@ export const CreatePromoForm = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validUntilDate, setValidUntilDate] = useState<Date>();
+  const [formErrors, setFormErrors] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -34,6 +35,34 @@ export const CreatePromoForm = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear errors when user starts typing
+    if (formErrors.length > 0) {
+      setFormErrors([]);
+    }
+  };
+
+  const validateForm = () => {
+    const errors = [];
+    
+    if (!formData.title.trim()) errors.push("Title is required");
+    if (!formData.description.trim()) errors.push("Description is required");
+    if (!formData.discount.trim()) errors.push("Discount text is required");
+    if (!formData.venue.trim()) errors.push("Venue name is required");
+    if (!formData.promoType) errors.push("Promo type is required");
+    if (!formData.category.trim()) errors.push("Category is required");
+    if (!validUntilDate) errors.push("Valid until date is required");
+    
+    return errors;
+  };
+
+  const isFormValid = () => {
+    return formData.title.trim() && 
+           formData.description.trim() && 
+           formData.discount.trim() && 
+           formData.venue.trim() && 
+           formData.promoType && 
+           formData.category.trim() && 
+           validUntilDate;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,14 +77,17 @@ export const CreatePromoForm = () => {
           description: "Please log in to create a promo.",
           variant: "destructive"
         });
+        setIsSubmitting(false);
         return;
       }
 
-      // Validate required fields
-      if (!formData.promoType) {
+      // Validate all required fields
+      const validationErrors = validateForm();
+      if (validationErrors.length > 0) {
+        setFormErrors(validationErrors);
         toast({
-          title: "Missing required field",
-          description: "Please select a promo type.",
+          title: "Please fill in all required fields",
+          description: validationErrors.join(", "),
           variant: "destructive"
         });
         setIsSubmitting(false);
@@ -170,7 +202,12 @@ export const CreatePromoForm = () => {
               dayOfWeek={formData.dayOfWeek}
               area={formData.area}
               drinkType={formData.drinkType}
-              onValidUntilChange={setValidUntilDate}
+              onValidUntilChange={(date) => {
+                setValidUntilDate(date);
+                if (formErrors.length > 0) {
+                  setFormErrors([]);
+                }
+              }}
               onCategoryChange={(value) => handleInputChange("category", value)}
               onPromoTypeChange={(value) => handleInputChange("promoType", value)}
               onDayOfWeekChange={(value) => handleInputChange("dayOfWeek", value)}
@@ -185,10 +222,21 @@ export const CreatePromoForm = () => {
               inputId="promo-image"
             />
 
+            {formErrors.length > 0 && (
+              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <h4 className="font-semibold text-destructive mb-2">Please fix the following errors:</h4>
+                <ul className="list-disc list-inside space-y-1 text-sm text-destructive">
+                  {formErrors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <Button
               type="submit"
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 neon-glow"
-              disabled={isSubmitting}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 neon-glow disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting || !isFormValid()}
             >
               {isSubmitting ? "Creating Promo..." : "Create Promo"}
             </Button>

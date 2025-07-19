@@ -41,7 +41,7 @@ export const PromoDetails = ({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Valid Until</Label>
+          <Label>Valid Until *</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -67,12 +67,13 @@ export const PromoDetails = ({
           </Popover>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
+          <Label htmlFor="category">Category *</Label>
           <Input
             id="category"
             placeholder="Drinks, Food, Entry..."
             value={category}
             onChange={(e) => onCategoryChange(e.target.value)}
+            required
           />
         </div>
       </div>
@@ -84,10 +85,10 @@ export const PromoDetails = ({
             <SelectValue placeholder="Select promo type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="free-flow">Free Flow</SelectItem>
-            <SelectItem value="ladies-night">Ladies Night</SelectItem>
-            <SelectItem value="bottle-promo">Bottle Promo</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
+            <SelectItem value="Free Flow">Free Flow</SelectItem>
+            <SelectItem value="Ladies Night">Ladies Night</SelectItem>
+            <SelectItem value="Bottle Promo">Bottle Promo</SelectItem>
+            <SelectItem value="Other">Other</SelectItem>
           </SelectContent>
         </Select>
       </div>
