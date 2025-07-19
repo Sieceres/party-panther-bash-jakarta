@@ -31,6 +31,11 @@ export const GoogleMap = ({
       return;
     }
 
+    if (!GOOGLE_MAPS_API_KEY) {
+      console.error("Google Maps API key is not configured. Please set VITE_GOOGLE_MAPS_API_KEY environment variable.");
+      return;
+    }
+
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
     script.async = true;
@@ -116,6 +121,20 @@ export const GoogleMap = ({
       markersRef.current.push(marker);
     });
   }, [map, markers]);
+
+  if (!GOOGLE_MAPS_API_KEY) {
+    return (
+      <div 
+        className="bg-muted rounded-lg flex items-center justify-center border border-destructive/20"
+        style={{ height }}
+      >
+        <div className="text-destructive text-center p-4">
+          <p className="font-medium">Google Maps API key not configured</p>
+          <p className="text-sm">Please set VITE_GOOGLE_MAPS_API_KEY environment variable</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isLoaded) {
     return (

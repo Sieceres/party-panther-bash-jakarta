@@ -53,7 +53,7 @@ export const EventsSection = ({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-4xl font-bold gradient-text mb-2">Jakarta Events</h2>
-            <p className="text-muted-foreground">Discover the hottest parties and events in the city, Alvaro!</p>
+            <p className="text-muted-foreground">Discover the hottest parties and events in the city!</p>
           </div>
           <Button
             onClick={handleCreateEventClick}
