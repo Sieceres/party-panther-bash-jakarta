@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Star, Users, MapPin, Trash2, Edit, Eye, ArrowLeft } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -43,9 +44,74 @@ export const AdminDashboard = () => {
   const [promos, setPromos] = useState<Promo[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'deleteEvent' | 'deletePromo' | 'deleteUser' | 'makeAdmin' | 'makeSuperAdmin';
+    id: string;
+    title?: string;
+    userName?: string;
+    isCurrentlyAdmin?: boolean;
+    isCurrentlySuperAdmin?: boolean;
+  } | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const checkAuthAndPermissions = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Access Denied",
+          description: "Please log in to access the admin dashboard",
+          variant: "destructive"
+        });
+        navigate('/auth');
+        return;
+      }
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('is_admin,is_super_admin')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error || !profile) {
+        toast({
+          title: "Access Denied",
+          description: "Unable to verify your permissions",
+          variant: "destructive"
+        });
+        navigate('/');
+        return;
+      }
+
+      if (!profile.is_admin && !profile.is_super_admin) {
+        toast({
+          title: "Access Denied",
+          description: "You don't have permission to access the admin dashboard",
+          variant: "destructive"
+        });
+        navigate('/');
+        return;
+      }
+
+      setIsAuthorized(true);
+      setIsSuperAdmin(profile.is_super_admin);
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      toast({
+        title: "Error",
+        description: "Failed to verify authentication",
+        variant: "destructive"
+      });
+      navigate('/');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const fetchData = async () => {
     try {
       const [eventsData, promosData, usersData] = await Promise.all([
         supabase.from('events').select('id, title, date, venue_name, organizer_name, created_at').order('created_at', { ascending: false }),
@@ -72,47 +138,110 @@ export const AdminDashboard = () => {
     }
   };
 
-  fetchData();
-}, [toast]);
+  useEffect(() => {
+    checkAuthAndPermissions();
+  }, [navigate, toast]);
+
+  useEffect(() => {
+    if (isAuthorized) {
+      fetchData();
+    }
+  }, [isAuthorized, toast]);
 
   const handleDeleteEvent = async (id: string) => {
     try {
-      const { error } = await supabase.from('events').delete().eq('id', id);
-      if (error) throw error;
-      
-      setEvents(events.filter(event => event.id !== id));
-      toast({
-        title: "Success",
-        description: "Event deleted successfully"
+      // Use secure-delete function with proper authorization checks
+      const authData = JSON.parse(localStorage.getItem('sb-qgttbaibhmzbmknjlghj-auth-token') || '{}');
+      const response = await fetch('https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/secure-delete', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authData.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ event_id: id })
       });
+      
+      const result = await response.json();
+      
+      if (result.success && result.deletedRows > 0) {
+        await fetchData();
+        toast({ title: "Success", description: "Event deleted successfully" });
+      } else {
+        throw new Error(result.message || 'Delete failed');
+      }
     } catch (error) {
       console.error('Error deleting event:', error);
       toast({
         title: "Error",
-        description: "Failed to delete event",
+        description: `Failed to delete event: ${error.message}`,
         variant: "destructive"
       });
     }
+    setPendingAction(null);
   };
 
   const handleDeletePromo = async (id: string) => {
     try {
-      const { error } = await supabase.from('promos').delete().eq('id', id);
-      if (error) throw error;
-      
-      setPromos(promos.filter(promo => promo.id !== id));
-      toast({
-        title: "Success",
-        description: "Promo deleted successfully"
+      // Use secure-delete function with proper authorization checks
+      const authData = JSON.parse(localStorage.getItem('sb-qgttbaibhmzbmknjlghj-auth-token') || '{}');
+      const response = await fetch('https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/secure-delete', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authData.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ promo_id: id })
       });
+      
+      const result = await response.json();
+      
+      if (result.success && result.deletedRows > 0) {
+        await fetchData();
+        toast({ title: "Success", description: "Promo deleted successfully" });
+      } else {
+        throw new Error(result.message || 'Delete failed');
+      }
     } catch (error) {
       console.error('Error deleting promo:', error);
       toast({
         title: "Error",
-        description: "Failed to delete promo",
+        description: `Failed to delete promo: ${error.message}`,
         variant: "destructive"
       });
     }
+    setPendingAction(null);
+  };
+
+  const handleDeleteUser = async (id: string) => {
+    try {
+      // Use secure-delete function with proper authorization checks
+      const authData = JSON.parse(localStorage.getItem('sb-qgttbaibhmzbmknjlghj-auth-token') || '{}');
+      const response = await fetch('https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/secure-delete', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authData.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_id: id })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success && result.deletedRows > 0) {
+        await fetchData();
+        toast({ title: "Success", description: "User deleted successfully" });
+      } else {
+        throw new Error(result.message || result.error || 'Delete failed');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Error",
+        description: `Failed to delete user: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+    setPendingAction(null);
   };
 
   const handleVerifyUser = async (userId: string) => {
@@ -144,13 +273,31 @@ export const AdminDashboard = () => {
 
   const handleSetAdmin = async (userId: string, isAdmin: boolean) => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_admin: isAdmin })
-        .eq('id', userId);
+      console.log('Attempting to set admin status:', { userId, isAdmin });
       
-      if (error) throw error;
+      // Use admin-role-update function with proper authorization checks
+      const authData = JSON.parse(localStorage.getItem('sb-qgttbaibhmzbmknjlghj-auth-token') || '{}');
+      const response = await fetch('https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/admin-role-update', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authData.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          target_user_id: userId,
+          is_admin: isAdmin 
+        })
+      });
       
+      const result = await response.json();
+      
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || result.message || 'Admin role update failed');
+      }
+      
+      console.log('Admin role update successful:', result);
+      
+      // Update local state
       setUsers(users.map(user => 
         user.id === userId ? { ...user, is_admin: isAdmin } : user
       ));
@@ -163,21 +310,40 @@ export const AdminDashboard = () => {
       console.error('Error setting admin:', error);
       toast({
         title: "Error",
-        description: "Failed to update user role.",
+        description: `Failed to update user role: ${error.message || error}`,
         variant: "destructive"
       });
     }
+    setPendingAction(null);
   };
 
   const handleSetSuperAdmin = async (userId: string, isSuperAdmin: boolean) => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_super_admin: isSuperAdmin })
-        .eq('id', userId);
+      console.log('Attempting to set super admin status:', { userId, isSuperAdmin });
       
-      if (error) throw error;
+      // Use admin-role-update function with proper authorization checks
+      const authData = JSON.parse(localStorage.getItem('sb-qgttbaibhmzbmknjlghj-auth-token') || '{}');
+      const response = await fetch('https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/admin-role-update', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authData.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          target_user_id: userId,
+          is_super_admin: isSuperAdmin 
+        })
+      });
       
+      const result = await response.json();
+      
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || result.message || 'Super admin role update failed');
+      }
+      
+      console.log('Super admin role update successful:', result);
+      
+      // Update local state
       setUsers(users.map(user => 
         user.id === userId ? { ...user, is_super_admin: isSuperAdmin } : user
       ));
@@ -190,11 +356,71 @@ export const AdminDashboard = () => {
       console.error('Error setting super admin:', error);
       toast({
         title: "Error",
-        description: "Failed to update user role.",
+        description: `Failed to update user role: ${error.message || error}`,
         variant: "destructive"
       });
     }
+    setPendingAction(null);
   };
+
+  const confirmAction = () => {
+    if (!pendingAction) return;
+    
+    switch (pendingAction.type) {
+      case 'deleteEvent':
+        handleDeleteEvent(pendingAction.id);
+        break;
+      case 'deletePromo':
+        handleDeletePromo(pendingAction.id);
+        break;
+      case 'deleteUser':
+        handleDeleteUser(pendingAction.id);
+        break;
+      case 'makeAdmin':
+        handleSetAdmin(pendingAction.id, !pendingAction.isCurrentlyAdmin);
+        break;
+      case 'makeSuperAdmin':
+        handleSetSuperAdmin(pendingAction.id, !pendingAction.isCurrentlySuperAdmin);
+        break;
+    }
+  };
+
+  const getConfirmationMessage = () => {
+    if (!pendingAction) return '';
+    
+    switch (pendingAction.type) {
+      case 'deleteEvent':
+        return `Are you sure you want to delete the event "${pendingAction.title}"?`;
+      case 'deletePromo':
+        return `Are you sure you want to delete the promo "${pendingAction.title}"?`;
+      case 'deleteUser':
+        return `Are you sure you want to delete user "${pendingAction.userName}"?`;
+      case 'makeAdmin':
+        return pendingAction.isCurrentlyAdmin 
+          ? `Are you sure you want to revoke admin privileges from "${pendingAction.userName}"?`
+          : `Are you sure you want to make "${pendingAction.userName}" an Admin?`;
+      case 'makeSuperAdmin':
+        return pendingAction.isCurrentlySuperAdmin
+          ? `Are you sure you want to revoke super admin privileges from "${pendingAction.userName}"?`
+          : `Are you sure you want to make "${pendingAction.userName}" a Super Admin?`;
+      default:
+        return 'Are you sure you want to perform this action?';
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background pt-20 px-4">
+        <div className="container mx-auto">
+          <div className="text-center">Verifying permissions...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -282,16 +508,24 @@ export const AdminDashboard = () => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => navigate(`/event/${event.id}`)}
+                        >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => navigate(`/edit-event/${event.id}`)}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button 
                           variant="destructive" 
                           size="sm"
-                          onClick={() => handleDeleteEvent(event.id)}
+                          onClick={() => setPendingAction({ type: 'deleteEvent', id: event.id, title: event.title })}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -321,16 +555,24 @@ export const AdminDashboard = () => {
                         <Badge className="bg-neon-pink text-black">{promo.discount_text}</Badge>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => navigate(`/promo/${promo.id}`)}
+                        >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => navigate(`/edit-promo/${promo.id}`)}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button 
                           variant="destructive" 
                           size="sm"
-                          onClick={() => handleDeletePromo(promo.id)}
+                          onClick={() => setPendingAction({ type: 'deletePromo', id: promo.id, title: promo.title })}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -391,19 +633,46 @@ export const AdminDashboard = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleSetAdmin(user.id, !user.is_admin)}
+                          onClick={() => setPendingAction({ 
+                            type: 'makeAdmin', 
+                            id: user.id, 
+                            userName: user.display_name || 'Unnamed User',
+                            isCurrentlyAdmin: user.is_admin 
+                          })}
                         >
                           {user.is_admin ? 'Revoke Admin' : 'Make Admin'}
                         </Button>
+                        {isSuperAdmin && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setPendingAction({ 
+                              type: 'makeSuperAdmin', 
+                              id: user.id, 
+                              userName: user.display_name || 'Unnamed User',
+                              isCurrentlySuperAdmin: user.is_super_admin 
+                            })}
+                          >
+                            {user.is_super_admin ? 'Revoke Super Admin' : 'Make Super Admin'}
+                          </Button>
+                        )}
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleSetSuperAdmin(user.id, !user.is_super_admin)}
+                          onClick={() => navigate(`/admin/user/${user.id}`)}
                         >
-                          {user.is_super_admin ? 'Revoke Super Admin' : 'Make Super Admin'}
-                        </Button>
-                        <Button variant="outline" size="sm">
                           <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => setPendingAction({ 
+                            type: 'deleteUser', 
+                            id: user.id, 
+                            userName: user.display_name || 'Unnamed User' 
+                          })}
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
@@ -413,6 +682,23 @@ export const AdminDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Confirmation Dialog */}
+        <AlertDialog open={!!pendingAction} onOpenChange={(open) => !open && setPendingAction(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Action</AlertDialogTitle>
+              <AlertDialogDescription>
+                {getConfirmationMessage()}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setPendingAction(null)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmAction}>Confirm</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
       </div>
     </div>
   );

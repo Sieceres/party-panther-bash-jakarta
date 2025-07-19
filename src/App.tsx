@@ -32,6 +32,7 @@ const App = () => (
           <Route path="/edit-event/:id" element={<EditEventPage />} />
           <Route path="/edit-promo/:id" element={<EditPromoPage />} />
           <Route path="/profile" element={<UserProfile />} /> {/* New route for user profile */}
+          <Route path="/admin/user/:userId" element={<UserProfile />} /> {/* Route for viewing specific users from admin */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

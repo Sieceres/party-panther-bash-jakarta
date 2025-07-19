@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,9 +53,10 @@ export const UserProfile = () => {
   });
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { userId } = useParams();
+  const isAdminView = !!userId;
 
   const fetchUserProfile = useCallback(async () => {
-    // ... (fetchUserProfile remains the same)
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -70,11 +71,12 @@ export const UserProfile = () => {
 
       setUser(user);
 
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*, is_admin, is_super_admin')
-        .eq('user_id', user.id)
-        .single();
+      // If this is admin view, fetch the specific user's profile by userId
+      const profileQuery = isAdminView 
+        ? supabase.from('profiles').select('*, is_admin, is_super_admin').eq('id', userId).single()
+        : supabase.from('profiles').select('*, is_admin, is_super_admin').eq('user_id', user.id).single();
+
+      const { data: profile, error } = await profileQuery;
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
@@ -95,29 +97,30 @@ export const UserProfile = () => {
         });
       }
 
-      // Fetch events created by the user
+      // Fetch events created by the user (or viewed user in admin mode)
+      const targetUserId = isAdminView ? profile?.user_id : user.id;
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
         .select('*')
-        .eq('created_by', user.id)
+        .eq('created_by', targetUserId)
         .order('created_at', { ascending: false });
 
       if (eventsError) {
         console.error('Error fetching user events:', eventsError);
         toast({
           title: "Error",
-          description: "Failed to load your created events.",
+          description: isAdminView ? "Failed to load user's created events." : "Failed to load your created events.",
           variant: "destructive",
         });
       } else {
         setUserEvents(eventsData || []);
       }
 
-      // Fetch promos created by the user
+      // Fetch promos created by the user (or viewed user in admin mode)
       const { data: promosData, error: promosError } = await supabase
         .from('promos')
         .select('*')
-        .eq('created_by', user.id)
+        .eq('created_by', targetUserId)
         .order('created_at', { ascending: false });
 
       if (promosError) {
@@ -141,7 +144,7 @@ export const UserProfile = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, isAdminView, userId]);
 
   useEffect(() => {
     fetchUserProfile();
@@ -211,13 +214,12 @@ export const UserProfile = () => {
 
   const handleDeleteEvent = async (eventId: string) => {
     try {
-      const { error } = await supabase.functions.invoke('delete-event', {
-        body: { event_id: eventId },
+      const { data, error } = await supabase.functions.invoke('admin-delete', {
+        body: { type: 'event', id: eventId },
       });
-
-      if (error) {
-        throw new Error(`Function invocation failed: ${error.message}`);
-      }
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       toast({
         title: "Success",
@@ -239,13 +241,12 @@ export const UserProfile = () => {
 
   const handleDeletePromo = async (promoId: string) => {
     try {
-      const { error } = await supabase.functions.invoke('delete-promo', {
-        body: { promo_id: promoId },
+      const { data, error } = await supabase.functions.invoke('admin-delete', {
+        body: { type: 'promo', id: promoId },
       });
-
-      if (error) {
-        throw new Error(`Function invocation failed: ${error.message}`);
-      }
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       toast({
         title: "Success",
@@ -303,11 +304,11 @@ export const UserProfile = () => {
       
       <Button
         variant="ghost"
-        onClick={() => navigate('/')}
+        onClick={() => navigate(isAdminView ? '/admin' : '/')}
         className="mb-6"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Home
+        {isAdminView ? 'Back to Admin Dashboard' : 'Back to Home'}
       </Button>
 
       {/* Profile Header */}
@@ -411,17 +412,31 @@ export const UserProfile = () => {
                   </>
                 ) : (
                   <>
-                    <Button 
-                      onClick={() => setIsEditing(true)}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Profile
-                    </Button>
-                    <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                      Share Profile
-                    </Button>
-                    {(profile?.is_admin || profile?.is_super_admin) && (
+                    {!isAdminView && (
+                      <>
+                        <Button 
+                          onClick={() => setIsEditing(true)}
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit Profile
+                        </Button>
+                        <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                          Share Profile
+                        </Button>
+                      </>
+                    )}
+                    {isAdminView && (
+                      <Button
+                        variant="outline"
+                        className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                        onClick={() => navigate('/admin')}
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Admin
+                      </Button>
+                    )}
+                    {!isAdminView && (profile?.is_admin || profile?.is_super_admin) && (
                       <Button
                         variant="outline"
                         className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
