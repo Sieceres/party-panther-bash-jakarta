@@ -194,46 +194,61 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age: number | null
           avatar_url: string | null
           bio: string | null
           business_name: string | null
           created_at: string
           display_name: string | null
+          gender: string | null
           id: string
+          instagram: string | null
           is_admin: boolean
           is_super_admin: boolean
           is_verified: boolean | null
+          party_style: string | null
           profile_type: string | null
           updated_at: string
           user_id: string
+          whatsapp: string | null
         }
         Insert: {
+          age?: number | null
           avatar_url?: string | null
           bio?: string | null
           business_name?: string | null
           created_at?: string
           display_name?: string | null
+          gender?: string | null
           id?: string
+          instagram?: string | null
           is_admin?: boolean
           is_super_admin?: boolean
           is_verified?: boolean | null
+          party_style?: string | null
           profile_type?: string | null
           updated_at?: string
           user_id: string
+          whatsapp?: string | null
         }
         Update: {
+          age?: number | null
           avatar_url?: string | null
           bio?: string | null
           business_name?: string | null
           created_at?: string
           display_name?: string | null
+          gender?: string | null
           id?: string
+          instagram?: string | null
           is_admin?: boolean
           is_super_admin?: boolean
           is_verified?: boolean | null
+          party_style?: string | null
           profile_type?: string | null
           updated_at?: string
           user_id?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }

@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift } from "lucide-react";
+import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -65,12 +65,15 @@ export const UserProfile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { userId } = useParams();
-  const isAdminView = !!userId;
+  const isAdminView = window.location.pathname.includes('/admin/user/');
+  const isSharedProfile = window.location.pathname.includes('/profile/') && !!userId;
 
   const fetchUserProfile = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      
+      // For shared profiles, allow unauthenticated access
+      if (!user && !isSharedProfile) {
         toast({
           title: "Not authenticated",
           description: "Please sign in to view your profile.",
@@ -82,10 +85,22 @@ export const UserProfile = () => {
 
       setUser(user);
 
-      // If this is admin view, fetch the specific user's profile by userId
-      const profileQuery = isAdminView 
-        ? supabase.from('profiles').select('*, is_admin, is_super_admin').eq('id', userId).single()
-        : supabase.from('profiles').select('*, is_admin, is_super_admin').eq('user_id', user.id).single();
+      // Determine which profile to fetch based on the route
+      let profileQuery;
+      if (isAdminView) {
+        // Admin viewing a user: /admin/user/:userId - userId is the profile ID
+        profileQuery = supabase.from('profiles').select('*, is_admin, is_super_admin').eq('id', userId).single();
+      } else if (isSharedProfile) {
+        // Shared profile: /profile/:userId - userId is the user_id
+        profileQuery = supabase.from('profiles').select('*, is_admin, is_super_admin').eq('user_id', userId).single();
+      } else if (user) {
+        // Current user's own profile: /profile
+        profileQuery = supabase.from('profiles').select('*, is_admin, is_super_admin').eq('user_id', user.id).single();
+      } else {
+        // No user and not a shared profile - should not happen due to earlier check
+        setLoading(false);
+        return;
+      }
 
       const { data: profile, error } = await profileQuery;
 
@@ -100,6 +115,8 @@ export const UserProfile = () => {
       }
 
       if (profile) {
+        console.log('Profile loaded:', profile);
+        console.log('Gender from profile:', profile.gender);
         setProfile(profile);
         setEditForm({
           display_name: profile.display_name || '',
@@ -113,41 +130,44 @@ export const UserProfile = () => {
         });
       }
 
-      // Fetch events created by the user (or viewed user in admin mode)
-      const targetUserId = isAdminView ? profile?.user_id : user.id;
-      const { data: eventsData, error: eventsError } = await supabase
-        .from('events')
-        .select('*')
-        .eq('created_by', targetUserId)
-        .order('created_at', { ascending: false });
+      // Fetch events created by the user
+      const targetUserId = (isAdminView || isSharedProfile) ? profile?.user_id : user?.id;
+      
+      if (targetUserId) {
+        const { data: eventsData, error: eventsError } = await supabase
+          .from('events')
+          .select('*')
+          .eq('created_by', targetUserId)
+          .order('created_at', { ascending: false });
 
-      if (eventsError) {
-        console.error('Error fetching user events:', eventsError);
-        toast({
-          title: "Error",
-          description: isAdminView ? "Failed to load user's created events." : "Failed to load your created events.",
-          variant: "destructive",
-        });
-      } else {
-        setUserEvents(eventsData || []);
-      }
+        if (eventsError) {
+          console.error('Error fetching user events:', eventsError);
+          toast({
+            title: "Error",
+            description: (isAdminView || isSharedProfile) ? "Failed to load user's created events." : "Failed to load your created events.",
+            variant: "destructive",
+          });
+        } else {
+          setUserEvents(eventsData || []);
+        }
 
-      // Fetch promos created by the user (or viewed user in admin mode)
-      const { data: promosData, error: promosError } = await supabase
-        .from('promos')
-        .select('*')
-        .eq('created_by', targetUserId)
-        .order('created_at', { ascending: false });
+        // Fetch promos created by the user
+        const { data: promosData, error: promosError } = await supabase
+          .from('promos')
+          .select('*')
+          .eq('created_by', targetUserId)
+          .order('created_at', { ascending: false });
 
-      if (promosError) {
-        console.error('Error fetching user promos:', promosError);
-        toast({
-          title: "Error",
-          description: "Failed to load your created promos.",
-          variant: "destructive",
-        });
-      } else {
-        setUserPromos(promosData || []);
+        if (promosError) {
+          console.error('Error fetching user promos:', promosError);
+          toast({
+            title: "Error",
+            description: (isAdminView || isSharedProfile) ? "Failed to load user's created promos." : "Failed to load your created promos.",
+            variant: "destructive",
+          });
+        } else {
+          setUserPromos(promosData || []);
+        }
       }
 
     } catch (error) {
@@ -160,7 +180,7 @@ export const UserProfile = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast, isAdminView, userId]);
+  }, [toast, isAdminView, isSharedProfile, userId]);
 
   useEffect(() => {
     fetchUserProfile();
@@ -184,6 +204,9 @@ export const UserProfile = () => {
         party_style: editForm.party_style || null,
         updated_at: new Date().toISOString()
       };
+
+      console.log('Saving profile data:', profileData);
+      console.log('Gender value being saved:', editForm.gender);
 
       const { error } = await supabase
         .from('profiles')
@@ -227,10 +250,39 @@ export const UserProfile = () => {
       setEditForm({
         display_name: profile.display_name || '',
         bio: profile.bio || '',
-        avatar_url: profile.avatar_url || ''
+        avatar_url: profile.avatar_url || '',
+        gender: profile.gender || '',
+        age: profile.age?.toString() || '',
+        instagram: profile.instagram || '',
+        whatsapp: profile.whatsapp || '',
+        party_style: profile.party_style || ''
       });
     }
     setIsEditing(false);
+  };
+
+  const handleShareProfile = async () => {
+    try {
+      const profileUrl = isAdminView 
+        ? `${window.location.origin}/profile/${profile?.user_id || userId}`
+        : `${window.location.origin}/profile/${user?.id}`;
+      
+      await navigator.clipboard.writeText(profileUrl);
+      
+      toast({
+        title: "Profile URL Copied! 🔗",
+        description: "The profile link has been copied to your clipboard and is ready to paste.",
+      });
+    } catch (error) {
+      // Fallback for browsers that don't support clipboard API
+      const fallbackUrl = isAdminView 
+        ? `${window.location.origin}/profile/${profile?.user_id || userId}`
+        : `${window.location.origin}/profile/${user?.id}`;
+      toast({
+        title: "Share Profile",
+        description: `Profile URL: ${fallbackUrl}`,
+      });
+    }
   };
 
   const handleDeleteEvent = async (eventId: string) => {
@@ -304,7 +356,8 @@ export const UserProfile = () => {
     );
   }
 
-  if (!user) {
+  // Only require authentication for non-shared profiles
+  if (!user && !isSharedProfile) {
     return (
       <div className="max-w-4xl mx-auto space-y-6">
         <Card className="bg-card border-border">
@@ -316,22 +369,11 @@ export const UserProfile = () => {
     );
   }
 
-  const displayName = profile?.display_name || user.email?.split('@')[0] || 'User';
+  const displayName = profile?.display_name || user?.email?.split('@')[0] || 'User';
   const avatarUrl = profile?.avatar_url || `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face`;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* ... (Back to Home button and Profile Header remain the same) */}
-      
-      <Button
-        variant="ghost"
-        onClick={() => navigate(isAdminView ? '/admin' : '/')}
-        className="mb-6"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        {isAdminView ? 'Back to Admin Dashboard' : 'Back to Home'}
-      </Button>
-
       {/* Profile Header */}
       <Card className="bg-card border-border">
         <CardContent className="pt-6">
@@ -377,81 +419,107 @@ export const UserProfile = () => {
                     />
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="gender">Gender (optional)</Label>
-                      <Select value={editForm.gender} onValueChange={(value) => setEditForm({ ...editForm, gender: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select gender" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="male">Male</SelectItem>
-                          <SelectItem value="female">Female</SelectItem>
-                          <SelectItem value="non-binary">Non-binary</SelectItem>
-                          <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  <div className="bg-muted/30 rounded-lg p-4 border">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      <h4 className="font-medium text-sm">Basic Info</h4>
+                      <span className="text-xs text-muted-foreground">(optional)</span>
                     </div>
-                    <div>
-                      <Label htmlFor="age">Age (optional)</Label>
-                      <Input
-                        id="age"
-                        type="number"
-                        min="18"
-                        max="100"
-                        value={editForm.age}
-                        onChange={(e) => setEditForm({ ...editForm, age: e.target.value })}
-                        placeholder="Enter your age"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="gender" className="text-sm font-medium">Gender</Label>
+                        <Select value={editForm.gender} onValueChange={(value) => setEditForm({ ...editForm, gender: value })}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="male">👨 Male</SelectItem>
+                            <SelectItem value="female">👩 Female</SelectItem>
+                            <SelectItem value="non-binary">🌈 Non-binary</SelectItem>
+                            <SelectItem value="prefer-not-to-say">🤐 Prefer not to say</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="age" className="text-sm font-medium">Age</Label>
+                        <Input
+                          id="age"
+                          type="number"
+                          min="18"
+                          max="100"
+                          value={editForm.age}
+                          onChange={(e) => setEditForm({ ...editForm, age: e.target.value })}
+                          placeholder="18-100"
+                          className="mt-1"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="party_style">Party Style (optional)</Label>
+                  <div className="bg-gradient-to-r from-primary/5 to-purple-600/5 rounded-lg p-4 border border-primary/20">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="text-lg">🎉</div>
+                      <Label htmlFor="party_style" className="text-base font-semibold text-primary">Party Style</Label>
+                      <span className="text-xs text-muted-foreground">(Let others know your vibe!)</span>
+                    </div>
                     <Select value={editForm.party_style} onValueChange={(value) => setEditForm({ ...editForm, party_style: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="What's your party vibe?" />
+                      <SelectTrigger className="border-primary/30 focus:border-primary">
+                        <SelectValue placeholder="🕺 What's your party vibe?" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="clubbing">Clubbing</SelectItem>
-                        <SelectItem value="rooftop-parties">Rooftop Parties</SelectItem>
-                        <SelectItem value="underground-raves">Underground Raves</SelectItem>
-                        <SelectItem value="beach-parties">Beach Parties</SelectItem>
-                        <SelectItem value="live-music">Live Music</SelectItem>
-                        <SelectItem value="cocktail-lounges">Cocktail Lounges</SelectItem>
-                        <SelectItem value="casual-hangouts">Casual Hangouts</SelectItem>
-                        <SelectItem value="vip-experiences">VIP Experiences</SelectItem>
+                        <SelectItem value="clubbing">🍸 Clubbing</SelectItem>
+                        <SelectItem value="rooftop-parties">🏙️ Rooftop Parties</SelectItem>
+                        <SelectItem value="underground-raves">🎵 Underground Raves</SelectItem>
+                        <SelectItem value="beach-parties">🏖️ Beach Parties</SelectItem>
+                        <SelectItem value="live-music">🎤 Live Music</SelectItem>
+                        <SelectItem value="cocktail-lounges">🍹 Cocktail Lounges</SelectItem>
+                        <SelectItem value="casual-hangouts">😎 Casual Hangouts</SelectItem>
+                        <SelectItem value="vip-experiences">✨ VIP Experiences</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <div className="space-y-3">
-                    <div>
-                      <Label htmlFor="instagram">Instagram Handle (optional)</Label>
-                      <Input
-                        id="instagram"
-                        value={editForm.instagram}
-                        onChange={(e) => setEditForm({ ...editForm, instagram: e.target.value })}
-                        placeholder="@yourusername"
-                      />
+                  <div className="bg-muted/20 rounded-lg p-4 border border-green-200/50">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <h4 className="font-medium text-sm">Social Connect</h4>
+                      <span className="text-xs text-muted-foreground">(Let people find you!)</span>
                     </div>
-                    <div>
-                      <Label htmlFor="whatsapp">WhatsApp Number (optional)</Label>
-                      <Input
-                        id="whatsapp"
-                        value={editForm.whatsapp}
-                        onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })}
-                        placeholder="+62 XXX XXX XXXX"
-                      />
-                    </div>
-                    {(editForm.instagram || editForm.whatsapp) && (
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                        <p className="text-sm text-amber-800">
-                          <strong>Privacy Notice:</strong> By making your Instagram or WhatsApp visible on your profile, you understand that it is visible to anyone online and that they can contact you on these platforms.
-                        </p>
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="instagram" className="text-sm font-medium flex items-center gap-2">
+                          📸 Instagram Handle
+                        </Label>
+                        <Input
+                          id="instagram"
+                          value={editForm.instagram}
+                          onChange={(e) => setEditForm({ ...editForm, instagram: e.target.value })}
+                          placeholder="@yourusername"
+                          className="mt-1"
+                        />
                       </div>
-                    )}
+                      <div>
+                        <Label htmlFor="whatsapp" className="text-sm font-medium flex items-center gap-2">
+                          💬 WhatsApp Number
+                        </Label>
+                        <Input
+                          id="whatsapp"
+                          value={editForm.whatsapp}
+                          onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })}
+                          placeholder="+62 XXX XXX XXXX"
+                          className="mt-1"
+                        />
+                      </div>
+                      {(editForm.instagram || editForm.whatsapp) && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                          <p className="text-sm text-amber-800">
+                            <strong>🔒 Privacy Notice:</strong> By adding social links, they'll be visible to anyone viewing your profile.
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
+
 
                   <ImageUpload
                     label="Avatar"
@@ -463,71 +531,77 @@ export const UserProfile = () => {
               ) : (
                 <div>
                   <h2 className="text-3xl font-bold gradient-text">{displayName}</h2>
-                  <p className="text-lg text-muted-foreground">@{displayName.toLowerCase().replace(/\s+/g, '')}</p>
                   <p className="text-sm text-muted-foreground mt-2 max-w-md">
                     {profile?.bio || "Jakarta party enthusiast | Always looking for the next great party! 🎉"}
                   </p>
                   
                   {/* Additional Profile Info */}
-                  <div className="mt-4 space-y-2">
+                  <div className="mt-6 space-y-4">
+                    {/* Basic Info */}
                     {(profile?.gender || profile?.age) && (
-                      <div className="flex gap-4 text-sm text-muted-foreground">
-                        {profile?.gender && (
-                          <span className="capitalize">{profile.gender.replace('-', ' ')}</span>
-                        )}
-                        {profile?.age && (
-                          <span>{profile.age} years old</span>
-                        )}
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground bg-muted/30 rounded-lg p-3">
+                        <div className="w-2 h-2 rounded-full bg-primary"></div>
+                        <div className="flex gap-4">
+                          {profile?.gender && (
+                            <span className="capitalize font-medium">{profile.gender.replace('-', ' ')}</span>
+                          )}
+                          {profile?.age && (
+                            <span className="font-medium">{profile.age} years old</span>
+                          )}
+                        </div>
                       </div>
                     )}
                     
+                    {/* Party Style - Make it prominent */}
                     {profile?.party_style && (
-                      <div className="text-sm">
-                        <Badge variant="secondary" className="bg-primary/10 text-primary">
-                          {profile.party_style.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                        </Badge>
+                      <div className="bg-gradient-to-r from-primary/10 to-purple-600/10 rounded-lg p-4 border border-primary/20">
+                        <div className="flex items-center gap-3">
+                          <div className="text-lg">🎉</div>
+                          <div>
+                            <p className="text-xs text-muted-foreground font-medium mb-1">PARTY STYLE</p>
+                            <Badge variant="default" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm px-3 py-1">
+                              {profile.party_style.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
                     )}
                     
+                    {/* Social Links */}
                     {(profile?.instagram || profile?.whatsapp) && (
-                      <div className="flex gap-3 text-sm">
-                        {profile?.instagram && (
-                          <a 
-                            href={`https://instagram.com/${profile.instagram.replace('@', '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:text-primary/80 transition-colors"
-                          >
-                            📸 {profile.instagram}
-                          </a>
-                        )}
-                        {profile?.whatsapp && (
-                          <a 
-                            href={`https://wa.me/${profile.whatsapp.replace(/\D/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:text-primary/80 transition-colors"
-                          >
-                            💬 WhatsApp
-                          </a>
-                        )}
+                      <div className="bg-muted/30 rounded-lg p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                          <p className="text-xs text-muted-foreground font-medium">CONNECT</p>
+                        </div>
+                        <div className="flex gap-3">
+                          {profile?.instagram && (
+                            <a 
+                              href={`https://instagram.com/${profile.instagram.replace('@', '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-2 rounded-full text-sm font-medium hover:shadow-lg transition-all duration-200 hover:scale-105"
+                            >
+                              📸 Instagram
+                            </a>
+                          )}
+                          {profile?.whatsapp && (
+                            <a 
+                              href={`https://wa.me/${profile.whatsapp.replace(/\D/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 bg-green-500 text-white px-3 py-2 rounded-full text-sm font-medium hover:shadow-lg transition-all duration-200 hover:scale-105"
+                            >
+                              💬 WhatsApp
+                            </a>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* Stats */}
-              <div className="flex justify-center md:justify-start space-x-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-neon-blue">12</div>
-                  <div className="text-xs text-muted-foreground">Events Attended</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-neon-cyan">3</div>
-                  <div className="text-xs text-muted-foreground">Events Created</div>
-                </div>
-              </div>
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
@@ -553,7 +627,7 @@ export const UserProfile = () => {
                   </>
                 ) : (
                   <>
-                    {!isAdminView && (
+                    {!isAdminView && !isSharedProfile && user && (
                       <>
                         <Button 
                           onClick={() => setIsEditing(true)}
@@ -562,7 +636,12 @@ export const UserProfile = () => {
                           <Edit className="w-4 h-4 mr-2" />
                           Edit Profile
                         </Button>
-                        <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                        <Button 
+                          variant="outline" 
+                          onClick={handleShareProfile}
+                          className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                        >
+                          <Share2 className="w-4 h-4 mr-2" />
                           Share Profile
                         </Button>
                       </>
@@ -725,24 +804,6 @@ export const UserProfile = () => {
 
       {/* ... (Badges, User Info, Recent Activity cards remain the same) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Badges */}
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <h3 className="font-semibold flex items-center space-x-2">
-              <Star className="w-5 h-5 text-primary" />
-              <span>Badges</span>
-            </h3>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {["Party Animal", "Event Creator", "Social Butterfly", "Night Owl"].map((badge) => (
-                <Badge key={badge} className="bg-primary/20 text-primary border-primary/30">
-                  {badge}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* User Info */}
         <Card className="bg-card border-border">

@@ -91,7 +91,7 @@ serve(async (req) => {
     )
 
     // Prepare the update object
-    const updateData: any = {}
+    const updateData: { is_admin?: boolean; is_super_admin?: boolean } = {}
     if (is_admin !== undefined) updateData.is_admin = is_admin
     if (is_super_admin !== undefined) updateData.is_super_admin = is_super_admin
 

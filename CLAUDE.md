@@ -112,7 +112,7 @@ If admin operations fail with 403 errors, verify:
 
 - This is a Lovable project (lovable.dev) with automatic deployment
 - Supabase project ID: qgttbaibhmzbmknjlghj
-- **Development server**: `npm run dev` should ALWAYS be running during development
+- **Development server**: `npm run dev` is ALWAYS running during development, no need to call it again
 - **Supabase CLI**: Always use `npx supabase [command]` for all Supabase operations
 - All custom routes must be added above the catch-all "*" route in App.tsx
 - The application supports both events and promotional offers with different data models
