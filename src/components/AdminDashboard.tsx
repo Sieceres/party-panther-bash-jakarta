@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft } from "lucide-react";
+import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -433,21 +434,23 @@ export const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-20 px-4">
-      <div className="container mx-auto space-y-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold gradient-text mb-2">Admin Dashboard</h1>
-            <p className="text-muted-foreground">Manage events, promos, and users</p>
+    <>
+      <Header activeSection="profile" onSectionChange={() => navigate('/profile')} />
+      <div className="min-h-screen bg-background pt-20 px-4">
+        <div className="container mx-auto space-y-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold gradient-text mb-2">Admin Dashboard</h1>
+              <p className="text-muted-foreground">Manage events, promos, and users</p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/profile')}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Profile
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => navigate('/profile')}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Profile
-          </Button>
-        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -699,7 +702,8 @@ export const AdminDashboard = () => {
           </AlertDialogContent>
         </AlertDialog>
 
+        </div>
       </div>
-    </div>
+    </>
   );
 };

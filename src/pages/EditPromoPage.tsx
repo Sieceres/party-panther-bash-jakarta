@@ -25,9 +25,6 @@ export const EditPromoPage = () => {
     discount: "",
     venue: "",
     address: "",
-    category: "",
-    originalPrice: "",
-    discountedPrice: "",
     dayOfWeek: "",
     area: "",
     drinkType: "",
@@ -80,9 +77,6 @@ export const EditPromoPage = () => {
             discount: promo.discount_text || "",
             venue: promo.venue_name || "",
             address: promo.venue_address || "",
-            category: promo.category || "",
-            originalPrice: promo.original_price_amount ? promo.original_price_amount.toString() : "",
-            discountedPrice: promo.discounted_price_amount ? promo.discounted_price_amount.toString() : "",
             dayOfWeek: promo.day_of_week || "",
             area: promo.area || "",
             drinkType: promo.drink_type || "",
@@ -145,10 +139,6 @@ export const EditPromoPage = () => {
         venue_address: location?.address || formData.address,
         venue_latitude: location?.lat || null,
         venue_longitude: location?.lng || null,
-        category: formData.category,
-        original_price_amount: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
-        discounted_price_amount: formData.discountedPrice ? parseFloat(formData.discountedPrice) : null,
-        price_currency: "IDR",
         valid_until: validUntilDate?.toISOString() || null,
         day_of_week: formData.dayOfWeek,
         area: formData.area,
@@ -243,28 +233,11 @@ export const EditPromoPage = () => {
                 label="Venue Location (Optional)"
               />
 
-              <PromoPricing
-                originalPrice={formData.originalPrice}
-                discountedPrice={formData.discountedPrice}
-                onOriginalPriceChange={(value) => handleInputChange('originalPrice', value)}
-                onDiscountedPriceChange={(value) => handleInputChange('discountedPrice', value)}
-              />
-              {/* Debug: Show current form data */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="p-4 bg-gray-100 text-sm">
-                  <strong>Debug - Form Data:</strong><br/>
-                  Original Price: "{formData.originalPrice}"<br/>
-                  Discounted Price: "{formData.discountedPrice}"
-                </div>
-              )}
-
               <PromoDetails
-                category={formData.category}
                 dayOfWeek={formData.dayOfWeek}
                 area={formData.area}
                 drinkType={formData.drinkType}
                 validUntilDate={validUntilDate}
-                onCategoryChange={(value) => handleInputChange('category', value)}
                 onDayOfWeekChange={(value) => handleInputChange('dayOfWeek', value)}
                 onAreaChange={(value) => handleInputChange('area', value)}
                 onDrinkTypeChange={(value) => handleInputChange('drinkType', value)}

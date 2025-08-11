@@ -19,6 +19,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2 } from "lucide-react";
+import { Header } from "./Header";
+import { ReportDialog } from "./ReportDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -373,7 +375,9 @@ export const UserProfile = () => {
   const avatarUrl = profile?.avatar_url || `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face`;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <>
+      <Header activeSection="profile" onSectionChange={() => navigate('/?section=profile')} />
+      <div className="max-w-4xl mx-auto space-y-6 pt-20 px-4">
       {/* Profile Header */}
       <Card className="bg-card border-border">
         <CardContent className="pt-6">
@@ -852,6 +856,18 @@ export const UserProfile = () => {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Report Option for Shared Profiles */}
+      {isSharedProfile && profile && (
+        <div className="fixed bottom-4 right-4">
+          <ReportDialog
+            type="profile"
+            targetId={profile.id}
+            targetTitle={profile.display_name || 'User Profile'}
+          />
+        </div>
+      )}
     </div>
+    </>
   );
 };

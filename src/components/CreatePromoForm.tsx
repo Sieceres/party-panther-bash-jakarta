@@ -22,13 +22,10 @@ export const CreatePromoForm = () => {
     discount: "",
     venue: "",
     address: "",
-    category: "",
     promoType: "",
-    originalPrice: "",
-    discountedPrice: "",
     dayOfWeek: "",
     area: "",
-    drinkType: "",
+    drinkType: "Other",
     image: ""
   });
   const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
@@ -49,7 +46,6 @@ export const CreatePromoForm = () => {
     if (!formData.discount.trim()) errors.push("Discount text is required");
     if (!formData.venue.trim()) errors.push("Venue name is required");
     if (!formData.promoType) errors.push("Promo type is required");
-    if (!formData.category.trim()) errors.push("Category is required");
     if (!validUntilDate) errors.push("Valid until date is required");
     
     return errors;
@@ -61,7 +57,6 @@ export const CreatePromoForm = () => {
            formData.discount.trim() && 
            formData.venue.trim() && 
            formData.promoType && 
-           formData.category.trim() && 
            validUntilDate;
   };
 
@@ -102,10 +97,7 @@ export const CreatePromoForm = () => {
         venue_address: formData.address,
         venue_latitude: location?.lat,
         venue_longitude: location?.lng,
-        category: formData.category,
         promo_type: formData.promoType,
-        original_price_amount: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
-        discounted_price_amount: formData.discountedPrice ? parseFloat(formData.discountedPrice) : null,
         price_currency: "IDR",
         valid_until: validUntilDate?.toISOString(),
         day_of_week: formData.dayOfWeek,
@@ -129,13 +121,10 @@ export const CreatePromoForm = () => {
         discount: "",
         venue: "",
         address: "",
-        category: "",
         promoType: "",
-        originalPrice: "",
-        discountedPrice: "",
         dayOfWeek: "",
         area: "",
-        drinkType: "",
+        drinkType: "Other",
         image: ""
       });
       setValidUntilDate(undefined);
@@ -188,16 +177,8 @@ export const CreatePromoForm = () => {
               onLocationSelect={setLocation}
             />
 
-            <PromoPricing
-              originalPrice={formData.originalPrice}
-              discountedPrice={formData.discountedPrice}
-              onOriginalPriceChange={(value) => handleInputChange("originalPrice", value)}
-              onDiscountedPriceChange={(value) => handleInputChange("discountedPrice", value)}
-            />
-
             <PromoDetails
               validUntilDate={validUntilDate}
-              category={formData.category}
               promoType={formData.promoType}
               dayOfWeek={formData.dayOfWeek}
               area={formData.area}
@@ -208,7 +189,6 @@ export const CreatePromoForm = () => {
                   setFormErrors([]);
                 }
               }}
-              onCategoryChange={(value) => handleInputChange("category", value)}
               onPromoTypeChange={(value) => handleInputChange("promoType", value)}
               onDayOfWeekChange={(value) => handleInputChange("dayOfWeek", value)}
               onAreaChange={(value) => handleInputChange("area", value)}

@@ -10,14 +10,12 @@ import { cn } from "@/lib/utils";
 
 interface PromoDetailsProps {
   validUntilDate: Date | undefined;
-  category: string;
-  promoType: string;
+  promoType?: string;
   dayOfWeek: string;
   area: string;
   drinkType: string;
   onValidUntilChange: (date: Date | undefined) => void;
-  onCategoryChange: (category: string) => void;
-  onPromoTypeChange: (type: string) => void;
+  onPromoTypeChange?: (type: string) => void;
   onDayOfWeekChange: (day: string) => void;
   onAreaChange: (area: string) => void;
   onDrinkTypeChange: (type: string) => void;
@@ -25,13 +23,11 @@ interface PromoDetailsProps {
 
 export const PromoDetails = ({ 
   validUntilDate, 
-  category, 
   promoType,
   dayOfWeek, 
   area, 
   drinkType,
   onValidUntilChange, 
-  onCategoryChange, 
   onPromoTypeChange,
   onDayOfWeekChange, 
   onAreaChange, 
@@ -39,59 +35,49 @@ export const PromoDetails = ({
 }: PromoDetailsProps) => {
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Valid Until *</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !validUntilDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {validUntilDate ? format(validUntilDate, "dd/MM/yyyy") : "Pick a date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={validUntilDate}
-                onSelect={onValidUntilChange}
-                initialFocus
-                className="pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="category">Category *</Label>
-          <Input
-            id="category"
-            placeholder="Drinks, Food, Entry..."
-            value={category}
-            onChange={(e) => onCategoryChange(e.target.value)}
-            required
-          />
-        </div>
+      <div className="space-y-2">
+        <Label>Valid Until *</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !validUntilDate && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {validUntilDate ? format(validUntilDate, "dd/MM/yyyy") : "Pick a date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={validUntilDate}
+              onSelect={onValidUntilChange}
+              initialFocus
+              className="pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="promoType">Promo Type *</Label>
-        <Select value={promoType} onValueChange={onPromoTypeChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select promo type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Free Flow">Free Flow</SelectItem>
-            <SelectItem value="Ladies Night">Ladies Night</SelectItem>
-            <SelectItem value="Bottle Promo">Bottle Promo</SelectItem>
-            <SelectItem value="Other">Other</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {promoType !== undefined && onPromoTypeChange && (
+        <div className="space-y-2">
+          <Label htmlFor="promoType">Promo Type *</Label>
+          <Select value={promoType} onValueChange={onPromoTypeChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select promo type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Free Flow">Free Flow</SelectItem>
+              <SelectItem value="Ladies Night">Ladies Night</SelectItem>
+              <SelectItem value="Bottle Promo">Bottle Promo</SelectItem>
+              <SelectItem value="Other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">

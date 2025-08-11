@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Calendar, MapPin, Users, Clock, ArrowLeft, Star, Share2 } from "lucide-react";
 import { GoogleMap } from "./GoogleMap";
+import { ReportDialog } from "./ReportDialog";
+import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -202,16 +204,18 @@ export const EventDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-20 px-4">
-      <div className="container mx-auto max-w-4xl">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/?section=events')}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Events
-        </Button>
+    <>
+      <Header activeSection="events" onSectionChange={() => navigate('/?section=events')} />
+      <div className="min-h-screen bg-background pt-20 px-4">
+        <div className="container mx-auto max-w-4xl">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/?section=events')}
+            className="mb-6"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Events
+          </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
@@ -330,11 +334,18 @@ export const EventDetailPage = () => {
                   <Share2 className="w-4 h-4 mr-2" />
                   Share Event
                 </Button>
+                
+                <ReportDialog
+                  type="event"
+                  targetId={event.id}
+                  targetTitle={event.title}
+                />
               </CardContent>
             </Card>
           </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
