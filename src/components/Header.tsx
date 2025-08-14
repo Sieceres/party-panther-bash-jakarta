@@ -76,7 +76,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3" onClick={() => onSectionChange('home')}>
             <div className="w-10 h-10 rounded-full party-gradient flex items-center justify-center p-1">
-              <img src="/lovable-uploads/8f80684f-f939-4964-b2f2-647abf8f8b00.png" alt="Party Panther Logo" className="w-full h-full object-contain" />
+              <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-2xl font-bold gradient-text">Party Panther</h1>
           </Link>
