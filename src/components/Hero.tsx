@@ -43,8 +43,8 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         {/* Main Title */}
         <div className="space-y-4">
           <div className="flex items-center justify-center space-x-4 mb-6">
-            <div className="w-20 h-20 rounded-full party-gradient flex items-center justify-center animate-glow">
-              <span className="text-5xl">🐾</span>
+            <div className="w-20 h-20 rounded-full party-gradient flex items-center justify-center animate-glow p-2">
+              <img src="/lovable-uploads/8f80684f-f939-4964-b2f2-647abf8f8b00.png" alt="Party Panther Logo" className="w-full h-full object-contain" />
             </div>
           </div>
           <h1 className="text-6xl md:text-8xl font-bold gradient-text mb-4 animate-slide-up">
@@ -95,12 +95,6 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
           </Button>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-muted-foreground rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-muted-foreground rounded-full mt-2 animate-pulse"></div>
-          </div>
-        </div>
       </div>
     </section>
   );
