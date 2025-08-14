@@ -44,7 +44,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         <div className="space-y-4">
           <div className="flex items-center justify-center space-x-4 mb-6">
             <div className="w-20 h-20 rounded-full party-gradient flex items-center justify-center animate-glow p-2">
-              <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="w-full h-full object-contain" />
+              <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="w-full h-full object-contain -ml-1" />
             </div>
           </div>
           <h1 className="text-6xl md:text-8xl font-bold gradient-text mb-4 animate-slide-up">
