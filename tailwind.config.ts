@@ -20,7 +20,7 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Titillium Web', 'sans-serif'],
+				sans: ['Poppins', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
