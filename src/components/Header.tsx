@@ -82,47 +82,58 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            {menuItems.filter(item => !item.hidden).map((item) => {
-              const Icon = item.icon;
-              return (
-                <Button
-                  key={item.id}
-                  variant={activeSection === item.id ? "default" : "ghost"}
-                  onClick={() => onSectionChange(item.id)}
-                  className={`flex items-center space-x-2 ${
-                    activeSection === item.id 
-                      ? "bg-primary text-primary-foreground" 
-                      : "hover:bg-accent"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </Button>
-              );
-            })}
-            
-            {/* Auth Button */}
-            {user ? (
-              <Button
-                variant="ghost"
-                onClick={handleSignOut}
-                className="flex items-center space-x-2"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
-              </Button>
-            ) : (
-              <Button
-                variant="default"
-                onClick={() => navigate('/auth')}
-                className="flex items-center space-x-2"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Sign In/Sign Up</span>
-              </Button>
-            )}
-          </nav>
+           <nav className="hidden md:flex items-center space-x-1 relative z-10">
+             {menuItems.filter(item => !item.hidden).map((item) => {
+               const Icon = item.icon;
+               return (
+                 <Button
+                   key={item.id}
+                   variant={activeSection === item.id ? "default" : "ghost"}
+                   onClick={(e) => {
+                     e.preventDefault();
+                     e.stopPropagation();
+                     onSectionChange(item.id);
+                   }}
+                   className={`flex items-center space-x-2 ${
+                     activeSection === item.id 
+                       ? "bg-primary text-primary-foreground" 
+                       : "hover:bg-accent"
+                   }`}
+                 >
+                   <Icon className="w-4 h-4" />
+                   <span>{item.label}</span>
+                 </Button>
+               );
+             })}
+             {/* Auth Button */}
+             {user ? (
+               <Button
+                 variant="ghost"
+                 onClick={(e) => {
+                   e.preventDefault();
+                   e.stopPropagation();
+                   handleSignOut();
+                 }}
+                 className="flex items-center space-x-2 relative z-10"
+               >
+                 <LogOut className="w-4 h-4" />
+                 <span>Sign Out</span>
+               </Button>
+             ) : (
+               <Button
+                 variant="default"
+                 onClick={(e) => {
+                   e.preventDefault();
+                   e.stopPropagation();
+                   navigate('/auth');
+                 }}
+                 className="flex items-center space-x-2 relative z-10"
+               >
+                 <LogIn className="w-4 h-4" />
+                 <span>Sign In/Sign Up</span>
+               </Button>
+             )}
+           </nav>
 
           {/* Mobile Menu Button */}
           <Button

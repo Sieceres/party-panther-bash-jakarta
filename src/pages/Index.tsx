@@ -205,6 +205,7 @@ const Index = () => {
             dayFilter={dayFilter}
             areaFilter={areaFilter}
             drinkTypeFilter={drinkTypeFilter}
+            loading={loading}
             onToggleCreatePromo={() => setShowCreatePromo(!showCreatePromo)}
             onClaimPromo={handleClaimPromo}
             onDayFilterChange={setDayFilter}

@@ -3,6 +3,7 @@ import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { PromoCard } from "@/components/PromoCard";
 import { CreatePromoForm } from "@/components/CreatePromoForm";
+import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filter, Star, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +18,7 @@ interface PromosSectionProps {
   dayFilter: string;
   areaFilter: string;
   drinkTypeFilter: string;
+  loading?: boolean;
   onToggleCreatePromo: () => void;
   onClaimPromo: (promoId: string) => void;
   onDayFilterChange: (value: string) => void;
@@ -30,6 +32,7 @@ export const PromosSection = ({
   dayFilter,
   areaFilter,
   drinkTypeFilter,
+  loading = false,
   onToggleCreatePromo,
   onClaimPromo,
   onDayFilterChange,
@@ -144,25 +147,31 @@ export const PromosSection = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPromos.map((promo) => (
-            <PromoCard 
-              key={promo.id} 
-              promo={{
-                ...promo,
-                discount: promo.discount_text,
-                venue: promo.venue_name,
-                validUntil: promo.valid_until,
-                image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
-                originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
-                discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
-                day: promo.day_of_week?.toLowerCase(),
-                area: promo.area?.toLowerCase(),
-                drinkType: promo.drink_type?.toLowerCase(),
-                created_by: promo.created_by
-              }}
-              onClaim={onClaimPromo} 
-            />
-          ))}
+          {loading ? (
+            <div className="col-span-full flex justify-center items-center py-20">
+              <SpinningPaws size="lg" />
+            </div>
+          ) : (
+            filteredPromos.map((promo) => (
+              <PromoCard 
+                key={promo.id} 
+                promo={{
+                  ...promo,
+                  discount: promo.discount_text,
+                  venue: promo.venue_name,
+                  validUntil: promo.valid_until,
+                  image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
+                  originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
+                  discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
+                  day: promo.day_of_week?.toLowerCase(),
+                  area: promo.area?.toLowerCase(),
+                  drinkType: promo.drink_type?.toLowerCase(),
+                  created_by: promo.created_by
+                }}
+                onClaim={onClaimPromo} 
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

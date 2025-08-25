@@ -3,8 +3,8 @@ import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/EventCard";
 import { EventForm } from "@/components/EventForm";
+import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { Calendar, Lock } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -81,9 +81,9 @@ export const EventsSection = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
-            Array.from({ length: 6 }).map((_, index) => (
-              <Skeleton key={index} className="h-[350px] w-full rounded-xl" />
-            ))
+            <div className="col-span-full flex justify-center items-center py-20">
+              <SpinningPaws size="lg" />
+            </div>
           ) : (
             events.map((event) => (
               <EventCard 
