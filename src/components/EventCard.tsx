@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Star } from "lucide-react";
+import { Calendar, User as UserIcon, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 import { Tables } from "../integrations/supabase/types";
 
@@ -24,6 +26,23 @@ interface EventCardProps {
 
 export const EventCard = ({ event, onJoin }: EventCardProps) => {
   const navigate = useNavigate();
+  const [creatorName, setCreatorName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCreator = async () => {
+      if (event.created_by) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('user_id', event.created_by)
+          .single();
+        
+        setCreatorName(profile?.display_name || 'Anonymous');
+      }
+    };
+
+    fetchCreator();
+  }, [event.created_by]);
 
   const handleCardClick = () => {
     navigate(`/event/${event.id}`);
@@ -70,10 +89,18 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
         
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center space-x-1 text-muted-foreground">
-            <User className="w-4 h-4" />
+            <UserIcon className="w-4 h-4" />
             <span>{event.attendees} going</span>
           </div>
-          <span className="text-xs text-muted-foreground">by {event.organizer}</span>
+          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+            <span>by {event.organizer}</span>
+            {creatorName && (
+              <>
+                <span>•</span>
+                <span>created by {creatorName}</span>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Tags */}

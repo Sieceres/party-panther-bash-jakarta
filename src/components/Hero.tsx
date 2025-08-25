@@ -42,11 +42,6 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
       <div className="relative z-10 text-center space-y-8 px-4 animate-fade-in">
         {/* Main Title */}
         <div className="space-y-4">
-          <div className="flex items-center justify-center space-x-4 mb-6">
-            <div className="w-20 h-20 rounded-full party-gradient flex items-center justify-center p-2">
-              <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="w-full h-full object-contain -ml-1" />
-            </div>
-          </div>
           <h1 className="text-6xl md:text-8xl font-bold gradient-text mb-4 animate-slide-up">
             Party Panther
           </h1>

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
@@ -13,13 +14,14 @@ import { ImageUpload } from "./form-components/ImageUpload";
 
 export const CreatePromoForm = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [validUntilDate, setValidUntilDate] = useState<Date>();
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    discount: "",
     venue: "",
     address: "",
     promoType: "",
@@ -32,18 +34,30 @@ export const CreatePromoForm = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
     // Clear errors when user starts typing
     if (formErrors.length > 0) {
       setFormErrors([]);
     }
   };
 
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'If you leave the page, your promo will not be saved. Are you sure you want to exit?';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
   const validateForm = () => {
     const errors = [];
     
     if (!formData.title.trim()) errors.push("Title is required");
     if (!formData.description.trim()) errors.push("Description is required");
-    if (!formData.discount.trim()) errors.push("Discount text is required");
     if (!formData.venue.trim()) errors.push("Venue name is required");
     if (!formData.promoType) errors.push("Promo type is required");
     if (!validUntilDate) errors.push("Valid until date is required");
@@ -54,7 +68,6 @@ export const CreatePromoForm = () => {
   const isFormValid = () => {
     return formData.title.trim() && 
            formData.description.trim() && 
-           formData.discount.trim() && 
            formData.venue.trim() && 
            formData.promoType && 
            validUntilDate;
@@ -92,7 +105,7 @@ export const CreatePromoForm = () => {
       const { error } = await supabase.from('promos').insert({
         title: formData.title,
         description: formData.description,
-        discount_text: formData.discount,
+        discount_text: formData.title, // Use title as discount text since discount field is removed
         venue_name: formData.venue,
         venue_address: formData.address,
         venue_latitude: location?.lat,
@@ -114,21 +127,10 @@ export const CreatePromoForm = () => {
         description: "Your promo has been submitted for review and will be live soon.",
       });
 
-      // Reset form
-      setFormData({
-        title: "",
-        description: "",
-        discount: "",
-        venue: "",
-        address: "",
-        promoType: "",
-        dayOfWeek: "",
-        area: "",
-        drinkType: "Other",
-        image: ""
-      });
-      setValidUntilDate(undefined);
-      setLocation(null);
+      setHasUnsavedChanges(false);
+      setTimeout(() => {
+        navigate('/?section=promos');
+      }, 1000);
     } catch (error) {
       console.error('Error creating promo:', error);
       toast({
@@ -164,10 +166,8 @@ export const CreatePromoForm = () => {
             />
 
             <PromoDiscount
-              discount={formData.discount}
               venue={formData.venue}
               address={formData.address}
-              onDiscountChange={(value) => handleInputChange("discount", value)}
               onVenueChange={(value) => handleInputChange("venue", value)}
               onAddressChange={(value) => handleInputChange("address", value)}
             />

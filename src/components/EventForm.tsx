@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,7 +21,9 @@ interface EventFormProps {
 
 export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [eventDate, setEventDate] = useState<Date | undefined>(initialData?.date ? new Date(initialData.date) : undefined);
   const [isRecurrent, setIsRecurrent] = useState(initialData?.is_recurrent || false);
   const [formData, setFormData] = useState({
@@ -67,7 +70,22 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    if (!initialData?.id) {
+      setHasUnsavedChanges(true);
+    }
   };
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges && !initialData?.id) {
+        e.preventDefault();
+        e.returnValue = 'If you leave the page, your event will not be saved. Are you sure you want to exit?';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges, initialData?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,23 +156,13 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       });
 
       if (!initialData?.id) {
-        // Reset form only for new event creation
-        setFormData({
-          title: "",
-          description: "",
-          time: "",
-          venue: "",
-          address: "",
-          organizer: "",
-          whatsapp: "",
-          image: ""
-        });
-        setEventDate(undefined);
-        setLocation(null);
-        setIsRecurrent(false);
+        setHasUnsavedChanges(false);
+        setTimeout(() => {
+          navigate('/?section=events');
+        }, 1000);
+      } else {
+        onSuccess?.(); // Call onSuccess callback for edits
       }
-
-      onSuccess?.(); // Call onSuccess callback
 
     } catch (error) {
       console.error(initialData?.id ? 'Error updating event:' : 'Error creating event:', error);

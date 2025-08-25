@@ -157,7 +157,8 @@ export const PromosSection = ({
                 discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
                 day: promo.day_of_week?.toLowerCase(),
                 area: promo.area?.toLowerCase(),
-                drinkType: promo.drink_type?.toLowerCase()
+                drinkType: promo.drink_type?.toLowerCase(),
+                created_by: promo.created_by
               }}
               onClaim={onClaimPromo} 
             />

@@ -219,10 +219,8 @@ export const EditPromoPage = () => {
               />
 
               <PromoDiscount
-                discount={formData.discount}
                 venue={formData.venue}
                 address={formData.address}
-                onDiscountChange={(value) => handleInputChange('discount', value)}
                 onVenueChange={(value) => handleInputChange('venue', value)}
                 onAddressChange={(value) => handleInputChange('address', value)}
               />

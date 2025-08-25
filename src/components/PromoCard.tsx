@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, MessageSquare } from "lucide-react";
+import { User, Star, MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ReviewsList } from "./ReviewsList";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Promo {
   id: string;
@@ -22,6 +23,7 @@ interface Promo {
   day: string;
   area: string;
   drinkType: string;
+  created_by?: string;
 }
 
 interface PromoCardProps {
@@ -34,6 +36,23 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
   const [showReviews, setShowReviews] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
+  const [creatorName, setCreatorName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCreator = async () => {
+      if (promo.created_by) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('user_id', promo.created_by)
+          .single();
+        
+        setCreatorName(profile?.display_name || 'Anonymous');
+      }
+    };
+
+    fetchCreator();
+  }, [promo.created_by]);
 
   const handleCardClick = () => {
     navigate(`/promo/${promo.id}`);
@@ -80,6 +99,12 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
           <div className="space-y-1">
             <p className="text-sm font-medium">{promo.venue}</p>
             <p className="text-xs text-muted-foreground">Valid until {promo.validUntil}</p>
+            {creatorName && (
+              <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                <User className="w-3 h-3" />
+                <span>by {creatorName}</span>
+              </div>
+            )}
           </div>
           <div className="text-right">
             <div className="flex items-center space-x-2">
