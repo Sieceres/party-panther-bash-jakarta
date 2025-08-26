@@ -19,7 +19,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2 } from "lucide-react";
-import { Header } from "./Header";
 import { ReportDialog } from "./ReportDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -375,9 +374,7 @@ export const UserProfile = () => {
   const avatarUrl = profile?.avatar_url || `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face`;
 
   return (
-    <>
-      <Header activeSection="profile" onSectionChange={() => navigate('/?section=profile')} />
-      <div className="max-w-4xl mx-auto space-y-6 pt-20 px-4">
+    <div className="max-w-4xl mx-auto space-y-6 pt-20 px-4">
       {/* Profile Header */}
       <Card className="bg-card border-border">
         <CardContent className="pt-6">
@@ -868,6 +865,5 @@ export const UserProfile = () => {
         </div>
       )}
     </div>
-    </>
   );
 };
