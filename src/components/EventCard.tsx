@@ -27,9 +27,11 @@ interface EventCardProps {
 export const EventCard = ({ event, onJoin }: EventCardProps) => {
   const navigate = useNavigate();
   const [creatorName, setCreatorName] = useState<string | null>(null);
+  const [eventTags, setEventTags] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchCreator = async () => {
+    const fetchEventData = async () => {
+      // Fetch creator name
       if (event.created_by) {
         const { data: profile } = await supabase
           .from('profiles')
@@ -39,10 +41,20 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
         
         setCreatorName(profile?.display_name || 'Anonymous');
       }
+
+      // Fetch event tags
+      const { data: tags } = await supabase
+        .from('event_event_tags')
+        .select('tag_name')
+        .eq('event_id', event.id);
+      
+      if (tags) {
+        setEventTags(tags.map(t => t.tag_name));
+      }
     };
 
-    fetchCreator();
-  }, [event.created_by]);
+    fetchEventData();
+  }, [event.created_by, event.id]);
 
   const handleCardClick = () => {
     navigate(`/event/${event.id}`);
@@ -93,19 +105,13 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
             <span>{event.attendees} going</span>
           </div>
           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-            <span>by {event.organizer}</span>
-            {creatorName && (
-              <>
-                <span>•</span>
-                <span>created by {creatorName}</span>
-              </>
-            )}
+            {creatorName && <span>Created by {creatorName}</span>}
           </div>
         </div>
 
         {/* Tags */}
         <div className="flex flex-wrap gap-2">
-          {event.tags.map((tag) => (
+          {eventTags.map((tag) => (
             <Badge key={tag} variant="secondary" className="text-xs">
               {tag}
             </Badge>

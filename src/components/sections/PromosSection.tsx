@@ -1,11 +1,10 @@
-
 import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { PromoCard } from "@/components/PromoCard";
 import { CreatePromoForm } from "@/components/CreatePromoForm";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Filter, Star, Lock } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Filter, Star, Lock, X, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -15,15 +14,15 @@ interface PromosSectionProps {
   promos: Tables<'promos'>[];
   filteredPromos: Tables<'promos'>[];
   showCreatePromo: boolean;
-  dayFilter: string;
-  areaFilter: string;
-  drinkTypeFilter: string;
+  dayFilter: string[];
+  areaFilter: string[];
+  drinkTypeFilter: string[];
   loading?: boolean;
   onToggleCreatePromo: () => void;
   onClaimPromo: (promoId: string) => void;
-  onDayFilterChange: (value: string) => void;
-  onAreaFilterChange: (value: string) => void;
-  onDrinkTypeFilterChange: (value: string) => void;
+  onDayFilterChange: (filters: string[]) => void;
+  onAreaFilterChange: (filters: string[]) => void;
+  onDrinkTypeFilterChange: (filters: string[]) => void;
 }
 
 export const PromosSection = ({ 
@@ -61,6 +60,64 @@ export const PromosSection = ({
     }
     onToggleCreatePromo();
   };
+
+  const resetAllFilters = () => {
+    onDayFilterChange([]);
+    onAreaFilterChange([]);
+    onDrinkTypeFilterChange([]);
+  };
+
+  const hasActiveFilters = dayFilter.length > 0 || areaFilter.length > 0 || drinkTypeFilter.length > 0;
+
+  const dayOptions = [
+    { id: 'monday', label: 'Monday' },
+    { id: 'tuesday', label: 'Tuesday' },
+    { id: 'wednesday', label: 'Wednesday' },
+    { id: 'thursday', label: 'Thursday' },
+    { id: 'friday', label: 'Friday' },
+    { id: 'saturday', label: 'Saturday' },
+    { id: 'sunday', label: 'Sunday' }
+  ];
+
+  const areaOptions = [
+    { id: 'north', label: 'North Jakarta' },
+    { id: 'south', label: 'South Jakarta' },
+    { id: 'east', label: 'East Jakarta' },
+    { id: 'west', label: 'West Jakarta' },
+    { id: 'central', label: 'Central Jakarta' }
+  ];
+
+  const drinkTypeOptions = [
+    { id: 'Free Flow', label: 'Free Flow' },
+    { id: 'Ladies Night', label: 'Ladies Night' },
+    { id: 'Bottle Promo', label: 'Bottle Promo' },
+    { id: 'Other', label: 'Other' }
+  ];
+
+  const handleDayChange = (dayId: string, checked: boolean) => {
+    if (checked) {
+      onDayFilterChange([...dayFilter, dayId]);
+    } else {
+      onDayFilterChange(dayFilter.filter(d => d !== dayId));
+    }
+  };
+
+  const handleAreaChange = (areaId: string, checked: boolean) => {
+    if (checked) {
+      onAreaFilterChange([...areaFilter, areaId]);
+    } else {
+      onAreaFilterChange(areaFilter.filter(a => a !== areaId));
+    }
+  };
+
+  const handleDrinkTypeChange = (typeId: string, checked: boolean) => {
+    if (checked) {
+      onDrinkTypeFilterChange([...drinkTypeFilter, typeId]);
+    } else {
+      onDrinkTypeFilterChange(drinkTypeFilter.filter(t => t !== typeId));
+    }
+  };
+
   return (
     <div className="pt-20 px-4">
       <div className="container mx-auto space-y-8">
@@ -94,65 +151,102 @@ export const PromosSection = ({
         )}
 
         {/* Filter Controls */}
-        <div className="flex flex-col sm:flex-row gap-4 p-4 bg-card rounded-lg border">
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Filter by:</span>
+        <div className="p-6 bg-card rounded-lg border">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Filter by:</span>
+            </div>
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={resetAllFilters}
+                className="text-xs"
+              >
+                <RotateCcw className="w-3 h-3 mr-1" />
+                Reset Filters
+              </Button>
+            )}
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 flex-1">
-            <Select value={dayFilter} onValueChange={onDayFilterChange}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Day of week" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Days</SelectItem>
-                <SelectItem value="monday">Monday</SelectItem>
-                <SelectItem value="tuesday">Tuesday</SelectItem>
-                <SelectItem value="wednesday">Wednesday</SelectItem>
-                <SelectItem value="thursday">Thursday</SelectItem>
-                <SelectItem value="friday">Friday</SelectItem>
-                <SelectItem value="saturday">Saturday</SelectItem>
-                <SelectItem value="sunday">Sunday</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Day Filter */}
+            <div>
+              <h4 className="font-medium mb-3">Day of Week</h4>
+              <div className="space-y-2">
+                {dayOptions.map(day => (
+                  <div key={day.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`day-${day.id}`}
+                      checked={dayFilter.includes(day.id)}
+                      onCheckedChange={(checked) => handleDayChange(day.id, !!checked)}
+                    />
+                    <label
+                      htmlFor={`day-${day.id}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {day.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-            <Select value={areaFilter} onValueChange={onAreaFilterChange}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Area" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Areas</SelectItem>
-                <SelectItem value="north">North Jakarta</SelectItem>
-                <SelectItem value="south">South Jakarta</SelectItem>
-                <SelectItem value="east">East Jakarta</SelectItem>
-                <SelectItem value="west">West Jakarta</SelectItem>
-                <SelectItem value="central">Central Jakarta</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Area Filter */}
+            <div>
+              <h4 className="font-medium mb-3">Area</h4>
+              <div className="space-y-2">
+                {areaOptions.map(area => (
+                  <div key={area.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`area-${area.id}`}
+                      checked={areaFilter.includes(area.id)}
+                      onCheckedChange={(checked) => handleAreaChange(area.id, !!checked)}
+                    />
+                    <label
+                      htmlFor={`area-${area.id}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {area.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-            <Select value={drinkTypeFilter} onValueChange={onDrinkTypeFilterChange}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Promo type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="Free Flow">Free Flow</SelectItem>
-                <SelectItem value="Ladies Night">Ladies Night</SelectItem>
-                <SelectItem value="Bottle Promo">Bottle Promo</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Drink Type Filter */}
+            <div>
+              <h4 className="font-medium mb-3">Promo Type</h4>
+              <div className="space-y-2">
+                {drinkTypeOptions.map(type => (
+                  <div key={type.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`type-${type.id}`}
+                      checked={drinkTypeFilter.includes(type.id)}
+                      onCheckedChange={(checked) => handleDrinkTypeChange(type.id, !!checked)}
+                    />
+                    <label
+                      htmlFor={`type-${type.id}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {type.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading ? (
-            <div className="col-span-full flex justify-center items-center py-20">
-              <SpinningPaws size="lg" />
-            </div>
-          ) : (
-            filteredPromos.map((promo) => (
+        {/* Results */}
+        {loading ? (
+          <div className="col-span-full flex justify-center items-center py-20">
+            <SpinningPaws size="lg" />
+          </div>
+        ) : filteredPromos.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPromos.map((promo) => (
               <PromoCard 
                 key={promo.id} 
                 promo={{
@@ -170,9 +264,29 @@ export const PromosSection = ({
                 }}
                 onClaim={onClaimPromo} 
               />
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20 space-y-4">
+            <div className="w-24 h-24 mx-auto rounded-full bg-muted/20 flex items-center justify-center">
+              <X className="w-12 h-12 text-muted-foreground" />
+            </div>
+            <h3 className="text-2xl font-semibold text-muted-foreground">No promos found</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              We couldn't find any promos matching your current filters. Try adjusting your selection or check back later for new deals.
+            </p>
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                onClick={resetAllFilters}
+                className="mt-4"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Reset all filters
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

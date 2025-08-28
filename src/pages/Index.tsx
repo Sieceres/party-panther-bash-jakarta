@@ -27,11 +27,14 @@ const Index = () => {
       setShowCreatePromo(false);
     }
     setActiveSection(section);
+    
+    // Scroll to top when changing sections
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const [dayFilter, setDayFilter] = useState("all");
-  const [areaFilter, setAreaFilter] = useState("all");
-  const [drinkTypeFilter, setDrinkTypeFilter] = useState("all");
+  const [dayFilter, setDayFilter] = useState<string[]>([]);
+  const [areaFilter, setAreaFilter] = useState<string[]>([]);
+  const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>([]);
   const [events, setEvents] = useState<Tables<'events'>[]>([]);
   const [promos, setPromos] = useState<Tables<'promos'>[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,9 +107,9 @@ const Index = () => {
   };
 
   const filteredPromos = promos.filter((promo) => {
-    const dayMatch = dayFilter === "all" || promo.day_of_week?.toLowerCase() === dayFilter;
-    const areaMatch = areaFilter === "all" || promo.area?.toLowerCase() === areaFilter.replace(' jakarta', '');
-    const promoTypeMatch = drinkTypeFilter === "all" || promo.promo_type === drinkTypeFilter;
+    const dayMatch = dayFilter.length === 0 || dayFilter.includes(promo.day_of_week?.toLowerCase() || '');
+    const areaMatch = areaFilter.length === 0 || areaFilter.includes(promo.area?.toLowerCase().replace(' jakarta', '') || '');
+    const promoTypeMatch = drinkTypeFilter.length === 0 || drinkTypeFilter.includes(promo.promo_type || '');
     return dayMatch && areaMatch && promoTypeMatch;
   });
 

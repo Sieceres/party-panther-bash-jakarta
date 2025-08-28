@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -71,6 +71,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "event_comments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_event_tags: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          tag_name: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          tag_name: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          tag_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_event_tags_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
@@ -418,6 +447,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_my_claim: {
+        Args: { claim: string }
+        Returns: Json
+      }
       get_user_role: {
         Args: Record<PropertyKey, never> | { _user_id: string }
         Returns: string

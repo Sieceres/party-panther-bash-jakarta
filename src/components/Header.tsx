@@ -106,46 +106,45 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                );
              })}
              {/* Auth Button */}
-             {user ? (
-               <Button
-                 variant="ghost"
-                 onClick={(e) => {
-                   e.preventDefault();
-                   e.stopPropagation();
-                   handleSignOut();
-                 }}
-                 className="flex items-center space-x-2 relative z-10"
-               >
-                 <LogOut className="w-4 h-4" />
-                 <span>Sign Out</span>
-               </Button>
-             ) : (
-               <Button
-                 variant="default"
-                 onClick={(e) => {
-                   e.preventDefault();
-                   e.stopPropagation();
-                   navigate('/auth');
-                 }}
-                 className="flex items-center space-x-2 relative z-10"
-               >
-                 <LogIn className="w-4 h-4" />
-                 <span>Sign In/Sign Up</span>
-               </Button>
-             )}
+              {user ? (
+                <Button
+                  variant="outline"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSignOut();
+                  }}
+                  className="flex items-center space-x-2 relative z-10 border-secondary text-secondary-foreground hover:bg-secondary"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </Button>
+              ) : (
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navigate('/auth');
+                  }}
+                  className="flex items-center space-x-2 relative z-10 bg-gradient-to-r from-neon-blue to-neon-cyan text-white hover:opacity-90"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Sign In/Sign Up</span>
+                </Button>
+              )}
            </nav>
 
           {/* Mobile Menu Button */}
           <Button
             variant="ghost"
             size="sm"
-            className="md:hidden"
+            className="md:hidden text-foreground hover:text-primary"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <div className="w-6 h-6 flex flex-col justify-center space-y-1">
-              <div className="w-full h-0.5 bg-current"></div>
-              <div className="w-full h-0.5 bg-current"></div>
-              <div className="w-full h-0.5 bg-current"></div>
+              <div className="w-full h-0.5 bg-current opacity-90"></div>
+              <div className="w-full h-0.5 bg-current opacity-90"></div>
+              <div className="w-full h-0.5 bg-current opacity-90"></div>
             </div>
           </Button>
         </div>
@@ -172,32 +171,31 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                 );
               })}
               
-              {/* Mobile Auth Button */}
-              {user ? (
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    handleSignOut();
-                    setIsMenuOpen(false);
-                  }}
-                  className="justify-start"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
-              ) : (
-                <Button
-                  variant="default"
-                  onClick={() => {
-                    navigate('/auth');
-                    setIsMenuOpen(false);
-                  }}
-                  className="justify-start"
-                >
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Sign In/Sign Up
-                </Button>
-              )}
+               {/* Mobile Auth Button */}
+               {user ? (
+                 <Button
+                   variant="ghost"
+                   onClick={() => {
+                     handleSignOut();
+                     setIsMenuOpen(false);
+                   }}
+                   className="justify-start mt-2"
+                 >
+                   <LogOut className="w-4 h-4 mr-2" />
+                   Sign Out
+                 </Button>
+               ) : (
+                 <Button
+                   onClick={() => {
+                     navigate('/auth');
+                     setIsMenuOpen(false);
+                   }}
+                   className="justify-start mt-2 bg-gradient-to-r from-neon-blue to-neon-cyan text-white"
+                 >
+                   <LogIn className="w-4 h-4 mr-2" />
+                   Sign In/Sign Up
+                 </Button>
+               )}
             </div>
           </nav>
         )}

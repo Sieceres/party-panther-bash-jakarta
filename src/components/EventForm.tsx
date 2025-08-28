@@ -12,6 +12,7 @@ import { EventDateTime } from "./form-components/EventDateTime";
 import { EventVenue } from "./form-components/EventVenue";
 import { EventOrganizer } from "./form-components/EventOrganizer";
 import { ImageUpload } from "./form-components/ImageUpload";
+import { EventTags } from "./form-components/EventTags";
 import { Tables } from "../integrations/supabase/types";
 
 interface EventFormProps {
@@ -24,6 +25,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [eventDate, setEventDate] = useState<Date | undefined>(initialData?.date ? new Date(initialData.date) : undefined);
   const [isRecurrent, setIsRecurrent] = useState(initialData?.is_recurrent || false);
   const [formData, setFormData] = useState({
@@ -150,6 +152,26 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
 
       if (error) throw error;
 
+      // Handle tags if creating new event
+      if (!initialData?.id && selectedTags.length > 0) {
+        const { data: eventData } = await supabase
+          .from('events')
+          .select('id')
+          .eq('created_by', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (eventData) {
+          const tagInserts = selectedTags.map(tag => ({
+            event_id: eventData.id,
+            tag_name: tag
+          }));
+
+          await supabase.from('event_event_tags').insert(tagInserts);
+        }
+      }
+
       toast({
         title: initialData?.id ? "Event Updated! 🎉" : "Event Created! 🎉",
         description: initialData?.id ? "Your event has been updated successfully." : "Your event has been submitted for review and will be live soon.",
@@ -226,6 +248,11 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               imageUrl={formData.image}
               onImageChange={(value) => handleInputChange("image", value)}
               inputId="event-image"
+            />
+
+            <EventTags
+              selectedTags={selectedTags}
+              onChange={setSelectedTags}
             />
 
             <div className="flex items-center space-x-2">
