@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { PromoCard } from "@/components/PromoCard";
 import { CreatePromoForm } from "@/components/CreatePromoForm";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Filter, Star, Lock, X, RotateCcw } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Filter, Star, Lock, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -14,15 +14,15 @@ interface PromosSectionProps {
   promos: Tables<'promos'>[];
   filteredPromos: Tables<'promos'>[];
   showCreatePromo: boolean;
-  dayFilter: string[];
-  areaFilter: string[];
-  drinkTypeFilter: string[];
+  dayFilter: string;
+  areaFilter: string;
+  drinkTypeFilter: string;
   loading?: boolean;
   onToggleCreatePromo: () => void;
   onClaimPromo: (promoId: string) => void;
-  onDayFilterChange: (filters: string[]) => void;
-  onAreaFilterChange: (filters: string[]) => void;
-  onDrinkTypeFilterChange: (filters: string[]) => void;
+  onDayFilterChange: (filter: string) => void;
+  onAreaFilterChange: (filter: string) => void;
+  onDrinkTypeFilterChange: (filter: string) => void;
 }
 
 export const PromosSection = ({ 
@@ -62,14 +62,15 @@ export const PromosSection = ({
   };
 
   const resetAllFilters = () => {
-    onDayFilterChange([]);
-    onAreaFilterChange([]);
-    onDrinkTypeFilterChange([]);
+    onDayFilterChange("all");
+    onAreaFilterChange("all");
+    onDrinkTypeFilterChange("all");
   };
 
-  const hasActiveFilters = dayFilter.length > 0 || areaFilter.length > 0 || drinkTypeFilter.length > 0;
+  const hasActiveFilters = dayFilter !== "all" || areaFilter !== "all" || drinkTypeFilter !== "all";
 
   const dayOptions = [
+    { id: 'all', label: 'All Days' },
     { id: 'monday', label: 'Monday' },
     { id: 'tuesday', label: 'Tuesday' },
     { id: 'wednesday', label: 'Wednesday' },
@@ -80,6 +81,7 @@ export const PromosSection = ({
   ];
 
   const areaOptions = [
+    { id: 'all', label: 'All Areas' },
     { id: 'north', label: 'North Jakarta' },
     { id: 'south', label: 'South Jakarta' },
     { id: 'east', label: 'East Jakarta' },
@@ -88,35 +90,13 @@ export const PromosSection = ({
   ];
 
   const drinkTypeOptions = [
+    { id: 'all', label: 'All Types' },
     { id: 'Free Flow', label: 'Free Flow' },
     { id: 'Ladies Night', label: 'Ladies Night' },
     { id: 'Bottle Promo', label: 'Bottle Promo' },
     { id: 'Other', label: 'Other' }
   ];
 
-  const handleDayChange = (dayId: string, checked: boolean) => {
-    if (checked) {
-      onDayFilterChange([...dayFilter, dayId]);
-    } else {
-      onDayFilterChange(dayFilter.filter(d => d !== dayId));
-    }
-  };
-
-  const handleAreaChange = (areaId: string, checked: boolean) => {
-    if (checked) {
-      onAreaFilterChange([...areaFilter, areaId]);
-    } else {
-      onAreaFilterChange(areaFilter.filter(a => a !== areaId));
-    }
-  };
-
-  const handleDrinkTypeChange = (typeId: string, checked: boolean) => {
-    if (checked) {
-      onDrinkTypeFilterChange([...drinkTypeFilter, typeId]);
-    } else {
-      onDrinkTypeFilterChange(drinkTypeFilter.filter(t => t !== typeId));
-    }
-  };
 
   return (
     <div className="pt-20 px-4">
@@ -170,71 +150,53 @@ export const PromosSection = ({
             )}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Day Filter */}
             <div>
-              <h4 className="font-medium mb-3">Day of Week</h4>
-              <div className="space-y-2">
-                {dayOptions.map(day => (
-                  <div key={day.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`day-${day.id}`}
-                      checked={dayFilter.includes(day.id)}
-                      onCheckedChange={(checked) => handleDayChange(day.id, !!checked)}
-                    />
-                    <label
-                      htmlFor={`day-${day.id}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
+              <Select value={dayFilter} onValueChange={onDayFilterChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select day" />
+                </SelectTrigger>
+                <SelectContent>
+                  {dayOptions.map(day => (
+                    <SelectItem key={day.id} value={day.id}>
                       {day.label}
-                    </label>
-                  </div>
-                ))}
-              </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Area Filter */}
             <div>
-              <h4 className="font-medium mb-3">Area</h4>
-              <div className="space-y-2">
-                {areaOptions.map(area => (
-                  <div key={area.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`area-${area.id}`}
-                      checked={areaFilter.includes(area.id)}
-                      onCheckedChange={(checked) => handleAreaChange(area.id, !!checked)}
-                    />
-                    <label
-                      htmlFor={`area-${area.id}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
+              <Select value={areaFilter} onValueChange={onAreaFilterChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select area" />
+                </SelectTrigger>
+                <SelectContent>
+                  {areaOptions.map(area => (
+                    <SelectItem key={area.id} value={area.id}>
                       {area.label}
-                    </label>
-                  </div>
-                ))}
-              </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Drink Type Filter */}
             <div>
-              <h4 className="font-medium mb-3">Promo Type</h4>
-              <div className="space-y-2">
-                {drinkTypeOptions.map(type => (
-                  <div key={type.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`type-${type.id}`}
-                      checked={drinkTypeFilter.includes(type.id)}
-                      onCheckedChange={(checked) => handleDrinkTypeChange(type.id, !!checked)}
-                    />
-                    <label
-                      htmlFor={`type-${type.id}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
+              <Select value={drinkTypeFilter} onValueChange={onDrinkTypeFilterChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select promo type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {drinkTypeOptions.map(type => (
+                    <SelectItem key={type.id} value={type.id}>
                       {type.label}
-                    </label>
-                  </div>
-                ))}
-              </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
@@ -268,10 +230,7 @@ export const PromosSection = ({
           </div>
         ) : (
           <div className="text-center py-20 space-y-4">
-            <div className="w-24 h-24 mx-auto rounded-full bg-muted/20 flex items-center justify-center">
-              <X className="w-12 h-12 text-muted-foreground" />
-            </div>
-            <h3 className="text-2xl font-semibold text-muted-foreground">No promos found</h3>
+            <h3 className="text-2xl font-semibold text-muted-foreground">No corresponding promo found</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
               We couldn't find any promos matching your current filters. Try adjusting your selection or check back later for new deals.
             </p>
@@ -282,7 +241,7 @@ export const PromosSection = ({
                 className="mt-4"
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
-                Reset all filters
+                Reset filters
               </Button>
             )}
           </div>

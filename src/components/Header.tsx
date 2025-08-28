@@ -78,7 +78,10 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
             <div className="w-10 h-10 rounded-full party-gradient flex items-center justify-center p-1">
               <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="w-full h-full object-contain -ml-0.5" />
             </div>
-            <h1 className="text-2xl font-bold gradient-text">Party Panther</h1>
+            <div className="flex items-baseline gap-2">
+              <h1 className="text-2xl font-bold gradient-text">Party Panther</h1>
+              <span className="text-sm font-serif text-red-500 transform -rotate-12 font-bold">BETA</span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -142,9 +145,9 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <div className="w-6 h-6 flex flex-col justify-center space-y-1">
-              <div className="w-full h-0.5 bg-current opacity-90"></div>
-              <div className="w-full h-0.5 bg-current opacity-90"></div>
-              <div className="w-full h-0.5 bg-current opacity-90"></div>
+              <div className="w-full h-0.5 bg-white opacity-90"></div>
+              <div className="w-full h-0.5 bg-white opacity-90"></div>
+              <div className="w-full h-0.5 bg-white opacity-90"></div>
             </div>
           </Button>
         </div>

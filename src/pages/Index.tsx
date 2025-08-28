@@ -32,9 +32,9 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const [dayFilter, setDayFilter] = useState<string[]>([]);
-  const [areaFilter, setAreaFilter] = useState<string[]>([]);
-  const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>([]);
+  const [dayFilter, setDayFilter] = useState<string>("all");
+  const [areaFilter, setAreaFilter] = useState<string>("all");
+  const [drinkTypeFilter, setDrinkTypeFilter] = useState<string>("all");
   const [events, setEvents] = useState<Tables<'events'>[]>([]);
   const [promos, setPromos] = useState<Tables<'promos'>[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,9 +107,9 @@ const Index = () => {
   };
 
   const filteredPromos = promos.filter((promo) => {
-    const dayMatch = dayFilter.length === 0 || dayFilter.includes(promo.day_of_week?.toLowerCase() || '');
-    const areaMatch = areaFilter.length === 0 || areaFilter.includes(promo.area?.toLowerCase().replace(' jakarta', '') || '');
-    const promoTypeMatch = drinkTypeFilter.length === 0 || drinkTypeFilter.includes(promo.promo_type || '');
+    const dayMatch = dayFilter === "all" || dayFilter === promo.day_of_week?.toLowerCase();
+    const areaMatch = areaFilter === "all" || areaFilter === promo.area?.toLowerCase().replace(' jakarta', '');
+    const promoTypeMatch = drinkTypeFilter === "all" || drinkTypeFilter === promo.promo_type;
     return dayMatch && areaMatch && promoTypeMatch;
   });
 
@@ -253,7 +253,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header activeSection={activeSection} onSectionChange={handleSectionChange} />
       {renderContent()}
-      <Footer />
+      <Footer onSectionChange={handleSectionChange} />
     </div>
   );
 };

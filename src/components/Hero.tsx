@@ -44,7 +44,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         <div className="space-y-4">
           <h1 className="text-6xl md:text-8xl font-bold gradient-text mb-4 animate-slide-up flex items-baseline justify-center gap-4">
             Party Panther
-            <span className="text-2xl md:text-3xl font-mono text-neon-cyan transform -rotate-12 opacity-80">BETA</span>
+            <span className="text-2xl md:text-3xl font-serif text-red-500 transform -rotate-12 opacity-90 font-bold">BETA</span>
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-2 animate-slide-up" style={{ animationDelay: '0.2s' }}>
             Jakarta's Ultimate Party & Promo Hub
