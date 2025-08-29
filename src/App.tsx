@@ -13,6 +13,8 @@ import { Contact } from "./pages/Contact";
 import { EditEventPage } from "./pages/EditEventPage";
 import { EditPromoPage } from "./pages/EditPromoPage";
 import { UserProfile } from "./components/UserProfile"; // Import UserProfile
+import TermsConditions from "./pages/TermsConditions";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,8 @@ const App = () => (
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/profile/:userId" element={<UserProfile />} />
           <Route path="/admin/user/:userId" element={<UserProfile />} />
+          <Route path="/terms-conditions" element={<TermsConditions />} />
+          <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

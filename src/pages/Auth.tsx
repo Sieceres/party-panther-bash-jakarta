@@ -209,12 +209,18 @@ const Auth = () => {
                     placeholder="Create a password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating account..." : "Sign Up"}
-                </Button>
+                  required
+                />
+              </div>
+              <div className="text-xs text-muted-foreground text-center">
+                By signing up, you agree to the{" "}
+                <a href="/terms-conditions" className="text-primary hover:underline">
+                  Terms & Conditions
+                </a>
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Creating account..." : "Sign Up"}
+              </Button>
               </form>
             </TabsContent>
           </Tabs>
