@@ -101,27 +101,27 @@ export const PromosSection = ({
   return (
     <div className="pt-20 px-4">
       <div className="container mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-4xl font-bold gradient-text mb-2">Hot Promos</h2>
-            <p className="text-muted-foreground">Save money while partying with these exclusive deals</p>
-          </div>
-          <Button
-            onClick={handleCreatePromoClick}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-          >
-            {user ? (
-              <>
-                <Star className="w-4 h-4 mr-2" />
-                Create Promo
-              </>
-            ) : (
-              <>
-                <Lock className="w-4 h-4 mr-2" />
-                Login to Create Promo
-              </>
-            )}
-          </Button>
+        <div>
+          <h2 className="text-4xl font-bold gradient-text mb-2">Hot Promos</h2>
+          <p className="text-muted-foreground mb-4">Save money while partying with these exclusive deals</p>
+          {!user && (
+            <Button
+              onClick={handleCreatePromoClick}
+              className="bg-gradient-to-r from-neon-blue to-neon-cyan text-white hover:opacity-90"
+            >
+              <Lock className="w-4 h-4 mr-2" />
+              Login to Create Promo
+            </Button>
+          )}
+          {user && (
+            <Button
+              onClick={handleCreatePromoClick}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <Star className="w-4 h-4 mr-2" />
+              Create Promo
+            </Button>
+          )}
         </div>
 
         {showCreatePromo && (
