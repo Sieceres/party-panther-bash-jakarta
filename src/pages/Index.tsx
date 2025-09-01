@@ -32,9 +32,9 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const [dayFilter, setDayFilter] = useState<string>("all");
-  const [areaFilter, setAreaFilter] = useState<string>("all");
-  const [drinkTypeFilter, setDrinkTypeFilter] = useState<string>("all");
+  const [dayFilter, setDayFilter] = useState<string[]>(["all"]);
+  const [areaFilter, setAreaFilter] = useState<string[]>(["all"]);
+  const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(["all"]);
   const [events, setEvents] = useState<Tables<'events'>[]>([]);
   const [promos, setPromos] = useState<Tables<'promos'>[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,11 +107,23 @@ const Index = () => {
   };
 
   const filteredPromos = promos.filter((promo) => {
-    const dayMatch = dayFilter === "all" || dayFilter === promo.day_of_week?.toLowerCase();
-    const areaMatch = areaFilter === "all" || areaFilter === promo.area?.toLowerCase().replace(' jakarta', '');
-    const promoTypeMatch = drinkTypeFilter === "all" || drinkTypeFilter === promo.promo_type;
+    const dayMatch = dayFilter.includes("all") || dayFilter.includes(promo.day_of_week?.toLowerCase() || "");
+    const areaMatch = areaFilter.includes("all") || areaFilter.includes(promo.area?.toLowerCase().replace(' jakarta', '') || "");
+    const promoTypeMatch = drinkTypeFilter.includes("all") || drinkTypeFilter.includes(promo.promo_type || "");
     return dayMatch && areaMatch && promoTypeMatch;
   });
+
+  const handleDayFilterChange = (filter: string[]) => {
+    setDayFilter(filter);
+  };
+
+  const handleAreaFilterChange = (filter: string[]) => {
+    setAreaFilter(filter);
+  };
+
+  const handleDrinkTypeFilterChange = (filter: string[]) => {
+    setDrinkTypeFilter(filter);
+  };
 
   const handleJoinEvent = async (eventId: string) => {
     try {
@@ -211,9 +223,9 @@ const Index = () => {
             loading={loading}
             onToggleCreatePromo={() => setShowCreatePromo(!showCreatePromo)}
             onClaimPromo={handleClaimPromo}
-            onDayFilterChange={setDayFilter}
-            onAreaFilterChange={setAreaFilter}
-            onDrinkTypeFilterChange={setDrinkTypeFilter}
+            onDayFilterChange={handleDayFilterChange}
+            onAreaFilterChange={handleAreaFilterChange}
+            onDrinkTypeFilterChange={handleDrinkTypeFilterChange}
           />
         );
       

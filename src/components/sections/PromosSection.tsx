@@ -18,15 +18,15 @@ interface PromosSectionProps {
   promos: Tables<'promos'>[];
   filteredPromos: Tables<'promos'>[];
   showCreatePromo: boolean;
-  dayFilter: string;
-  areaFilter: string;
-  drinkTypeFilter: string;
+  dayFilter: string[];
+  areaFilter: string[];
+  drinkTypeFilter: string[];
   loading?: boolean;
   onToggleCreatePromo: () => void;
   onClaimPromo: (promoId: string) => void;
-  onDayFilterChange: (filter: string) => void;
-  onAreaFilterChange: (filter: string) => void;
-  onDrinkTypeFilterChange: (filter: string) => void;
+  onDayFilterChange: (filter: string[]) => void;
+  onAreaFilterChange: (filter: string[]) => void;
+  onDrinkTypeFilterChange: (filter: string[]) => void;
 }
 
 export const PromosSection = ({ 
@@ -63,12 +63,18 @@ export const PromosSection = ({
   };
 
   const resetAllFilters = () => {
-    onDayFilterChange("all");
-    onAreaFilterChange("all");
-    onDrinkTypeFilterChange("all");
+    onDayFilterChange(["all"]);
+    onAreaFilterChange(["all"]);
+    onDrinkTypeFilterChange(["all"]);
   };
 
-  const hasActiveFilters = dayFilter !== "all" || areaFilter !== "all" || drinkTypeFilter !== "all";
+  const hasActiveFilters = !dayFilter.includes("all") || !areaFilter.includes("all") || !drinkTypeFilter.includes("all");
+
+  const getFilterDisplayText = (filters: string[], allLabel: string) => {
+    if (filters.includes("all") || filters.length === 0) return allLabel;
+    if (filters.length === 1) return filters[0].charAt(0).toUpperCase() + filters[0].slice(1);
+    return `${filters.length} selected`;
+  };
 
   const dayOptions = [
     { id: 'all', label: 'All Days' },
@@ -134,18 +140,18 @@ export const PromosSection = ({
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="flex flex-col space-y-2">
             <label className="text-sm font-medium">Day</label>
-            <Select value={dayFilter} onValueChange={onDayFilterChange}>
+            <Select>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="All days" />
+                <SelectValue>{getFilterDisplayText(dayFilter, "All days")}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <div className="p-2 space-y-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="all-days"
-                      checked={dayFilter === "all"}
+                      checked={dayFilter.includes("all")}
                       onCheckedChange={(checked) => {
-                        if (checked) onDayFilterChange("all");
+                        if (checked) onDayFilterChange(["all"]);
                       }}
                     />
                     <Label htmlFor="all-days" className="text-sm">All days</Label>
@@ -154,12 +160,14 @@ export const PromosSection = ({
                     <div key={day} className="flex items-center space-x-2">
                       <Checkbox
                         id={`day-${day.toLowerCase()}`}
-                        checked={dayFilter === day.toLowerCase()}
+                        checked={dayFilter.includes(day.toLowerCase())}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            onDayFilterChange(day.toLowerCase());
-                          } else if (dayFilter === day.toLowerCase()) {
-                            onDayFilterChange("all");
+                            const newFilters = dayFilter.filter(f => f !== "all");
+                            onDayFilterChange([...newFilters, day.toLowerCase()]);
+                          } else {
+                            const newFilters = dayFilter.filter(f => f !== day.toLowerCase());
+                            onDayFilterChange(newFilters.length === 0 ? ["all"] : newFilters);
                           }
                         }}
                       />
@@ -175,18 +183,18 @@ export const PromosSection = ({
           
           <div className="flex flex-col space-y-2">
             <label className="text-sm font-medium">Area</label>
-            <Select value={areaFilter} onValueChange={onAreaFilterChange}>
+            <Select>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="All areas" />
+                <SelectValue>{getFilterDisplayText(areaFilter, "All areas")}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <div className="p-2 space-y-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="all-areas"
-                      checked={areaFilter === "all"}
+                      checked={areaFilter.includes("all")}
                       onCheckedChange={(checked) => {
-                        if (checked) onAreaFilterChange("all");
+                        if (checked) onAreaFilterChange(["all"]);
                       }}
                     />
                     <Label htmlFor="all-areas" className="text-sm">All areas</Label>
@@ -195,12 +203,14 @@ export const PromosSection = ({
                     <div key={area} className="flex items-center space-x-2">
                       <Checkbox
                         id={`area-${area.toLowerCase()}`}
-                        checked={areaFilter === area.toLowerCase()}
+                        checked={areaFilter.includes(area.toLowerCase())}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            onAreaFilterChange(area.toLowerCase());
-                          } else if (areaFilter === area.toLowerCase()) {
-                            onAreaFilterChange("all");
+                            const newFilters = areaFilter.filter(f => f !== "all");
+                            onAreaFilterChange([...newFilters, area.toLowerCase()]);
+                          } else {
+                            const newFilters = areaFilter.filter(f => f !== area.toLowerCase());
+                            onAreaFilterChange(newFilters.length === 0 ? ["all"] : newFilters);
                           }
                         }}
                       />
@@ -216,18 +226,18 @@ export const PromosSection = ({
           
           <div className="flex flex-col space-y-2">
             <label className="text-sm font-medium">Drink Type</label>
-            <Select value={drinkTypeFilter} onValueChange={onDrinkTypeFilterChange}>
+            <Select>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="All types" />
+                <SelectValue>{getFilterDisplayText(drinkTypeFilter, "All types")}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <div className="p-2 space-y-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="all-drinks"
-                      checked={drinkTypeFilter === "all"}
+                      checked={drinkTypeFilter.includes("all")}
                       onCheckedChange={(checked) => {
-                        if (checked) onDrinkTypeFilterChange("all");
+                        if (checked) onDrinkTypeFilterChange(["all"]);
                       }}
                     />
                     <Label htmlFor="all-drinks" className="text-sm">All types</Label>
@@ -236,12 +246,14 @@ export const PromosSection = ({
                     <div key={drink} className="flex items-center space-x-2">
                       <Checkbox
                         id={`drink-${drink.toLowerCase()}`}
-                        checked={drinkTypeFilter === drink.toLowerCase()}
+                        checked={drinkTypeFilter.includes(drink.toLowerCase())}
                         onCheckedChange={(checked) => {
                           if (checked) {
-                            onDrinkTypeFilterChange(drink.toLowerCase());
-                          } else if (drinkTypeFilter === drink.toLowerCase()) {
-                            onDrinkTypeFilterChange("all");
+                            const newFilters = drinkTypeFilter.filter(f => f !== "all");
+                            onDrinkTypeFilterChange([...newFilters, drink.toLowerCase()]);
+                          } else {
+                            const newFilters = drinkTypeFilter.filter(f => f !== drink.toLowerCase());
+                            onDrinkTypeFilterChange(newFilters.length === 0 ? ["all"] : newFilters);
                           }
                         }}
                       />
@@ -270,9 +282,9 @@ export const PromosSection = ({
               </p>
               <Button 
                 onClick={() => {
-                  onDayFilterChange("all");
-                  onAreaFilterChange("all");
-                  onDrinkTypeFilterChange("all");
+                  onDayFilterChange(["all"]);
+                  onAreaFilterChange(["all"]);
+                  onDrinkTypeFilterChange(["all"]);
                 }}
                 variant="outline"
               >
