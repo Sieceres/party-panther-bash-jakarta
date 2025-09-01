@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, Star, User, LogIn, LogOut, BookOpen } from "lucide-react";
+import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Flame } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
@@ -62,8 +62,8 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
   };
 
   const menuItems = [
-    { id: 'home', label: 'Home', icon: Star },
-    { id: 'promos', label: 'Promos', icon: Star },
+    { id: 'home', label: 'Home', icon: Home },
+    { id: 'promos', label: 'Promos', icon: Flame },
     { id: 'events', label: 'Events', icon: Calendar },
     { id: 'blog', label: 'Blog', icon: BookOpen, hidden: true },
     { id: 'profile', label: 'Profile', icon: User }
@@ -76,7 +76,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3" onClick={() => onSectionChange('home')}>
             <div className="w-10 h-10 rounded-full party-gradient flex items-center justify-center p-1">
-              <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="w-full h-full object-contain -ml-0.5" />
+              <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="w-full h-full object-cover rounded-full" />
             </div>
             <div className="flex items-baseline gap-2">
               <h1 className="text-2xl font-bold gradient-text">Party Panther</h1>
@@ -97,11 +97,11 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                      e.stopPropagation();
                      onSectionChange(item.id);
                    }}
-                   className={`flex items-center space-x-2 ${
-                     activeSection === item.id 
-                       ? "bg-primary text-primary-foreground" 
-                       : "hover:bg-accent"
-                   }`}
+                    className={`flex items-center space-x-2 transition-all ${
+                      activeSection === item.id 
+                        ? "bg-primary text-primary-foreground" 
+                        : "hover:bg-gradient-to-r hover:from-neon-blue hover:to-neon-cyan hover:text-white"
+                    }`}
                  >
                    <Icon className="w-4 h-4" />
                    <span>{item.label}</span>

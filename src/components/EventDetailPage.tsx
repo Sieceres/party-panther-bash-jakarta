@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, MapPin, Users, Clock, ArrowLeft, Star, Share2 } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, ArrowLeft, Star, Share2, MessageSquare, Send } from "lucide-react";
 import { GoogleMap } from "./GoogleMap";
 import { ReportDialog } from "./ReportDialog";
 import { Header } from "./Header";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -34,7 +35,10 @@ export const EventDetailPage = () => {
   const { toast } = useToast();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
-  const [hasJoined, setHasJoined] = useState(false); // New state for joined status
+  const [hasJoined, setHasJoined] = useState(false);
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [commentsLoading, setCommentsLoading] = useState(false);
 
   const memoizedCenter = useMemo(() => {
     if (event?.venue_latitude && event?.venue_longitude) {
@@ -76,6 +80,23 @@ export const EventDetailPage = () => {
           if (attendeeData && !attendeeError) {
             setHasJoined(true);
           }
+        }
+
+        // Fetch comments
+        const { data: commentsData, error: commentsError } = await supabase
+          .from('event_comments')
+          .select(`
+            *,
+            profiles!event_comments_user_id_fkey (
+              display_name,
+              avatar_url
+            )
+          `)
+          .eq('event_id', id)
+          .order('created_at', { ascending: true });
+
+        if (commentsData && !commentsError) {
+          setComments(commentsData);
         }
 
       } catch (error) {
@@ -180,6 +201,57 @@ export const EventDetailPage = () => {
       const message = `Hi! I'm interested in your event: ${event.title}`;
       const whatsappUrl = `https://wa.me/${event.organizer_whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!newComment.trim() || !event) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to comment.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setCommentsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('event_comments')
+        .insert({
+          event_id: event.id,
+          user_id: user.id,
+          comment: newComment.trim()
+        })
+        .select(`
+          *,
+          profiles!event_comments_user_id_fkey (
+            display_name,
+            avatar_url
+          )
+        `)
+        .single();
+
+      if (error) throw error;
+
+      setComments([...comments, data]);
+      setNewComment("");
+      toast({
+        title: "Comment added!",
+        description: "Your comment has been posted.",
+      });
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add comment. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setCommentsLoading(false);
     }
   };
 
@@ -296,6 +368,63 @@ export const EventDetailPage = () => {
                     />
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Comments Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <MessageSquare className="w-5 h-5" />
+                  <span>Discussion ({comments.length})</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Add Comment Form */}
+                <div className="space-y-3">
+                  <Textarea
+                    placeholder="Share your thoughts about this event..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    className="min-h-[80px] resize-none"
+                  />
+                  <Button
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim() || commentsLoading}
+                    className="bg-gradient-to-r from-neon-blue to-neon-cyan text-white hover:opacity-90"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {commentsLoading ? "Posting..." : "Post Comment"}
+                  </Button>
+                </div>
+
+                {/* Comments List */}
+                <div className="space-y-4">
+                  {comments.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-4">
+                      No comments yet. Be the first to share your thoughts!
+                    </p>
+                  ) : (
+                    comments.map((comment) => (
+                      <div key={comment.id} className="flex space-x-3 p-3 bg-muted/50 rounded-lg">
+                        <div className="w-8 h-8 bg-gradient-to-r from-neon-blue to-neon-cyan rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                          {comment.profiles?.display_name?.[0]?.toUpperCase() || '?'}
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center space-x-2">
+                            <p className="font-medium text-sm">
+                              {comment.profiles?.display_name || 'Anonymous'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(comment.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <p className="text-sm leading-relaxed">{comment.comment}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>

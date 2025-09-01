@@ -2,14 +2,58 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Star, Sparkles } from "lucide-react";
 import heroBackground from "@/assets/hero-background.jpg";
 import floatingElements from "@/assets/floating-elements.png";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface HeroProps {
   onSectionChange: (section: string) => void;
 }
 
 export const Hero = ({ onSectionChange }: HeroProps) => {
+  const [stats, setStats] = useState({
+    events: 0,
+    promos: 0,
+    partyGoers: 0
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        // Fetch events count
+        const { count: eventsCount } = await supabase
+          .from('events')
+          .select('*', { count: 'exact', head: true });
+
+        // Fetch promos count
+        const { count: promosCount } = await supabase
+          .from('promos')
+          .select('*', { count: 'exact', head: true });
+
+        // Fetch party goers count (total unique users who have joined events)
+        const { count: partyGoersCount } = await supabase
+          .from('event_attendees')
+          .select('user_id', { count: 'exact', head: true });
+
+        setStats({
+          events: eventsCount || 0,
+          promos: promosCount || 0,
+          partyGoers: partyGoersCount || 0
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        // Keep default values if error occurs
+        setStats({
+          events: 500,
+          promos: 1000,
+          partyGoers: 50000
+        });
+      }
+    };
+
+    fetchStats();
+  }, []);
   return (
-    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden pt-16">
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
@@ -39,17 +83,17 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         <div className="absolute top-1/3 right-1/2 w-2 h-2 bg-neon-blue rounded-full animate-pulse" style={{ animationDelay: '1.5s' }}></div>
       </div>
 
-      <div className="relative z-10 text-center space-y-8 px-4 animate-fade-in">
+      <div className="relative z-20 text-center space-y-8 px-4 animate-fade-in">
         {/* Main Title */}
         <div className="space-y-4">
-          <h1 className="text-6xl md:text-8xl font-bold gradient-text mb-4 animate-slide-up flex items-baseline justify-center gap-4">
+          <h1 className="text-6xl md:text-8xl font-bold gradient-text mb-4 animate-slide-up flex items-baseline justify-center gap-4 hero-title">
             Party Panther
             <span className="text-2xl md:text-3xl font-serif text-red-500 transform -rotate-12 opacity-90 font-bold">BETA</span>
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-2 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <p className="text-xl md:text-2xl text-muted-foreground mb-2 animate-slide-up hero-subtitle" style={{ animationDelay: '0.2s' }}>
             Jakarta's Ultimate Party & Promo Hub
           </p>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-slide-up hero-subtitle" style={{ animationDelay: '0.4s' }}>
             Discover the hottest events, exclusive promos, and connect with Jakarta's vibrant nightlife community
           </p>
         </div>
@@ -57,15 +101,15 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         {/* Stats */}
         <div className="flex justify-center space-x-8 mb-8 animate-slide-up" style={{ animationDelay: '0.6s' }}>
           <div className="text-center">
-            <div className="text-2xl font-bold gradient-text">500+</div>
+            <div className="text-2xl font-bold gradient-text">{stats.events}+</div>
             <div className="text-sm text-muted-foreground">Events</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold gradient-text">1000+</div>
+            <div className="text-2xl font-bold gradient-text">{stats.promos}+</div>
             <div className="text-sm text-muted-foreground">Promos</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold gradient-text">50K+</div>
+            <div className="text-2xl font-bold gradient-text">{stats.partyGoers > 1000 ? `${Math.floor(stats.partyGoers / 1000)}K+` : `${stats.partyGoers}+`}</div>
             <div className="text-sm text-muted-foreground">Party Goers</div>
           </div>
         </div>
@@ -75,7 +119,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
           <Button
             size="lg"
             onClick={() => onSectionChange('promos')}
-            className="group bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-4 rounded-full transition-all hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
+            className="group bg-gradient-to-r from-neon-blue to-neon-cyan text-white font-semibold px-8 py-4 rounded-full transition-all hover:scale-105 hover:shadow-lg hover:shadow-neon-blue/25"
           >
             <Star className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" />
             Find Hot Promos
