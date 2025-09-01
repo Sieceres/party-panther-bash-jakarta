@@ -130,136 +130,129 @@ export const PromosSection = ({
           </div>
         )}
 
-        {/* Dropdown and Checkbox Filters */}
-        <div className="space-y-6 mb-6">
-          {/* Dropdown Filters */}
-          <div className="flex flex-wrap gap-4">
-            <div className="flex flex-col space-y-2">
-              <label className="text-sm font-medium">Day</label>
-              <Select value={dayFilter} onValueChange={onDayFilterChange}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="All days" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All days</SelectItem>
-                  <SelectItem value="monday">Monday</SelectItem>
-                  <SelectItem value="tuesday">Tuesday</SelectItem>
-                  <SelectItem value="wednesday">Wednesday</SelectItem>
-                  <SelectItem value="thursday">Thursday</SelectItem>
-                  <SelectItem value="friday">Friday</SelectItem>
-                  <SelectItem value="saturday">Saturday</SelectItem>
-                  <SelectItem value="sunday">Sunday</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex flex-col space-y-2">
-              <label className="text-sm font-medium">Area</label>
-              <Select value={areaFilter} onValueChange={onAreaFilterChange}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="All areas" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All areas</SelectItem>
-                  <SelectItem value="central">Central</SelectItem>
-                  <SelectItem value="south">South</SelectItem>
-                  <SelectItem value="north">North</SelectItem>
-                  <SelectItem value="east">East</SelectItem>
-                  <SelectItem value="west">West</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex flex-col space-y-2">
-              <label className="text-sm font-medium">Drink Type</label>
-              <Select value={drinkTypeFilter} onValueChange={onDrinkTypeFilterChange}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="All types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All types</SelectItem>
-                  <SelectItem value="beer">Beer</SelectItem>
-                  <SelectItem value="cocktails">Cocktails</SelectItem>
-                  <SelectItem value="wine">Wine</SelectItem>
-                  <SelectItem value="spirits">Spirits</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        {/* Dropdown Filters with Checkboxes */}
+        <div className="flex flex-wrap gap-4 mb-6">
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium">Day</label>
+            <Select value={dayFilter} onValueChange={onDayFilterChange}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="All days" />
+              </SelectTrigger>
+              <SelectContent>
+                <div className="p-2 space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="all-days"
+                      checked={dayFilter === "all"}
+                      onCheckedChange={(checked) => {
+                        if (checked) onDayFilterChange("all");
+                      }}
+                    />
+                    <Label htmlFor="all-days" className="text-sm">All days</Label>
+                  </div>
+                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
+                    <div key={day} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`day-${day.toLowerCase()}`}
+                        checked={dayFilter === day.toLowerCase()}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            onDayFilterChange(day.toLowerCase());
+                          } else if (dayFilter === day.toLowerCase()) {
+                            onDayFilterChange("all");
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`day-${day.toLowerCase()}`} className="text-sm">
+                        {day}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </SelectContent>
+            </Select>
           </div>
-
-          {/* Checkbox Filters */}
-          <div className="border border-border rounded-lg p-4 bg-card">
-            <h3 className="text-sm font-medium mb-3">Quick Filters</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {/* Day Checkboxes */}
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Days</Label>
-                {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
-                  <div key={day} className="flex items-center space-x-2">
+          
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium">Area</label>
+            <Select value={areaFilter} onValueChange={onAreaFilterChange}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="All areas" />
+              </SelectTrigger>
+              <SelectContent>
+                <div className="p-2 space-y-2">
+                  <div className="flex items-center space-x-2">
                     <Checkbox
-                      id={day.toLowerCase()}
-                      checked={dayFilter === day.toLowerCase()}
+                      id="all-areas"
+                      checked={areaFilter === "all"}
                       onCheckedChange={(checked) => {
-                        if (checked) {
-                          onDayFilterChange(day.toLowerCase());
-                        } else if (dayFilter === day.toLowerCase()) {
-                          onDayFilterChange("all");
-                        }
+                        if (checked) onAreaFilterChange("all");
                       }}
                     />
-                    <Label htmlFor={day.toLowerCase()} className="text-xs">
-                      {day}
-                    </Label>
+                    <Label htmlFor="all-areas" className="text-sm">All areas</Label>
                   </div>
-                ))}
-              </div>
-
-              {/* Area Checkboxes */}
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Areas</Label>
-                {["Central", "South", "North", "East", "West"].map((area) => (
-                  <div key={area} className="flex items-center space-x-2">
+                  {["Central", "South", "North", "East", "West"].map((area) => (
+                    <div key={area} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`area-${area.toLowerCase()}`}
+                        checked={areaFilter === area.toLowerCase()}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            onAreaFilterChange(area.toLowerCase());
+                          } else if (areaFilter === area.toLowerCase()) {
+                            onAreaFilterChange("all");
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`area-${area.toLowerCase()}`} className="text-sm">
+                        {area}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium">Drink Type</label>
+            <Select value={drinkTypeFilter} onValueChange={onDrinkTypeFilterChange}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="All types" />
+              </SelectTrigger>
+              <SelectContent>
+                <div className="p-2 space-y-2">
+                  <div className="flex items-center space-x-2">
                     <Checkbox
-                      id={area.toLowerCase()}
-                      checked={areaFilter === area.toLowerCase()}
+                      id="all-drinks"
+                      checked={drinkTypeFilter === "all"}
                       onCheckedChange={(checked) => {
-                        if (checked) {
-                          onAreaFilterChange(area.toLowerCase());
-                        } else if (areaFilter === area.toLowerCase()) {
-                          onAreaFilterChange("all");
-                        }
+                        if (checked) onDrinkTypeFilterChange("all");
                       }}
                     />
-                    <Label htmlFor={area.toLowerCase()} className="text-xs">
-                      {area}
-                    </Label>
+                    <Label htmlFor="all-drinks" className="text-sm">All types</Label>
                   </div>
-                ))}
-              </div>
-
-              {/* Drink Type Checkboxes */}
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Drinks</Label>
-                {["Beer", "Cocktails", "Wine", "Spirits"].map((drink) => (
-                  <div key={drink} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={drink.toLowerCase()}
-                      checked={drinkTypeFilter === drink.toLowerCase()}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          onDrinkTypeFilterChange(drink.toLowerCase());
-                        } else if (drinkTypeFilter === drink.toLowerCase()) {
-                          onDrinkTypeFilterChange("all");
-                        }
-                      }}
-                    />
-                    <Label htmlFor={drink.toLowerCase()} className="text-xs">
-                      {drink}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
+                  {["Beer", "Cocktails", "Wine", "Spirits"].map((drink) => (
+                    <div key={drink} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`drink-${drink.toLowerCase()}`}
+                        checked={drinkTypeFilter === drink.toLowerCase()}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            onDrinkTypeFilterChange(drink.toLowerCase());
+                          } else if (drinkTypeFilter === drink.toLowerCase()) {
+                            onDrinkTypeFilterChange("all");
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`drink-${drink.toLowerCase()}`} className="text-sm">
+                        {drink}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
