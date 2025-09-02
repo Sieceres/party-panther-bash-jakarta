@@ -86,8 +86,8 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
       <div className="relative z-20 text-center space-y-8 px-4 animate-fade-in">
         {/* Main Title */}
         <div className="space-y-4">
-          <h1 className="text-6xl md:text-8xl font-bold gradient-text mb-4 animate-slide-up flex items-baseline justify-center gap-4 hero-title">
-            Party Panther1
+          <h1 className="text-6xl md:text-8xl font-bold text-[#00BFFF] mb-4 animate-slide-up flex items-baseline justify-center gap-4 hero-title">
+           Party Panther1
             <span className="text-2xl md:text-3xl font-serif text-red-500 transform -rotate-12 opacity-90 font-bold">BETA</span>
           </h1>
           <p className="text-xl md:text-2xl text-white mb-2 animate-slide-up hero-subtitle" style={{ animationDelay: '0.2s' }}>
