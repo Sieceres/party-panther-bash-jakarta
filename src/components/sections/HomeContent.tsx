@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "../../integrations/supabase/types";
 import { EventCard } from "../EventCard";
 import { PromoCard } from "../PromoCard";
-import { ArrowRight, Zap, TrendingUp } from "lucide-react";
+import { ArrowRight, Zap, TrendingUp, Calendar } from "lucide-react";
 import sectionBackground from "@/assets/section-background.jpg";
 
 interface HomeContentProps {
@@ -66,15 +66,14 @@ export const HomeContent = ({
           <div className="floating-element absolute bottom-20 left-10 w-20 h-20 rounded-full bg-neon-indigo blur-md"></div>
         </div>
 
-        <div className="relative z-10 px-4 py-16">
+        <div className="relative z-10 px-4 py-8">
           <div className="container mx-auto space-y-8">
             <div className="flex items-center justify-between animate-slide-up">
               <div className="space-y-2">
-                <div className="flex items-center space-x-2 mb-3">
-                  <Zap className="w-6 h-6 text-neon-cyan animate-pulse" />
-                  <span className="text-sm font-semibold uppercase tracking-wider text-neon-cyan">Hot Deals</span>
-                </div>
-                <h2 className="text-4xl font-bold gradient-text mb-2">Hot Promos</h2>
+                <h2 className="text-4xl font-bold gradient-text mb-2 flex items-center gap-3">
+                  <Zap className="w-8 h-8 text-neon-cyan animate-pulse" />
+                  Hot Promos
+                </h2>
                 <p className="text-muted-foreground text-lg">Save money on your next night out!</p>
               </div>
               <Button
@@ -134,11 +133,10 @@ export const HomeContent = ({
           <div className="container mx-auto space-y-8">
             <div className="flex items-center justify-between animate-slide-up">
               <div className="space-y-2">
-                <div className="flex items-center space-x-2 mb-3">
-                  <TrendingUp className="w-6 h-6 text-neon-indigo animate-pulse" />
-                  <span className="text-sm font-semibold uppercase tracking-wider text-neon-indigo">Popular</span>
-                </div>
-                <h2 className="text-4xl font-bold gradient-text mb-2">Upcoming Events</h2>
+                <h2 className="text-4xl font-bold gradient-text mb-2 flex items-center gap-3">
+                  <Calendar className="w-8 h-8 text-neon-indigo" />
+                  Upcoming Events
+                </h2>
                 <p className="text-muted-foreground text-lg">Don't miss these amazing parties</p>
               </div>
               <Button

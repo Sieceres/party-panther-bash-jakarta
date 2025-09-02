@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Flame } from "lucide-react";
+import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
@@ -63,7 +63,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
 
   const menuItems = [
     { id: 'home', label: 'Home', icon: Home },
-    { id: 'promos', label: 'Promos', icon: Flame },
+    { id: 'promos', label: 'Promos', icon: Zap },
     { id: 'events', label: 'Events', icon: Calendar },
     { id: 'blog', label: 'Blog', icon: BookOpen, hidden: true },
     { id: 'profile', label: 'Profile', icon: User }

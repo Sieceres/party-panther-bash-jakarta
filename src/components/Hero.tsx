@@ -90,10 +90,10 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
             Party Panther
             <span className="text-2xl md:text-3xl font-serif text-red-500 transform -rotate-12 opacity-90 font-bold">BETA</span>
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-2 animate-slide-up hero-subtitle" style={{ animationDelay: '0.2s' }}>
+          <p className="text-xl md:text-2xl text-white mb-2 animate-slide-up hero-subtitle" style={{ animationDelay: '0.2s' }}>
             Jakarta's Ultimate Party & Promo Hub
           </p>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-slide-up hero-subtitle" style={{ animationDelay: '0.4s' }}>
+          <p className="text-lg text-white/80 max-w-2xl mx-auto animate-slide-up hero-subtitle" style={{ animationDelay: '0.4s' }}>
             Discover the hottest events, exclusive promos, and connect with Jakarta's vibrant nightlife community
           </p>
         </div>
@@ -110,12 +110,12 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold gradient-text">{stats.partyGoers > 1000 ? `${Math.floor(stats.partyGoers / 1000)}K+` : `${stats.partyGoers}+`}</div>
-            <div className="text-sm text-muted-foreground">Party Goers</div>
+            <div className="text-sm text-white/70">Party People</div>
           </div>
         </div>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 animate-slide-up" style={{ animationDelay: '0.8s' }}>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-slide-up" style={{ animationDelay: '0.8s' }}>
           <Button
             size="lg"
             onClick={() => onSectionChange('promos')}

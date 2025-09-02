@@ -29,6 +29,7 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
             <button onClick={() => onSectionChange('home')} className="text-muted-foreground hover:text-primary transition-colors">Home</button>
             <button onClick={() => onSectionChange('events')} className="text-muted-foreground hover:text-primary transition-colors">Events</button>
             <button onClick={() => onSectionChange('promos')} className="text-muted-foreground hover:text-primary transition-colors">Promos</button>
+            <button onClick={() => onSectionChange('blog')} className="text-muted-foreground hover:text-primary transition-colors">Blog</button>
             <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">Contact</Link>
             <button onClick={() => onSectionChange('profile')} className="text-muted-foreground hover:text-primary transition-colors">Profile</button>
           </div>
@@ -38,13 +39,7 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
             <h3 className="font-semibold text-lg mb-2">Follow Us</h3>
             <div className="flex space-x-4">
               <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                <Facebook className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
                 <Instagram className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                <Twitter className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -52,9 +47,7 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
           {/* Contact Info Placeholder */}
           <div className="flex flex-col items-center md:items-start space-y-2">
             <h3 className="font-semibold text-lg mb-2">Contact Us</h3>
-            <p className="text-sm text-muted-foreground">Email: info@partypanther.com</p>
-            <p className="text-sm text-muted-foreground">Phone: +62 812 3456 7890</p>
-            <p className="text-sm text-muted-foreground">Address: Jakarta, Indonesia</p>
+            <p className="text-sm text-muted-foreground">Instagram: @partypanther.id</p>
           </div>
         </div>
 
