@@ -49,7 +49,7 @@ const About = () => {
               <CardContent className="p-6">
                 <Users className="w-12 h-12 mx-auto mb-4 text-primary" />
                 <h3 className="text-xl font-semibold mb-2">Community</h3>
-                <p className="text-muted-foreground">Connect with like-minded party-goers and nightlife enthusiasts</p>
+                <p className="text-muted-foreground">Connect with like-minded party people and nightlife enthusiasts</p>
               </CardContent>
             </Card>
           </div>
@@ -95,7 +95,7 @@ const About = () => {
             <section>
               <h2 className="text-3xl font-bold mb-6 text-center">Our Story</h2>
               <p className="text-lg text-muted-foreground text-center">
-                Founded in 2024, Party Panther emerged from a simple idea: Jakarta's nightlife scene needed a central hub where party-goers could discover, connect, and share their experiences. What started as a passion project by a group of nightlife enthusiasts has grown into Jakarta's go-to platform for nightlife discovery.
+                Founded in 2024, Party Panther emerged from a simple idea: Jakarta's nightlife scene needed a central hub where party people could discover, connect, and share their experiences. What started as a passion project by a group of nightlife enthusiasts has grown into Jakarta's go-to platform for nightlife discovery.
               </p>
               <p className="text-lg text-muted-foreground text-center mt-4">
                 We're currently in beta, continuously improving our platform based on user feedback and the evolving needs of Jakarta's vibrant nightlife community. Join us on this exciting journey as we revolutionize how people experience Jakarta's nightlife!

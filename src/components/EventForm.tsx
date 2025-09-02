@@ -250,10 +250,13 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               inputId="event-image"
             />
 
-            <EventTags
-              selectedTags={selectedTags}
-              onChange={setSelectedTags}
-            />
+            <div className="space-y-2">
+              <Label>Event Tags (Optional)</Label>
+              <EventTags
+                selectedTags={selectedTags}
+                onChange={setSelectedTags}
+              />
+            </div>
 
             <div className="flex items-center space-x-2">
               <Checkbox

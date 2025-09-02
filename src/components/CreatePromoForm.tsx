@@ -195,12 +195,12 @@ export const CreatePromoForm = () => {
               onDrinkTypeChange={(value) => handleInputChange("drinkType", value)}
             />
 
-            <ImageUpload
-              label="Promo Image"
-              imageUrl={formData.image}
-              onImageChange={(value) => handleInputChange("image", value)}
-              inputId="promo-image"
-            />
+              <ImageUpload
+                label="Promo Image/Poster"
+                imageUrl={formData.image}
+                onImageChange={(value) => handleInputChange("image", value)}
+                inputId="promo-image"
+              />
 
             {formErrors.length > 0 && (
               <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">

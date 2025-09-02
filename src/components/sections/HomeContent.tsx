@@ -1,9 +1,16 @@
 
-import { Tables } from "../../integrations/supabase/types";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Hero } from "@/components/Hero";
-import { EventCard } from "@/components/EventCard";
-import { PromoCard } from "@/components/PromoCard";
+import { EventsSection } from "./EventsSection";
+import { PromosSection } from "./PromosSection";
+import { BlogSection } from "../BlogSection";
+import { Hero } from "../Hero";
+import { SpinningPaws } from "../ui/spinning-paws";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "../../integrations/supabase/types";
+import { EventCard } from "../EventCard";
+import { PromoCard } from "../PromoCard";
 import { ArrowRight, Zap, TrendingUp } from "lucide-react";
 import sectionBackground from "@/assets/section-background.jpg";
 
@@ -171,39 +178,8 @@ export const HomeContent = ({
         </div>
       </div>
 
-      {/* Call to Action Section */}
-      <div className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 party-gradient opacity-10"></div>
-        <div className="absolute inset-0">
-          <div className="floating-element absolute top-10 left-10 w-12 h-12 bg-neon-blue rounded-full blur-sm"></div>
-          <div className="floating-element absolute bottom-10 right-10 w-16 h-16 bg-neon-cyan rounded-full blur-sm"></div>
-          <div className="floating-element absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-neon-indigo rounded-full blur-md opacity-50"></div>
-        </div>
-        
-        <div className="relative z-10 text-center space-y-6 px-4">
-          <h3 className="text-3xl font-bold gradient-text animate-slide-up">Ready to Party?</h3>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            Join thousands of party-goers discovering the best events and exclusive promos in Jakarta
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4 animate-slide-up" style={{ animationDelay: '0.4s' }}>
-            <Button 
-              onClick={() => onSectionChange('events')}
-              size="lg"
-              className="bg-gradient-to-r from-neon-blue to-neon-cyan text-white font-semibold px-8 py-3 rounded-full hover:scale-105 transition-all"
-            >
-              Explore All Events
-            </Button>
-            <Button 
-              onClick={() => onSectionChange('promos')}
-              size="lg"
-              variant="outline"
-              className="font-semibold px-8 py-3 rounded-full hover:scale-105 transition-all hover:bg-primary hover:text-primary-foreground"
-            >
-              Browse Promos
-            </Button>
-          </div>
-        </div>
-      </div>
+      {/* Blog Section */}
+      <BlogSection />
     </div>
   );
 };

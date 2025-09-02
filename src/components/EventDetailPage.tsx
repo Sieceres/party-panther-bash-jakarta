@@ -228,7 +228,7 @@ export const EventDetailPage = () => {
         })
         .select(`
           *,
-          profiles!event_comments_user_id_fkey (
+          profiles (
             display_name,
             avatar_url
           )
