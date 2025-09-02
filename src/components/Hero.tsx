@@ -87,7 +87,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         {/* Main Title */}
         <div className="space-y-4">
           <h1 className="text-6xl md:text-8xl font-bold text-[#00BFFF] mb-4 animate-slide-up flex items-baseline justify-center gap-4 hero-title">
-           Party Panther1
+           Party Panther
           </h1>
           <p className="text-xl md:text-2xl text-white mb-2 animate-slide-up hero-subtitle" style={{ animationDelay: '0.2s' }}>
             Jakarta's Ultimate Party & Promo Hub
