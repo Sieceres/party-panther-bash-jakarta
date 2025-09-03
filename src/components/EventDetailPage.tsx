@@ -88,7 +88,7 @@ export const EventDetailPage = () => {
           .from('event_comments')
           .select(`
             *,
-            profiles!event_comments_user_id_fkey (
+            profiles (
               display_name,
               avatar_url
             )
@@ -416,7 +416,7 @@ export const EventDetailPage = () => {
                          </Avatar>
                          <div className="flex-1 space-y-1">
                            <div className="flex items-center space-x-2">
-                             <p className="font-semibold text-sm">
+                             <p className="font-semibold text-sm" style={{ color: '#2596be' }}>
                                {comment.profiles?.display_name || 'Anonymous'}
                              </p>
                              <p className="text-xs text-muted-foreground">
