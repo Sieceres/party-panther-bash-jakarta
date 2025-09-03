@@ -96,8 +96,8 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="flex justify-center space-x-8 mb-8 animate-slide-up" style={{ animationDelay: '0.6s' }}>
+        {/* Stats - Hidden temporarily */}
+        {/* <div className="flex justify-center space-x-8 mb-8 animate-slide-up" style={{ animationDelay: '0.6s' }}>
           <div className="text-center">
             <div className="text-2xl font-bold gradient-text">{stats.events}+</div>
             <div className="text-sm text-muted-foreground">Events</div>
@@ -110,7 +110,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
             <div className="text-2xl font-bold gradient-text">{stats.partyGoers > 1000 ? `${Math.floor(stats.partyGoers / 1000)}K+` : `${stats.partyGoers}+`}</div>
             <div className="text-sm text-white/70">Party People</div>
           </div>
-        </div>
+        </div> */}
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-slide-up" style={{ animationDelay: '0.8s' }}>
