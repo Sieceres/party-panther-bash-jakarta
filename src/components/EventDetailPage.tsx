@@ -284,7 +284,7 @@ export const EventDetailPage = () => {
           <Button
             variant="ghost"
             onClick={() => navigate('/?section=events')}
-            className="mb-6"
+            className="mb-6 hover:bg-gradient-to-r hover:from-neon-blue hover:to-neon-cyan hover:text-white transition-all"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Events
