@@ -43,6 +43,7 @@ interface Profile {
   updated_at: string;
   is_admin: boolean;
   is_super_admin: boolean;
+  is_verified: boolean;
 }
 
 export const UserProfile = () => {
@@ -803,8 +804,55 @@ export const UserProfile = () => {
         </CardContent>
       </Card>
 
-      {/* ... (Badges, User Info, Recent Activity cards remain the same) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Badges */}
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <h3 className="font-semibold flex items-center space-x-2">
+              <Star className="w-5 h-5 text-primary" />
+              <span>Badges & Achievements</span>
+            </h3>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {profile?.is_super_admin && (
+                  <Badge variant="destructive" className="bg-gradient-to-r from-red-500 to-purple-600 text-white border-none">
+                    🔥 Super Admin
+                  </Badge>
+                )}
+                {profile?.is_admin && !profile?.is_super_admin && (
+                  <Badge variant="secondary" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-none">
+                    ⚡ Admin
+                  </Badge>
+                )}
+                {profile?.is_verified && (
+                  <Badge variant="outline" className="border-primary text-primary">
+                    ✓ Verified
+                  </Badge>
+                )}
+                {userEvents.length >= 5 && (
+                  <Badge variant="outline" className="border-yellow-500 text-yellow-600">
+                    🎉 Event Creator
+                  </Badge>
+                )}
+                {userPromos.length >= 3 && (
+                  <Badge variant="outline" className="border-green-500 text-green-600">
+                    💰 Deal Master
+                  </Badge>
+                )}
+                {profile?.party_style && (
+                  <Badge variant="outline" className="border-purple-500 text-purple-600">
+                    🕺 {profile.party_style.charAt(0).toUpperCase() + profile.party_style.slice(1).replace('-', ' ')}
+                  </Badge>
+                )}
+                {(!profile?.is_admin && !profile?.is_super_admin && !profile?.is_verified && userEvents.length < 5 && userPromos.length < 3 && !profile?.party_style) && (
+                  <p className="text-sm text-muted-foreground">No badges yet. Keep creating events and promos to earn achievements!</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* User Info */}
         <Card className="bg-card border-border">
