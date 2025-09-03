@@ -41,6 +41,13 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "event_attendees_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       event_comments: {
@@ -74,6 +81,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_comments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_public"
             referencedColumns: ["id"]
           },
           {
@@ -112,6 +126,13 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "event_event_tags_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       event_tag_assignments: {
@@ -136,6 +157,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_tag_assignments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_public"
             referencedColumns: ["id"]
           },
           {
@@ -458,7 +486,66 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      events_public: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          date: string | null
+          description: string | null
+          id: string | null
+          image_url: string | null
+          is_recurrent: boolean | null
+          organizer_name: string | null
+          organizer_whatsapp: string | null
+          price_currency: string | null
+          time: string | null
+          title: string | null
+          updated_at: string | null
+          venue_address: string | null
+          venue_latitude: number | null
+          venue_longitude: number | null
+          venue_name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          date?: string | null
+          description?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_recurrent?: boolean | null
+          organizer_name?: string | null
+          organizer_whatsapp?: never
+          price_currency?: string | null
+          time?: string | null
+          title?: string | null
+          updated_at?: string | null
+          venue_address?: string | null
+          venue_latitude?: number | null
+          venue_longitude?: number | null
+          venue_name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          date?: string | null
+          description?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_recurrent?: boolean | null
+          organizer_name?: string | null
+          organizer_whatsapp?: never
+          price_currency?: string | null
+          time?: string | null
+          title?: string | null
+          updated_at?: string | null
+          venue_address?: string | null
+          venue_latitude?: number | null
+          venue_longitude?: number | null
+          venue_name?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_events_safe: {
