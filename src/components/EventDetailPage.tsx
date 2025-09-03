@@ -1,14 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { Calendar, MapPin, Users, Clock, ArrowLeft, Star, Share2, MessageSquare, Send } from "lucide-react";
 import { GoogleMap } from "./GoogleMap";
+import { EventForm } from "./EventForm";
 import { ReportDialog } from "./ReportDialog";
 import { Header } from "./Header";
-import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -405,24 +407,27 @@ export const EventDetailPage = () => {
                       No comments yet. Be the first to share your thoughts!
                     </p>
                   ) : (
-                    comments.map((comment) => (
-                      <div key={comment.id} className="flex space-x-3 p-3 bg-muted/50 rounded-lg">
-                        <div className="w-8 h-8 bg-gradient-to-r from-neon-blue to-neon-cyan rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                          {comment.profiles?.display_name?.[0]?.toUpperCase() || '?'}
-                        </div>
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <p className="font-medium text-sm">
-                              {comment.profiles?.display_name || 'Anonymous'}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(comment.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <p className="text-sm leading-relaxed">{comment.comment}</p>
-                        </div>
-                      </div>
-                    ))
+                     comments.map((comment) => (
+                       <div key={comment.id} className="flex space-x-3 p-3 bg-muted/50 rounded-lg">
+                         <Avatar className="w-8 h-8">
+                           <AvatarImage src={comment.profiles?.avatar_url} />
+                           <AvatarFallback className="bg-gradient-to-r from-neon-blue to-neon-cyan text-white font-semibold text-sm">
+                             {comment.profiles?.display_name?.[0]?.toUpperCase() || '?'}
+                           </AvatarFallback>
+                         </Avatar>
+                         <div className="flex-1 space-y-1">
+                           <div className="flex items-center space-x-2">
+                             <p className="font-semibold text-sm">
+                               {comment.profiles?.display_name || 'Anonymous'}
+                             </p>
+                             <p className="text-xs text-muted-foreground">
+                               {new Date(comment.created_at).toLocaleString()}
+                             </p>
+                           </div>
+                           <p className="text-sm leading-relaxed font-light">{comment.comment}</p>
+                         </div>
+                       </div>
+                     ))
                   )}
                 </div>
               </CardContent>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ReviewForm } from "./ReviewForm";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface Review {
   id: string;
@@ -142,51 +143,60 @@ export const ReviewsList = ({ promoId, onReviewsChange }: ReviewsListProps) => {
           <h3 className="font-semibold">Reviews ({reviews.length})</h3>
           {reviews.map((review) => (
             <div key={review.id} className="p-4 bg-card rounded-lg border space-y-2">
-              <div className="flex items-center space-x-2">
-                <div className="flex">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${
-                        i < review.rating
-                          ? "text-yellow-400 fill-current"
-                          : "text-muted-foreground"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm font-medium">
-                  Anonymous
-                </span>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-muted-foreground">
-                  {new Date(review.created_at).toLocaleDateString()}
-                </span>
-                {currentUser?.id === review.user_id && !editingReview && !showReviewForm && (
-                  <div className="flex items-center space-x-1">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setEditingReview(review)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDeleteReview(review.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+              <div className="flex items-center space-x-3">
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${review.user_id}`} />
+                  <AvatarFallback className="bg-gradient-to-r from-neon-blue to-neon-cyan text-white font-semibold text-sm">
+                    A
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-4 h-4 ${
+                            i < review.rating
+                              ? "text-yellow-400 fill-current"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm font-semibold">
+                      Anonymous
+                    </span>
                   </div>
-                )}
-              </div>
-              
-              {review.comment && (
-                <p className="text-sm text-muted-foreground">{review.comment}</p>
-              )}
+                  <div className="flex items-center space-x-2 mt-1">
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(review.created_at).toLocaleString()}
+                     </span>
+                     {currentUser?.id === review.user_id && !editingReview && !showReviewForm && (
+                       <div className="flex items-center space-x-1">
+                         <Button
+                           size="sm"
+                           variant="ghost"
+                           onClick={() => setEditingReview(review)}
+                         >
+                           <Edit className="w-4 h-4" />
+                         </Button>
+                         <Button
+                           size="sm"
+                           variant="ghost"
+                           onClick={() => handleDeleteReview(review.id)}
+                         >
+                           <Trash2 className="w-4 h-4" />
+                         </Button>
+                       </div>
+                     )}
+                   </div>
+                 </div>
+               </div>
+               
+               {review.comment && (
+                 <p className="text-sm text-muted-foreground font-light leading-relaxed">{review.comment}</p>
+               )}
             </div>
           ))}
         </div>
