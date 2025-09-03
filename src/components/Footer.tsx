@@ -56,15 +56,11 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
             <img src="/logo-partypanyther.jpeg" alt="Party Panther Logo" className="mt-4 h-32" />
           </div>
 
-          {/* Navigation Links */}
+          {/* Links */}
           <div className="flex flex-col items-center md:items-start space-y-2">
-            <h3 className="font-semibold text-lg mb-2">Quick Links</h3>
-            <button onClick={() => onSectionChange('home')} className="text-muted-foreground hover:text-primary transition-colors">Home</button>
-            <button onClick={() => onSectionChange('events')} className="text-muted-foreground hover:text-primary transition-colors">Events</button>
-            <button onClick={() => onSectionChange('promos')} className="text-muted-foreground hover:text-primary transition-colors">Promos</button>
-            <button onClick={() => onSectionChange('blog')} className="text-muted-foreground hover:text-primary transition-colors">Blog</button>
-            <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">Contact</Link>
-            <button onClick={() => onSectionChange('profile')} className="text-muted-foreground hover:text-primary transition-colors">Profile</button>
+            <h3 className="font-semibold text-lg mb-2">Links</h3>
+            <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About Us</Link>
+            <Link to="/terms-conditions" className="text-muted-foreground hover:text-primary transition-colors">Terms and Conditions</Link>
           </div>
 
           {/* Social Media */}
