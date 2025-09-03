@@ -132,13 +132,12 @@ export const UserProfile = () => {
         });
       }
 
-      // Fetch events created by the user
+      // Fetch events created by the user using the secure function
       const targetUserId = (isAdminView || isSharedProfile) ? profile?.user_id : user?.id;
       
       if (targetUserId) {
         const { data: eventsData, error: eventsError } = await supabase
-          .from('events')
-          .select('*')
+          .rpc('get_events_safe')
           .eq('created_by', targetUserId)
           .order('created_at', { ascending: false });
 

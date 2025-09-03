@@ -29,8 +29,7 @@ export const EditEventPage = () => {
 
       try {
         const { data, error } = await supabase
-          .from('events')
-          .select('*')
+          .rpc('get_events_safe')
           .eq('id', id)
           .single();
 
