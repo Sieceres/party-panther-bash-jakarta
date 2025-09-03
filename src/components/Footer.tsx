@@ -83,7 +83,7 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
                   className="text-muted-foreground hover:text-primary"
                   onClick={handleWhatsAppClick}
                 >
-                  <img src="/lovable-uploads/b887765b-39cc-4591-9a35-f4574776e28a.png" alt="WhatsApp" className="h-5 w-5" />
+                  <img src="/lovable-uploads/3204a251-393a-4b1a-8696-230c48ed85a2.png" alt="WhatsApp" className="h-5 w-5" />
                 </Button>
               </div>
             </div>
