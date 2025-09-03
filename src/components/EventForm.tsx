@@ -137,6 +137,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       };
 
       let error;
+      let newEventId = null;
+      
       if (initialData?.id) {
         // Update existing event
         const { error: updateError } = await supabase
@@ -146,25 +148,35 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         error = updateError;
       } else {
         // Insert new event
-        const { error: insertError } = await supabase.from('events').insert(eventData);
+        const { data: insertData, error: insertError } = await supabase
+          .from('events')
+          .insert(eventData)
+          .select('id')
+          .single();
         error = insertError;
+        newEventId = insertData?.id;
       }
 
       if (error) throw error;
 
-      // Handle tags if creating new event
-      if (!initialData?.id && selectedTags.length > 0) {
-        const { data: eventData } = await supabase
-          .from('events')
-          .select('id')
-          .eq('created_by', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+      // Handle new event creation tasks
+      if (!initialData?.id && newEventId) {
+        // Automatically join the organizer to their own event
+        const { error: attendeeError } = await supabase
+          .from('event_attendees')
+          .insert({
+            event_id: newEventId,
+            user_id: user.id
+          });
 
-        if (eventData) {
+        if (attendeeError) {
+          console.warn('Failed to auto-join organizer to event:', attendeeError);
+        }
+
+        // Handle tags for new event
+        if (selectedTags.length > 0) {
           const tagInserts = selectedTags.map(tag => ({
-            event_id: eventData.id,
+            event_id: newEventId,
             tag_name: tag
           }));
 
