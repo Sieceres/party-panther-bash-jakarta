@@ -61,37 +61,40 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
             <h3 className="font-semibold text-lg mb-2">Links</h3>
             <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About Us</Link>
             <Link to="/terms-conditions" className="text-muted-foreground hover:text-primary transition-colors">Terms and Conditions</Link>
+            <button onClick={() => onSectionChange('blog')} className="text-muted-foreground hover:text-primary transition-colors">Blog</button>
           </div>
 
           {/* Social Media */}
-          <div className="flex flex-col items-center md:items-start space-y-2">
-            <h3 className="font-semibold text-lg mb-2">Follow Us</h3>
-            <div className="flex space-x-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-muted-foreground hover:text-primary"
-                onClick={() => window.open("https://instagram.com/partypantherid", "_blank")}
-              >
-                <Instagram className="h-5 w-5" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-muted-foreground hover:text-primary"
-                onClick={handleWhatsAppClick}
-              >
-                <MessageCircle className="h-5 w-5" />
-              </Button>
+          <div className="flex flex-col items-center md:items-start space-y-4">
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Follow Us</h3>
+              <div className="flex space-x-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-muted-foreground hover:text-primary"
+                  onClick={() => window.open("https://instagram.com/partypantherid", "_blank")}
+                >
+                  <Instagram className="h-5 w-5" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-muted-foreground hover:text-primary"
+                  onClick={handleWhatsAppClick}
+                >
+                  <img src="/lovable-uploads/b887765b-39cc-4591-9a35-f4574776e28a.png" alt="WhatsApp" className="h-5 w-5" />
+                </Button>
+              </div>
             </div>
-          </div>
-
-          {/* Contact Info */}
-          <div className="flex flex-col items-center md:items-start space-y-2">
-            <h3 className="font-semibold text-lg mb-2">Contact Us</h3>
-            <p className="text-sm text-muted-foreground">Email: info@partypanther.id</p>
-            <p className="text-sm text-muted-foreground">Phone: +62 812 3456 7890</p>
-            <p className="text-sm text-muted-foreground">Instagram: @partypanther.id</p>
+            
+            {/* Contact Info */}
+            <div className="flex flex-col items-center md:items-start space-y-2">
+              <h3 className="font-semibold text-lg mb-2">Contact Us</h3>
+              <p className="text-sm text-muted-foreground">Email: info@partypanther.id</p>
+              <p className="text-sm text-muted-foreground">Phone: +62 812 3456 7890</p>
+              <p className="text-sm text-muted-foreground">Instagram: @partypanther.id</p>
+            </div>
           </div>
         </div>
 
