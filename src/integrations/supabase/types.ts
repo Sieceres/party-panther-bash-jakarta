@@ -461,6 +461,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_events_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          created_by: string
+          date: string
+          description: string
+          id: string
+          image_url: string
+          is_recurrent: boolean
+          organizer_name: string
+          organizer_whatsapp: string
+          price_currency: string
+          time: string
+          title: string
+          updated_at: string
+          venue_address: string
+          venue_latitude: number
+          venue_longitude: number
+          venue_name: string
+        }[]
+      }
       get_my_claim: {
         Args: { claim: string }
         Returns: Json

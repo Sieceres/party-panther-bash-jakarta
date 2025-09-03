@@ -59,10 +59,9 @@ const Index = () => {
 
   const fetchData = async (currentUserId?: string) => { // Modified to accept currentUserId
     try {
-      // Fetch events
+      // Fetch events using secure function
       const { data: eventsData, error: eventsError } = await supabase
-        .from('events')
-        .select('*')
+        .rpc('get_events_safe')
         .order('date', { ascending: true });
 
       if (eventsError) throw eventsError;
