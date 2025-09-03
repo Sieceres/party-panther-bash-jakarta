@@ -451,6 +451,18 @@ export type Database = {
         Args: { claim: string }
         Returns: Json
       }
+      get_public_profile_info: {
+        Args: { profile_user_id: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          business_name: string
+          display_name: string
+          id: string
+          is_verified: boolean
+          profile_type: string
+        }[]
+      }
       get_user_role: {
         Args: Record<PropertyKey, never> | { _user_id: string }
         Returns: string
