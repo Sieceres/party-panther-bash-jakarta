@@ -41,6 +41,7 @@ export const EventDetailPage = () => {
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
   const [commentsLoading, setCommentsLoading] = useState(false);
+  const [lastCommentTime, setLastCommentTime] = useState<number>(0);
 
   const memoizedCenter = useMemo(() => {
     if (event?.venue_latitude && event?.venue_longitude) {
@@ -208,6 +209,37 @@ export const EventDetailPage = () => {
   const handleAddComment = async () => {
     if (!newComment.trim() || !event) return;
 
+    // Spam protection - character limits
+    if (newComment.trim().length < 3) {
+      toast({
+        title: "Comment too short",
+        description: "Comments must be at least 3 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (newComment.trim().length > 500) {
+      toast({
+        title: "Comment too long",
+        description: "Comments must be less than 500 characters.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Rate limiting - prevent comments within 30 seconds
+    const now = Date.now();
+    if (now - lastCommentTime < 30000) {
+      const remainingTime = Math.ceil((30000 - (now - lastCommentTime)) / 1000);
+      toast({
+        title: "Please wait",
+        description: `You can comment again in ${remainingTime} seconds.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast({
@@ -240,6 +272,7 @@ export const EventDetailPage = () => {
 
       setComments([...comments, data]);
       setNewComment("");
+      setLastCommentTime(now);
       toast({
         title: "Comment added!",
         description: "Your comment has been posted.",
@@ -253,6 +286,13 @@ export const EventDetailPage = () => {
       });
     } finally {
       setCommentsLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleAddComment();
     }
   };
 
@@ -384,11 +424,17 @@ export const EventDetailPage = () => {
                 {/* Add Comment Form */}
                 <div className="space-y-3">
                   <Textarea
-                    placeholder="Share your thoughts about this event..."
+                    placeholder="Share your thoughts about this event... (Press Enter to submit, Shift+Enter for new line)"
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     className="min-h-[80px] resize-none"
+                    maxLength={500}
                   />
+                  <div className="flex justify-between items-center text-xs text-muted-foreground">
+                    <span>Press Enter to submit, Shift+Enter for new line</span>
+                    <span>{newComment.length}/500</span>
+                  </div>
                   <Button
                     onClick={handleAddComment}
                     disabled={!newComment.trim() || commentsLoading}
