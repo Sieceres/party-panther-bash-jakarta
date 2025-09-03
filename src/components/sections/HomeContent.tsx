@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { EventsSection } from "./EventsSection";
 import { PromosSection } from "./PromosSection";
-import { BlogSection } from "../BlogSection";
+
 import { Hero } from "../Hero";
 import { SpinningPaws } from "../ui/spinning-paws";
 import { useToast } from "@/hooks/use-toast";
@@ -175,9 +175,6 @@ export const HomeContent = ({
           </div>
         </div>
       </div>
-
-      {/* Blog Section */}
-      <BlogSection />
     </div>
   );
 };
