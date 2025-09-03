@@ -485,7 +485,7 @@ export const UserProfile = () => {
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-2 h-2 rounded-full bg-green-500"></div>
                       <h4 className="font-medium text-sm">Social Connect</h4>
-                      <span className="text-xs text-muted-foreground">(Let people find you!)</span>
+                      <span className="text-xs text-muted-foreground">(Visible to all logged-in members!)</span>
                     </div>
                     <div className="space-y-3">
                       <div>
