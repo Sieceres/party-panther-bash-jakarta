@@ -49,11 +49,14 @@ const Index = () => {
 
     fetchUserAndData();
     
-    // Handle URL section parameter
+    // Handle URL section parameter - only if there's actually a section parameter
     const urlParams = new URLSearchParams(window.location.search);
     const section = urlParams.get('section');
     if (section && ['home', 'events', 'promos', 'blog', 'profile', 'contact'].includes(section)) {
       setActiveSection(section);
+    } else {
+      // Ensure we're on home section if no URL parameter
+      setActiveSection('home');
     }
   }, []);
 
