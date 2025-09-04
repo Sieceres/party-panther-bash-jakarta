@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -10,7 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { BasicEventInfo } from "./form-components/BasicEventInfo";
 import { EventDateTime } from "./form-components/EventDateTime";
 import { EventVenue } from "./form-components/EventVenue";
-import { EventOrganizer } from "./form-components/EventOrganizer";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { EventTags } from "./form-components/EventTags";
 import { Tables } from "../integrations/supabase/types";
@@ -34,7 +34,6 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
     time: initialData?.time || "",
     venue: initialData?.venue_name || "",
     address: initialData?.venue_address || "",
-    organizer: initialData?.organizer_name || "",
     whatsapp: initialData?.organizer_whatsapp || "",
     image: initialData?.image_url || ""
   });
@@ -56,7 +55,6 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         time: initialData.time || "",
         venue: initialData.venue_name || "",
         address: initialData.venue_address || "",
-        organizer: initialData.organizer_name || "",
         whatsapp: initialData.organizer_whatsapp || "",
         image: initialData.image_url || ""
       });
@@ -106,7 +104,12 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
 
       // Validate event date is not in the past
       if (eventDate && formData.time) {
-        const eventDateTime = new Date(`${eventDate.toISOString().split('T')[0]}T${formData.time}`);
+        const year = eventDate.getFullYear();
+        const month = String(eventDate.getMonth() + 1).padStart(2, '0');
+        const day = String(eventDate.getDate()).padStart(2, '0');
+        const dateString = `${year}-${month}-${day}`;
+        
+        const eventDateTime = new Date(`${dateString}T${formData.time}`);
         const now = new Date();
         
         if (eventDateTime < now) {
@@ -129,7 +132,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         venue_address: formData.address,
         venue_latitude: location?.lat,
         venue_longitude: location?.lng,
-        organizer_name: formData.organizer || null,
+        organizer_name: null,
         organizer_whatsapp: formData.whatsapp,
         image_url: formData.image,
         is_recurrent: isRecurrent,
@@ -248,12 +251,15 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               onLocationChange={handleSetLocation}
             />
 
-            <EventOrganizer
-              organizer={formData.organizer}
-              whatsapp={formData.whatsapp}
-              onOrganizerChange={(value) => handleInputChange("organizer", value)}
-              onWhatsappChange={(value) => handleInputChange("whatsapp", value)}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="whatsapp">WhatsApp (Optional)</Label>
+              <Input
+                id="whatsapp"
+                placeholder="+62..."
+                value={formData.whatsapp}
+                onChange={(e) => handleInputChange("whatsapp", e.target.value)}
+              />
+            </div>
 
             <ImageUpload
               label="Event Image"
