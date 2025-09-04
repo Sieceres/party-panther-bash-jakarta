@@ -86,11 +86,9 @@ export const EventsSection = ({
   return (
     <div className="pt-20 px-4">
       <div className="container mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-4xl font-bold gradient-text mb-2">Jakarta Events</h2>
-            <p className="text-muted-foreground">Discover the hottest parties and events in the city!</p>
-          </div>
+        <div>
+          <h2 className="text-4xl font-bold gradient-text mb-2">Jakarta Events</h2>
+          <p className="text-muted-foreground mb-4">Discover the hottest parties and events in the city!</p>
           <Button
             onClick={handleCreateEventClick}
             className="bg-primary hover:bg-primary/90 text-primary-foreground"
