@@ -92,7 +92,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
             Jakarta's Ultimate Party & Promo Hub
           </p>
           <p className="text-lg text-white/80 max-w-2xl mx-auto animate-slide-up hero-subtitle" style={{ animationDelay: '0.4s' }}>
-            Discover the hottest events, exclusive promos, and connect with Jakarta's vibrant nightlife community
+            Discover promos that make you purr, events that make you roar, and connect with other Party Panthers in Jakarta
           </p>
         </div>
 
