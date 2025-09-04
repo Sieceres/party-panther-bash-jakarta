@@ -5,8 +5,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Tables } from "../integrations/supabase/types";
 import { EventForm } from "@/components/EventForm";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button"; // Import Button
-import { ArrowLeft } from "lucide-react"; // Import ArrowLeft icon
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { Header } from "@/components/Header";
 
 export const EditEventPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,7 +57,7 @@ export const EditEventPage = () => {
       title: "Event Updated!",
       description: "Your event has been successfully updated.",
     });
-    navigate('/profile'); // Navigate back to profile after successful update
+    navigate('/?section=events'); // Navigate back to events after successful update
   };
 
   if (loading) {
@@ -88,18 +89,21 @@ export const EditEventPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-20 px-4">
-      <div className="container mx-auto max-w-2xl">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/profile')}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Profile
-        </Button>
-        <EventForm initialData={event} onSuccess={handleSuccess} />
+    <>
+      <Header activeSection="events" onSectionChange={() => navigate('/?section=events')} />
+      <div className="min-h-screen bg-background pt-20 px-4">
+        <div className="container mx-auto max-w-2xl">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/?section=events')}
+            className="mb-6"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Events
+          </Button>
+          <EventForm initialData={event} onSuccess={handleSuccess} />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
