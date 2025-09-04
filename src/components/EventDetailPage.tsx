@@ -5,12 +5,23 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, MapPin, Users, Clock, ArrowLeft, Star, Share2, MessageSquare, Send } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, ArrowLeft, Star, Share2, MessageSquare, Send, Edit2, Trash2 } from "lucide-react";
 import { GoogleMap } from "./GoogleMap";
 import { EventForm } from "./EventForm";
 import { ReportDialog } from "./ReportDialog";
 import { Header } from "./Header";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -28,6 +39,7 @@ interface Event {
   organizer_name: string;
   organizer_whatsapp: string;
   created_at: string;
+  created_by: string;
   is_recurrent: boolean | null; // Added is_recurrent
 }
 
@@ -42,6 +54,9 @@ export const EventDetailPage = () => {
   const [newComment, setNewComment] = useState("");
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [lastCommentTime, setLastCommentTime] = useState<number>(0);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isJoinedHovered, setIsJoinedHovered] = useState(false);
 
   const memoizedCenter = useMemo(() => {
     if (event?.venue_latitude && event?.venue_longitude) {
@@ -72,6 +87,7 @@ export const EventDetailPage = () => {
         // Check if the current user has already joined this event
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          setCurrentUser(user);
           const { data: attendeeData, error: attendeeError } = await supabase
             .from('event_attendees')
             .select('*')
@@ -296,6 +312,51 @@ export const EventDetailPage = () => {
     }
   };
 
+  const handleEdit = () => {
+    navigate(`/edit-event/${event?.id}`);
+  };
+
+  const handleDelete = async () => {
+    if (!currentUser || !event || currentUser.id !== event.created_by) {
+      toast({
+        title: "Unauthorized",
+        description: "You can only delete your own events.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', event.id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Event deleted successfully!"
+      });
+
+      navigate('/?section=events');
+    } catch (error: any) {
+      console.error('Error deleting event:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete event",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const isOwner = currentUser && event && currentUser.id === event.created_by;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background pt-20 px-4">
@@ -495,9 +556,11 @@ export const EventDetailPage = () => {
 
                 <Button
                   onClick={handleJoinEvent}
+                  onMouseEnter={() => setIsJoinedHovered(true)}
+                  onMouseLeave={() => setIsJoinedHovered(false)}
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
-                  {hasJoined ? "Joined" : "Join Event"}
+                  {hasJoined ? (isJoinedHovered ? "Leave" : "Joined") : "Join Event"}
                 </Button>
                 <Button
                   variant="outline"
@@ -513,6 +576,50 @@ export const EventDetailPage = () => {
                   <Share2 className="w-4 h-4 mr-2" />
                   Share Event
                 </Button>
+                
+                {isOwner && (
+                  <>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleEdit}
+                    >
+                      <Edit2 className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                    
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          className="w-full"
+                          disabled={isDeleting}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          {isDeleting ? "Deleting..." : "Delete"}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete this event? This action cannot be undone and will remove all associated data including attendees and comments.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleDelete}
+                            className="bg-destructive hover:bg-destructive/90"
+                            disabled={isDeleting}
+                          >
+                            {isDeleting ? "Deleting..." : "Delete Event"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </>
+                )}
                 
                 <ReportDialog
                   type="event"
