@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, MapPin, Users, Clock, ArrowLeft, Star, Share2, MessageSquare, Send, Edit2, Trash2 } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, ArrowLeft, Star, Share2, MessageSquare, Send, Edit2, Trash2, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { GoogleMap } from "./GoogleMap";
 import { EventForm } from "./EventForm";
 import { ReportDialog } from "./ReportDialog";
@@ -56,7 +62,7 @@ export const EventDetailPage = () => {
   const [lastCommentTime, setLastCommentTime] = useState<number>(0);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isJoinedHovered, setIsJoinedHovered] = useState(false);
+  
 
   const memoizedCenter = useMemo(() => {
     if (event?.venue_latitude && event?.venue_longitude) {
@@ -554,14 +560,28 @@ export const EventDetailPage = () => {
                   </Badge>
                 </div>
 
-                <Button
-                  onClick={handleJoinEvent}
-                  onMouseEnter={() => setIsJoinedHovered(true)}
-                  onMouseLeave={() => setIsJoinedHovered(false)}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  {hasJoined ? (isJoinedHovered ? "Leave" : "Joined") : "Join Event"}
-                </Button>
+                {hasJoined ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                        Joined
+                        <ChevronDown className="w-4 h-4 ml-2" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="w-full">
+                      <DropdownMenuItem onClick={() => handleUnjoinEvent(currentUser?.id)} className="text-destructive focus:text-destructive">
+                        Leave
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Button
+                    onClick={handleJoinEvent}
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    Join Event
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   className="w-full"
