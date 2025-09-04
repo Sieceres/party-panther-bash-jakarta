@@ -70,8 +70,8 @@ export const HomeContent = ({
           <div className="container mx-auto space-y-8">
             <div className="flex items-center justify-between animate-slide-up">
               <div className="space-y-2">
-                <h2 className="text-4xl font-bold gradient-text mb-2 flex items-center gap-3">
-                  <Zap className="w-8 h-8 text-neon-cyan animate-pulse" />
+                <h2 className="gradient-text gradient-text-glow mb-2 flex items-center gap-3">
+                  <Zap className="w-8 h-8 text-neon-cyan animate-neon-pulse" />
                   Hot Promos
                 </h2>
                 <p className="text-muted-foreground text-lg">Save money on your next night out!</p>
@@ -86,12 +86,12 @@ export const HomeContent = ({
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {promos.slice(0, 3).map((promo, index) => (
                 <div 
                   key={promo.id} 
-                  className="card-hover"
-                  style={{ animationDelay: `${0.1 * index}s` }}
+                  className="animate-stagger-in opacity-0"
+                  style={{ animationDelay: `${0.08 * index}s` }}
                 >
                   <PromoCard 
                     promo={{
@@ -133,8 +133,8 @@ export const HomeContent = ({
           <div className="container mx-auto space-y-8">
             <div className="flex items-center justify-between animate-slide-up">
               <div className="space-y-2">
-                <h2 className="text-4xl font-bold gradient-text mb-2 flex items-center gap-3">
-                  <Calendar className="w-8 h-8 text-neon-indigo" />
+                <h2 className="gradient-text gradient-text-glow mb-2 flex items-center gap-3">
+                  <Calendar className="w-8 h-8 text-neon-indigo animate-neon-pulse" />
                   Upcoming Events
                 </h2>
                 <p className="text-muted-foreground text-lg">Don't miss these amazing parties</p>
@@ -149,12 +149,12 @@ export const HomeContent = ({
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {events.slice(0, 3).map((event, index) => (
                 <div 
                   key={event.id} 
-                  className="card-hover"
-                  style={{ animationDelay: `${0.1 * index}s` }}
+                  className="animate-stagger-in opacity-0"
+                  style={{ animationDelay: `${0.08 * index}s` }}
                 >
                   <EventCard 
                     event={{

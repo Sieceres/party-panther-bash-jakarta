@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CalendarIcon, Search, Filter, X } from "lucide-react";
+import { CalendarIcon, Search, Filter, X, MapPin, Zap, Ticket } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -58,7 +58,7 @@ export const EventFilters = ({
             placeholder="Search events..."
             value={searchTerm}
             onChange={(e) => onSearchFilter(e.target.value)}
-            className="pl-10"
+            className="glass-control pl-10"
           />
         </div>
 
@@ -68,7 +68,7 @@ export const EventFilters = ({
             <Button
               variant="outline"
               className={cn(
-                "justify-start text-left font-normal",
+                "glass-control justify-start text-left font-normal",
                 !selectedDate && "text-muted-foreground"
               )}
             >
@@ -91,12 +91,12 @@ export const EventFilters = ({
         <Button
           variant="outline"
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2"
+          className="glass-control flex items-center gap-2"
         >
-          <Filter className="w-4 h-4" />
+          <Ticket className="w-4 h-4" />
           Tags
           {selectedTags.length > 0 && (
-            <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
+            <span className="neon-tag text-xs">
               {selectedTags.length}
             </span>
           )}
