@@ -14,7 +14,7 @@ export const EditEventPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [event, setEvent] = useState<Tables<'events'> | null>(null);
+  const [event, setEvent] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export const EditEventPage = () => {
         const { data, error } = await getEventBySlugOrId(id);
 
         if (error) throw error;
-        setEvent(data);
+        setEvent(data || null);
       } catch (error) {
         console.error('Error fetching event for edit:', error);
         toast({

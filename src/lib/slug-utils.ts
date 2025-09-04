@@ -1,10 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const getEventBySlugOrId = async (identifier: string) => {
-  const slugResult = await supabase.rpc('get_events_safe').eq('slug', identifier).maybeSingle();
+  const slugResult = await supabase.from('events').select('*').eq('slug', identifier).maybeSingle();
   if (slugResult.data) return slugResult;
   
-  return await supabase.rpc('get_events_safe').eq('id', identifier).maybeSingle();
+  return await supabase.from('events').select('*').eq('id', identifier).maybeSingle();
 };
 
 export const getPromoBySlugOrId = async (identifier: string) => {
