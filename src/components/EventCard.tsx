@@ -2,9 +2,21 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User as UserIcon, Star } from "lucide-react";
+import { Calendar, User as UserIcon, Star, Edit2, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 import { Tables } from "../integrations/supabase/types";
 
@@ -28,8 +40,11 @@ import { format } from "date-fns";
 
 export const EventCard = ({ event, onJoin }: EventCardProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [creatorName, setCreatorName] = useState<string | null>(null);
   const [eventTags, setEventTags] = useState<string[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchEventData = async () => {
@@ -53,6 +68,10 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
       if (tags) {
         setEventTags(tags.map(t => t.tag_name));
       }
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
     };
 
     fetchEventData();
@@ -61,6 +80,52 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
   const handleCardClick = () => {
     navigate(`/event/${event.id}`);
   };
+
+  const handleEdit = () => {
+    navigate(`/edit-event/${event.id}`);
+  };
+
+  const handleDelete = async () => {
+    if (!currentUser || currentUser.id !== event.created_by) {
+      toast({
+        title: "Unauthorized",
+        description: "You can only delete your own events.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', event.id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Event deleted successfully!"
+      });
+
+      // Refresh the page to show updated data
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error deleting event:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete event",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const isOwner = currentUser && currentUser.id === event.created_by;
 
   return (
     <Card className="neon-card bg-card/95 backdrop-blur-sm border border-border/50 group cursor-pointer" onClick={handleCardClick}>
@@ -82,13 +147,59 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
             {eventTags[0]}
           </div>
         )}
+        {isOwner && (
+          <div className="absolute top-3 right-20 flex gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit();
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white p-2 h-8 w-8"
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-red-600 hover:bg-red-700 text-white p-2 h-8 w-8"
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this event? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    className="bg-red-600 hover:bg-red-700"
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? "Deleting..." : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
       </div>
 
       <CardContent className="p-4">
         <div className="space-y-3">
           <div>
             <h3 className="text-xl font-bold text-white mb-1 line-clamp-2" style={{ fontSize: '20px' }}>{event.title}</h3>
-            <p className="text-sm" style={{ color: '#E0E0E0', fontSize: '14px' }}>{format(new Date(event.date), 'EEEE, MMMM do')} at {event.time}</p>
+            <p className="text-sm whitespace-pre-wrap" style={{ color: '#E0E0E0', fontSize: '14px' }}>{format(new Date(event.date), 'EEEE, MMMM do')} at {event.time}</p>
           </div>
           
           <p className="text-sm text-white">{event.venue || event.venue_name}</p>

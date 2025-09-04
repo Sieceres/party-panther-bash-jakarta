@@ -1,12 +1,24 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Star, MessageSquare } from "lucide-react";
+import { User, Star, MessageSquare, Edit2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReviewsList } from "./ReviewsList";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Promo {
   id: string;
@@ -35,10 +47,13 @@ import { format } from "date-fns";
 
 export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [showReviews, setShowReviews] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
   const [creatorName, setCreatorName] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchCreator = async () => {
@@ -53,7 +68,13 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
       }
     };
 
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    };
+
     fetchCreator();
+    getCurrentUser();
   }, [promo.created_by]);
 
   const handleCardClick = () => {
@@ -64,6 +85,52 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
     setAverageRating(avgRating);
     setTotalReviews(total);
   };
+
+  const handleEdit = () => {
+    navigate(`/edit-promo/${promo.id}`);
+  };
+
+  const handleDelete = async () => {
+    if (!currentUser || currentUser.id !== promo.created_by) {
+      toast({
+        title: "Unauthorized",
+        description: "You can only delete your own promos.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('promos')
+        .delete()
+        .eq('id', promo.id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Promo deleted successfully!"
+      });
+
+      // Refresh the page to show updated data
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error deleting promo:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete promo",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const isOwner = currentUser && currentUser.id === promo.created_by;
 
   return (
     <Card className="neon-card bg-card/95 backdrop-blur-sm border border-border/50 group cursor-pointer" onClick={handleCardClick}>
@@ -87,11 +154,57 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
             {promo.category}
           </div>
         )}
+        {isOwner && (
+          <div className="absolute top-3 right-20 flex gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit();
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white p-2 h-8 w-8"
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-red-600 hover:bg-red-700 text-white p-2 h-8 w-8"
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Promo</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this promo? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    className="bg-red-600 hover:bg-red-700"
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? "Deleting..." : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
       </div>
 
       <CardHeader className="pb-3">
         <h3 className="text-xl font-bold text-white mb-1 line-clamp-2" style={{ fontSize: '20px' }}>{promo.title}</h3>
-        <p className="text-sm line-clamp-2" style={{ color: '#E0E0E0', fontSize: '14px' }}>{promo.description}</p>
+        <p className="text-sm line-clamp-2 whitespace-pre-wrap" style={{ color: '#E0E0E0', fontSize: '14px' }}>{promo.description}</p>
       </CardHeader>
 
       <CardContent className="space-y-3">
