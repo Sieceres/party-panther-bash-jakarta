@@ -88,23 +88,36 @@ export const UserProfile = () => {
       setUser(user);
 
       // Determine which profile to fetch based on the route
-      let profileQuery;
-      if (isAdminView) {
-        // Admin viewing a user: /admin/user/:userId - userId is the profile ID
-        profileQuery = supabase.from('profiles').select('*, is_admin, is_super_admin').eq('id', userId).single();
-      } else if (isSharedProfile) {
-        // Shared profile: /profile/:userId - userId is the user_id
-        profileQuery = supabase.from('profiles').select('*, is_admin, is_super_admin').eq('user_id', userId).single();
-      } else if (user) {
-        // Current user's own profile: /profile
-        profileQuery = supabase.from('profiles').select('*, is_admin, is_super_admin').eq('user_id', user.id).single();
-      } else {
-        // No user and not a shared profile - should not happen due to earlier check
-        setLoading(false);
-        return;
+      let profileData;
+      let error = null;
+      
+      try {
+        if (isAdminView) {
+          // Admin viewing a user: use full profile function with profile ID
+          const profileResult = await supabase.from('profiles').select('user_id').eq('id', userId).single();
+          if (profileResult.data) {
+            const { data } = await supabase.rpc('get_full_profile_info', { profile_user_id: profileResult.data.user_id });
+            profileData = data && data.length > 0 ? data[0] : null;
+          }
+        } else if (isSharedProfile) {
+          // Shared profile: use public profile function
+          const { data } = await supabase.rpc('get_public_profile_info', { profile_user_id: userId });
+          profileData = data && data.length > 0 ? data[0] : null;
+        } else if (user) {
+          // Current user's own profile: use full profile function
+          const { data } = await supabase.rpc('get_full_profile_info', { profile_user_id: user.id });
+          profileData = data && data.length > 0 ? data[0] : null;
+        } else {
+          // No user and not a shared profile - should not happen due to earlier check
+          setLoading(false);
+          return;
+        }
+      } catch (err) {
+        error = err;
+        profileData = null;
       }
 
-      const { data: profile, error } = await profileQuery;
+      const profile = profileData;
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);

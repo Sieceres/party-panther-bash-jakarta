@@ -59,12 +59,13 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
     const fetchCreator = async () => {
       if (promo.created_by) {
         const { data: profile } = await supabase
-          .from('profiles')
-          .select('display_name')
-          .eq('user_id', promo.created_by)
-          .single();
+          .rpc('get_safe_profile_info', { profile_user_id: promo.created_by });
         
-        setCreatorName(profile?.display_name || 'Anonymous');
+        if (profile && profile.length > 0) {
+          setCreatorName(profile[0]?.display_name || 'Anonymous');
+        } else {
+          setCreatorName('Anonymous');
+        }
       }
     };
 

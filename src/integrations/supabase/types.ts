@@ -483,6 +483,26 @@ export type Database = {
           venue_name: string
         }[]
       }
+      get_full_profile_info: {
+        Args: { profile_user_id: string }
+        Returns: {
+          age: number
+          avatar_url: string
+          bio: string
+          business_name: string
+          created_at: string
+          display_name: string
+          gender: string
+          id: string
+          instagram: string
+          is_verified: boolean
+          party_style: string
+          profile_type: string
+          updated_at: string
+          user_id: string
+          whatsapp: string
+        }[]
+      }
       get_my_claim: {
         Args: { claim: string }
         Returns: Json
@@ -497,6 +517,18 @@ export type Database = {
           id: string
           is_verified: boolean
           profile_type: string
+        }[]
+      }
+      get_safe_profile_info: {
+        Args: { profile_user_id: string }
+        Returns: {
+          avatar_url: string
+          business_name: string
+          display_name: string
+          id: string
+          is_verified: boolean
+          profile_type: string
+          user_id: string
         }[]
       }
       get_user_role: {
