@@ -82,11 +82,16 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
             {promo.discount}
           </div>
         )}
+        {promo.category && (
+          <div className="neon-tag absolute top-3 left-3">
+            {promo.category}
+          </div>
+        )}
       </div>
 
       <CardHeader className="pb-3">
-        <h3 className="text-xl font-bold text-white mb-1 line-clamp-2">{promo.title}</h3>
-        <p className="text-sm line-clamp-2" style={{ color: '#E0E0E0' }}>{promo.description}</p>
+        <h3 className="text-xl font-bold text-white mb-1 line-clamp-2" style={{ fontSize: '20px' }}>{promo.title}</h3>
+        <p className="text-sm line-clamp-2" style={{ color: '#E0E0E0', fontSize: '14px' }}>{promo.description}</p>
       </CardHeader>
 
       <CardContent className="space-y-3">

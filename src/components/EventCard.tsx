@@ -77,13 +77,18 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
         <div className="neon-tag absolute top-3 right-3">
           {format(new Date(event.date), 'MMM dd')}
         </div>
+        {eventTags.length > 0 && (
+          <div className="neon-tag absolute top-3 left-3">
+            {eventTags[0]}
+          </div>
+        )}
       </div>
 
       <CardContent className="p-4">
         <div className="space-y-3">
           <div>
-            <h3 className="text-xl font-bold text-white mb-1 line-clamp-2">{event.title}</h3>
-            <p className="text-sm" style={{ color: '#E0E0E0' }}>{format(new Date(event.date), 'EEEE, MMMM do')} at {event.time}</p>
+            <h3 className="text-xl font-bold text-white mb-1 line-clamp-2" style={{ fontSize: '20px' }}>{event.title}</h3>
+            <p className="text-sm" style={{ color: '#E0E0E0', fontSize: '14px' }}>{format(new Date(event.date), 'EEEE, MMMM do')} at {event.time}</p>
           </div>
           
           <p className="text-sm text-white">{event.venue || event.venue_name}</p>

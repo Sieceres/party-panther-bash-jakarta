@@ -118,13 +118,15 @@
     background-clip: text;
     font-size: 36px;
     font-weight: 700;
+    position: relative;
   }
 
   .gradient-text-glow {
     position: relative;
   }
 
-  .gradient-text-glow::after {
+  .gradient-text-glow::after,
+  .gradient-text::after {
     content: '';
     position: absolute;
     bottom: -8px;
@@ -133,25 +135,30 @@
     height: 3px;
     background: linear-gradient(90deg, #00CFFF, #4F8EFF);
     border-radius: 2px;
-    animation: glow-underline 2s ease-in-out infinite;
+    box-shadow: 0 0 12px rgba(0, 207, 255, 0.6);
+    animation: glow-pulse 2s ease-in-out infinite alternate;
   }
 
   .glass-control {
     backdrop-filter: blur(12px);
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50px;
+    border-radius: 25px;
     transition: all 0.3s ease;
+    padding: 8px 16px;
   }
 
   .glass-control:hover {
     border-color: #00CFFF;
-    box-shadow: 0 0 20px rgba(0, 207, 255, 0.3);
+    box-shadow: 0 0 16px rgba(0, 207, 255, 0.3);
     transform: scale(1.02);
   }
 
   .neon-card {
+    background: rgba(15, 15, 15, 0.9);
+    border: 1px solid rgba(0, 207, 255, 0.2);
     border-radius: 16px;
+    backdrop-filter: blur(10px);
     box-shadow: 0 0 12px rgba(0, 207, 255, 0.25);
     transition: all 0.3s ease;
     overflow: hidden;
@@ -159,7 +166,8 @@
 
   .neon-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 8px 32px rgba(0, 207, 255, 0.4);
+    box-shadow: 0 12px 40px rgba(0, 207, 255, 0.3);
+    border-color: rgba(0, 207, 255, 0.4);
   }
 
   .neon-card .card-image {
@@ -171,31 +179,46 @@
   }
 
   .image-overlay {
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
-    transition: background 0.3s ease;
+    background: linear-gradient(to bottom, 
+      transparent 0%,
+      transparent 40%,
+      rgba(0, 0, 0, 0.4) 70%,
+      rgba(0, 0, 0, 0.6) 100%
+    );
+    transition: all 0.3s ease;
   }
 
   .neon-card:hover .image-overlay {
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    background: linear-gradient(to bottom, 
+      transparent 0%,
+      transparent 30%,
+      rgba(0, 0, 0, 0.6) 60%,
+      rgba(0, 0, 0, 0.8) 100%
+    );
   }
 
   .neon-tag {
-    background: #00CFFF;
-    color: #000;
+    background: linear-gradient(135deg, #00CFFF, #4F8EFF);
+    color: #000000;
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
+    box-shadow: 0 0 12px rgba(0, 207, 255, 0.4);
+    display: inline-block;
   }
 
   .cta-button {
     background: linear-gradient(135deg, #00CFFF, #4F8EFF);
     color: white;
-    padding: 8px 24px;
-    border-radius: 25px;
     border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
     font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 207, 255, 0.3);
     opacity: 0;
     transform: translateY(10px);
   }
@@ -206,8 +229,8 @@
   }
 
   .cta-button:hover {
-    box-shadow: 0 4px 20px rgba(0, 207, 255, 0.4);
     transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 207, 255, 0.6);
   }
 
   .hero-bg {
@@ -268,6 +291,40 @@
   .floating-element:nth-child(3n) {
     animation-delay: -4s;
     animation-duration: 10s;
+  }
+
+  /* Animation utilities */
+  .animate-stagger-in {
+    animation: stagger-fade-up 0.6s ease-out forwards;
+  }
+
+  @keyframes stagger-fade-up {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { 
+      box-shadow: 0 0 12px rgba(0, 207, 255, 0.4);
+    }
+    50% { 
+      box-shadow: 0 0 20px rgba(0, 207, 255, 0.8);
+    }
+  }
+
+  @keyframes neon-pulse {
+    0%, 100% { 
+      filter: drop-shadow(0 0 8px rgba(0, 207, 255, 0.6));
+    }
+    50% { 
+      filter: drop-shadow(0 0 16px rgba(0, 207, 255, 0.9));
+    }
   }
 
   /* Keyframes for floating animation */

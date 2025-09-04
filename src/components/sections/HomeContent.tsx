@@ -70,16 +70,16 @@ export const HomeContent = ({
           <div className="container mx-auto space-y-8">
             <div className="flex items-center justify-between animate-slide-up">
               <div className="space-y-2">
-                <h2 className="gradient-text gradient-text-glow mb-2 flex items-center gap-3">
-                  <Zap className="w-8 h-8 text-neon-cyan animate-neon-pulse" />
+                <h2 className="gradient-text flex items-center gap-3">
+                  <Zap className="w-10 h-10" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
                   Hot Promos
                 </h2>
-                <p className="text-muted-foreground text-lg">Save money on your next night out!</p>
+                <p className="text-gray-300 text-lg">Save money on your next night out!</p>
               </div>
               <Button
                 onClick={() => onSectionChange("promos")}
                 variant="outline"
-                className="group hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105"
+                className="glass-control hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105"
               >
                 See More
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -133,16 +133,16 @@ export const HomeContent = ({
           <div className="container mx-auto space-y-8">
             <div className="flex items-center justify-between animate-slide-up">
               <div className="space-y-2">
-                <h2 className="gradient-text gradient-text-glow mb-2 flex items-center gap-3">
-                  <Calendar className="w-8 h-8 text-neon-indigo animate-neon-pulse" />
+                <h2 className="gradient-text flex items-center gap-3">
+                  <Calendar className="w-10 h-10" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
                   Upcoming Events
                 </h2>
-                <p className="text-muted-foreground text-lg">Don't miss these amazing parties</p>
+                <p className="text-gray-300 text-lg">Don't miss these amazing parties</p>
               </div>
               <Button
                 onClick={() => onSectionChange("events")}
                 variant="outline"
-                className="group hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105"
+                className="glass-control hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105"
               >
                 See More
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />

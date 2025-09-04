@@ -53,12 +53,13 @@ export const EventFilters = ({
       <div className="flex flex-wrap gap-2">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
             placeholder="Search events..."
             value={searchTerm}
             onChange={(e) => onSearchFilter(e.target.value)}
-            className="glass-control pl-10"
+            className="glass-control pl-12 pr-4 h-10"
+            style={{ background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '25px' }}
           />
         </div>
 
@@ -67,13 +68,13 @@ export const EventFilters = ({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className={cn(
-                "glass-control justify-start text-left font-normal",
-                !selectedDate && "text-muted-foreground"
-              )}
+              className="glass-control justify-start text-left font-normal flex items-center gap-2 h-10 px-4"
+              style={{ background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '25px' }}
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {selectedDate ? format(selectedDate, "PPP") : "Select date"}
+              <CalendarIcon className="h-4 w-4 text-cyan-400" />
+              <span className={cn(!selectedDate && "text-gray-400")}>
+                {selectedDate ? format(selectedDate, "PPP") : "Select date"}
+              </span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -91,12 +92,13 @@ export const EventFilters = ({
         <Button
           variant="outline"
           onClick={() => setShowFilters(!showFilters)}
-          className="glass-control flex items-center gap-2"
+          className="glass-control flex items-center gap-2 h-10 px-4"
+          style={{ background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '25px' }}
         >
-          <Ticket className="w-4 h-4" />
-          Tags
+          <Ticket className="w-4 h-4 text-cyan-400" />
+          <span>Tags</span>
           {selectedTags.length > 0 && (
-            <span className="neon-tag text-xs">
+            <span className="neon-tag text-xs ml-1">
               {selectedTags.length}
             </span>
           )}
