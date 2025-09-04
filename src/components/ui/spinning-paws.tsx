@@ -40,6 +40,15 @@ export const SpinningPaws = ({ className, size = "md" }: SpinningPawsProps) => {
           </div>
         </div>
       </div>
+      
+      <div className="ml-3 text-center">
+        <div className="text-sm font-medium text-muted-foreground animate-pulse">
+          Loading...
+        </div>
+        <div className="text-xs text-muted-foreground mt-1">
+          Fetching the hottest spots! 🎉
+        </div>
+      </div>
     </div>
   );
 };
