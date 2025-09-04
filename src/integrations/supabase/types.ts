@@ -180,6 +180,7 @@ export type Database = {
           organizer_name: string | null
           organizer_whatsapp: string | null
           price_currency: string | null
+          slug: string | null
           time: string
           title: string
           updated_at: string
@@ -199,6 +200,7 @@ export type Database = {
           organizer_name?: string | null
           organizer_whatsapp?: string | null
           price_currency?: string | null
+          slug?: string | null
           time: string
           title: string
           updated_at?: string
@@ -218,6 +220,7 @@ export type Database = {
           organizer_name?: string | null
           organizer_whatsapp?: string | null
           price_currency?: string | null
+          slug?: string | null
           time?: string
           title?: string
           updated_at?: string
@@ -376,6 +379,7 @@ export type Database = {
           original_price_amount: number | null
           price_currency: string | null
           promo_type: string | null
+          slug: string | null
           title: string
           updated_at: string
           valid_until: string | null
@@ -399,6 +403,7 @@ export type Database = {
           original_price_amount?: number | null
           price_currency?: string | null
           promo_type?: string | null
+          slug?: string | null
           title: string
           updated_at?: string
           valid_until?: string | null
@@ -422,6 +427,7 @@ export type Database = {
           original_price_amount?: number | null
           price_currency?: string | null
           promo_type?: string | null
+          slug?: string | null
           title?: string
           updated_at?: string
           valid_until?: string | null
@@ -461,6 +467,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_slug: {
+        Args: { input_text: string }
+        Returns: string
+      }
       get_events_safe: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -530,6 +540,14 @@ export type Database = {
           profile_type: string
           user_id: string
         }[]
+      }
+      get_unique_event_slug: {
+        Args: { event_id?: string; title_text: string }
+        Returns: string
+      }
+      get_unique_promo_slug: {
+        Args: { promo_id?: string; title_text: string }
+        Returns: string
       }
       get_user_role: {
         Args: Record<PropertyKey, never> | { _user_id: string }
