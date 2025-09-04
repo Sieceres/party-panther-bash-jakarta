@@ -29,6 +29,7 @@ export const EventsSection = ({
 }: EventsSectionProps) => {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -38,6 +39,7 @@ export const EventsSection = ({
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+      setAuthLoading(false);
     };
     getUser();
   }, []);
@@ -89,22 +91,24 @@ export const EventsSection = ({
         <div>
           <h2 className="text-4xl font-bold gradient-text mb-2">Jakarta Events</h2>
           <p className="text-muted-foreground mb-4">Discover the hottest parties and events in the city!</p>
-          <Button
-            onClick={handleCreateEventClick}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-          >
-            {user ? (
-              <>
-                <Calendar className="w-4 h-4 mr-2" />
-                Create Event
-              </>
-            ) : (
-              <>
-                <Lock className="w-4 h-4 mr-2" />
-                Login to Create Event
-              </>
-            )}
-          </Button>
+          {!authLoading && (
+            <Button
+              onClick={handleCreateEventClick}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {user ? (
+                <>
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Create Event
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4 mr-2" />
+                  Login to Create Event
+                </>
+              )}
+            </Button>
+          )}
         </div>
 
         {showCreateEvent && (
