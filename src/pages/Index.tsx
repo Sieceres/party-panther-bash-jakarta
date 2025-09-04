@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "../integrations/supabase/types";
 import { Footer } from "@/components/Footer";
 import { User } from "@supabase/supabase-js";
+import { EventWithSlug, PromoWithSlug } from "@/types/extended-types";
 
 const Index = () => {
   const { toast } = useToast();
@@ -35,8 +36,8 @@ const Index = () => {
   const [dayFilter, setDayFilter] = useState<string[]>(["all"]);
   const [areaFilter, setAreaFilter] = useState<string[]>(["all"]);
   const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(["all"]);
-  const [events, setEvents] = useState<Tables<'events'>[]>([]);
-  const [promos, setPromos] = useState<Tables<'promos'>[]>([]);
+  const [events, setEvents] = useState<EventWithSlug[]>([]);  
+  const [promos, setPromos] = useState<PromoWithSlug[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null); // Added user state
 
@@ -80,10 +81,11 @@ const Index = () => {
         joinedEventIds = attendeesData.map(attendee => attendee.event_id);
       }
 
-      const eventsWithJoinStatus = eventsData.map(event => ({
+      const eventsWithJoinStatus = eventsData.map((event: any) => ({
         ...event,
-        isJoined: joinedEventIds.includes(event.id)
-      }));
+        isJoined: joinedEventIds.includes(event.id),
+        slug: event.slug || null
+      })) as EventWithSlug[];
 
       // Fetch promos
       const { data: promosData, error: promosError } = await supabase
@@ -97,7 +99,7 @@ const Index = () => {
       console.log('Fetched promos:', promosData);
       
       setEvents(eventsWithJoinStatus || []);
-      setPromos(promosData || []);
+      setPromos((promosData?.map((promo: any) => ({ ...promo, slug: promo.slug || null })) as PromoWithSlug[]) || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       // Use fallback mock data if database fails

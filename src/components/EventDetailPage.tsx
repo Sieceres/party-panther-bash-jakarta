@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getEventBySlugOrId, getEditEventUrl } from "@/lib/slug-utils";
 
 interface Event {
   id: string;
@@ -46,7 +47,8 @@ interface Event {
   organizer_whatsapp: string;
   created_at: string;
   created_by: string;
-  is_recurrent: boolean | null; // Added is_recurrent
+  is_recurrent: boolean | null;
+  slug?: string | null;
 }
 
 export const EventDetailPage = () => {
@@ -82,10 +84,7 @@ export const EventDetailPage = () => {
       if (!id) return;
       
       try {
-        const { data, error } = await supabase
-          .rpc('get_events_safe')
-          .eq('id', id)
-          .single();
+        const { data, error } = await getEventBySlugOrId(id);
 
         if (error) throw error;
         setEvent(data);
@@ -97,7 +96,7 @@ export const EventDetailPage = () => {
           const { data: attendeeData, error: attendeeError } = await supabase
             .from('event_attendees')
             .select('*')
-            .eq('event_id', id)
+            .eq('event_id', data?.id)
             .eq('user_id', user.id)
             .maybeSingle();
 
@@ -116,7 +115,7 @@ export const EventDetailPage = () => {
               avatar_url
             )
           `)
-          .eq('event_id', id)
+          .eq('event_id', data?.id)
           .order('created_at', { ascending: true });
 
         if (commentsData && !commentsError) {
@@ -319,7 +318,7 @@ export const EventDetailPage = () => {
   };
 
   const handleEdit = () => {
-    navigate(`/edit-event/${event?.id}`);
+    navigate(getEditEventUrl(event));
   };
 
   const handleDelete = async () => {

@@ -25,6 +25,8 @@ import { useToast } from "@/hooks/use-toast";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { Tables } from "../integrations/supabase/types";
 import { ImageUpload } from "./form-components/ImageUpload";
+import { EventWithSlug, PromoWithSlug } from "@/types/extended-types";
+import { getEventUrl, getPromoUrl, getEditEventUrl, getEditPromoUrl } from "@/lib/slug-utils";
 
 // ... (interface Profile remains the same)
 
@@ -52,8 +54,8 @@ export const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [userEvents, setUserEvents] = useState<Tables<'events'>[]>([]);
-  const [userPromos, setUserPromos] = useState<Tables<'promos'>[]>([]);
+  const [userEvents, setUserEvents] = useState<EventWithSlug[]>([]);
+  const [userPromos, setUserPromos] = useState<PromoWithSlug[]>([]);
   const [editForm, setEditForm] = useState({
     display_name: '',
     bio: '',
@@ -162,7 +164,7 @@ export const UserProfile = () => {
             variant: "destructive",
           });
         } else {
-          setUserEvents(eventsData || []);
+          setUserEvents((eventsData?.map((event: any) => ({ ...event, slug: event.slug || null })) as EventWithSlug[]) || []);
         }
 
         // Fetch promos created by the user
@@ -180,7 +182,7 @@ export const UserProfile = () => {
             variant: "destructive",
           });
         } else {
-          setUserPromos(promosData || []);
+          setUserPromos((promosData?.map((promo: any) => ({ ...promo, slug: promo.slug || null })) as PromoWithSlug[]) || []);
         }
       }
 
@@ -710,7 +712,7 @@ export const UserProfile = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate(`/edit-event/${event.id}`)}
+                      onClick={() => navigate(getEditEventUrl(event))}
                     >
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
@@ -777,7 +779,7 @@ export const UserProfile = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate(`/edit-promo/${promo.id}`)}
+                      onClick={() => navigate(getEditPromoUrl(promo))}
                     >
                       <Edit className="w-4 h-4 mr-2" />
                       Edit

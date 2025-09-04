@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Header } from "@/components/Header";
+import { getEventBySlugOrId } from "@/lib/slug-utils";
 
 export const EditEventPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,10 +30,7 @@ export const EditEventPage = () => {
       }
 
       try {
-        const { data, error } = await supabase
-          .rpc('get_events_safe')
-          .eq('id', id)
-          .single();
+        const { data, error } = await getEventBySlugOrId(id);
 
         if (error) throw error;
         setEvent(data);
@@ -43,7 +41,7 @@ export const EditEventPage = () => {
           description: "Failed to load event for editing.",
           variant: "destructive"
         });
-        navigate('/profile'); // Redirect if event not found or error
+        navigate('/?section=events'); // Redirect if event not found or error
       } finally {
         setLoading(false);
       }
