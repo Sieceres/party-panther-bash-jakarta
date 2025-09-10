@@ -215,7 +215,8 @@ export const UserProfile = () => {
           const { data: favoritePromosData, error: favoritePromosError } = await supabase
             .from('user_favorite_promos')
             .select(`
-              promos:promos(*)
+              promo_id,
+              promos!inner(*)
             `)
             .eq('user_id', targetUserId);
 

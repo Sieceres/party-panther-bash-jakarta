@@ -29,6 +29,10 @@ const Index = () => {
     }
     setActiveSection(section);
     
+    // Update URL to reflect section change
+    const newUrl = section === 'home' ? '/' : `/?section=${section}`;
+    window.history.pushState({}, '', newUrl);
+    
     // Scroll to top when changing sections
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -55,9 +59,13 @@ const Index = () => {
     const section = urlParams.get('section');
     if (section && ['home', 'events', 'promos', 'blog', 'profile', 'contact'].includes(section)) {
       setActiveSection(section);
+      // Update URL without page reload
+      const newUrl = section === 'home' ? '/' : `/?section=${section}`;
+      window.history.replaceState({}, '', newUrl);
     } else {
       // Ensure we're on home section if no URL parameter
       setActiveSection('home');
+      window.history.replaceState({}, '', '/');
     }
   }, []);
 

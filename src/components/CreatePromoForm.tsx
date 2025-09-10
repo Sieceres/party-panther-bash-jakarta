@@ -60,7 +60,6 @@ export const CreatePromoForm = () => {
     if (!formData.description.trim()) errors.push("Description is required");
     if (!formData.venue.trim()) errors.push("Venue name is required");
     if (!formData.promoType) errors.push("Promo type is required");
-    if (!validUntilDate) errors.push("Valid until date is required");
     
     return errors;
   };
@@ -69,8 +68,7 @@ export const CreatePromoForm = () => {
     return formData.title.trim() && 
            formData.description.trim() && 
            formData.venue.trim() && 
-           formData.promoType && 
-           validUntilDate;
+           formData.promoType;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -105,7 +103,7 @@ export const CreatePromoForm = () => {
       const { error } = await supabase.from('promos').insert({
         title: formData.title,
         description: formData.description,
-        discount_text: formData.title, // Use title as discount text since discount field is removed
+        discount_text: formData.promoType, // Use promo type as discount text
         venue_name: formData.venue,
         venue_address: formData.address,
         venue_latitude: location?.lat,

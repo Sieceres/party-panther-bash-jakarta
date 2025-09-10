@@ -36,7 +36,7 @@ export const PromoDetails = ({
   return (
     <>
       <div className="space-y-2">
-        <Label>Valid Until *</Label>
+        <Label>Valid Until (Optional)</Label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
