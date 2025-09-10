@@ -182,14 +182,6 @@ const Index = () => {
     }
   };
 
-  const handleClaimPromo = (promoId: string) => {
-    const promo = promos.find(p => p.id === promoId);
-    toast({
-      title: "Promo claimed! 🎊",
-      description: `"${promo?.title}" has been added to your account. Show this at the venue.`,
-    });
-  };
-
   const renderContent = () => {
     switch (activeSection) {
       case "home":
@@ -200,7 +192,6 @@ const Index = () => {
             promos={promos}
             onSectionChange={handleSectionChange}
             onJoinEvent={handleJoinEvent}
-            onClaimPromo={handleClaimPromo}
           />
         );
       
@@ -226,7 +217,6 @@ const Index = () => {
             drinkTypeFilter={drinkTypeFilter}
             loading={loading}
             onToggleCreatePromo={() => setShowCreatePromo(!showCreatePromo)}
-            onClaimPromo={handleClaimPromo}
             onDayFilterChange={handleDayFilterChange}
             onAreaFilterChange={handleAreaFilterChange}
             onDrinkTypeFilterChange={handleDrinkTypeFilterChange}
@@ -259,7 +249,6 @@ const Index = () => {
             promos={promos}
             onSectionChange={handleSectionChange}
             onJoinEvent={handleJoinEvent}
-            onClaimPromo={handleClaimPromo}
           />
         );
     }

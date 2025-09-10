@@ -20,7 +20,6 @@ interface HomeContentProps {
   promos: Tables<'promos'>[];
   onSectionChange: (section: string) => void;
   onJoinEvent: (eventId: string) => void;
-  onClaimPromo: (promoId: string) => void;
 }
 
 export const HomeContent = ({ 
@@ -28,8 +27,7 @@ export const HomeContent = ({
   events, 
   promos, 
   onSectionChange, 
-  onJoinEvent, 
-  onClaimPromo 
+  onJoinEvent
 }: HomeContentProps) => {
   if (loading) {
     return (
@@ -93,21 +91,20 @@ export const HomeContent = ({
                   className="animate-stagger-in opacity-0"
                   style={{ animationDelay: `${0.08 * index}s` }}
                 >
-                  <PromoCard 
-                    promo={{
-                      ...promo,
-                      discount: promo.discount_text,
-                      venue: promo.venue_name,
-                      validUntil: promo.valid_until,
-                      image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
-                      originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
-                      discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
-                      day: promo.day_of_week?.toLowerCase(),
-                      area: promo.area?.toLowerCase(),
-                      drinkType: promo.drink_type?.toLowerCase()
-                    }} 
-                    onClaim={onClaimPromo} 
-                  />
+                   <PromoCard 
+                     promo={{
+                       ...promo,
+                       discount: promo.discount_text,
+                       venue: promo.venue_name,
+                       validUntil: promo.valid_until,
+                       image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
+                       originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
+                       discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
+                       day: promo.day_of_week?.toLowerCase(),
+                       area: promo.area?.toLowerCase(),
+                       drinkType: promo.drink_type?.toLowerCase()
+                     }} 
+                   />
                 </div>
               ))}
             </div>

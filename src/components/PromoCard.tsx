@@ -40,12 +40,11 @@ interface Promo {
 
 interface PromoCardProps {
   promo: Promo;
-  onClaim?: (promoId: string) => void;
 }
 
 import { format } from "date-fns";
 
-export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
+export const PromoCard = ({ promo }: PromoCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showReviews, setShowReviews] = useState(false);
@@ -345,31 +344,15 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 flex justify-between items-center">
-        <Button variant="outline" size="sm" onClick={(e) => {
-          e.stopPropagation();
-          navigate(`/promo/${promo.id}`);
-        }}>
-          View Details
-        </Button>
-        <button 
-          className="cta-button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClaim && onClaim(promo.id);
-          }}
-        >
-          Claim Promo
-        </button>
-        
-        {/* Reviews Section */}
-        <div className={cn("w-full mt-4", { "hidden": !showReviews })}>
+      {/* Reviews Section */}
+      {showReviews && (
+        <CardFooter className="p-4 pt-0">
           <ReviewsList 
             promoId={promo.id} 
             onReviewsChange={handleReviewsChange}
           />
-        </div>
-      </CardFooter>
+        </CardFooter>
+      )}
     </Card>
   );
 };

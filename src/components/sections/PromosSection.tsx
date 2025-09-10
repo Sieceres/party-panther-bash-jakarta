@@ -23,7 +23,6 @@ interface PromosSectionProps {
   drinkTypeFilter: string[];
   loading?: boolean;
   onToggleCreatePromo: () => void;
-  onClaimPromo: (promoId: string) => void;
   onDayFilterChange: (filter: string[]) => void;
   onAreaFilterChange: (filter: string[]) => void;
   onDrinkTypeFilterChange: (filter: string[]) => void;
@@ -37,7 +36,6 @@ export const PromosSection = ({
   drinkTypeFilter,
   loading = false,
   onToggleCreatePromo,
-  onClaimPromo,
   onDayFilterChange,
   onAreaFilterChange,
   onDrinkTypeFilterChange
@@ -308,7 +306,6 @@ export const PromosSection = ({
                   drinkType: promo.drink_type?.toLowerCase(),
                   created_by: promo.created_by
                 }}
-                onClaim={onClaimPromo} 
               />
             ))
           )}
