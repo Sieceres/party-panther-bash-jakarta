@@ -586,6 +586,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       should_show_organizer_contact: {
         Args: Record<PropertyKey, never>
         Returns: boolean
