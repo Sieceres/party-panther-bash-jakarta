@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Star, MessageSquare, Edit2, Trash2 } from "lucide-react";
+import { User, Star, MessageSquare, Edit2, Trash2, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReviewsList } from "./ReviewsList";
 import { useNavigate } from "react-router-dom";
@@ -54,6 +54,8 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
   const [creatorName, setCreatorName] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
   useEffect(() => {
     const fetchCreator = async () => {
@@ -72,11 +74,23 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
     const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
+      
+      // Check if promo is favorited by current user
+      if (user) {
+        const { data } = await supabase
+          .from('user_favorite_promos')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('promo_id', promo.id)
+          .single();
+        
+        setIsFavorite(!!data);
+      }
     };
 
     fetchCreator();
     getCurrentUser();
-  }, [promo.created_by]);
+  }, [promo.created_by, promo.id]);
 
   const handleCardClick = () => {
     navigate(`/promo/${promo.id}`);
@@ -131,6 +145,59 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
     }
   };
 
+  const toggleFavorite = async () => {
+    if (!currentUser) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to save favorite promos.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsTogglingFavorite(true);
+    try {
+      if (isFavorite) {
+        // Remove from favorites
+        const { error } = await supabase
+          .from('user_favorite_promos')
+          .delete()
+          .eq('user_id', currentUser.id)
+          .eq('promo_id', promo.id);
+
+        if (error) throw error;
+
+        setIsFavorite(false);
+        toast({
+          title: "Removed from favorites",
+          description: "Promo removed from your favorites!"
+        });
+      } else {
+        // Add to favorites
+        const { error } = await supabase
+          .from('user_favorite_promos')
+          .insert({ user_id: currentUser.id, promo_id: promo.id });
+
+        if (error) throw error;
+
+        setIsFavorite(true);
+        toast({
+          title: "Added to favorites",
+          description: "Promo added to your favorites!"
+        });
+      }
+    } catch (error: any) {
+      console.error('Error toggling favorite:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update favorite status",
+        variant: "destructive"
+      });
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  };
+
   const isOwner = currentUser && currentUser.id === promo.created_by;
 
   return (
@@ -146,7 +213,10 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
         />
         <div className="image-overlay absolute inset-0"></div>
         {promo.discount && (
-          <div className="neon-tag absolute top-3 right-3">
+          <div className={cn(
+            "neon-tag absolute top-3",
+            currentUser && !isOwner ? "right-12" : "right-3"
+          )}>
             {promo.discount}
           </div>
         )}
@@ -199,6 +269,28 @@ export const PromoCard = ({ promo, onClaim }: PromoCardProps) => {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+          </div>
+        )}
+        {/* Favorite button - visible to authenticated users */}
+        {currentUser && !isOwner && (
+          <div className="absolute top-3 right-3">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite();
+              }}
+              className={cn(
+                "p-2 h-8 w-8 transition-colors duration-200",
+                isFavorite 
+                  ? "bg-pink-600 hover:bg-pink-700 text-white" 
+                  : "bg-white/80 hover:bg-white text-pink-600"
+              )}
+              disabled={isTogglingFavorite}
+            >
+              <Heart className={cn("w-4 h-4", isFavorite && "fill-current")} />
+            </Button>
           </div>
         )}
       </div>

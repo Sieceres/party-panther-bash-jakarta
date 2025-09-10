@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2 } from "lucide-react";
+import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2, Heart } from "lucide-react";
 import { ReportDialog } from "./ReportDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +56,8 @@ export const UserProfile = () => {
   const [saving, setSaving] = useState(false);
   const [userEvents, setUserEvents] = useState<EventWithSlug[]>([]);
   const [userPromos, setUserPromos] = useState<PromoWithSlug[]>([]);
+  const [joinedEvents, setJoinedEvents] = useState<EventWithSlug[]>([]);
+  const [favoritePromos, setFavoritePromos] = useState<PromoWithSlug[]>([]);
   const [editForm, setEditForm] = useState({
     display_name: '',
     bio: '',
@@ -183,6 +185,54 @@ export const UserProfile = () => {
           });
         } else {
           setUserPromos((promosData?.map((promo: any) => ({ ...promo, slug: promo.slug || null })) as PromoWithSlug[]) || []);
+        }
+
+        // Fetch events the user has joined (only for own profile, not admin/shared views)
+        if (!isAdminView && !isSharedProfile && user?.id === targetUserId) {
+          const { data: joinedEventsData, error: joinedEventsError } = await supabase
+            .from('event_attendees')
+            .select(`
+              events:events(*)
+            `)
+            .eq('user_id', targetUserId);
+
+          if (joinedEventsError) {
+            console.error('Error fetching joined events:', joinedEventsError);
+            toast({
+              title: "Error",
+              description: "Failed to load events you joined.",
+              variant: "destructive",
+            });
+          } else {
+            const joinedEventsWithSlug = joinedEventsData
+              ?.map((item: any) => item.events)
+              .filter(Boolean)
+              .map((event: any) => ({ ...event, slug: event.slug || null })) as EventWithSlug[];
+            setJoinedEvents(joinedEventsWithSlug || []);
+          }
+
+          // Fetch user's favorite promos
+          const { data: favoritePromosData, error: favoritePromosError } = await supabase
+            .from('user_favorite_promos')
+            .select(`
+              promos:promos(*)
+            `)
+            .eq('user_id', targetUserId);
+
+          if (favoritePromosError) {
+            console.error('Error fetching favorite promos:', favoritePromosError);
+            toast({
+              title: "Error",
+              description: "Failed to load favorite promos.",
+              variant: "destructive",
+            });
+          } else {
+            const favoritePromosWithSlug = favoritePromosData
+              ?.map((item: any) => item.promos)
+              .filter(Boolean)
+              .map((promo: any) => ({ ...promo, slug: promo.slug || null })) as PromoWithSlug[];
+            setFavoritePromos(favoritePromosWithSlug || []);
+          }
         }
       }
 
@@ -350,6 +400,61 @@ export const UserProfile = () => {
       toast({
         title: "Error",
         description: `Failed to delete promo: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleFavoritePromo = async (promoId: string) => {
+    if (!user) return;
+
+    try {
+      const isFavorite = favoritePromos.some(promo => promo.id === promoId);
+      
+      if (isFavorite) {
+        // Remove from favorites
+        const { error } = await supabase
+          .from('user_favorite_promos')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('promo_id', promoId);
+
+        if (error) throw error;
+
+        setFavoritePromos(favoritePromos.filter(promo => promo.id !== promoId));
+        toast({
+          title: "Removed from favorites",
+          description: "Promo removed from your favorites!",
+        });
+      } else {
+        // Add to favorites
+        const { error } = await supabase
+          .from('user_favorite_promos')
+          .insert({ user_id: user.id, promo_id: promoId });
+
+        if (error) throw error;
+
+        // Fetch the promo details to add to favorites list
+        const { data: promoData, error: promoError } = await supabase
+          .from('promos')
+          .select('*')
+          .eq('id', promoId)
+          .single();
+
+        if (!promoError && promoData) {
+          setFavoritePromos([...favoritePromos, { ...promoData, slug: promoData.slug || null }]);
+        }
+
+        toast({
+          title: "Added to favorites",
+          description: "Promo added to your favorites!",
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update favorite status.",
         variant: "destructive",
       });
     }
@@ -817,6 +922,94 @@ export const UserProfile = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Events I Joined - Only show for own profile */}
+      {!isAdminView && !isSharedProfile && user && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <h3 className="font-semibold flex items-center space-x-2">
+              <Calendar className="w-5 h-5 text-green-500" />
+              <span>Events I Joined</span>
+            </h3>
+          </CardHeader>
+          <CardContent>
+            {joinedEvents.length === 0 ? (
+              <p className="text-muted-foreground">You haven't joined any events yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {joinedEvents.map((event) => (
+                  <div key={event.id} className="flex items-center justify-between border-b pb-2 last:pb-0 last:border-b-0">
+                    <div>
+                      <p className="font-medium">{event.title}</p>
+                      <p className="text-sm text-muted-foreground">{event.date} at {event.time}</p>
+                      {event.venue_name && (
+                        <p className="text-sm text-muted-foreground">📍 {event.venue_name}</p>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(getEventUrl(event))}
+                    >
+                      View Event
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Favorite Promos - Only show for own profile */}
+      {!isAdminView && !isSharedProfile && user && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <h3 className="font-semibold flex items-center space-x-2">
+              <Heart className="w-5 h-5 text-pink-500" />
+              <span>Favorite Promos</span>
+            </h3>
+          </CardHeader>
+          <CardContent>
+            {favoritePromos.length === 0 ? (
+              <p className="text-muted-foreground">No favorite promos saved yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {favoritePromos.map((promo) => (
+                  <div key={promo.id} className="flex items-center justify-between border-b pb-2 last:pb-0 last:border-b-0">
+                    <div>
+                      <p className="font-medium">{promo.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {promo.venue_name} • {promo.discount_text}
+                        {promo.valid_until && (
+                          <> • Valid until {new Date(promo.valid_until).toLocaleDateString()}</>
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(getPromoUrl(promo))}
+                      >
+                        View Promo
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => toggleFavoritePromo(promo.id)}
+                        className="text-pink-500 hover:text-pink-600"
+                      >
+                        <Heart className="w-4 h-4 fill-current" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Badges */}
