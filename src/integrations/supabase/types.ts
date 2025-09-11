@@ -369,11 +369,11 @@ export type Database = {
           category: string | null
           created_at: string
           created_by: string
-          day_of_week: string | null
+          day_of_week: string[] | null
           description: string
           discount_text: string
           discounted_price_amount: number | null
-          drink_type: string | null
+          drink_type: string[] | null
           id: string
           image_url: string | null
           original_price_amount: number | null
@@ -393,11 +393,11 @@ export type Database = {
           category?: string | null
           created_at?: string
           created_by: string
-          day_of_week?: string | null
+          day_of_week?: string[] | null
           description: string
           discount_text: string
           discounted_price_amount?: number | null
-          drink_type?: string | null
+          drink_type?: string[] | null
           id?: string
           image_url?: string | null
           original_price_amount?: number | null
@@ -417,11 +417,11 @@ export type Database = {
           category?: string | null
           created_at?: string
           created_by?: string
-          day_of_week?: string | null
+          day_of_week?: string[] | null
           description?: string
           discount_text?: string
           discounted_price_amount?: number | null
-          drink_type?: string | null
+          drink_type?: string[] | null
           id?: string
           image_url?: string | null
           original_price_amount?: number | null

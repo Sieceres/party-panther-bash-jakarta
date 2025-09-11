@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -11,14 +12,14 @@ import { cn } from "@/lib/utils";
 interface PromoDetailsProps {
   validUntilDate: Date | undefined;
   promoType?: string;
-  dayOfWeek: string;
+  dayOfWeek: string[];
   area: string;
-  drinkType: string;
+  drinkType: string[];
   onValidUntilChange: (date: Date | undefined) => void;
   onPromoTypeChange?: (type: string) => void;
-  onDayOfWeekChange: (day: string) => void;
+  onDayOfWeekChange: (days: string[]) => void;
   onAreaChange: (area: string) => void;
-  onDrinkTypeChange: (type: string) => void;
+  onDrinkTypeChange: (types: string[]) => void;
 }
 
 export const PromoDetails = ({ 
@@ -81,21 +82,21 @@ export const PromoDetails = ({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="dayOfWeek">Day of Week</Label>
-          <Select value={dayOfWeek} onValueChange={onDayOfWeekChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select day" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="monday">Monday</SelectItem>
-              <SelectItem value="tuesday">Tuesday</SelectItem>
-              <SelectItem value="wednesday">Wednesday</SelectItem>
-              <SelectItem value="thursday">Thursday</SelectItem>
-              <SelectItem value="friday">Friday</SelectItem>
-              <SelectItem value="saturday">Saturday</SelectItem>
-              <SelectItem value="sunday">Sunday</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label htmlFor="dayOfWeek">Days of Week</Label>
+          <MultiSelect
+            options={[
+              { value: "monday", label: "Monday" },
+              { value: "tuesday", label: "Tuesday" },
+              { value: "wednesday", label: "Wednesday" },
+              { value: "thursday", label: "Thursday" },
+              { value: "friday", label: "Friday" },
+              { value: "saturday", label: "Saturday" },
+              { value: "sunday", label: "Sunday" }
+            ]}
+            selectedValues={dayOfWeek}
+            onSelectionChange={onDayOfWeekChange}
+            placeholder="Select days"
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="area">Area</Label>
@@ -113,19 +114,19 @@ export const PromoDetails = ({
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="drinkType">Drink Type</Label>
-          <Select value={drinkType} onValueChange={onDrinkTypeChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="cocktails">Cocktails</SelectItem>
-              <SelectItem value="beer">Beer</SelectItem>
-              <SelectItem value="wine">Wine</SelectItem>
-              <SelectItem value="spirits">Spirits</SelectItem>
-              <SelectItem value="all">All Drinks</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label htmlFor="drinkType">Drink Types</Label>
+          <MultiSelect
+            options={[
+              { value: "cocktails", label: "Cocktails" },
+              { value: "beer", label: "Beer" },
+              { value: "wine", label: "Wine" },
+              { value: "spirits", label: "Spirits" },
+              { value: "all", label: "All Drinks" }
+            ]}
+            selectedValues={drinkType}
+            onSelectionChange={onDrinkTypeChange}
+            placeholder="Select drink types"
+          />
         </div>
       </div>
     </>

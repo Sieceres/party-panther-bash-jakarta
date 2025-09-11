@@ -25,14 +25,14 @@ export const CreatePromoForm = () => {
     venue: "",
     address: "",
     promoType: "",
-    dayOfWeek: "",
+    dayOfWeek: [] as string[],
     area: "",
-    drinkType: "Other",
+    drinkType: [] as string[],
     image: ""
   });
   const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setHasUnsavedChanges(true);
     // Clear errors when user starts typing
@@ -188,9 +188,9 @@ export const CreatePromoForm = () => {
                 }
               }}
               onPromoTypeChange={(value) => handleInputChange("promoType", value)}
-              onDayOfWeekChange={(value) => handleInputChange("dayOfWeek", value)}
+              onDayOfWeekChange={(values) => handleInputChange("dayOfWeek", values)}
               onAreaChange={(value) => handleInputChange("area", value)}
-              onDrinkTypeChange={(value) => handleInputChange("drinkType", value)}
+              onDrinkTypeChange={(values) => handleInputChange("drinkType", values)}
             />
 
               <ImageUpload

@@ -25,9 +25,9 @@ export const EditPromoPage = () => {
     discount: "",
     venue: "",
     address: "",
-    dayOfWeek: "",
+    dayOfWeek: [] as string[],
     area: "",
-    drinkType: "",
+    drinkType: [] as string[],
     image: ""
   });
   const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
@@ -77,9 +77,9 @@ export const EditPromoPage = () => {
             discount: promo.discount_text || "",
             venue: promo.venue_name || "",
             address: promo.venue_address || "",
-            dayOfWeek: promo.day_of_week || "",
+            dayOfWeek: Array.isArray(promo.day_of_week) ? promo.day_of_week : (promo.day_of_week ? [promo.day_of_week] : []),
             area: promo.area || "",
-            drinkType: promo.drink_type || "",
+            drinkType: Array.isArray(promo.drink_type) ? promo.drink_type : (promo.drink_type ? [promo.drink_type] : []),
             image: promo.image_url || ""
           });
 
@@ -110,7 +110,7 @@ export const EditPromoPage = () => {
     fetchPromo();
   }, [id, navigate, toast]);
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -236,9 +236,9 @@ export const EditPromoPage = () => {
                 area={formData.area}
                 drinkType={formData.drinkType}
                 validUntilDate={validUntilDate}
-                onDayOfWeekChange={(value) => handleInputChange('dayOfWeek', value)}
+                onDayOfWeekChange={(values) => handleInputChange('dayOfWeek', values)}
                 onAreaChange={(value) => handleInputChange('area', value)}
-                onDrinkTypeChange={(value) => handleInputChange('drinkType', value)}
+                onDrinkTypeChange={(values) => handleInputChange('drinkType', values)}
                 onValidUntilChange={setValidUntilDate}
               />
 

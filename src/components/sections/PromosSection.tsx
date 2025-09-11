@@ -301,9 +301,9 @@ export const PromosSection = ({
                   image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
                   originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
                   discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
-                  day: promo.day_of_week?.toLowerCase(),
+                  day: Array.isArray(promo.day_of_week) ? promo.day_of_week.join(', ') : (promo.day_of_week || ''),
                   area: promo.area?.toLowerCase(),
-                  drinkType: promo.drink_type?.toLowerCase(),
+                  drinkType: Array.isArray(promo.drink_type) ? promo.drink_type.join(', ') : (promo.drink_type || ''),
                   created_by: promo.created_by
                 }}
               />

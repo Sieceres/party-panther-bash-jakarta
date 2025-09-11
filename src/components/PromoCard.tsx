@@ -32,9 +32,9 @@ interface Promo {
   category: string;
   originalPrice: string;
   discountedPrice: string;
-  day: string;
+  day: string[] | string;
   area: string;
-  drinkType: string;
+  drinkType: string[] | string;
   created_by?: string;
 }
 

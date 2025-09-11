@@ -55,7 +55,7 @@ export const PromoDetailPage = () => {
           .single();
 
         if (error) throw error;
-        setPromo(data);
+        setPromo(data as any);
       } catch (error) {
         console.error('Error fetching promo:', error);
         toast({

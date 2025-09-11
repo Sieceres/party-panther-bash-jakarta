@@ -119,7 +119,10 @@ const Index = () => {
   };
 
   const filteredPromos = promos.filter((promo) => {
-    const dayMatch = dayFilter.includes("all") || dayFilter.includes(promo.day_of_week?.toLowerCase() || "");
+    const dayMatch = dayFilter.includes("all") || 
+      (Array.isArray(promo.day_of_week) ? 
+        promo.day_of_week.some((day: string) => dayFilter.includes(day?.toLowerCase() || "")) :
+        dayFilter.includes((promo.day_of_week as string)?.toLowerCase() || ""));
     const areaMatch = areaFilter.includes("all") || areaFilter.includes(promo.area?.toLowerCase().replace(' jakarta', '') || "");
     const promoTypeMatch = drinkTypeFilter.includes("all") || drinkTypeFilter.includes(promo.promo_type || "");
     return dayMatch && areaMatch && promoTypeMatch;
