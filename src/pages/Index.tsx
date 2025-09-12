@@ -40,6 +40,8 @@ const Index = () => {
   const [dayFilter, setDayFilter] = useState<string[]>(["all"]);
   const [areaFilter, setAreaFilter] = useState<string[]>(["all"]);
   const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(["all"]);
+  const [promoSortBy, setPromoSortBy] = useState("newest");
+  const [eventSortBy, setEventSortBy] = useState("date-asc");
   const [events, setEvents] = useState<EventWithSlug[]>([]);  
   const [promos, setPromos] = useState<PromoWithSlug[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,15 +120,67 @@ const Index = () => {
     }
   };
 
-  const filteredPromos = promos.filter((promo) => {
-    const dayMatch = dayFilter.includes("all") || 
-      (Array.isArray(promo.day_of_week) ? 
-        promo.day_of_week.some((day: string) => dayFilter.includes(day?.toLowerCase() || "")) :
-        dayFilter.includes((promo.day_of_week as string)?.toLowerCase() || ""));
-    const areaMatch = areaFilter.includes("all") || areaFilter.includes(promo.area?.toLowerCase().replace(' jakarta', '') || "");
-    const promoTypeMatch = drinkTypeFilter.includes("all") || drinkTypeFilter.includes(promo.promo_type || "");
-    return dayMatch && areaMatch && promoTypeMatch;
-  });
+  const filteredAndSortedPromos = promos
+    .filter((promo) => {
+      const dayMatch = dayFilter.includes("all") || 
+        (Array.isArray(promo.day_of_week) ? 
+          promo.day_of_week.some((day: string) => dayFilter.includes(day?.toLowerCase() || "")) :
+          dayFilter.includes((promo.day_of_week as string)?.toLowerCase() || ""));
+      const areaMatch = areaFilter.includes("all") || areaFilter.includes(promo.area?.toLowerCase().replace(' jakarta', '') || "");
+      const promoTypeMatch = drinkTypeFilter.includes("all") || drinkTypeFilter.includes(promo.promo_type || "");
+      return dayMatch && areaMatch && promoTypeMatch;
+    })
+    .sort((a, b) => {
+      switch (promoSortBy) {
+        case "newest":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "price-low":
+          const aPrice = a.discounted_price_amount || 0;
+          const bPrice = b.discounted_price_amount || 0;
+          return aPrice - bPrice;
+        case "price-high":
+          const aPriceHigh = a.discounted_price_amount || 0;
+          const bPriceHigh = b.discounted_price_amount || 0;
+          return bPriceHigh - aPriceHigh;
+        case "title-az":
+          return a.title.localeCompare(b.title);
+        case "title-za":
+          return b.title.localeCompare(a.title);
+        case "valid-until":
+          if (!a.valid_until && !b.valid_until) return 0;
+          if (!a.valid_until) return 1;
+          if (!b.valid_until) return -1;
+          return new Date(a.valid_until).getTime() - new Date(b.valid_until).getTime();
+        default:
+          return 0;
+      }
+    });
+
+  const filteredAndSortedEvents = events
+    .sort((a, b) => {
+      switch (eventSortBy) {
+        case "date-asc":
+          const aDateTime = new Date(`${a.date} ${a.time}`).getTime();
+          const bDateTime = new Date(`${b.date} ${b.time}`).getTime();
+          return aDateTime - bDateTime;
+        case "date-desc":
+          const aDateTimeDesc = new Date(`${a.date} ${a.time}`).getTime();
+          const bDateTimeDesc = new Date(`${b.date} ${b.time}`).getTime();
+          return bDateTimeDesc - aDateTimeDesc;
+        case "newest":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "title-az":
+          return a.title.localeCompare(b.title);
+        case "title-za":
+          return b.title.localeCompare(a.title);
+        default:
+          return 0;
+      }
+    });
 
   const handleDayFilterChange = (filter: string[]) => {
     setDayFilter(filter);
@@ -199,8 +253,8 @@ const Index = () => {
         return (
           <HomeContent
             loading={loading}
-            events={events}
-            promos={promos}
+            events={filteredAndSortedEvents}
+            promos={filteredAndSortedPromos}
             onSectionChange={handleSectionChange}
             onJoinEvent={handleJoinEvent}
           />
@@ -209,10 +263,12 @@ const Index = () => {
       case "events":
         return (
           <EventsSection
-            events={events}
+            events={filteredAndSortedEvents}
             showCreateEvent={showCreateEvent}
+            sortBy={eventSortBy}
             onToggleCreateEvent={() => setShowCreateEvent(!showCreateEvent)}
             onJoinEvent={handleJoinEvent}
+            onSortChange={setEventSortBy}
             loading={loading} // Pass loading state
           />
         );
@@ -221,16 +277,18 @@ const Index = () => {
         return (
           <PromosSection
             promos={promos}
-            filteredPromos={filteredPromos}
+            filteredPromos={filteredAndSortedPromos}
             showCreatePromo={showCreatePromo}
             dayFilter={dayFilter}
             areaFilter={areaFilter}
             drinkTypeFilter={drinkTypeFilter}
+            sortBy={promoSortBy}
             loading={loading}
             onToggleCreatePromo={() => setShowCreatePromo(!showCreatePromo)}
             onDayFilterChange={handleDayFilterChange}
             onAreaFilterChange={handleAreaFilterChange}
             onDrinkTypeFilterChange={handleDrinkTypeFilterChange}
+            onSortChange={setPromoSortBy}
           />
         );
       
@@ -256,8 +314,8 @@ const Index = () => {
         return (
           <HomeContent
             loading={loading}
-            events={events}
-            promos={promos}
+            events={filteredAndSortedEvents}
+            promos={filteredAndSortedPromos}
             onSectionChange={handleSectionChange}
             onJoinEvent={handleJoinEvent}
           />

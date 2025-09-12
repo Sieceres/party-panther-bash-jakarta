@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LoginDialog } from "@/components/LoginDialog";
-import { Star, Lock, Filter, RotateCcw } from "lucide-react";
+import { Star, Lock, Filter, RotateCcw, ArrowUpDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -21,11 +21,13 @@ interface PromosSectionProps {
   dayFilter: string[];
   areaFilter: string[];
   drinkTypeFilter: string[];
+  sortBy: string;
   loading?: boolean;
   onToggleCreatePromo: () => void;
   onDayFilterChange: (filter: string[]) => void;
   onAreaFilterChange: (filter: string[]) => void;
   onDrinkTypeFilterChange: (filter: string[]) => void;
+  onSortChange: (sort: string) => void;
 }
 
 export const PromosSection = ({ 
@@ -34,11 +36,13 @@ export const PromosSection = ({
   dayFilter,
   areaFilter,
   drinkTypeFilter,
+  sortBy,
   loading = false,
   onToggleCreatePromo,
   onDayFilterChange,
   onAreaFilterChange,
-  onDrinkTypeFilterChange
+  onDrinkTypeFilterChange,
+  onSortChange
 }: PromosSectionProps) => {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
@@ -134,8 +138,8 @@ export const PromosSection = ({
           </div>
         )}
 
-        {/* Dropdown Filters with Checkboxes */}
-        <div className="flex flex-wrap gap-4 mb-6">
+        {/* Filters and Sort */}
+        <div className="flex flex-wrap gap-4 mb-6 items-end">
           <div className="flex flex-col space-y-2">
             <label className="text-sm font-medium">Day</label>
             <Select>
@@ -261,6 +265,25 @@ export const PromosSection = ({
                     </div>
                   ))}
                 </div>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium">Sort By</label>
+            <Select value={sortBy} onValueChange={onSortChange}>
+              <SelectTrigger className="w-48">
+                <ArrowUpDown className="w-4 h-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="price-low">Price: Low to High</SelectItem>
+                <SelectItem value="price-high">Price: High to Low</SelectItem>
+                <SelectItem value="title-az">Title: A-Z</SelectItem>
+                <SelectItem value="title-za">Title: Z-A</SelectItem>
+                <SelectItem value="valid-until">Valid Until</SelectItem>
               </SelectContent>
             </Select>
           </div>

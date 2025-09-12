@@ -3,10 +3,11 @@ import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/EventCard";
 import { EventForm } from "@/components/EventForm";
-import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { EventFilters } from "@/components/EventFilters";
+import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { LoginDialog } from "@/components/LoginDialog";
-import { Calendar, Lock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Star, Lock, ArrowUpDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -15,16 +16,20 @@ import { User } from "@supabase/supabase-js";
 interface EventsSectionProps {
   events: Tables<'events'>[];
   showCreateEvent: boolean;
+  sortBy: string;
   onToggleCreateEvent: () => void;
   onJoinEvent: (eventId: string) => void;
-  loading: boolean; // Added loading prop
+  onSortChange: (sort: string) => void;
+  loading: boolean;
 }
 
 export const EventsSection = ({
   events,
   showCreateEvent,
+  sortBy,
   onToggleCreateEvent,
   onJoinEvent,
+  onSortChange,
   loading
 }: EventsSectionProps) => {
   const { toast } = useToast();
@@ -98,7 +103,7 @@ export const EventsSection = ({
             >
               {user ? (
                 <>
-                  <Calendar className="w-4 h-4 mr-2" />
+                  <Star className="w-4 h-4 mr-2" />
                   Create Event
                 </>
               ) : (
@@ -117,16 +122,40 @@ export const EventsSection = ({
           </div>
         )}
 
-        <div className="mb-8">
+        <div className="space-y-4 mb-8">
           <EventFilters
-            onDateFilter={setSelectedDate}
-            onTagFilter={setSelectedTags}
-            onSearchFilter={setSearchTerm}
-            onResetFilters={handleResetFilters}
+            onDateFilter={(date) => setSelectedDate(date)}
+            onTagFilter={(tags) => setSelectedTags(tags)}
+            onSearchFilter={(search) => setSearchTerm(search)}
+            onResetFilters={() => {
+              setSelectedDate(undefined);
+              setSelectedTags([]);
+              setSearchTerm('');
+            }}
             selectedDate={selectedDate}
             selectedTags={selectedTags}
             searchTerm={searchTerm}
           />
+          
+          <div className="flex justify-end">
+            <div className="flex flex-col space-y-2">
+              <label className="text-sm font-medium">Sort By</label>
+              <Select value={sortBy} onValueChange={onSortChange}>
+                <SelectTrigger className="w-48">
+                  <ArrowUpDown className="w-4 h-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date-asc">Date: Nearest First</SelectItem>
+                  <SelectItem value="date-desc">Date: Latest First</SelectItem>
+                  <SelectItem value="newest">Newest Posted</SelectItem>
+                  <SelectItem value="oldest">Oldest Posted</SelectItem>
+                  <SelectItem value="title-az">Title: A-Z</SelectItem>
+                  <SelectItem value="title-za">Title: Z-A</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
