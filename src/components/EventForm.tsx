@@ -14,6 +14,7 @@ import { EventVenue } from "./form-components/EventVenue";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { EventTags } from "./form-components/EventTags";
 import { Tables } from "../integrations/supabase/types";
+import { getEventUrl } from "@/lib/slug-utils";
 
 interface EventFormProps {
   initialData?: Tables<'events'>; // Optional initial data for editing
@@ -194,8 +195,16 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
 
       if (!initialData?.id) {
         setHasUnsavedChanges(false);
-        setTimeout(() => {
-          navigate(`/event/${newEventId}`);
+        setTimeout(async () => {
+          // Fetch the newly created event to get its slug for navigation
+          const { data: eventData } = await supabase
+            .from('events')
+            .select('id, slug')
+            .eq('id', newEventId)
+            .single();
+          
+          const eventUrl = eventData?.slug ? `/event/${eventData.slug}` : `/event/${newEventId}`;
+          navigate(eventUrl);
         }, 1000);
       } else {
         onSuccess?.(); // Call onSuccess callback for edits

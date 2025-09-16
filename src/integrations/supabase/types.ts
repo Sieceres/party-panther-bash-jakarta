@@ -513,6 +513,7 @@ export type Database = {
           organizer_name: string
           organizer_whatsapp: string
           price_currency: string
+          slug: string
           time: string
           title: string
           updated_at: string

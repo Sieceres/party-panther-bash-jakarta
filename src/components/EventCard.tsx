@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { Tables } from "../integrations/supabase/types";
+import { getEventUrl, getEditEventUrl } from "@/lib/slug-utils";
 
 interface Event extends Tables<'events'> {
   venue: string;
@@ -79,11 +80,11 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
   }, [event.created_by, event.id]);
 
   const handleCardClick = () => {
-    navigate(`/event/${event.id}`);
+    navigate(getEventUrl(event));
   };
 
   const handleEdit = () => {
-    navigate(`/edit-event/${event.id}`);
+    navigate(getEditEventUrl(event));
   };
 
   const handleDelete = async () => {

@@ -43,6 +43,7 @@ interface PromoCardProps {
 }
 
 import { format } from "date-fns";
+import { getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
 
 export const PromoCard = ({ promo }: PromoCardProps) => {
   const navigate = useNavigate();
@@ -92,7 +93,7 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
   }, [promo.created_by, promo.id]);
 
   const handleCardClick = () => {
-    navigate(`/promo/${promo.id}`);
+    navigate(getPromoUrl(promo));
   };
 
   const handleReviewsChange = (avgRating: number, total: number) => {
@@ -101,7 +102,7 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
   };
 
   const handleEdit = () => {
-    navigate(`/edit-promo/${promo.id}`);
+    navigate(getEditPromoUrl(promo));
   };
 
   const handleDelete = async () => {

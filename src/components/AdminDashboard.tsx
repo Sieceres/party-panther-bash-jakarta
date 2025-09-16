@@ -9,6 +9,7 @@ import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft } from "lucide-reac
 import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getEventUrl, getEditEventUrl, getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
 
 interface Event {
   id: string;
@@ -17,6 +18,7 @@ interface Event {
   venue_name: string;
   organizer_name: string;
   created_at: string;
+  slug?: string;
 }
 
 interface Promo {
@@ -26,6 +28,7 @@ interface Promo {
   discount_text: string;
   valid_until: string;
   created_at: string;
+  slug?: string;
 }
 
 interface User {
@@ -122,11 +125,12 @@ export const AdminDashboard = () => {
             date: event.date,
             venue_name: event.venue_name,
             organizer_name: event.organizer_name,
-            created_at: event.created_at
+            created_at: event.created_at,
+            slug: event.slug
           })) || [], 
           error: result.error 
         })),
-        supabase.from('promos').select('id, title, venue_name, discount_text, valid_until, created_at').order('created_at', { ascending: false }),
+        supabase.from('promos').select('id, title, venue_name, discount_text, valid_until, created_at, slug').order('created_at', { ascending: false }),
         supabase.from('profiles').select('id, display_name, profile_type, created_at, is_verified, is_admin, is_super_admin').order('created_at', { ascending: false })
       ]);
 
@@ -524,14 +528,14 @@ export const AdminDashboard = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => navigate(`/event/${event.id}`)}
+                          onClick={() => navigate(getEventUrl(event))}
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => navigate(`/edit-event/${event.id}`)}
+                          onClick={() => navigate(getEditEventUrl(event))}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -571,14 +575,14 @@ export const AdminDashboard = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => navigate(`/promo/${promo.id}`)}
+                          onClick={() => navigate(getPromoUrl(promo))}
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => navigate(`/edit-promo/${promo.id}`)}
+                          onClick={() => navigate(getEditPromoUrl(promo))}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
