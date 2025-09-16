@@ -1,15 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Zap } from "lucide-react";
+import { Calendar, Zap, ExternalLink } from "lucide-react";
 import heroBackground from "@/assets/hero-background.jpg";
 import floatingElements from "@/assets/floating-elements.png";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface HeroProps {
   onSectionChange: (section: string) => void;
 }
 
 export const Hero = ({ onSectionChange }: HeroProps) => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     events: 0,
     promos: 0,
@@ -129,6 +131,14 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
           >
             <Calendar className="w-5 h-5 mr-2 group-hover:bounce transition-transform" />
             Explore Events
+          </Button>
+          <Button
+            size="lg"
+            onClick={() => navigate('/event/angkot-pub-crawl')}
+            className="group bg-gradient-to-r from-slate-400 to-slate-600 text-white font-semibold px-8 py-4 rounded-full transition-all hover:scale-105 hover:shadow-lg hover:shadow-slate-500/25 border border-slate-300/20"
+          >
+            <ExternalLink className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" />
+            Angkot Pub Crawl
           </Button>
         </div>
 
