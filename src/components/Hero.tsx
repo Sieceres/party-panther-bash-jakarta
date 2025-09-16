@@ -132,13 +132,19 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
             <Calendar className="w-5 h-5 mr-2 group-hover:bounce transition-transform" />
             Explore Events
           </Button>
+        </div>
+        
+        {/* Special Event Button */}
+        <div className="flex justify-center mt-4 animate-slide-up" style={{ animationDelay: '1s' }}>
           <Button
             size="lg"
             onClick={() => navigate('/event/angkot-pub-crawl')}
-            className="group bg-gradient-to-r from-slate-400 to-slate-600 text-white font-semibold px-8 py-4 rounded-full transition-all hover:scale-105 hover:shadow-lg hover:shadow-slate-500/25 border border-slate-300/20"
+            className="group relative bg-gradient-to-r from-slate-200 via-white to-slate-200 text-slate-800 font-bold px-8 py-4 rounded-full transition-all hover:scale-110 hover:shadow-2xl hover:shadow-slate-400/60 border-2 border-slate-300/50 backdrop-blur-sm overflow-hidden shadow-lg shadow-slate-300/40"
           >
-            <ExternalLink className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" />
-            Angkot Pub Crawl
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-slate-400/20 rounded-full"></div>
+            <ExternalLink className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform relative z-10" />
+            <span className="relative z-10 bg-gradient-to-b from-slate-700 to-slate-900 bg-clip-text text-transparent font-extrabold">Angkot Pub Crawl</span>
           </Button>
         </div>
 
