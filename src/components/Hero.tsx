@@ -139,12 +139,12 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
           <Button
             size="lg"
             onClick={() => navigate('/event/angkot-pub-crawl')}
-            className="group relative bg-gradient-to-r from-slate-200 via-white to-slate-200 text-slate-800 font-bold px-8 py-4 rounded-full transition-all hover:scale-110 hover:shadow-2xl hover:shadow-slate-400/60 border-2 border-slate-300/50 backdrop-blur-sm overflow-hidden shadow-lg shadow-slate-300/40"
+            className="group relative bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-400 text-slate-900 font-black px-8 py-4 rounded-full transition-all hover:scale-110 hover:shadow-2xl hover:shadow-yellow-400/60 border-2 border-yellow-300 backdrop-blur-sm overflow-hidden shadow-xl shadow-yellow-300/60"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
-            <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-slate-400/20 rounded-full"></div>
-            <ExternalLink className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform relative z-10" />
-            <span className="relative z-10 bg-gradient-to-b from-slate-700 to-slate-900 bg-clip-text text-transparent font-extrabold">Angkot Pub Crawl</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-yellow-600/20 rounded-full"></div>
+            <ExternalLink className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform relative z-10 text-slate-900" />
+            <span className="relative z-10 text-slate-900 font-black drop-shadow-sm">Angkot Pub Crawl</span>
           </Button>
         </div>
 
