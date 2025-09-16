@@ -115,27 +115,27 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         </div> */}
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-slide-up" style={{ animationDelay: '0.8s' }}>
-          <Button
-            size="lg"
-            onClick={() => onSectionChange('promos')}
-            className="group bg-gradient-to-r from-neon-blue to-neon-cyan text-white font-semibold px-8 py-4 rounded-full transition-all hover:scale-105 hover:shadow-lg hover:shadow-neon-blue/25"
-          >
-            <Zap className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" />
-            Find Hot Promos
-          </Button>
-          <Button
-            size="lg"
-            onClick={() => onSectionChange('events')}
-            className="group bg-gradient-to-r from-neon-blue to-neon-cyan text-white font-semibold px-8 py-4 rounded-full transition-all hover:scale-105 hover:shadow-lg hover:shadow-neon-blue/25"
-          >
-            <Calendar className="w-5 h-5 mr-2 group-hover:bounce transition-transform" />
-            Explore Events
-          </Button>
-        </div>
-        
-        {/* Special Event Button */}
-        <div className="flex justify-center mt-4 animate-slide-up" style={{ animationDelay: '1s' }}>
+        <div className="flex flex-col items-center justify-center gap-4 pt-4 animate-slide-up" style={{ animationDelay: '0.8s' }}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button
+              size="lg"
+              onClick={() => onSectionChange('promos')}
+              className="group bg-gradient-to-r from-neon-blue to-neon-cyan text-white font-semibold px-8 py-4 rounded-full transition-all hover:scale-105 hover:shadow-lg hover:shadow-neon-blue/25"
+            >
+              <Zap className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" />
+              Find Hot Promos
+            </Button>
+            <Button
+              size="lg"
+              onClick={() => onSectionChange('events')}
+              className="group bg-gradient-to-r from-neon-blue to-neon-cyan text-white font-semibold px-8 py-4 rounded-full transition-all hover:scale-105 hover:shadow-lg hover:shadow-neon-blue/25"
+            >
+              <Calendar className="w-5 h-5 mr-2 group-hover:bounce transition-transform" />
+              Explore Events
+            </Button>
+          </div>
+          
+          {/* Special Event Button - Always below */}
           <Button
             size="lg"
             onClick={() => navigate('/event/angkot-pub-crawl')}
