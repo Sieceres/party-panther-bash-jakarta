@@ -195,7 +195,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       if (!initialData?.id) {
         setHasUnsavedChanges(false);
         setTimeout(() => {
-          navigate('/?section=events');
+          navigate(`/event/${newEventId}`);
         }, 1000);
       } else {
         onSuccess?.(); // Call onSuccess callback for edits
