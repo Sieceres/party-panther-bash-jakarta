@@ -115,7 +115,17 @@ export const AdminDashboard = () => {
   const fetchData = async () => {
     try {
       const [eventsData, promosData, usersData] = await Promise.all([
-        supabase.from('events').select('id, title, date, venue_name, organizer_name, created_at').order('created_at', { ascending: false }),
+        supabase.rpc('get_events_safe').then(result => ({ 
+          data: result.data?.map((event: any) => ({
+            id: event.id,
+            title: event.title,
+            date: event.date,
+            venue_name: event.venue_name,
+            organizer_name: event.organizer_name,
+            created_at: event.created_at
+          })) || [], 
+          error: result.error 
+        })),
         supabase.from('promos').select('id, title, venue_name, discount_text, valid_until, created_at').order('created_at', { ascending: false }),
         supabase.from('profiles').select('id, display_name, profile_type, created_at, is_verified, is_admin, is_super_admin').order('created_at', { ascending: false })
       ]);
