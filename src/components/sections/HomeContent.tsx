@@ -72,7 +72,7 @@ export const HomeContent = ({
                   <Zap className="w-10 h-10" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
                   Hot Promos
                 </h2>
-                <p className="text-gray-300 text-lg">Save money on your next night out!</p>
+                <p className="text-gray-300 text-lg">Go big without going broke!</p>
               </div>
               <Button
                 onClick={() => onSectionChange("promos")}
