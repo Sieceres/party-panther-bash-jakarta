@@ -51,6 +51,12 @@ interface Event {
   slug?: string | null;
 }
 
+interface Attendee {
+  id: string;
+  display_name: string;
+  avatar_url: string | null;
+}
+
 export const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -64,6 +70,9 @@ export const EventDetailPage = () => {
   const [lastCommentTime, setLastCommentTime] = useState<number>(0);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // NEW: State for attendees
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
   
 
   const memoizedCenter = useMemo(() => {
@@ -120,6 +129,20 @@ export const EventDetailPage = () => {
 
         if (commentsData && !commentsError) {
           setComments(commentsData);
+        }
+
+        // NEW: Fetch attendees for this event
+        const { data: attendeeList, error: attendeeListError } = await supabase
+          .from('event_attendees')
+          .select('user_id, profiles(display_name, avatar_url)')
+          .eq('event_id', data?.id);
+
+        if (!attendeeListError && attendeeList) {
+          setAttendees(attendeeList.map((a: any) => ({
+            id: a.user_id,
+            display_name: a.profiles?.display_name || 'Anonymous',
+            avatar_url: a.profiles?.avatar_url || null,
+          })));
         }
 
       } catch (error) {
@@ -182,6 +205,17 @@ export const EventDetailPage = () => {
         description: `You're now registered for "${event.title}". See you there!`,
       });
       setHasJoined(true);
+
+      // NEW: Add user to attendee list
+      setAttendees(prev => [
+        ...prev,
+        {
+          id: user.id,
+          display_name: user.user_metadata?.display_name || 'You',
+          avatar_url: user.user_metadata?.avatar_url || null,
+        }
+      ]);
+
     } catch (error) {
       console.error('Error joining event:', error);
       toast({
@@ -209,6 +243,9 @@ export const EventDetailPage = () => {
         description: `You've unjoined "${event.title}".`,
       });
       setHasJoined(false);
+
+      // NEW: Remove user from attendee list
+      setAttendees(prev => prev.filter(a => a.id !== userId));
     } catch (error) {
       console.error('Error unjoining event:', error);
       toast({
@@ -475,6 +512,34 @@ export const EventDetailPage = () => {
                     />
                   </div>
                 )}
+
+                {/* --- NEW: Attendee List --- */}
+                <Separator />
+                <div className="space-y-2">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Attendees ({attendees.length})
+                  </h4>
+                  {attendees.length === 0 ? (
+                    <p className="text-muted-foreground">No one has joined yet.</p>
+                  ) : (
+                    <ul className="flex flex-wrap gap-4">
+                      {attendees.map((a) => (
+                        <li key={a.id} className="flex items-center space-x-2">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={a.avatar_url || undefined} />
+                            <AvatarFallback>
+                              {a.display_name?.[0]?.toUpperCase() || "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm">{a.display_name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                {/* --- END Attendee List --- */}
+
               </CardContent>
             </Card>
 
