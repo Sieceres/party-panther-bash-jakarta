@@ -158,7 +158,7 @@ export const HomeContent = ({
                       ...event,
                       venue: event.venue_name,
                       image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
-                      attendees: 0,
+                      attendees: event.attendees,
                       rating: 4.5 + Math.random() * 0.5,
                       
                       organizer: event.organizer_name
