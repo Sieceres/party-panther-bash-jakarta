@@ -57,7 +57,7 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
       } else {
         toast({
           title: "Success",
-          description: "Please check your email to confirm your account.",
+          description: "Login successful!",
         });
         onOpenChange(false);
       }
