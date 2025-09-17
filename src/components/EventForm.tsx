@@ -12,7 +12,7 @@ import { BasicEventInfo } from "./form-components/BasicEventInfo";
 import { EventDateTime } from "./form-components/EventDateTime";
 import { EventVenue } from "./form-components/EventVenue";
 import { ImageUpload } from "./form-components/ImageUpload";
-import { EventTags } from "./form-components/EventTags";
+
 import { Tables } from "../integrations/supabase/types";
 import { getEventUrl } from "@/lib/slug-utils";
 
@@ -26,7 +26,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  
   const [eventDate, setEventDate] = useState<Date | undefined>(initialData?.date ? new Date(initialData.date) : undefined);
   const [isRecurrent, setIsRecurrent] = useState(initialData?.is_recurrent || false);
   const [formData, setFormData] = useState({
@@ -177,15 +177,6 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
           console.warn('Failed to auto-join organizer to event:', attendeeError);
         }
 
-        // Handle tags for new event
-        if (selectedTags.length > 0) {
-          const tagInserts = selectedTags.map(tag => ({
-            event_id: newEventId,
-            tag_name: tag
-          }));
-
-          await supabase.from('event_event_tags').insert(tagInserts);
-        }
       }
 
       toast({
@@ -277,13 +268,6 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               inputId="event-image"
             />
 
-            <div className="space-y-2">
-              <Label>Event Tags (Optional)</Label>
-              <EventTags
-                selectedTags={selectedTags}
-                onChange={setSelectedTags}
-              />
-            </div>
 
             <div className="flex items-center space-x-2">
               <Checkbox

@@ -27,7 +27,7 @@ interface Event extends Tables<'events'> {
   image: string;
   attendees: number;
   rating: number;
-  tags: string[];
+  
   organizer: string;
   isJoined?: boolean;
 }
@@ -43,7 +43,7 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [creatorName, setCreatorName] = useState<string | null>(null);
-  const [eventTags, setEventTags] = useState<string[]>([]);
+  
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -61,15 +61,6 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
         }
       }
 
-      // Fetch event tags
-      const { data: tags } = await supabase
-        .from('event_event_tags')
-        .select('tag_name')
-        .eq('event_id', event.id);
-      
-      if (tags) {
-        setEventTags(tags.map(t => t.tag_name));
-      }
 
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
@@ -144,11 +135,6 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
         <div className="neon-tag absolute top-3 right-3">
           {format(new Date(event.date), 'MMM dd')}
         </div>
-        {eventTags.length > 0 && (
-          <div className="neon-tag absolute top-3 left-3">
-            {eventTags[0]}
-          </div>
-        )}
         {isOwner && (
           <div className="absolute top-3 right-20 flex gap-2">
             <Button
@@ -216,14 +202,6 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
             </div>
           </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-1">
-            {eventTags.slice(0, 2).map((tag, index) => (
-              <span key={index} className="neon-tag text-xs">
-                {tag}
-              </span>
-            ))}
-          </div>
         </div>
       </CardContent>
 

@@ -37,7 +37,7 @@ export const EventsSection = ({
   const [authLoading, setAuthLoading] = useState(true);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -73,11 +73,6 @@ export const EventsSection = ({
         }
       }
       
-      // Tag filter (placeholder - would need to implement tag system)
-      if (selectedTags.length > 0) {
-        // For now, just show all events if tags are selected
-        // TODO: Implement actual tag filtering when event tags are stored
-      }
       
       return true;
     });
@@ -87,7 +82,6 @@ export const EventsSection = ({
 
   const handleResetFilters = () => {
     setSelectedDate(undefined);
-    setSelectedTags([]);
     setSearchTerm("");
   };
   return (
@@ -125,15 +119,12 @@ export const EventsSection = ({
         <div className="space-y-4 mb-8">
           <EventFilters
             onDateFilter={(date) => setSelectedDate(date)}
-            onTagFilter={(tags) => setSelectedTags(tags)}
             onSearchFilter={(search) => setSearchTerm(search)}
             onResetFilters={() => {
               setSelectedDate(undefined);
-              setSelectedTags([]);
               setSearchTerm('');
             }}
             selectedDate={selectedDate}
-            selectedTags={selectedTags}
             searchTerm={searchTerm}
           />
           
@@ -172,7 +163,7 @@ export const EventsSection = ({
                   : "Try adjusting your filters to see more events."
                 }
               </p>
-              {(selectedDate || selectedTags.length > 0 || searchTerm) && (
+              {(selectedDate || searchTerm) && (
                 <Button onClick={handleResetFilters} variant="outline">
                   Reset Filters
                 </Button>
@@ -189,7 +180,7 @@ export const EventsSection = ({
                   image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
                   attendees: 0, // Use actual attendee count from database
                   rating: 4.5 + Math.random() * 0.5,
-                  tags: ['Party', 'Music', 'Dance'],
+                  
                   organizer: event.organizer_name
                 }}
                 onJoin={onJoinEvent} 
