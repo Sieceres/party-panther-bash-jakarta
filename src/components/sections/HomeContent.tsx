@@ -134,7 +134,7 @@ export const HomeContent = ({
                   <Calendar className="w-10 h-10" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
                   Upcoming Events
                 </h2>
-                <p className="text-gray-300 text-lg">Don't miss these amazing parties</p>
+                <p className="text-gray-300 text-lg">Don't miss these amazing parties!</p>
               </div>
               <Button
                 onClick={() => onSectionChange("events")}
