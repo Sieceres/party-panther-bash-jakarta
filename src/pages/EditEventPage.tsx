@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Header } from "@/components/Header";
-import { getEventBySlugOrId } from "@/lib/slug-utils";
+import { getEventBySlugOrId, getEventUrl } from "@/lib/slug-utils";
 
 export const EditEventPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -55,7 +55,7 @@ export const EditEventPage = () => {
       title: "Event Updated!",
       description: "Your event has been successfully updated.",
     });
-    navigate('/?section=events'); // Navigate back to events after successful update
+    navigate(getEventUrl(event)); // Navigate to the event details page
   };
 
   if (loading) {
