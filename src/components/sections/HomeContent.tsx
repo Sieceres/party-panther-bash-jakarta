@@ -156,7 +156,6 @@ export const HomeContent = ({
                   <EventCard 
                     event={{
                       ...event,
-                      price: 'Free',
                       venue: event.venue_name,
                       image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
                       attendees: 0,

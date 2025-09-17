@@ -552,12 +552,6 @@ export const EventDetailPage = () => {
                 <CardTitle>Event Info</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Entry</span>
-                  <Badge className="bg-primary text-primary-foreground text-lg px-3 py-1">
-                    Free
-                  </Badge>
-                </div>
 
                 {hasJoined ? (
                   <DropdownMenu>

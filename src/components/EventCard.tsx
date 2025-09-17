@@ -23,7 +23,6 @@ import { getEventUrl, getEditEventUrl } from "@/lib/slug-utils";
 
 interface Event extends Tables<'events'> {
   venue: string;
-  price: string;
   image: string;
   attendees: number;
   rating: number;
