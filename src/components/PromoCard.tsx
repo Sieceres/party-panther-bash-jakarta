@@ -296,6 +296,7 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
       </div>
 
       <CardHeader className="pb-3">
+        <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">{promo.title}</h3>
         <p className="text-sm line-clamp-2 whitespace-pre-wrap" style={{ color: '#E0E0E0', fontSize: '14px' }}>{promo.description}</p>
       </CardHeader>
 
