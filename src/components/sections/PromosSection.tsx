@@ -111,7 +111,7 @@ export const PromosSection = ({
       <div className="container mx-auto space-y-8">
         <div>
           <h2 className="text-4xl font-bold gradient-text mb-2">Hot Promos</h2>
-          <p className="text-muted-foreground mb-4">Save money while partying with these exclusive deals</p>
+          <p className="text-muted-foreground mb-4">Go big without going broke with these amazing deals!</p>
           {!user && (
             <Button
               onClick={handleCreatePromoClick}
