@@ -65,7 +65,6 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     { id: 'home', label: 'Home', icon: Home },
     { id: 'promos', label: 'Promos', icon: Zap },
     { id: 'events', label: 'Events', icon: Calendar },
-    { id: 'blog', label: 'Blog', icon: BookOpen, hidden: true },
     { id: 'profile', label: 'Profile', icon: User }
   ];
 
