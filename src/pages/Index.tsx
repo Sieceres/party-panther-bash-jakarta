@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { HomeContent } from "@/components/sections/HomeContent";
@@ -44,7 +43,7 @@ const Index = () => {
   const [events, setEvents] = useState<EventWithSlug[]>([]);  
   const [promos, setPromos] = useState<PromoWithSlug[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null); // Added user state
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchUserAndData = async () => {
@@ -55,22 +54,21 @@ const Index = () => {
 
     fetchUserAndData();
     
-    // Handle URL section parameter - only if there's actually a section parameter
+    // Handle URL section parameter
     const urlParams = new URLSearchParams(window.location.search);
     const section = urlParams.get('section');
     if (section && ['home', 'events', 'promos', 'profile', 'contact'].includes(section)) {
       setActiveSection(section);
-      // Update URL without page reload
       const newUrl = section === 'home' ? '/' : `/?section=${section}`;
       window.history.replaceState({}, '', newUrl);
     } else {
-      // Ensure we're on home section if no URL parameter
       setActiveSection('home');
       window.history.replaceState({}, '', '/');
     }
   }, []);
 
-  const fetchData = async (currentUserId?: string) => { // Modified to accept currentUserId
+  // --- CHANGED: Fetch attendee counts per event and add to events ---
+  const fetchData = async (currentUserId?: string) => {
     try {
       // Fetch events using secure function
       const { data: eventsData, error: eventsError } = await supabase
@@ -90,10 +88,24 @@ const Index = () => {
         joinedEventIds = attendeesData.map(attendee => attendee.event_id);
       }
 
-      const eventsWithJoinStatus = eventsData.map((event: any) => ({
+      // NEW: Fetch attendee counts per event
+      const { data: attendeeCountsData, error: attendeeCountsError } = await supabase
+        .from('event_attendees')
+        .select('event_id', { count: 'exact', groupBy: ['event_id'] });
+
+      if (attendeeCountsError) throw attendeeCountsError;
+
+      // Build a map of event_id -> count
+      const attendeeCountsMap: Record<string, number> = {};
+      (attendeeCountsData || []).forEach((row: any) => {
+        attendeeCountsMap[row.event_id] = row.count ?? row._count ?? 0;
+      });
+
+      const eventsWithJoinStatus = (eventsData || []).map((event: any) => ({
         ...event,
         isJoined: joinedEventIds.includes(event.id),
-        slug: event.slug || null
+        slug: event.slug || null,
+        attendees: attendeeCountsMap[event.id] || 0, // <-- Use real attendee count
       })) as EventWithSlug[];
 
       // Fetch promos
@@ -104,14 +116,10 @@ const Index = () => {
 
       if (promosError) throw promosError;
 
-      console.log('Fetched events:', eventsWithJoinStatus);
-      console.log('Fetched promos:', promosData);
-      
       setEvents(eventsWithJoinStatus || []);
       setPromos((promosData?.map((promo: any) => ({ ...promo, slug: promo.slug || null })) as PromoWithSlug[]) || []);
     } catch (error) {
       console.error('Error fetching data:', error);
-      // Use fallback mock data if database fails
       setEvents([]);
       setPromos([]);
     } finally {
@@ -195,7 +203,7 @@ const Index = () => {
 
   const handleJoinEvent = async (eventId: string) => {
     try {
-      if (!user) { // Use the user from state
+      if (!user) {
         toast({
           title: "Authentication required",
           description: "Please sign in to join events.",
@@ -212,7 +220,7 @@ const Index = () => {
         });
 
       if (error) {
-        if (error.code === '23505') { // Unique constraint violation
+        if (error.code === '23505') {
           toast({
             title: "Already joined",
             description: "You're already registered for this event.",
@@ -230,7 +238,6 @@ const Index = () => {
         description: `You're now registered for "${event?.title}". See you there!`,
       });
 
-      // Update the specific event's isJoined status in the state
       setEvents(prevEvents =>
         prevEvents.map(e =>
           e.id === eventId ? { ...e, isJoined: true } : e
@@ -268,7 +275,7 @@ const Index = () => {
             onToggleCreateEvent={() => setShowCreateEvent(!showCreateEvent)}
             onJoinEvent={handleJoinEvent}
             onSortChange={setEventSortBy}
-            loading={loading} // Pass loading state
+            loading={loading}
           />
         );
       
