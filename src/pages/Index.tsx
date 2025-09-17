@@ -4,7 +4,6 @@ import { Header } from "@/components/Header";
 import { HomeContent } from "@/components/sections/HomeContent";
 import { EventsSection } from "@/components/sections/EventsSection";
 import { PromosSection } from "@/components/sections/PromosSection";
-import { BlogSection } from "@/components/BlogSection";
 import { UserProfile } from "@/components/UserProfile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,7 +58,7 @@ const Index = () => {
     // Handle URL section parameter - only if there's actually a section parameter
     const urlParams = new URLSearchParams(window.location.search);
     const section = urlParams.get('section');
-    if (section && ['home', 'events', 'promos', 'blog', 'profile', 'contact'].includes(section)) {
+    if (section && ['home', 'events', 'promos', 'profile', 'contact'].includes(section)) {
       setActiveSection(section);
       // Update URL without page reload
       const newUrl = section === 'home' ? '/' : `/?section=${section}`;
@@ -290,15 +289,6 @@ const Index = () => {
             onDrinkTypeFilterChange={handleDrinkTypeFilterChange}
             onSortChange={setPromoSortBy}
           />
-        );
-      
-      case "blog":
-        return (
-          <div className="pt-20 px-4">
-            <div className="container mx-auto">
-              <BlogSection />
-            </div>
-          </div>
         );
       
       case "profile":
