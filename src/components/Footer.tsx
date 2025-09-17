@@ -61,7 +61,6 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
             <h3 className="font-semibold text-lg mb-2">Links</h3>
             <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About Us</Link>
             <Link to="/terms-conditions" className="text-muted-foreground hover:text-primary transition-colors">Terms and Conditions</Link>
-            <button onClick={() => onSectionChange('blog')} className="text-muted-foreground hover:text-primary transition-colors">Blog</button>
           </div>
 
           {/* Social Media */}
