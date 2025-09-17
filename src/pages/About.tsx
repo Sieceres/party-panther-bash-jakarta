@@ -16,7 +16,7 @@ const About = () => {
               <span className="text-sm font-serif text-red-500 transform -rotate-12 font-bold">BETA</span>
             </div>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Jakarta's premier nightlife discovery platform, connecting party enthusiasts with the hottest events, venues, and exclusive promotions across the city.
+              Jakarta's ultimate nightlife platform, letting you discover promos that make you purr, events that make you roar, and connect with other Party Panthers in the city.
             </p>
           </div>
 
@@ -58,7 +58,7 @@ const About = () => {
             <section>
               <h2 className="text-3xl font-bold mb-6 text-center">Our Mission</h2>
               <p className="text-lg text-muted-foreground text-center">
-                At Party Panther, we believe that Jakarta's nightlife should be accessible to everyone. Our mission is to create a comprehensive platform that connects party enthusiasts with the best events, venues, and experiences the city has to offer. Whether you're looking for a chill rooftop lounge, an underground club, or an exclusive VIP event, we've got you covered.
+                At Party Panther, we want to take Jakarta's nightlife to the next level. Our mission is to create a comprehensive platform that shows party enthusiasts the best events the city has to offer, as well as providing you with an overview of the best promotions around so you can find the perfect place to have a drink tonight. Take Party Panther's paw and let us guide you.
               </p>
             </section>
 
