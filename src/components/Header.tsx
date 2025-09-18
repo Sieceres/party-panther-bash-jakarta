@@ -88,14 +88,21 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
              {menuItems.filter(item => !item.hidden).map((item) => {
                const Icon = item.icon;
                return (
-                 <Button
-                   key={item.id}
-                   variant={activeSection === item.id ? "default" : "ghost"}
-                   onClick={(e) => {
-                     e.preventDefault();
-                     e.stopPropagation();
-                     onSectionChange(item.id);
-                   }}
+                  <Button
+                    key={item.id}
+                    variant={activeSection === item.id ? "default" : "ghost"}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      
+                      // Check if user is trying to access profile without being authenticated
+                      if (item.id === 'profile' && !user) {
+                        navigate('/auth');
+                        return;
+                      }
+                      
+                      onSectionChange(item.id);
+                    }}
                     className={`flex items-center space-x-2 transition-all ${
                       activeSection === item.id 
                         ? "bg-primary text-primary-foreground" 
@@ -159,12 +166,19 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                 const Icon = item.icon;
                 return (
                   <Button
-                    key={item.id}
-                    variant={activeSection === item.id ? "default" : "ghost"}
-                    onClick={() => {
-                      onSectionChange(item.id);
-                      setIsMenuOpen(false);
-                    }}
+                     key={item.id}
+                     variant={activeSection === item.id ? "default" : "ghost"}
+                     onClick={() => {
+                       // Check if user is trying to access profile without being authenticated
+                       if (item.id === 'profile' && !user) {
+                         navigate('/auth');
+                         setIsMenuOpen(false);
+                         return;
+                       }
+                       
+                       onSectionChange(item.id);
+                       setIsMenuOpen(false);
+                     }}
                     className="justify-start"
                   >
                     <Icon className="w-4 h-4 mr-2" />
