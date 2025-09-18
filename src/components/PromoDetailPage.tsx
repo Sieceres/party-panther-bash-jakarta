@@ -49,13 +49,15 @@ export const PromoDetailPage = () => {
       if (!id) return;
       
       try {
-        const { data, error } = await supabase
-          .from('promos')
-          .select('*')
-          .eq('id', id)
-          .single();
+        // Use the slug-aware utility function
+        const { data, error } = await import("@/lib/slug-utils").then(module => 
+          module.getPromoBySlugOrId(id)
+        );
 
         if (error) throw error;
+        if (!data) {
+          throw new Error('Promo not found');
+        }
         setPromo(data as any);
       } catch (error) {
         console.error('Error fetching promo:', error);

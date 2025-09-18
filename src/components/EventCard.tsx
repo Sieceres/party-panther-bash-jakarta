@@ -121,6 +121,9 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
 
   return (
     <Card className="neon-card bg-card/95 backdrop-blur-sm border border-border/50 group cursor-pointer" onClick={handleCardClick}>
+      <CardHeader className="pb-3">
+        <h3 className="text-xl font-bold text-white mb-1 line-clamp-2" style={{ fontSize: '20px' }}>{event.title}</h3>
+      </CardHeader>
       <div className="relative overflow-hidden">
         <img 
           src={event.image || event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop'}
@@ -185,7 +188,6 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
       <CardContent className="p-4">
         <div className="space-y-3">
           <div>
-            <h3 className="text-xl font-bold text-white mb-1 line-clamp-2" style={{ fontSize: '20px' }}>{event.title}</h3>
             <p className="text-sm whitespace-pre-wrap" style={{ color: '#E0E0E0', fontSize: '14px' }}>{format(new Date(event.date), 'EEEE, MMMM do')} at {event.time}</p>
           </div>
           
