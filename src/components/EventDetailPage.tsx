@@ -723,6 +723,7 @@ export const EventDetailPage = () => {
                       Join Event
                     </Button>
                   )}
+                  
                   <Button
                     variant="outline"
                     className="w-full"
