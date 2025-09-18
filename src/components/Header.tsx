@@ -144,9 +144,9 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <div className="w-6 h-6 flex flex-col justify-center space-y-1">
-              <div className="w-full h-0.5 bg-foreground"></div>
-              <div className="w-full h-0.5 bg-neutral-100"></div>
-              <div className="w-full h-0.5 bg-gray-200"></div>
+              <div className="w-full h-0.5 bg-white"></div>
+              <div className="w-full h-0.5 bg-white"></div>
+              <div className="w-full h-0.5 bg-white"></div>
             </div>
           </Button>
         </div>

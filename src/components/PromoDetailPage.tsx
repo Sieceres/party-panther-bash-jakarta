@@ -11,7 +11,6 @@ import { ReportDialog } from "./ReportDialog";
 import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import Linkify from "linkify-react";
 
 interface Promo {
   id: string;
@@ -169,11 +168,9 @@ export const PromoDetailPage = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  <Linkify options={{ target: "_blank", rel: "noopener noreferrer", className: "text-primary hover:underline" }}>
-                    {promo.description}
-                  </Linkify>
-                </div>
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {promo.description}
+                </p>
                 
                 <Separator />
                 
