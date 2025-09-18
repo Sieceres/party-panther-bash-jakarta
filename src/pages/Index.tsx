@@ -111,7 +111,7 @@ const Index = () => {
       } else {
         // Build a map of event_id -> count
         (attendeeCountsData || []).forEach((row: any) => {
-          attendeeCountsMap[row.event_id] = row.attendee_count || 0;
+          attendeeCountsMap[row.event_id] = Number(row.attendee_count) || 0;
         });
       }
 
