@@ -71,8 +71,9 @@ export const EventDetailPage = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // NEW: State for attendees
+  // NEW: State for attendees and count
   const [attendees, setAttendees] = useState<Attendee[]>([]);
+  const [attendeeCount, setAttendeeCount] = useState<number>(0);
   
 
   const memoizedCenter = useMemo(() => {
@@ -131,19 +132,35 @@ export const EventDetailPage = () => {
           setComments(commentsData);
         }
 
-        // NEW: Fetch attendees for this event
-        const { data: attendeeList, error: attendeeListError } = await supabase
-          .from('event_attendees')
-          .select('user_id, profiles(display_name, avatar_url)')
-          .eq('event_id', data?.id);
+        // Fetch attendee count using public function
+        const { data: attendeeCountData, error: attendeeCountError } = await supabase
+          .rpc('get_event_attendee_counts');
 
-        if (!attendeeListError && attendeeList) {
-          setAttendees(attendeeList.map((a: any) => ({
-            id: a.user_id,
-            display_name: a.profiles?.display_name || 'Anonymous',
-            avatar_url: a.profiles?.avatar_url || null,
-          })));
+        let attendeeCount = 0;
+        if (!attendeeCountError && attendeeCountData) {
+          const eventAttendeeData = attendeeCountData.find((item: any) => item.event_id === data?.id);
+          attendeeCount = eventAttendeeData ? eventAttendeeData.attendee_count : 0;
         }
+
+        // If user is authenticated, also fetch attendee details for display
+        let attendeeDetails: Attendee[] = [];
+        if (user) {
+          const { data: attendeeList, error: attendeeListError } = await supabase
+            .from('event_attendees')
+            .select('user_id, profiles(display_name, avatar_url)')
+            .eq('event_id', data?.id);
+
+          if (!attendeeListError && attendeeList) {
+            attendeeDetails = attendeeList.map((a: any) => ({
+              id: a.user_id,
+              display_name: a.profiles?.display_name || 'Anonymous',
+              avatar_url: a.profiles?.avatar_url || null,
+            }));
+          }
+        }
+
+        setAttendees(attendeeDetails);
+        setAttendeeCount(attendeeCount);
 
       } catch (error) {
         console.error('Error fetching event:', error);
@@ -206,7 +223,10 @@ export const EventDetailPage = () => {
       });
       setHasJoined(true);
 
-      // NEW: Add user to attendee list
+      // Update attendee count
+      setAttendeeCount(prev => prev + 1);
+
+      // NEW: Add user to attendee list if we have attendee details loaded
       setAttendees(prev => [
         ...prev,
         {
@@ -243,6 +263,9 @@ export const EventDetailPage = () => {
         description: `You've unjoined "${event.title}".`,
       });
       setHasJoined(false);
+
+      // Update attendee count
+      setAttendeeCount(prev => prev - 1);
 
       // NEW: Remove user from attendee list
       setAttendees(prev => prev.filter(a => a.id !== userId));
@@ -322,7 +345,12 @@ export const EventDetailPage = () => {
           profiles (
             display_name,
             avatar_url
-          )
+                  ) : (
+                    <p className="text-muted-foreground">
+                      {attendeeCount} {attendeeCount === 1 ? 'person has' : 'people have'} joined this event.
+                      {!currentUser && ' Sign in to see who\'s attending.'}
+                    </p>
+                  )}
         `)
         .single();
 
@@ -518,11 +546,11 @@ export const EventDetailPage = () => {
                 <div className="space-y-2">
                   <h4 className="font-semibold flex items-center gap-2">
                     <Users className="w-4 h-4" />
-                    Attendees ({attendees.length})
+                    Attendees ({attendeeCount})
                   </h4>
-                  {attendees.length === 0 ? (
+                  {attendeeCount === 0 ? (
                     <p className="text-muted-foreground">No one has joined yet.</p>
-                  ) : (
+                  ) : attendees.length > 0 ? (
                     <ul className="flex flex-wrap gap-4">
                       {attendees.map((a) => (
                         <li key={a.id} className="flex items-center space-x-2">
@@ -536,6 +564,11 @@ export const EventDetailPage = () => {
                         </li>
                       ))}
                     </ul>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      {attendeeCount} {attendeeCount === 1 ? 'person has' : 'people have'} joined this event.
+                      {!currentUser && ' Sign in to see who\'s attending.'}
+                    </p>
                   )}
                 </div>
                 {/* --- END Attendee List --- */}
