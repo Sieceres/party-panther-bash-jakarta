@@ -17,7 +17,7 @@ const Index = () => {
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showCreatePromo, setShowCreatePromo] = useState(false);
 
-  // Cancel create forms when section changes
+  // Update navigation section when changing between sections properly
   const handleSectionChange = (section: string) => {
     if (section !== "events") {
       setShowCreateEvent(false);
@@ -33,6 +33,9 @@ const Index = () => {
     
     // Scroll to top when changing sections
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Refresh data to ensure it's current
+    fetchData(user?.id);
   };
 
   const [dayFilter, setDayFilter] = useState<string[]>(["all"]);

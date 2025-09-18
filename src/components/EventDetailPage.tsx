@@ -12,7 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { GoogleMap } from "./GoogleMap";
+import { CommentActions } from "./CommentActions";
 import { EventForm } from "./EventForm";
 import { ReportDialog } from "./ReportDialog";
 import { Header } from "./Header";
@@ -69,6 +69,8 @@ export const EventDetailPage = () => {
   const [newComment, setNewComment] = useState("");
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [lastCommentTime, setLastCommentTime] = useState<number>(0);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -344,7 +346,8 @@ export const EventDetailPage = () => {
       });
     } finally {
       setCommentsLoading(false);
-    }
+  const handleCommentDeleted = (commentId: string) => {
+    setComments(comments.filter(c => c.id !== commentId));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -705,19 +708,19 @@ export const EventDetailPage = () => {
                       </AlertDialogContent>
                     </AlertDialog>
                   </>
-                )}
-                
-                <ReportDialog
-                  type="event"
-                  targetId={event.id}
-                  targetTitle={event.title}
-                />
-              </CardContent>
-            </Card>
-          </div>
-          </div>
+              )}
+              
+              <ReportDialog
+                type="event"
+                targetId={event.id}
+                targetTitle={event.title}
+              />
+            </CardContent>
+          </Card>
+        </div>
         </div>
       </div>
+    </div>
     </>
   );
 };

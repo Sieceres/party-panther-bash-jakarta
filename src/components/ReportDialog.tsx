@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,17 +9,31 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ReportDialogProps {
-  type: 'profile' | 'event' | 'promo';
+  type: 'profile' | 'event' | 'promo' | 'comment';
   targetId: string;
   targetTitle: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const ReportDialog = ({ type, targetId, targetTitle }: ReportDialogProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const ReportDialog = ({ type, targetId, targetTitle, open, onOpenChange }: ReportDialogProps) => {
+  const [isOpen, setIsOpen] = useState(open || false);
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  // Update internal state when external open prop changes
+  useEffect(() => {
+    if (open !== undefined) {
+      setIsOpen(open);
+    }
+  }, [open]);
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setIsOpen(newOpen);
+    onOpenChange?.(newOpen);
+  };
 
   const reasonOptions = {
     profile: [
@@ -41,6 +55,13 @@ export const ReportDialog = ({ type, targetId, targetTitle }: ReportDialogProps)
       "Inappropriate content",
       "Spam",
       "Fake promo",
+      "Other"
+    ],
+    comment: [
+      "Inappropriate content",
+      "Harassment",
+      "Spam",
+      "Offensive language",
       "Other"
     ]
   };
@@ -68,8 +89,21 @@ export const ReportDialog = ({ type, targetId, targetTitle }: ReportDialogProps)
         return;
       }
 
-      // Here you would typically save to a reports table
-      // For now, just show a success message
+      // Save the report to the database
+      const { error } = await supabase
+        .from('reports')
+        .insert({
+          reporter_id: user.id,
+          target_type: type,
+          target_id: targetId,
+          target_title: targetTitle,
+          reason: reason,
+          description: description.trim() || null
+        });
+
+      if (error) {
+        throw error;
+      }
       
       toast({
         title: "Report submitted",
@@ -92,13 +126,15 @@ export const ReportDialog = ({ type, targetId, targetTitle }: ReportDialogProps)
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-          <Flag className="w-4 h-4 mr-2" />
-          Report
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      {!onOpenChange && (
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+            <Flag className="w-4 h-4 mr-2" />
+            Report
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Report {type}</DialogTitle>
@@ -138,7 +174,7 @@ export const ReportDialog = ({ type, targetId, targetTitle }: ReportDialogProps)
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
+            <Button variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>

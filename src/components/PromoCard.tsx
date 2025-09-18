@@ -56,6 +56,7 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const fetchCreator = async () => {
@@ -74,6 +75,17 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
     const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
+      
+      // Check if user is admin
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin, is_super_admin')
+          .eq('user_id', user.id)
+          .single();
+        
+        setIsAdmin(profile?.is_admin || profile?.is_super_admin || false);
+      }
       
       // Check if promo is favorited by current user
       if (user) {
@@ -106,10 +118,30 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
   };
 
   const handleDelete = async () => {
-    if (!currentUser || currentUser.id !== promo.created_by) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       toast({
         title: "Unauthorized",
-        description: "You can only delete your own promos.",
+        description: "Please log in to delete promos.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if user is owner or admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin, is_super_admin')
+      .eq('user_id', user.id)
+      .single();
+    
+    const isAdmin = profile?.is_admin || profile?.is_super_admin || false;
+    const isOwner = user.id === promo.created_by;
+    
+    if (!isOwner && !isAdmin) {
+      toast({
+        title: "Unauthorized",
+        description: "You can only delete your own promos or need admin privileges.",
         variant: "destructive"
       });
       return;
@@ -199,6 +231,7 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
   };
 
   const isOwner = currentUser && currentUser.id === promo.created_by;
+  const canDelete = isOwner || isAdmin;
 
   return (
     <Card className="neon-card bg-card/95 backdrop-blur-sm border border-border/50 group cursor-pointer" onClick={handleCardClick}>
@@ -225,7 +258,7 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
             {promo.category}
           </div>
         )}
-        {isOwner && (
+        {canDelete && (
           <div className="absolute top-3 right-20 flex gap-2">
             <Button
               size="sm"
