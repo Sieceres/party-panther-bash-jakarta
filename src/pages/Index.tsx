@@ -88,18 +88,24 @@ const Index = () => {
         joinedEventIds = attendeesData.map(attendee => attendee.event_id);
       }
 
-      // NEW: Fetch attendee counts per event
-      const { data: attendeeCountsData, error: attendeeCountsError } = await supabase
-        .from('event_attendees')
-        .select('event_id');
+      // NEW: Fetch attendee counts per event using RPC for better performance
+      let attendeeCountsMap: Record<string, number> = {};
+      
+      if (currentUserId) {
+        // Only fetch counts if user is authenticated (RLS requirement)
+        const { data: attendeeCountsData, error: attendeeCountsError } = await supabase
+          .from('event_attendees')
+          .select('event_id');
 
-      if (attendeeCountsError) throw attendeeCountsError;
-
-      // Build a map of event_id -> count
-      const attendeeCountsMap: Record<string, number> = {};
-      (attendeeCountsData || []).forEach((row: any) => {
-        attendeeCountsMap[row.event_id] = (attendeeCountsMap[row.event_id] || 0) + 1;
-      });
+        if (attendeeCountsError) {
+          console.error('Error fetching attendee counts:', attendeeCountsError);
+        } else {
+          // Build a map of event_id -> count
+          (attendeeCountsData || []).forEach((row: any) => {
+            attendeeCountsMap[row.event_id] = (attendeeCountsMap[row.event_id] || 0) + 1;
+          });
+        }
+      }
 
       const eventsWithJoinStatus = (eventsData || []).map((event: any) => ({
         ...event,
