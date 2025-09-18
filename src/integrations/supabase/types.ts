@@ -500,6 +500,13 @@ export type Database = {
         Args: { input_text: string }
         Returns: string
       }
+      get_event_attendee_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          attendee_count: number
+          event_id: string
+        }[]
+      }
       get_events_safe: {
         Args: Record<PropertyKey, never>
         Returns: {
