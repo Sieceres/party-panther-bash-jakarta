@@ -30,8 +30,6 @@ interface Promo {
   image: string;
   image_url?: string;
   category: string;
-  originalPrice: string;
-  discountedPrice: string;
   day: string[] | string;
   area: string;
   drinkType: string[] | string;
@@ -105,7 +103,7 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
         const { data, error } = await supabase
           .from('promo_reviews')
           .select('rating')
-          .eq('promo_id', promo.id);
+          .eq('promo_id', promo.id.toString());
 
         if (error) throw error;
 
@@ -369,14 +367,6 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
                 <span>by {creatorName}</span>
               </div>
             )}
-          </div>
-          <div className="text-right">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground line-through">
-                {promo.originalPrice}
-              </span>
-              <span className="font-bold text-white">{promo.discountedPrice}</span>
-            </div>
           </div>
         </div>
 

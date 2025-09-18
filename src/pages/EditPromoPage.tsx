@@ -8,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { BasicPromoInfo } from "@/components/form-components/BasicPromoInfo";
 import { PromoDiscount } from "@/components/form-components/PromoDiscount";
 import { LocationSelector } from "@/components/form-components/LocationSelector";
-import { PromoPricing } from "@/components/form-components/PromoPricing";
 import { PromoDetails } from "@/components/form-components/PromoDetails";
 import { ImageUpload } from "@/components/form-components/ImageUpload";
 
@@ -68,8 +67,6 @@ export const EditPromoPage = () => {
 
         if (promo) {
           console.log('Promo data:', promo); // Debug log
-          console.log('Original price:', promo.original_price_amount);
-          console.log('Discounted price:', promo.discounted_price_amount);
           
           setFormData({
             title: promo.title || "",

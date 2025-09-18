@@ -279,8 +279,6 @@ export const PromosSection = ({
               <SelectContent>
                 <SelectItem value="newest">Newest First</SelectItem>
                 <SelectItem value="oldest">Oldest First</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
                 <SelectItem value="title-az">Title: A-Z</SelectItem>
                 <SelectItem value="title-za">Title: Z-A</SelectItem>
                 <SelectItem value="valid-until">Valid Until</SelectItem>
@@ -322,8 +320,6 @@ export const PromosSection = ({
                   venue: promo.venue_name,
                   validUntil: promo.valid_until,
                   image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
-                  originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
-                  discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
                   day: Array.isArray(promo.day_of_week) ? promo.day_of_week.join(', ') : (promo.day_of_week || ''),
                   area: promo.area?.toLowerCase(),
                   drinkType: Array.isArray(promo.drink_type) ? promo.drink_type.join(', ') : (promo.drink_type || ''),

@@ -8,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { BasicPromoInfo } from "./form-components/BasicPromoInfo";
 import { PromoDiscount } from "./form-components/PromoDiscount";
 import { LocationSelector } from "./form-components/LocationSelector";
-import { PromoPricing } from "./form-components/PromoPricing";
 import { PromoDetails } from "./form-components/PromoDetails";
 import { ImageUpload } from "./form-components/ImageUpload";
 

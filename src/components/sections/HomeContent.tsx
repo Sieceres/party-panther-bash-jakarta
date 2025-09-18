@@ -98,8 +98,6 @@ export const HomeContent = ({
                        venue: promo.venue_name,
                        validUntil: promo.valid_until,
                        image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
-                       originalPrice: promo.original_price_amount ? `IDR ${promo.original_price_amount.toLocaleString()}` : 'N/A',
-                       discountedPrice: promo.discounted_price_amount ? `IDR ${promo.discounted_price_amount.toLocaleString()}` : 'FREE',
                         day: Array.isArray(promo.day_of_week) ? promo.day_of_week.join(', ') : (promo.day_of_week || ''),
                         area: promo.area?.toLowerCase(),
                         drinkType: Array.isArray(promo.drink_type) ? promo.drink_type.join(', ') : (promo.drink_type || '')
