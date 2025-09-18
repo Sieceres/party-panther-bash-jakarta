@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { EventWithSlug, PromoWithSlug } from "@/types/extended-types";
 import { Button } from "@/components/ui/button";
 import { EventsSection } from "./EventsSection";
 import { PromosSection } from "./PromosSection";
@@ -16,8 +16,8 @@ import sectionBackground from "@/assets/section-background.jpg";
 
 interface HomeContentProps {
   loading: boolean;
-  events: Tables<'events'>[];
-  promos: Tables<'promos'>[];
+  events: EventWithSlug[];
+  promos: PromoWithSlug[];
   onSectionChange: (section: string) => void;
   onJoinEvent: (eventId: string) => void;
 }
@@ -158,7 +158,7 @@ export const HomeContent = ({
                       ...event,
                       venue: event.venue_name,
                       image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
-                      attendees: event.attendees,
+                      attendees: event.attendees || 0,
                       rating: 4.5 + Math.random() * 0.5,
                       
                       organizer: event.organizer_name

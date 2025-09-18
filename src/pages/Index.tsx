@@ -91,14 +91,14 @@ const Index = () => {
       // NEW: Fetch attendee counts per event
       const { data: attendeeCountsData, error: attendeeCountsError } = await supabase
         .from('event_attendees')
-        .select('event_id', { count: 'exact', groupBy: ['event_id'] });
+        .select('event_id');
 
       if (attendeeCountsError) throw attendeeCountsError;
 
       // Build a map of event_id -> count
       const attendeeCountsMap: Record<string, number> = {};
       (attendeeCountsData || []).forEach((row: any) => {
-        attendeeCountsMap[row.event_id] = row.count ?? row._count ?? 0;
+        attendeeCountsMap[row.event_id] = (attendeeCountsMap[row.event_id] || 0) + 1;
       });
 
       const eventsWithJoinStatus = (eventsData || []).map((event: any) => ({

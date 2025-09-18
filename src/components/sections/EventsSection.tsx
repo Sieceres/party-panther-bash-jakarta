@@ -1,5 +1,5 @@
 
-import { Tables } from "../../integrations/supabase/types";
+import { EventWithSlug } from "@/types/extended-types";
 import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/EventCard";
 import { EventForm } from "@/components/EventForm";
@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 
 interface EventsSectionProps {
-  events: Tables<'events'>[];
+  events: EventWithSlug[];
   showCreateEvent: boolean;
   sortBy: string;
   onToggleCreateEvent: () => void;
@@ -57,7 +57,7 @@ export const EventsSection = ({
     onToggleCreateEvent();
   };
 
-  const filterEvents = (events: Tables<'events'>[]) => {
+  const filterEvents = (events: EventWithSlug[]) => {
     return events.filter(event => {
       // Search filter
       if (searchTerm && !event.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
@@ -177,7 +177,7 @@ export const EventsSection = ({
                   ...event,
                   venue: event.venue_name,
                   image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
-                  attendees: event.attendees, // Use actual attendee count from database
+                  attendees: event.attendees || 0, // Use actual attendee count from database
                   rating: 4.5 + Math.random() * 0.5,
                   
                   organizer: event.organizer_name
