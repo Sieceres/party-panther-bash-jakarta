@@ -67,6 +67,8 @@ export const EventDetailPage = () => {
   const [lastCommentTime, setLastCommentTime] = useState<number>(0);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showAllAttendees, setShowAllAttendees] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
 
   const memoizedCenter = useMemo(() => {
     if (!event?.venue_latitude || !event?.venue_longitude) {
@@ -463,6 +465,14 @@ export const EventDetailPage = () => {
   const isOwner = user && user.id === event?.created_by;
   const canDelete = isOwner || isAdmin;
 
+  // Helper functions for pagination
+  const displayedAttendees = showAllAttendees ? attendees : attendees.slice(0, 10);
+  const displayedComments = showAllComments ? comments : comments.slice(0, 10);
+  
+  const handleProfileClick = (userId: string) => {
+    navigate(`/profile/${userId}`);
+  };
+
   if (loading) {
     return (
       <>
@@ -595,20 +605,59 @@ export const EventDetailPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {attendees.map((attendee) => (
-                      <div key={attendee.id} className="flex items-center space-x-2 bg-muted p-2 rounded-lg">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={attendee.profiles?.avatar_url} />
-                          <AvatarFallback>
-                            {attendee.profiles?.display_name?.[0]?.toUpperCase() || '?'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm font-medium">
-                          {attendee.profiles?.display_name || 'Anonymous'}
-                        </span>
+                  <div className="space-y-3">
+                    {displayedAttendees.map((attendee) => (
+                      <div 
+                        key={attendee.id} 
+                        className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted cursor-pointer transition-colors"
+                        onClick={() => handleProfileClick(attendee.user_id)}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="w-10 h-10">
+                            <AvatarImage src={attendee.profiles?.avatar_url} />
+                            <AvatarFallback>
+                              {attendee.profiles?.display_name?.[0]?.toUpperCase() || '?'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <span className="font-medium">
+                              {attendee.profiles?.display_name || 'Anonymous'}
+                            </span>
+                            {attendee.profiles?.bio && (
+                              <p className="text-sm text-muted-foreground line-clamp-1">
+                                {attendee.profiles.bio}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        {attendee.profiles?.is_verified && (
+                          <Badge variant="secondary" className="text-xs">Verified</Badge>
+                        )}
                       </div>
                     ))}
+                    {attendees.length === 0 && (
+                      <p className="text-center text-muted-foreground py-8">
+                        No attendees yet. Be the first to join!
+                      </p>
+                    )}
+                    {attendees.length > 10 && !showAllAttendees && (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => setShowAllAttendees(true)}
+                      >
+                        See all {attendees.length} attendees
+                      </Button>
+                    )}
+                    {showAllAttendees && attendees.length > 10 && (
+                      <Button
+                        variant="ghost"
+                        className="w-full"
+                        onClick={() => setShowAllAttendees(false)}
+                      >
+                        Show less
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -648,41 +697,70 @@ export const EventDetailPage = () => {
 
                   {/* Comments List */}
                   <div className="space-y-3">
-                    {comments.length === 0 ? (
+                    {displayedComments.length === 0 ? (
                       <p className="text-center text-muted-foreground py-8">
                         No comments yet. Be the first to share your thoughts!
                       </p>
                     ) : (
-                      comments.map((comment) => (
-                        <div key={comment.id} className="flex space-x-3 p-3 bg-muted/50 rounded-lg">
-                          <Avatar>
-                            <AvatarImage src={comment.profiles?.avatar_url} />
-                            <AvatarFallback>
-                              {comment.profiles?.display_name?.[0]?.toUpperCase() || '?'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-2">
-                                <span className="font-medium text-sm">
-                                  {comment.profiles?.display_name || 'Anonymous'}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {new Date(comment.created_at).toLocaleString()}
-                                </span>
+                      displayedComments.map((comment) => (
+                        <div key={comment.id} className="p-4 bg-muted/50 rounded-lg">
+                          <div className="flex space-x-3">
+                            <Avatar 
+                              className="cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => handleProfileClick(comment.user_id)}
+                            >
+                              <AvatarImage src={comment.profiles?.avatar_url} />
+                              <AvatarFallback>
+                                {comment.profiles?.display_name?.[0]?.toUpperCase() || '?'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                  <span 
+                                    className="font-medium text-sm cursor-pointer hover:text-primary transition-colors"
+                                    onClick={() => handleProfileClick(comment.user_id)}
+                                  >
+                                    {comment.profiles?.display_name || 'Anonymous'}
+                                  </span>
+                                  {comment.profiles?.is_verified && (
+                                    <Badge variant="secondary" className="text-xs">Verified</Badge>
+                                  )}
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(comment.created_at).toLocaleString()}
+                                  </span>
+                                </div>
+                                <CommentActions
+                                  comment={comment}
+                                  currentUserId={currentUser?.id}
+                                  isAdmin={isAdmin}
+                                  onCommentDeleted={handleCommentDeleted}
+                                  commentType="event"
+                                />
                               </div>
-                              <CommentActions
-                                comment={comment}
-                                currentUserId={currentUser?.id}
-                                isAdmin={isAdmin}
-                                onCommentDeleted={handleCommentDeleted}
-                                commentType="event"
-                              />
+                              <p className="text-sm leading-relaxed font-light mt-2">{comment.comment}</p>
                             </div>
-                            <p className="text-sm leading-relaxed font-light">{comment.comment}</p>
                           </div>
                         </div>
                       ))
+                    )}
+                    {comments.length > 10 && !showAllComments && (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => setShowAllComments(true)}
+                      >
+                        See all {comments.length} comments
+                      </Button>
+                    )}
+                    {showAllComments && comments.length > 10 && (
+                      <Button
+                        variant="ghost"
+                        className="w-full"
+                        onClick={() => setShowAllComments(false)}
+                      >
+                        Show less
+                      </Button>
                     )}
                   </div>
                 </CardContent>
