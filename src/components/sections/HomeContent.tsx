@@ -34,9 +34,7 @@ export const HomeContent = ({
       <div className="pt-20 px-4">
         <div className="container mx-auto">
           <div className="text-center flex flex-col items-center space-y-4">
-            <div className="w-16 h-16 rounded-full party-gradient flex items-center justify-center animate-spin">
-              <span className="text-4xl">🐾</span>
-            </div>
+            <SpinningPaws size="lg" />
             <p className="text-muted-foreground">Loading amazing events and promos...</p>
           </div>
         </div>

@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ReviewForm } from "./ReviewForm";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
+import { SpinningPaws } from "@/components/ui/spinning-paws";
 
 interface Review {
   id: string;
@@ -126,7 +127,11 @@ export const ReviewsList = ({ promoId, onReviewsChange }: ReviewsListProps) => {
   };
 
   if (loading) {
-    return <div className="text-center py-4">Loading reviews...</div>;
+    return (
+      <div className="text-center py-4">
+        <SpinningPaws size="sm" />
+      </div>
+    );
   }
 
   return (

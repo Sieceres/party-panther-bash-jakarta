@@ -27,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEventBySlugOrId, getEditEventUrl } from "@/lib/slug-utils";
 import Linkify from "linkify-react";
+import { SpinningPaws } from "@/components/ui/spinning-paws";
 
 interface Event {
   id: string;
@@ -479,7 +480,10 @@ export const EventDetailPage = () => {
         <Header activeSection="events" onSectionChange={() => navigate('/?section=events')} />
         <div className="min-h-screen bg-background pt-20 px-4">
           <div className="container mx-auto">
-            <div className="text-center">Loading event details...</div>
+            <div className="text-center space-y-4">
+              <SpinningPaws size="lg" />
+              <div className="text-center">Loading event details...</div>
+            </div>
           </div>
         </div>
       </>

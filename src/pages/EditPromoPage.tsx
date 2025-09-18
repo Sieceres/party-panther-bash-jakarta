@@ -10,6 +10,7 @@ import { PromoDiscount } from "@/components/form-components/PromoDiscount";
 import { LocationSelector } from "@/components/form-components/LocationSelector";
 import { PromoDetails } from "@/components/form-components/PromoDetails";
 import { ImageUpload } from "@/components/form-components/ImageUpload";
+import { SpinningPaws } from "@/components/ui/spinning-paws";
 
 export const EditPromoPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -182,7 +183,10 @@ export const EditPromoPage = () => {
     return (
       <div className="pt-20 px-4">
         <div className="container mx-auto max-w-4xl">
-          <div className="text-center">Loading promo data...</div>
+          <div className="text-center space-y-4">
+            <SpinningPaws size="lg" />
+            <div className="text-center">Loading promo data...</div>
+          </div>
         </div>
       </div>
     );

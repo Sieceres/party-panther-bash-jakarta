@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
+import { SpinningPaws } from "@/components/ui/spinning-paws";
 
 interface GoogleMapProps {
   center?: { lat: number; lng: number };
@@ -142,7 +143,10 @@ export const GoogleMap = ({
         className="bg-muted rounded-lg flex items-center justify-center"
         style={{ height }}
       >
-        <div className="text-muted-foreground">Loading map...</div>
+        <div className="flex items-center justify-center space-x-2">
+          <SpinningPaws size="sm" />
+          <span className="text-muted-foreground">Loading map...</span>
+        </div>
       </div>
     );
   }

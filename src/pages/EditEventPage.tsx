@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Header } from "@/components/Header";
 import { getEventBySlugOrId, getEventUrl } from "@/lib/slug-utils";
+import { SpinningPaws } from "@/components/ui/spinning-paws";
 
 export const EditEventPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -63,8 +64,9 @@ export const EditEventPage = () => {
       <div className="min-h-screen bg-background pt-20 px-4">
         <div className="container mx-auto max-w-2xl">
           <Card className="bg-card border-border">
-            <CardContent className="pt-6 text-center">
-              Loading event data...
+            <CardContent className="pt-6 text-center space-y-4">
+              <SpinningPaws size="lg" />
+              <p>Loading event data...</p>
             </CardContent>
           </Card>
         </div>

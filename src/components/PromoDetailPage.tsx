@@ -8,6 +8,7 @@ import { MapPin, ArrowLeft, Star, Share2 } from "lucide-react";
 import { GoogleMap } from "./GoogleMap";
 import { ReviewsList } from "./ReviewsList";
 import { ReportDialog } from "./ReportDialog";
+import { SpinningPaws } from "./ui/spinning-paws";
 import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -89,7 +90,10 @@ export const PromoDetailPage = () => {
     return (
       <div className="min-h-screen bg-background pt-20 px-4">
         <div className="container mx-auto">
-          <div className="text-center">Loading promo details...</div>
+          <div className="text-center space-y-4">
+            <SpinningPaws size="lg" />
+            <div className="text-center">Loading promo details...</div>
+          </div>
         </div>
       </div>
     );

@@ -103,7 +103,7 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
         const { data, error } = await supabase
           .from('promo_reviews')
           .select('rating')
-          .eq('promo_id', promo.id.toString());
+          .eq('promo_id', promo.id);
 
         if (error) throw error;
 
