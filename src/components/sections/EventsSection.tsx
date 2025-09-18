@@ -1,4 +1,3 @@
-
 import { EventWithSlug } from "@/types/extended-types";
 import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/EventCard";
@@ -37,11 +36,11 @@ export const EventsSection = ({
   const [authLoading, setAuthLoading] = useState(true);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const getUser = async () => {
+      setAuthLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       setAuthLoading(false);
@@ -60,11 +59,13 @@ export const EventsSection = ({
   const filterEvents = (events: EventWithSlug[]) => {
     return events.filter(event => {
       // Search filter
-      if (searchTerm && !event.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
-          !event.description?.toLowerCase().includes(searchTerm.toLowerCase())) {
+      if (
+        searchTerm &&
+        !event.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        !event.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
         return false;
       }
-      
       // Date filter
       if (selectedDate) {
         const eventDate = new Date(event.date);
@@ -72,8 +73,6 @@ export const EventsSection = ({
           return false;
         }
       }
-      
-      
       return true;
     });
   };
@@ -84,13 +83,23 @@ export const EventsSection = ({
     setSelectedDate(undefined);
     setSearchTerm("");
   };
+
   return (
     <div className="pt-20 px-4">
       <div className="container mx-auto space-y-8">
         <div>
           <h2 className="text-4xl font-bold gradient-text mb-2">Jakarta Events</h2>
           <p className="text-muted-foreground mb-4">Discover the hottest parties and events in the city!</p>
-          {!authLoading && (
+          {/* Always show "Create Event" as default while auth is loading */}
+          {authLoading ? (
+            <Button
+              onClick={handleCreateEventClick}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <Star className="w-4 h-4 mr-2" />
+              Create Event
+            </Button>
+          ) : (
             <Button
               onClick={handleCreateEventClick}
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -118,16 +127,13 @@ export const EventsSection = ({
 
         <div className="space-y-4 mb-8">
           <EventFilters
-            onDateFilter={(date) => setSelectedDate(date)}
-            onSearchFilter={(search) => setSearchTerm(search)}
-            onResetFilters={() => {
-              setSelectedDate(undefined);
-              setSearchTerm('');
-            }}
+            onDateFilter={setSelectedDate}
+            onSearchFilter={setSearchTerm}
+            onResetFilters={handleResetFilters}
             selectedDate={selectedDate}
             searchTerm={searchTerm}
           />
-          
+
           <div className="flex justify-end">
             <div className="flex flex-col space-y-2">
               <label className="text-sm font-medium">Sort By</label>
@@ -158,7 +164,7 @@ export const EventsSection = ({
             <div className="col-span-full text-center py-20">
               <h3 className="text-xl font-semibold mb-2">No events found</h3>
               <p className="text-muted-foreground mb-4">
-                {events.length === 0 
+                {events.length === 0
                   ? "No events are currently available."
                   : "Try adjusting your filters to see more events."
                 }
@@ -171,25 +177,24 @@ export const EventsSection = ({
             </div>
           ) : (
             filteredEvents.map((event) => (
-              <EventCard 
-                key={event.id} 
+              <EventCard
+                key={event.id}
                 event={{
                   ...event,
                   venue: event.venue_name,
                   image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
-                  attendees: event.attendees || 0, // Use actual attendee count from database
+                  attendees: event.attendees || 0,
                   rating: 4.5 + Math.random() * 0.5,
-                  
                   organizer: event.organizer_name
                 }}
-                onJoin={onJoinEvent} 
+                onJoin={onJoinEvent}
               />
             ))
           )}
         </div>
-        
-        <LoginDialog 
-          open={showLoginDialog} 
+
+        <LoginDialog
+          open={showLoginDialog}
           onOpenChange={setShowLoginDialog}
           onSuccess={() => {
             setShowLoginDialog(false);
