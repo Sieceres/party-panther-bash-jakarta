@@ -130,18 +130,54 @@ export const EventDetailPage = () => {
           setComments(commentsData);
         }
 
-        // Fetch attendees for this event (with profile info)
-        const { data: attendeeList, error: attendeeListError } = await supabase
-          .from('event_attendees')
-          .select('user_id, profiles(display_name, avatar_url)')
-          .eq('event_id', data?.id);
+        // Fetch attendees for this event
+        console.log('Fetching attendees for event:', data?.id, 'User:', user?.id);
+        
+        // First get the attendee count (public)
+        const { data: attendeeCount, error: countError } = await supabase
+          .rpc('get_event_attendee_counts')
+          .eq('event_id', data?.id)
+          .maybeSingle();
+        
+        console.log('Attendee count result:', { attendeeCount, countError });
 
-        if (!attendeeListError && attendeeList) {
-          setAttendees(attendeeList.map((a: any) => ({
-            id: a.user_id,
-            display_name: a.profiles?.display_name || 'Anonymous',
-            avatar_url: a.profiles?.avatar_url || null,
-          })));
+        if (user) {
+          // If user is authenticated, get detailed attendee info
+          const { data: attendeeList, error: attendeeListError } = await supabase
+            .from('event_attendees')
+            .select('user_id')
+            .eq('event_id', data?.id);
+
+          console.log('Attendee list query result:', { attendeeList, attendeeListError });
+
+          if (!attendeeListError && attendeeList && attendeeList.length > 0) {
+            // Fetch profile info for each attendee using the safe function
+            const attendeeProfiles = await Promise.all(
+              attendeeList.map(async (attendee: any) => {
+                const { data: profileData } = await supabase.rpc('get_safe_profile_info', {
+                  profile_user_id: attendee.user_id
+                });
+                
+                console.log('Profile data for user', attendee.user_id, ':', profileData);
+                
+                return {
+                  id: attendee.user_id,
+                  display_name: profileData?.[0]?.display_name || 'Anonymous User',
+                  avatar_url: profileData?.[0]?.avatar_url || null,
+                };
+              })
+            );
+            
+            console.log('Final attendee profiles:', attendeeProfiles);
+            setAttendees(attendeeProfiles);
+          } else {
+            console.log('No attendees found or error:', attendeeListError);
+            setAttendees([]);
+          }
+        } else {
+          console.log('User not authenticated, showing count only');
+          // For unauthenticated users, just set empty attendees but they can see the count elsewhere
+          setAttendees([]);
         }
 
       } catch (error) {
@@ -206,12 +242,16 @@ export const EventDetailPage = () => {
       setHasJoined(true);
 
       // Add new attendee to the list immediately
+      const { data: profileData } = await supabase.rpc('get_safe_profile_info', {
+        profile_user_id: user.id
+      });
+
       setAttendees(prev => [
         ...prev,
         {
           id: user.id,
-          display_name: user.user_metadata?.display_name || 'You',
-          avatar_url: user.user_metadata?.avatar_url || null,
+          display_name: profileData?.[0]?.display_name || user.user_metadata?.display_name || 'You',
+          avatar_url: profileData?.[0]?.avatar_url || user.user_metadata?.avatar_url || null,
         }
       ]);
 
@@ -519,8 +559,12 @@ export const EventDetailPage = () => {
                     <Users className="w-4 h-4" />
                     Attendees ({attendees.length})
                   </h4>
-                  {attendees.length === 0 ? (
-                    <p className="text-muted-foreground">No one has joined yet.</p>
+                  {!currentUser ? (
+                    <p className="text-muted-foreground text-sm">
+                      <span className="font-medium">Log in to see who's attending this event</span>
+                    </p>
+                  ) : attendees.length === 0 ? (
+                    <p className="text-muted-foreground">No one has joined yet. Be the first!</p>
                   ) : (
                     <ul className="flex flex-wrap gap-4">
                       {attendees.map((a) => (
