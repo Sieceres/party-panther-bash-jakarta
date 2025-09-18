@@ -143,25 +143,10 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
             className="md:hidden text-foreground hover:text-primary"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            <div
-              className="w-6 h-6 flex flex-col justify-center space-y-1"
-              style="color-scheme: light;"
-            >
-              <div className="w-full h-0.5 bg-black dark:bg-white"></div>
-              <div className="w-full h-0.5 bg-black dark:bg-white"></div>
-              <div className="w-full h-0.5 bg-black dark:bg-white"></div>
-            </div>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden text-foreground hover:text-primary"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
             <div className="w-6 h-6 flex flex-col justify-center space-y-1">
-              <div className="w-full h-0.5 bg-white"></div>
-              <div className="w-full h-0.5 bg-white"></div>
-              <div className="w-full h-0.5 bg-white"></div>
+              <div className="w-full h-0.5 bg-foreground"></div>
+              <div className="w-full h-0.5 bg-foreground"></div>
+              <div className="w-full h-0.5 bg-foreground"></div>
             </div>
           </Button>
         </div>
