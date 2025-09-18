@@ -115,6 +115,31 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
     }
   };
 
+  const handleSocialAuth = async (provider: 'google') => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -156,6 +181,26 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
                 {loading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+            
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => handleSocialAuth('google')}
+            >
+              Continue with Google
+            </Button>
           </TabsContent>
           
           <TabsContent value="signup">
@@ -203,6 +248,26 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
                 {loading ? "Creating account..." : "Sign Up"}
               </Button>
             </form>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+            
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => handleSocialAuth('google')}
+            >
+              Continue with Google
+            </Button>
           </TabsContent>
         </Tabs>
       </DialogContent>
