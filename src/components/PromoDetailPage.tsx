@@ -11,6 +11,7 @@ import { ReportDialog } from "./ReportDialog";
 import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getPromoBySlugOrId } from "@/lib/slug-utils";
 import Linkify from "linkify-react";
 
 interface Promo {
@@ -50,9 +51,7 @@ export const PromoDetailPage = () => {
       
       try {
         // Use the slug-aware utility function
-        const { data, error } = await import("@/lib/slug-utils").then(module => 
-          module.getPromoBySlugOrId(id)
-        );
+        const { data, error } = await getPromoBySlugOrId(id);
 
         if (error) throw error;
         if (!data) {
