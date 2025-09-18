@@ -137,18 +137,18 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
            </nav>
 
           {/* Mobile Menu Button */}
-<Button
-  variant="ghost"
-  size="sm"
-  className="md:hidden text-foreground hover:text-primary"
-  onClick={() => setIsMenuOpen(!isMenuOpen)}
->
-  <div className="w-6 h-6 flex flex-col justify-center space-y-1">
-    <div className="w-full h-0.5 bg-foreground"></div>
-    <div className="w-full h-0.5 bg-foreground"></div>
-    <div className="w-full h-0.5 bg-foreground"></div>
-  </div>
-</Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden text-foreground hover:text-primary"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <div className="w-6 h-6 flex flex-col justify-center space-y-1">
+              <div className="w-full h-0.5 bg-foreground"></div>
+              <div className="w-full h-0.5 bg-neutral-100"></div>
+              <div className="w-full h-0.5 bg-gray-200"></div>
+            </div>
+          </Button>
         </div>
 
         {/* Mobile Navigation */}
