@@ -54,6 +54,10 @@
     --party-dark: 240 10% 3.9%;
     --party-darker: 240 20% 1%;
     --party-light: 240 3.7% 15.9%;
+    
+    /* Link colors for better contrast */
+    --link: 193 100% 65%;
+    --link-hover: 210 100% 70%;
   }
 
   .light {
@@ -88,6 +92,10 @@
     --party-dark: 0 0% 100%;
     --party-darker: 240 4.8% 95.9%;
     --party-light: 240 5.9% 90%;
+    
+    /* Link colors for light mode */
+    --link: 210 100% 45%;
+    --link-hover: 193 100% 50%;
   }
 }
 
@@ -98,6 +106,16 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+  }
+  
+  a {
+    color: hsl(var(--link));
+    text-decoration: underline;
+    transition: color 0.2s ease;
+  }
+  
+  a:hover {
+    color: hsl(var(--link-hover));
   }
 }
 
