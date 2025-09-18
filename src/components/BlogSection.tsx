@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, ExternalLink } from "lucide-react";
+import { SpinningPaws } from "@/components/ui/spinning-paws";
 
 interface BlogPost {
   id: string;
@@ -86,7 +87,10 @@ export const BlogSection = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold gradient-text mb-4">Party Insights</h2>
-            <p className="text-xl text-muted-foreground">Loading latest articles...</p>
+            <div className="flex flex-col items-center space-y-4">
+              <SpinningPaws size="lg" />
+              <p className="text-xl text-muted-foreground">Loading latest articles...</p>
+            </div>
           </div>
         </div>
       </section>

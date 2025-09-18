@@ -27,6 +27,7 @@ import { Tables } from "../integrations/supabase/types";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { EventWithSlug, PromoWithSlug } from "@/types/extended-types";
 import { getEventUrl, getPromoUrl, getEditEventUrl, getEditPromoUrl } from "@/lib/slug-utils";
+import { SpinningPaws } from "@/components/ui/spinning-paws";
 
 // ... (interface Profile remains the same)
 
@@ -467,10 +468,9 @@ export const UserProfile = () => {
       <div className="max-w-4xl mx-auto space-y-6">
         <Card className="bg-card border-border">
           <CardContent className="pt-6">
-            <div className="animate-pulse space-y-4">
-              <div className="w-24 h-24 bg-muted rounded-full mx-auto"></div>
-              <div className="h-4 bg-muted rounded w-1/3 mx-auto"></div>
-              <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
+            <div className="text-center space-y-4">
+              <SpinningPaws size="lg" />
+              <p className="text-muted-foreground">Loading profile...</p>
             </div>
           </CardContent>
         </Card>

@@ -10,6 +10,7 @@ import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEventUrl, getEditEventUrl, getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
+import { SpinningPaws } from "@/components/ui/spinning-paws";
 
 interface Event {
   id: string;
@@ -441,7 +442,10 @@ export const AdminDashboard = () => {
     return (
       <div className="min-h-screen bg-background pt-20 px-4">
         <div className="container mx-auto">
-          <div className="text-center">Loading admin dashboard...</div>
+          <div className="text-center space-y-4">
+            <SpinningPaws size="lg" />
+            <div className="text-center">Loading admin dashboard...</div>
+          </div>
         </div>
       </div>
     );
