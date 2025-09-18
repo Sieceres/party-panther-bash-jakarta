@@ -5,18 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, MapPin, Users, Clock, ArrowLeft, Star, Share2, MessageSquare, Send, Edit2, Trash2, ChevronDown } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { CommentActions } from "./CommentActions";
-import { EventForm } from "./EventForm";
-import { ReportDialog } from "./ReportDialog";
-import { Header } from "./Header";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +17,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { MapPin, ArrowLeft, User as UserIcon, Star, Share2, Edit2, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import { GoogleMap } from "./GoogleMap";
+import { CommentActions } from "./CommentActions";
+import { ReportDialog } from "./ReportDialog";
+import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEventBySlugOrId, getEditEventUrl } from "@/lib/slug-utils";
@@ -44,18 +39,13 @@ interface Event {
   venue_latitude: number;
   venue_longitude: number;
   image_url: string;
+  is_recurrent: boolean;
   organizer_name: string;
   organizer_whatsapp: string;
-  created_at: string;
   created_by: string;
-  is_recurrent: boolean | null;
-  slug?: string | null;
-}
-
-interface Attendee {
-  id: string;
-  display_name: string;
-  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+  slug?: string;
 }
 
 export const EventDetailPage = () => {
@@ -64,89 +54,119 @@ export const EventDetailPage = () => {
   const { toast } = useToast();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const [hasJoined, setHasJoined] = useState(false);
+  const [attendees, setAttendees] = useState<any[]>([]);
+  const [joiningEvent, setJoiningEvent] = useState(false);
+  const [leavingEvent, setLeavingEvent] = useState(false);
+  const [totalAttendees, setTotalAttendees] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [lastCommentTime, setLastCommentTime] = useState<number>(0);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  // Attendee list
-  const [attendees, setAttendees] = useState<Attendee[]>([]);
 
   const memoizedCenter = useMemo(() => {
-    if (event?.venue_latitude && event?.venue_longitude) {
-      return { lat: Number(event.venue_latitude), lng: Number(event.venue_longitude) };
+    if (!event?.venue_latitude || !event?.venue_longitude) {
+      return { lat: -6.2088, lng: 106.8456 }; // Jakarta default
     }
-    return undefined;
-  }, [event]);
+    return {
+      lat: Number(event.venue_latitude),
+      lng: Number(event.venue_longitude)
+    };
+  }, [event?.venue_latitude, event?.venue_longitude]);
 
-  const markers = useMemo(() => (event?.venue_latitude && event?.venue_longitude ? [{
-    lat: Number(event.venue_latitude),
-    lng: Number(event.venue_longitude),
-    title: event.venue_name
-  }] : []), [event]);
+  const markers = useMemo(() => {
+    if (!event?.venue_latitude || !event?.venue_longitude) return [];
+    return [{
+      lat: Number(event.venue_latitude),
+      lng: Number(event.venue_longitude),
+      title: event.venue_name
+    }];
+  }, [event?.venue_latitude, event?.venue_longitude, event?.venue_name]);
 
   useEffect(() => {
-    const fetchEvent = async () => {
+    const fetchData = async () => {
       if (!id) return;
 
       try {
-        const { data, error } = await getEventBySlugOrId(id);
-
-        if (error) throw error;
-        setEvent(data);
-
-        // Check if the current user has already joined this event
+        const { data: eventData, error: eventError } = await getEventBySlugOrId(id);
+        if (eventError || !eventData) {
+          throw new Error('Event not found');
+        }
+        
+        setEvent(eventData);
+        
+        // Get current user and check admin status
         const { data: { user } } = await supabase.auth.getUser();
+        setCurrentUser(user);
+        setUser(user);
+        
         if (user) {
-          setCurrentUser(user);
-          const { data: attendeeData, error: attendeeError } = await supabase
-            .from('event_attendees')
-            .select('*')
-            .eq('event_id', data?.id)
+          // Check if user is admin
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_admin, is_super_admin')
             .eq('user_id', user.id)
-            .maybeSingle();
+            .single();
+          
+          setIsAdmin(profile?.is_admin || profile?.is_super_admin || false);
+        }
 
-          if (attendeeData && !attendeeError) {
-            setHasJoined(true);
-          }
+        // Check if user has joined this event
+        if (user) {
+          const { data: attendeeData } = await supabase
+            .from('event_attendees')
+            .select('id')
+            .eq('event_id', eventData.id)
+            .eq('user_id', user.id)
+            .single();
+          
+          setHasJoined(!!attendeeData);
         }
 
         // Fetch comments
         const { data: commentsData, error: commentsError } = await supabase
           .from('event_comments')
           .select(`
-            *,
-            profiles (
+            id,
+            comment,
+            created_at,
+            updated_at,
+            user_id,
+            profiles:user_id (
               display_name,
               avatar_url
             )
           `)
-          .eq('event_id', data?.id)
-          .order('created_at', { ascending: true });
+          .eq('event_id', eventData.id)
+          .order('created_at', { ascending: false });
 
         if (commentsData && !commentsError) {
           setComments(commentsData);
         }
 
-        // Fetch attendees for this event (with profile info)
-        const { data: attendeeList, error: attendeeListError } = await supabase
+        // Fetch attendees with profiles
+        const { data: attendeesData, error: attendeesError } = await supabase
           .from('event_attendees')
-          .select('user_id, profiles(display_name, avatar_url)')
-          .eq('event_id', data?.id);
+          .select(`
+            id,
+            user_id,
+            joined_at,
+            profiles:user_id (
+              display_name,
+              avatar_url
+            )
+          `)
+          .eq('event_id', eventData.id)
+          .order('joined_at', { ascending: false });
 
-        if (!attendeeListError && attendeeList) {
-          setAttendees(attendeeList.map((a: any) => ({
-            id: a.user_id,
-            display_name: a.profiles?.display_name || 'Anonymous',
-            avatar_url: a.profiles?.avatar_url || null,
-          })));
+        if (attendeesData && !attendeesError) {
+          setAttendees(attendeesData);
+          setTotalAttendees(attendeesData.length);
         }
-
       } catch (error) {
         console.error('Error fetching event:', error);
         toast({
@@ -159,27 +179,22 @@ export const EventDetailPage = () => {
       }
     };
 
-    fetchEvent();
+    fetchData();
   }, [id, toast]);
 
   const handleJoinEvent = async () => {
-    if (!event) return;
-
-    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast({
         title: "Authentication required",
-        description: "Please log in to join this event.",
+        description: "Please log in to join events.",
         variant: "destructive"
       });
       return;
     }
 
-    if (hasJoined) {
-      handleUnjoinEvent(user.id);
-      return;
-    }
+    if (!event) return;
 
+    setJoiningEvent(true);
     try {
       const { error } = await supabase
         .from('event_attendees')
@@ -189,35 +204,43 @@ export const EventDetailPage = () => {
         });
 
       if (error) {
-        if (error.code === '23505') { // Unique constraint violation
+        if (error.code === '23505') {
           toast({
-            title: "Already joined!",
+            title: "Already joined",
             description: "You're already registered for this event.",
             variant: "destructive"
           });
-          setHasJoined(true);
         } else {
           throw error;
         }
         return;
       }
 
+      setHasJoined(true);
+      setTotalAttendees(prev => prev + 1);
       toast({
         title: "Successfully joined event! 🎉",
         description: `You're now registered for "${event.title}". See you there!`,
       });
-      setHasJoined(true);
 
-      // Add new attendee to the list immediately
-      setAttendees(prev => [
-        ...prev,
-        {
-          id: user.id,
-          display_name: user.user_metadata?.display_name || 'You',
-          avatar_url: user.user_metadata?.avatar_url || null,
-        }
-      ]);
+      // Refresh attendees list
+      const { data: attendeesData } = await supabase
+        .from('event_attendees')
+        .select(`
+          id,
+          user_id,
+          joined_at,
+          profiles:user_id (
+            display_name,
+            avatar_url
+          )
+        `)
+        .eq('event_id', event.id)
+        .order('joined_at', { ascending: false });
 
+      if (attendeesData) {
+        setAttendees(attendeesData);
+      }
     } catch (error) {
       console.error('Error joining event:', error);
       toast({
@@ -225,43 +248,65 @@ export const EventDetailPage = () => {
         description: "Failed to join event. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setJoiningEvent(false);
     }
   };
 
-  const handleUnjoinEvent = async (userId: string) => {
-    if (!event) return;
+  const handleUnjoinEvent = async () => {
+    if (!user || !event) return;
 
+    setLeavingEvent(true);
     try {
       const { error } = await supabase
         .from('event_attendees')
         .delete()
         .eq('event_id', event.id)
-        .eq('user_id', userId);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
-      toast({
-        title: "Successfully unjoined event!",
-        description: `You've unjoined "${event.title}".`,
-      });
       setHasJoined(false);
+      setTotalAttendees(prev => Math.max(0, prev - 1));
+      toast({
+        title: "Left event",
+        description: "You have left this event.",
+      });
 
-      // Remove attendee from the list immediately
-      setAttendees(prev => prev.filter(a => a.id !== userId));
+      // Refresh attendees list
+      const { data: attendeesData } = await supabase
+        .from('event_attendees')
+        .select(`
+          id,
+          user_id,
+          joined_at,
+          profiles:user_id (
+            display_name,
+            avatar_url
+          )
+        `)
+        .eq('event_id', event.id)
+        .order('joined_at', { ascending: false });
+
+      if (attendeesData) {
+        setAttendees(attendeesData);
+      }
     } catch (error) {
-      console.error('Error unjoining event:', error);
+      console.error('Error leaving event:', error);
       toast({
         title: "Error",
-        description: "Failed to unjoin event. Please try again.",
+        description: "Failed to leave event. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setLeavingEvent(false);
     }
   };
 
   const handleContactOrganizer = () => {
     if (event?.organizer_whatsapp) {
-      const message = `Hi! I'm interested in your event: ${event.title}`;
-      const whatsappUrl = `https://wa.me/${event.organizer_whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+      const message = `Hi! I'm interested in attending "${event.title}" on ${format(new Date(event.date), 'MMMM do, yyyy')} at ${event.time}.`;
+      const whatsappUrl = `https://wa.me/${event.organizer_whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     }
   };
@@ -269,7 +314,7 @@ export const EventDetailPage = () => {
   const handleAddComment = async () => {
     if (!newComment.trim() || !event) return;
 
-    // Spam protection - character limits
+    // Basic validation
     if (newComment.trim().length < 3) {
       toast({
         title: "Comment too short",
@@ -300,7 +345,6 @@ export const EventDetailPage = () => {
       return;
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast({
         title: "Authentication required",
@@ -320,8 +364,12 @@ export const EventDetailPage = () => {
           comment: newComment.trim()
         })
         .select(`
-          *,
-          profiles (
+          id,
+          comment,
+          created_at,
+          updated_at,
+          user_id,
+          profiles:user_id (
             display_name,
             avatar_url
           )
@@ -346,26 +394,40 @@ export const EventDetailPage = () => {
       });
     } finally {
       setCommentsLoading(false);
+    }
+  };
+
   const handleCommentDeleted = (commentId: string) => {
     setComments(comments.filter(c => c.id !== commentId));
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       handleAddComment();
     }
   };
 
   const handleEdit = () => {
+    if (!event) return;
     navigate(getEditEventUrl(event));
   };
 
   const handleDelete = async () => {
-    if (!currentUser || !event || currentUser.id !== event.created_by) {
+    if (!currentUser) {
       toast({
         title: "Unauthorized",
-        description: "You can only delete your own events.",
+        description: "Please log in to delete events.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if user is owner or admin
+    const isOwner = currentUser.id === event?.created_by;
+    if (!isOwner && !isAdmin) {
+      toast({
+        title: "Unauthorized",
+        description: "You can only delete your own events or need admin privileges.",
         variant: "destructive"
       });
       return;
@@ -376,11 +438,9 @@ export const EventDetailPage = () => {
       const { error } = await supabase
         .from('events')
         .delete()
-        .eq('id', event.id);
+        .eq('id', event?.id);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Success",
@@ -391,7 +451,7 @@ export const EventDetailPage = () => {
     } catch (error: any) {
       console.error('Error deleting event:', error);
       toast({
-        title: "Error",
+        title: "Error",  
         description: error.message || "Failed to delete event",
         variant: "destructive"
       });
@@ -400,39 +460,40 @@ export const EventDetailPage = () => {
     }
   };
 
-  const isOwner = currentUser && event && currentUser.id === event.created_by;
+  const isOwner = user && user.id === event?.created_by;
+  const canDelete = isOwner || isAdmin;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pt-20 px-4">
-        <div className="container mx-auto">
-          <div className="text-center">Loading event details...</div>
+      <>
+        <Header activeSection="events" onSectionChange={() => navigate('/?section=events')} />
+        <div className="min-h-screen bg-background pt-20 px-4">
+          <div className="container mx-auto">
+            <div className="text-center">Loading event details...</div>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-background pt-20 px-4">
-        <div className="container mx-auto">
-          <div className="text-center">Event not found</div>
+      <>
+        <Header activeSection="events" onSectionChange={() => navigate('/?section=events')} />
+        <div className="min-h-screen bg-background pt-20 px-4">
+          <div className="container mx-auto">
+            <div className="text-center">Event not found</div>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
-
-  const linkifyOptions = {
-    target: "_blank",
-    rel: "noopener noreferrer",
-    className: "text-blue-600 underline break-all"
-  };
 
   return (
     <>
       <Header activeSection="events" onSectionChange={() => navigate('/?section=events')} />
       <div className="min-h-screen bg-background pt-20 px-4">
-        <div className="container mx-auto max-w-4xl">
+        <div className="container mx-auto max-w-6xl">
           <Button
             variant="ghost"
             onClick={() => navigate('/?section=events')}
@@ -442,285 +503,296 @@ export const EventDetailPage = () => {
             Back to Events
           </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Event Image */}
-            {event.image_url && (
-              <div className="aspect-video rounded-lg overflow-hidden">
-                <img 
-                  src={event.image_url} 
-                  alt={event.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-
-            {/* Event Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-3xl gradient-text">{event.title}</CardTitle>
-                <div className="flex items-center space-x-4 text-muted-foreground">
-                  <div className="flex items-center space-x-1">
-                    <Calendar className="w-4 h-4" />
-                    <span>{event.date}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{event.time}</span>
-                  </div>
-                  {event.is_recurrent && (
-                    <Badge variant="secondary" className="text-xs">
-                      Recurrent Event
-                    </Badge>
-                  )}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Event Image */}
+              {event.image_url && (
+                <div className="aspect-video rounded-lg overflow-hidden">
+                  <img 
+                    src={event.image_url} 
+                    alt={event.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  <Linkify options={linkifyOptions}>
-                    {event.description}
-                  </Linkify>
-                </p>
-                
-                <Separator />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <h4 className="font-semibold">Venue</h4>
-                    <div className="flex items-start space-x-2">
-                      <MapPin className="w-4 h-4 mt-1 text-muted-foreground" />
-                      <div>
-                        <p className="font-medium">{event.venue_name}</p>
-                        <p className="text-sm text-muted-foreground">{event.venue_address}</p>
+              )}
+
+              {/* Event Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-3xl gradient-text">{event.title}</CardTitle>
+                  <div className="flex items-center space-x-4 text-muted-foreground">
+                    <span>{format(new Date(event.date), 'EEEE, MMMM do, yyyy')}</span>
+                    <span>•</span>
+                    <span>{event.time}</span>
+                    {event.is_recurrent && (
+                      <>
+                        <span>•</span>
+                        <Badge variant="secondary">Recurring</Badge>
+                      </>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    <Linkify options={{ target: "_blank", rel: "noopener noreferrer", className: "text-primary hover:underline" }}>
+                      {event.description}
+                    </Linkify>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <h4 className="font-semibold">Venue</h4>
+                      <div className="flex items-start space-x-2">
+                        <MapPin className="w-4 h-4 mt-1 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">{event.venue_name}</p>
+                          <p className="text-sm text-muted-foreground">{event.venue_address}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-semibold">Organizer</h4>
+                      <div className="flex items-center space-x-2">
+                        <UserIcon className="w-4 h-4 text-muted-foreground" />
+                        <span>{event.organizer_name}</span>
+                        {event.organizer_whatsapp && user && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleContactOrganizer}
+                            className="ml-2"
+                          >
+                            Contact
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <h4 className="font-semibold">Organizer</h4>
-                    <p>{event.organizer_name}</p>
-                    {event.organizer_whatsapp && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleContactOrganizer}
-                        className="text-xs"
-                      >
-                        Contact via WhatsApp
-                      </Button>
-                    )}
-                  </div>
-                </div>
 
-                {markers.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-semibold">Location</h4>
-                    <GoogleMap
-                      center={memoizedCenter}
-                      markers={markers}
-                      height="300px"
-                    />
-                  </div>
-                )}
+                  {markers.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold">Location</h4>
+                      <GoogleMap
+                        center={memoizedCenter}
+                        markers={markers}
+                        height="300px"
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-                {/* --- Attendee List --- */}
-                <Separator />
-                <div className="space-y-2">
-                  <h4 className="font-semibold flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Attendees ({attendees.length})
-                  </h4>
-                  {attendees.length === 0 ? (
-                    <p className="text-muted-foreground">No one has joined yet.</p>
-                  ) : (
-                    <ul className="flex flex-wrap gap-4">
-                      {attendees.map((a) => (
-                        <li key={a.id} className="flex items-center space-x-2">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage src={a.avatar_url || undefined} />
+              {/* Attendees Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <UserIcon className="w-5 h-5" />
+                    <span>Attendees ({totalAttendees})</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {attendees.map((attendee) => (
+                      <div key={attendee.id} className="flex items-center space-x-2 bg-muted p-2 rounded-lg">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={attendee.profiles?.avatar_url} />
+                          <AvatarFallback>
+                            {attendee.profiles?.display_name?.[0]?.toUpperCase() || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium">
+                          {attendee.profiles?.display_name || 'Anonymous'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Comments Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <span>Discussion ({comments.length})</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Add Comment Form */}
+                  {user && (
+                    <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
+                      <Textarea
+                        placeholder="Share your thoughts about this event..."
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        onKeyDown={handleKeyPress}
+                        rows={3}
+                      />
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-muted-foreground">
+                          {newComment.length}/500
+                        </span>
+                        <Button
+                          onClick={handleAddComment}
+                          disabled={!newComment.trim() || commentsLoading}
+                          size="sm"
+                        >
+                          {commentsLoading ? "Posting..." : "Post Comment"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Comments List */}
+                  <div className="space-y-3">
+                    {comments.length === 0 ? (
+                      <p className="text-center text-muted-foreground py-8">
+                        No comments yet. Be the first to share your thoughts!
+                      </p>
+                    ) : (
+                      comments.map((comment) => (
+                        <div key={comment.id} className="flex space-x-3 p-3 bg-muted/50 rounded-lg">
+                          <Avatar>
+                            <AvatarImage src={comment.profiles?.avatar_url} />
                             <AvatarFallback>
-                              {a.display_name?.[0]?.toUpperCase() || "?"}
+                              {comment.profiles?.display_name?.[0]?.toUpperCase() || '?'}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-sm">{a.display_name}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-                {/* --- END Attendee List --- */}
-
-              </CardContent>
-            </Card>
-
-            {/* Comments Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <MessageSquare className="w-5 h-5" />
-                  <span>Discussion ({comments.length})</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Add Comment Form */}
-                <div className="space-y-3">
-                  <Textarea
-                    placeholder="Share your thoughts about this event... (Press Enter to submit, Shift+Enter for new line)"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="min-h-[80px] resize-none"
-                    maxLength={500}
-                  />
-                  <div className="flex justify-between items-center text-xs text-muted-foreground">
-                    <span>Press Enter to submit, Shift+Enter for new line</span>
-                    <span>{newComment.length}/500</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <span className="font-medium text-sm">
+                                  {comment.profiles?.display_name || 'Anonymous'}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(comment.created_at).toLocaleString()}
+                                </span>
+                              </div>
+                              <CommentActions
+                                comment={comment}
+                                currentUserId={currentUser?.id}
+                                isAdmin={isAdmin}
+                                onCommentDeleted={handleCommentDeleted}
+                                commentType="event"
+                              />
+                            </div>
+                            <p className="text-sm leading-relaxed font-light">{comment.comment}</p>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
-                  <Button
-                    onClick={handleAddComment}
-                    disabled={!newComment.trim() || commentsLoading}
-                    className="bg-gradient-to-r from-neon-blue to-neon-cyan text-white hover:opacity-90"
-                  >
-                    <Send className="w-4 h-4 mr-2" />
-                    {commentsLoading ? "Posting..." : "Post Comment"}
-                  </Button>
-                </div>
+                </CardContent>
+              </Card>
+            </div>
 
-                {/* Comments List */}
-                <div className="space-y-4">
-                  {comments.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-4">
-                      No comments yet. Be the first to share your thoughts!
-                    </p>
-                  ) : (
-                     comments.map((comment) => (
-                       <div key={comment.id} className="flex space-x-3 p-3 bg-muted/50 rounded-lg">
-                         <Avatar className="w-8 h-8">
-                           <AvatarImage src={comment.profiles?.avatar_url} />
-                           <AvatarFallback className="bg-gradient-to-r from-neon-blue to-neon-cyan text-white font-semibold text-sm">
-                             {comment.profiles?.display_name?.[0]?.toUpperCase() || '?'}
-                           </AvatarFallback>
-                         </Avatar>
-                         <div className="flex-1 space-y-1">
-                           <div className="flex items-center space-x-2">
-                             <p className="font-semibold text-sm" style={{ color: '#2596be' }}>
-                               {comment.profiles?.display_name || 'Anonymous'}
-                             </p>
-                             <p className="text-xs text-muted-foreground">
-                               {new Date(comment.created_at).toLocaleString()}
-                             </p>
-                           </div>
-                           <p className="text-sm leading-relaxed font-light">{comment.comment}</p>
-                         </div>
-                       </div>
-                     ))
+            {/* Sidebar */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Event Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {user && !hasJoined && (
+                    <Button
+                      onClick={handleJoinEvent}
+                      disabled={joiningEvent}
+                      className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold"
+                    >
+                      {joiningEvent ? "Joining..." : "Join Event"}
+                    </Button>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Event Info</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-
-                {hasJoined ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                        Joined
-                        <ChevronDown className="w-4 h-4 ml-2" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="center" className="w-full">
-                      <DropdownMenuItem onClick={() => handleUnjoinEvent(currentUser?.id)} className="text-destructive focus:text-destructive">
-                        Leave
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <Button
-                    onClick={handleJoinEvent}
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                  >
-                    Join Event
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
-                    toast({
-                      title: "Link Copied!",
-                      description: "Event link copied to clipboard.",
-                    });
-                  }}
-                >
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share Event
-                </Button>
-                
-                {isOwner && (
-                  <>
+                  {user && hasJoined && (
                     <Button
                       variant="outline"
-                      className="w-full"
-                      onClick={handleEdit}
+                      onClick={handleUnjoinEvent}
+                      disabled={leavingEvent}
+                      className="w-full border-neon-pink text-neon-pink hover:bg-neon-pink hover:text-black"
                     >
-                      <Edit2 className="w-4 h-4 mr-2" />
-                      Edit
+                      {leavingEvent ? "Leaving..." : "✓ Joined - Click to Leave"}
                     </Button>
-                    
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="destructive"
-                          className="w-full"
-                          disabled={isDeleting}
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          {isDeleting ? "Deleting..." : "Delete"}
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Event</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete this event? This action cannot be undone and will remove all associated data including attendees and comments.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={handleDelete}
-                            className="bg-destructive hover:bg-destructive/90"
+                  )}
+                  {!user && (
+                    <Button
+                      onClick={() => navigate('/auth')}
+                      className="w-full bg-primary hover:bg-primary/90"
+                    >
+                      Join Event
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast({
+                        title: "Link Copied!",
+                        description: "Event link copied to clipboard.",
+                      });
+                    }}
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share Event
+                  </Button>
+                  
+                  {(isOwner || isAdmin) && (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleEdit}
+                      >
+                        <Edit2 className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            className="w-full"
                             disabled={isDeleting}
                           >
-                            {isDeleting ? "Deleting..." : "Delete Event"}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </>
-              )}
-              
-              <ReportDialog
-                type="event"
-                targetId={event.id}
-                targetTitle={event.title}
-              />
-            </CardContent>
-          </Card>
-        </div>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            {isDeleting ? "Deleting..." : "Delete"}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this event? This action cannot be undone and will remove all associated data including attendees and comments.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={handleDelete}
+                              className="bg-destructive hover:bg-destructive/90"
+                              disabled={isDeleting}
+                            >
+                              {isDeleting ? "Deleting..." : "Delete Event"}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </>
+                  )}
+                  
+                  <ReportDialog
+                    type="event"
+                    targetId={event.id}
+                    targetTitle={event.title}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 };
