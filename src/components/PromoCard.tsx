@@ -100,8 +100,33 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
       }
     };
 
+    const fetchReviewStats = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('promo_reviews')
+          .select('rating')
+          .eq('promo_id', promo.id);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const avgRating = data.reduce((sum, review) => sum + review.rating, 0) / data.length;
+          setAverageRating(avgRating);
+          setTotalReviews(data.length);
+        } else {
+          setAverageRating(0);
+          setTotalReviews(0);
+        }
+      } catch (error) {
+        console.error('Error fetching review stats:', error);
+        setAverageRating(0);
+        setTotalReviews(0);
+      }
+    };
+
     fetchCreator();
     getCurrentUser();
+    fetchReviewStats();
   }, [promo.created_by, promo.id]);
 
   const handleCardClick = () => {

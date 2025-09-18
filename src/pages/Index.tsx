@@ -98,6 +98,16 @@ const Index = () => {
       let attendeeCountsMap: Record<string, number> = {};
       if (attendeeCountsError) {
         console.error('Error fetching attendee counts:', attendeeCountsError);
+        // Fallback: manually count attendees if RPC fails
+        const { data: fallbackData } = await supabase
+          .from('event_attendees')
+          .select('event_id');
+        
+        if (fallbackData) {
+          fallbackData.forEach((row: any) => {
+            attendeeCountsMap[row.event_id] = (attendeeCountsMap[row.event_id] || 0) + 1;
+          });
+        }
       } else {
         // Build a map of event_id -> count
         (attendeeCountsData || []).forEach((row: any) => {

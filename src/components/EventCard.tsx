@@ -45,6 +45,7 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
   
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const fetchEventData = async () => {
@@ -60,10 +61,19 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
         }
       }
 
-
-      // Get current user
+      // Get current user and check admin status
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin, is_super_admin')
+          .eq('user_id', user.id)
+          .single();
+        
+        setIsAdmin(profile?.is_admin || profile?.is_super_admin || false);
+      }
     };
 
     fetchEventData();
@@ -78,10 +88,30 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
   };
 
   const handleDelete = async () => {
-    if (!currentUser || currentUser.id !== event.created_by) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       toast({
         title: "Unauthorized",
-        description: "You can only delete your own events.",
+        description: "Please log in to delete events.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if user is owner or admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin, is_super_admin')
+      .eq('user_id', user.id)
+      .single();
+    
+    const isAdmin = profile?.is_admin || profile?.is_super_admin || false;
+    const isOwner = user.id === event.created_by;
+    
+    if (!isOwner && !isAdmin) {
+      toast({
+        title: "Unauthorized",
+        description: "You can only delete your own events or need admin privileges.",
         variant: "destructive"
       });
       return;
@@ -118,6 +148,7 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
   };
 
   const isOwner = currentUser && currentUser.id === event.created_by;
+  const canDelete = isOwner || isAdmin;
 
   return (
     <Card className="neon-card bg-card/95 backdrop-blur-sm border border-border/50 group cursor-pointer" onClick={handleCardClick}>
@@ -137,7 +168,7 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
         <div className="neon-tag absolute top-3 right-3">
           {format(new Date(event.date), 'MMM dd')}
         </div>
-        {isOwner && (
+        {canDelete && (
           <div className="absolute top-3 right-20 flex gap-2">
             <Button
               size="sm"
