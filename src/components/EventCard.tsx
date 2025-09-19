@@ -22,62 +22,40 @@ import { Tables } from "../integrations/supabase/types";
 import { getEventUrl, getEditEventUrl } from "@/lib/slug-utils";
 
 interface Event extends Tables<'events'> {
-  venue: string;
-  image: string;
+  venue?: string;
+  image?: string;
   attendees: number;
-  rating: number;
-  
-  organizer: string;
+  rating?: number;
+  organizer?: string;
   isJoined?: boolean;
+  is_joined?: boolean;
+  // Optimized data fields
+  creator_name?: string;
+  creator_avatar?: string;
+  creator_verified?: boolean;
 }
 
 interface EventCardProps {
   event: Event;
   onJoin?: (eventId: string) => void;
+  userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
 }
 
 import { format } from "date-fns";
 
-export const EventCard = ({ event, onJoin }: EventCardProps) => {
+export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [creatorName, setCreatorName] = useState<string | null>(null);
-  
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const fetchEventData = async () => {
-      // Fetch creator name using secure function
-      if (event.created_by) {
-        const { data: profile } = await supabase
-          .rpc('get_safe_profile_info', { profile_user_id: event.created_by });
-        
-        if (profile && profile.length > 0) {
-          setCreatorName(profile[0]?.display_name || 'Anonymous');
-        } else {
-          setCreatorName('Anonymous');
-        }
-      }
-
-      // Get current user and check admin status
+    const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
-      
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin, is_super_admin')
-          .eq('user_id', user.id)
-          .single();
-        
-        setIsAdmin(profile?.is_admin || profile?.is_super_admin || false);
-      }
     };
-
-    fetchEventData();
-  }, [event.created_by, event.id]);
+    getCurrentUser();
+  }, []);
 
   const handleCardClick = () => {
     navigate(getEventUrl(event));
@@ -148,7 +126,11 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
   };
 
   const isOwner = currentUser && currentUser.id === event.created_by;
+  const isAdmin = userAdminStatus?.is_admin || userAdminStatus?.is_super_admin || false;
   const canDelete = isOwner || isAdmin;
+  
+  // Use optimized creator name or fallback to fetching
+  const creatorName = event.creator_name || 'Anonymous';
 
   return (
     <Card className="neon-card bg-card/95 backdrop-blur-sm border border-border/50 group cursor-pointer" onClick={handleCardClick}>
@@ -251,7 +233,7 @@ export const EventCard = ({ event, onJoin }: EventCardProps) => {
             onJoin && onJoin(event.id);
           }}
         >
-          {event.isJoined ? "Joined" : "Join Event"}
+          {event.isJoined || event.is_joined ? "Joined" : "Join Event"}
         </button>
       </CardFooter>
     </Card>

@@ -569,6 +569,34 @@ export type Database = {
           venue_name: string
         }[]
       }
+      get_events_with_details: {
+        Args: { user_id_param?: string }
+        Returns: {
+          attendee_count: number
+          created_at: string
+          created_by: string
+          creator_avatar: string
+          creator_name: string
+          creator_verified: boolean
+          date: string
+          description: string
+          id: string
+          image_url: string
+          is_joined: boolean
+          is_recurrent: boolean
+          organizer_name: string
+          organizer_whatsapp: string
+          price_currency: string
+          slug: string
+          time: string
+          title: string
+          updated_at: string
+          venue_address: string
+          venue_latitude: number
+          venue_longitude: number
+          venue_name: string
+        }[]
+      }
       get_full_profile_info: {
         Args: { profile_user_id: string }
         Returns: {
@@ -592,6 +620,39 @@ export type Database = {
       get_my_claim: {
         Args: { claim: string }
         Returns: Json
+      }
+      get_promos_with_details: {
+        Args: { user_id_param?: string }
+        Returns: {
+          area: string
+          average_rating: number
+          category: string
+          created_at: string
+          created_by: string
+          creator_avatar: string
+          creator_name: string
+          creator_verified: boolean
+          day_of_week: string[]
+          description: string
+          discount_text: string
+          discounted_price_amount: number
+          drink_type: string[]
+          id: string
+          image_url: string
+          is_favorite: boolean
+          original_price_amount: number
+          price_currency: string
+          promo_type: string
+          slug: string
+          title: string
+          total_reviews: number
+          updated_at: string
+          valid_until: string
+          venue_address: string
+          venue_latitude: number
+          venue_longitude: number
+          venue_name: string
+        }[]
       }
       get_public_profile_info: {
         Args: { profile_user_id: string }
@@ -624,6 +685,13 @@ export type Database = {
       get_unique_promo_slug: {
         Args: { promo_id?: string; title_text: string }
         Returns: string
+      }
+      get_user_admin_status: {
+        Args: { user_id_param: string }
+        Returns: {
+          is_admin: boolean
+          is_super_admin: boolean
+        }[]
       }
       get_user_role: {
         Args: Record<PropertyKey, never> | { _user_id: string }

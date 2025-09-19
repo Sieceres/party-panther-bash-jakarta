@@ -20,6 +20,8 @@ interface HomeContentProps {
   promos: PromoWithSlug[];
   onSectionChange: (section: string) => void;
   onJoinEvent: (eventId: string) => void;
+  userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
+  onFavoriteToggle?: (promoId: string, isFavorite: boolean) => void;
 }
 
 export const HomeContent = ({ 
@@ -27,7 +29,9 @@ export const HomeContent = ({
   events, 
   promos, 
   onSectionChange, 
-  onJoinEvent
+  onJoinEvent,
+  userAdminStatus,
+  onFavoriteToggle
 }: HomeContentProps) => {
   if (loading) {
     return (
@@ -90,17 +94,19 @@ export const HomeContent = ({
                   style={{ animationDelay: `${0.08 * index}s` }}
                 >
                    <PromoCard 
-                     promo={{
-                       ...promo,
-                       discount: promo.discount_text,
-                       venue: promo.venue_name,
-                       validUntil: promo.valid_until,
-                       image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
-                        day: Array.isArray(promo.day_of_week) ? promo.day_of_week.join(', ') : (promo.day_of_week || ''),
-                        area: promo.area?.toLowerCase(),
-                        drinkType: Array.isArray(promo.drink_type) ? promo.drink_type.join(', ') : (promo.drink_type || '')
-                     }} 
-                   />
+                      promo={{
+                        ...promo,
+                        discount: promo.discount_text,
+                        venue: promo.venue_name,
+                        validUntil: promo.valid_until,
+                        image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
+                         day: Array.isArray(promo.day_of_week) ? promo.day_of_week.join(', ') : (promo.day_of_week || ''),
+                         area: promo.area?.toLowerCase(),
+                         drinkType: Array.isArray(promo.drink_type) ? promo.drink_type.join(', ') : (promo.drink_type || '')
+                      }} 
+                      userAdminStatus={userAdminStatus}
+                      onFavoriteToggle={onFavoriteToggle}
+                    />
                 </div>
               ))}
             </div>
@@ -149,18 +155,18 @@ export const HomeContent = ({
                   className="animate-stagger-in opacity-0"
                   style={{ animationDelay: `${0.08 * index}s` }}
                 >
-                  <EventCard 
-                    event={{
-                      ...event,
-                      venue: event.venue_name,
-                      image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
-                      attendees: event.attendees || 0,
-                      rating: 4.5 + Math.random() * 0.5,
-                      
-                      organizer: event.organizer_name
-                    }} 
-                    onJoin={onJoinEvent} 
-                  />
+                   <EventCard 
+                     event={{
+                       ...event,
+                       venue: event.venue_name,
+                       image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
+                       attendees: event.attendees || 0,
+                       rating: 4.5 + Math.random() * 0.5,
+                       organizer: event.organizer_name
+                     }} 
+                     onJoin={onJoinEvent}
+                     userAdminStatus={userAdminStatus}
+                   />
                 </div>
               ))}
             </div>

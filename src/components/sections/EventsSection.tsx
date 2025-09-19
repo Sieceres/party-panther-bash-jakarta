@@ -20,6 +20,7 @@ interface EventsSectionProps {
   onJoinEvent: (eventId: string) => void;
   onSortChange: (sort: string) => void;
   loading: boolean;
+  userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
 }
 
 export const EventsSection = ({
@@ -29,7 +30,8 @@ export const EventsSection = ({
   onToggleCreateEvent,
   onJoinEvent,
   onSortChange,
-  loading
+  loading,
+  userAdminStatus
 }: EventsSectionProps) => {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
@@ -188,6 +190,7 @@ export const EventsSection = ({
                   organizer: event.organizer_name
                 }}
                 onJoin={onJoinEvent}
+                userAdminStatus={userAdminStatus}
               />
             ))
           )}

@@ -6,16 +6,27 @@ import { PromosSection } from "@/components/sections/PromosSection";
 import { UserProfile } from "@/components/UserProfile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "../integrations/supabase/types";
 import { Footer } from "@/components/Footer";
-import { User } from "@supabase/supabase-js";
-import { EventWithSlug, PromoWithSlug } from "@/types/extended-types";
+import { useOptimizedData } from "@/hooks/useOptimizedData";
 
 const Index = () => {
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState("home");
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showCreatePromo, setShowCreatePromo] = useState(false);
+
+  // Use optimized data hook for better performance
+  const { 
+    events, 
+    promos, 
+    loading, 
+    user, 
+    userAdminStatus,
+    refreshData, 
+    updateEventAttendance,
+    updatePromoFavorite,
+    isDataFresh 
+  } = useOptimizedData();
 
   // Update navigation section when changing between sections properly
   const handleSectionChange = (section: string) => {
@@ -34,8 +45,10 @@ const Index = () => {
     // Scroll to top when changing sections
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
-    // Refresh data to ensure it's current
-    fetchData(user?.id);
+    // Only refresh data if it's stale or user specifically navigated to a section
+    if (!isDataFresh || section === 'events' || section === 'promos') {
+      refreshData();
+    }
   };
 
   const [dayFilter, setDayFilter] = useState<string[]>(["all"]);
@@ -43,20 +56,8 @@ const Index = () => {
   const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(["all"]);
   const [promoSortBy, setPromoSortBy] = useState("newest");
   const [eventSortBy, setEventSortBy] = useState("date-asc");
-  const [events, setEvents] = useState<EventWithSlug[]>([]);  
-  const [promos, setPromos] = useState<PromoWithSlug[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const fetchUserAndData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      fetchData(user?.id); // Pass user ID to fetchData
-    };
-
-    fetchUserAndData();
-    
     // Handle URL section parameter
     const urlParams = new URLSearchParams(window.location.search);
     const section = urlParams.get('section');
@@ -69,77 +70,6 @@ const Index = () => {
       window.history.replaceState({}, '', '/');
     }
   }, []);
-
-  // --- CHANGED: Fetch attendee counts per event and add to events ---
-  const fetchData = async (currentUserId?: string) => {
-    try {
-      // Fetch events using secure function
-      const { data: eventsData, error: eventsError } = await supabase
-        .rpc('get_events_safe')
-        .order('date', { ascending: true });
-
-      if (eventsError) throw eventsError;
-
-      let joinedEventIds: string[] = [];
-      if (currentUserId) {
-        const { data: attendeesData, error: attendeesError } = await supabase
-          .from('event_attendees')
-          .select('event_id')
-          .eq('user_id', currentUserId);
-
-        if (attendeesError) throw attendeesError;
-        joinedEventIds = attendeesData.map(attendee => attendee.event_id);
-      }
-
-      // Fetch public attendee counts for all events
-      const { data: attendeeCountsData, error: attendeeCountsError } = await supabase
-        .rpc('get_event_attendee_counts');
-
-      let attendeeCountsMap: Record<string, number> = {};
-      if (attendeeCountsError) {
-        console.error('Error fetching attendee counts:', attendeeCountsError);
-        // Fallback: manually count attendees if RPC fails
-        const { data: fallbackData } = await supabase
-          .from('event_attendees')
-          .select('event_id');
-        
-        if (fallbackData) {
-          fallbackData.forEach((row: any) => {
-            attendeeCountsMap[row.event_id] = (attendeeCountsMap[row.event_id] || 0) + 1;
-          });
-        }
-      } else {
-        // Build a map of event_id -> count
-        (attendeeCountsData || []).forEach((row: any) => {
-          attendeeCountsMap[row.event_id] = Number(row.attendee_count) || 0;
-        });
-      }
-
-      const eventsWithJoinStatus = (eventsData || []).map((event: any) => ({
-        ...event,
-        isJoined: joinedEventIds.includes(event.id),
-        slug: event.slug || null,
-        attendees: attendeeCountsMap[event.id] || 0, // <-- Use real attendee count
-      })) as EventWithSlug[];
-
-      // Fetch promos
-      const { data: promosData, error: promosError } = await supabase
-        .from('promos')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (promosError) throw promosError;
-
-      setEvents(eventsWithJoinStatus || []);
-      setPromos((promosData?.map((promo: any) => ({ ...promo, slug: promo.slug || null })) as PromoWithSlug[]) || []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setEvents([]);
-      setPromos([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const filteredAndSortedPromos = promos
     .filter((promo) => {
@@ -226,6 +156,20 @@ const Index = () => {
         return;
       }
 
+      // Check if already joined
+      const event = events.find(e => e.id === eventId);
+      if (event?.is_joined) {
+        toast({
+          title: "Already joined",
+          description: "You're already registered for this event.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Optimistically update UI
+      updateEventAttendance(eventId, true);
+
       const { error } = await supabase
         .from('event_attendees')
         .insert({
@@ -234,6 +178,9 @@ const Index = () => {
         });
 
       if (error) {
+        // Revert optimistic update on error
+        updateEventAttendance(eventId, false);
+        
         if (error.code === '23505') {
           toast({
             title: "Already joined",
@@ -246,19 +193,15 @@ const Index = () => {
         return;
       }
 
-      const event = events.find(e => e.id === eventId);
       toast({
         title: "Successfully joined event! 🎉",
         description: `You're now registered for "${event?.title}". See you there!`,
       });
 
-      setEvents(prevEvents =>
-        prevEvents.map(e =>
-          e.id === eventId ? { ...e, isJoined: true, attendees: (e.attendees || 0) + 1 } : e
-        )
-      );
     } catch (error) {
       console.error('Error joining event:', error);
+      // Revert optimistic update on error
+      updateEventAttendance(eventId, false);
       toast({
         title: "Error",
         description: "Failed to join event. Please try again.",
@@ -277,6 +220,8 @@ const Index = () => {
             promos={filteredAndSortedPromos}
             onSectionChange={handleSectionChange}
             onJoinEvent={handleJoinEvent}
+            userAdminStatus={userAdminStatus}
+            onFavoriteToggle={updatePromoFavorite}
           />
         );
       
@@ -290,6 +235,7 @@ const Index = () => {
             onJoinEvent={handleJoinEvent}
             onSortChange={setEventSortBy}
             loading={loading}
+            userAdminStatus={userAdminStatus}
           />
         );
       
@@ -309,6 +255,8 @@ const Index = () => {
             onAreaFilterChange={handleAreaFilterChange}
             onDrinkTypeFilterChange={handleDrinkTypeFilterChange}
             onSortChange={setPromoSortBy}
+            userAdminStatus={userAdminStatus}
+            onFavoriteToggle={updatePromoFavorite}
           />
         );
       
@@ -329,6 +277,8 @@ const Index = () => {
             promos={filteredAndSortedPromos}
             onSectionChange={handleSectionChange}
             onJoinEvent={handleJoinEvent}
+            userAdminStatus={userAdminStatus}
+            onFavoriteToggle={updatePromoFavorite}
           />
         );
     }

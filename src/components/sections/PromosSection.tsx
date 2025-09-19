@@ -28,6 +28,8 @@ interface PromosSectionProps {
   onAreaFilterChange: (filter: string[]) => void;
   onDrinkTypeFilterChange: (filter: string[]) => void;
   onSortChange: (sort: string) => void;
+  userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
+  onFavoriteToggle?: (promoId: string, isFavorite: boolean) => void;
 }
 
 export const PromosSection = ({ 
@@ -42,7 +44,9 @@ export const PromosSection = ({
   onDayFilterChange,
   onAreaFilterChange,
   onDrinkTypeFilterChange,
-  onSortChange
+  onSortChange,
+  userAdminStatus,
+  onFavoriteToggle
 }: PromosSectionProps) => {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
@@ -312,19 +316,21 @@ export const PromosSection = ({
             </div>
           ) : (
             filteredPromos.map((promo) => (
-              <PromoCard 
+               <PromoCard 
                 key={promo.id} 
                 promo={{
                   ...promo,
-                  discount: promo.discount_text,
-                  venue: promo.venue_name,
-                  validUntil: promo.valid_until,
-                  image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
-                  day: Array.isArray(promo.day_of_week) ? promo.day_of_week.join(', ') : (promo.day_of_week || ''),
-                  area: promo.area?.toLowerCase(),
-                  drinkType: Array.isArray(promo.drink_type) ? promo.drink_type.join(', ') : (promo.drink_type || ''),
-                  created_by: promo.created_by
+                  discount: promo.discount_text || "",
+                  venue: promo.venue_name || "",
+                  validUntil: promo.valid_until || "",
+                  image: promo.image_url || "",
+                  category: promo.category || "",
+                  day: promo.day_of_week || [],
+                  area: promo.area || "",
+                  drinkType: promo.drink_type || []
                 }}
+                userAdminStatus={userAdminStatus}
+                onFavoriteToggle={onFavoriteToggle}
               />
             ))
           )}

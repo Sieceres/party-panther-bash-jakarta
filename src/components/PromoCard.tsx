@@ -34,106 +34,53 @@ interface Promo {
   area: string;
   drinkType: string[] | string;
   created_by?: string;
+  // Optimized data fields
+  creator_name?: string;
+  creator_avatar?: string;
+  creator_verified?: boolean;
+  average_rating?: number;
+  total_reviews?: number;
+  is_favorite?: boolean;
 }
 
 interface PromoCardProps {
   promo: Promo;
+  userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
+  onFavoriteToggle?: (promoId: string, isFavorite: boolean) => void;
 }
 
 import { format } from "date-fns";
 import { getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
 
-export const PromoCard = ({ promo }: PromoCardProps) => {
+export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle }: PromoCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showReviews, setShowReviews] = useState(false);
-  const [averageRating, setAverageRating] = useState(0);
-  const [totalReviews, setTotalReviews] = useState(0);
-  const [creatorName, setCreatorName] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Use optimized data or fallback to defaults
+  const averageRating = promo.average_rating || 0;
+  const totalReviews = Number(promo.total_reviews) || 0;
+  const creatorName = promo.creator_name || 'Anonymous';
+  const isFavorite = promo.is_favorite || false;
 
   useEffect(() => {
-    const fetchCreator = async () => {
-      if (promo.created_by) {
-        const { data: profile } = await supabase
-          .rpc('get_safe_profile_info', { profile_user_id: promo.created_by });
-        
-        if (profile && profile.length > 0) {
-          setCreatorName(profile[0]?.display_name || 'Anonymous');
-        } else {
-          setCreatorName('Anonymous');
-        }
-      }
-    };
-
     const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
-      
-      // Check if user is admin
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin, is_super_admin')
-          .eq('user_id', user.id)
-          .single();
-        
-        setIsAdmin(profile?.is_admin || profile?.is_super_admin || false);
-      }
-      
-      // Check if promo is favorited by current user
-      if (user) {
-        const { data } = await supabase
-          .from('user_favorite_promos')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('promo_id', promo.id)
-          .single();
-        
-        setIsFavorite(!!data);
-      }
     };
-
-    const fetchReviewStats = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('promo_reviews')
-          .select('rating')
-          .eq('promo_id', promo.id);
-
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-          const avgRating = data.reduce((sum, review) => sum + review.rating, 0) / data.length;
-          setAverageRating(avgRating);
-          setTotalReviews(data.length);
-        } else {
-          setAverageRating(0);
-          setTotalReviews(0);
-        }
-      } catch (error) {
-        console.error('Error fetching review stats:', error);
-        setAverageRating(0);
-        setTotalReviews(0);
-      }
-    };
-
-    fetchCreator();
     getCurrentUser();
-    fetchReviewStats();
-  }, [promo.created_by, promo.id]);
+  }, []);
 
   const handleCardClick = () => {
     navigate(getPromoUrl(promo));
   };
 
   const handleReviewsChange = (avgRating: number, total: number) => {
-    setAverageRating(avgRating);
-    setTotalReviews(total);
+    // This function can be kept for ReviewsList compatibility but doesn't need to update state
+    // since we're using optimized data from the hook
   };
 
   const handleEdit = () => {
@@ -222,7 +169,8 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
 
         if (error) throw error;
 
-        setIsFavorite(false);
+        // Optimistic update
+        onFavoriteToggle?.(promo.id, false);
         toast({
           title: "Removed from favorites",
           description: "Promo removed from your favorites!"
@@ -235,7 +183,8 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
 
         if (error) throw error;
 
-        setIsFavorite(true);
+        // Optimistic update
+        onFavoriteToggle?.(promo.id, true);
         toast({
           title: "Added to favorites",
           description: "Promo added to your favorites!"
@@ -243,6 +192,8 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
       }
     } catch (error: any) {
       console.error('Error toggling favorite:', error);
+      // Revert optimistic update on error
+      onFavoriteToggle?.(promo.id, !isFavorite);
       toast({
         title: "Error",
         description: error.message || "Failed to update favorite status",
@@ -254,6 +205,7 @@ export const PromoCard = ({ promo }: PromoCardProps) => {
   };
 
   const isOwner = currentUser && currentUser.id === promo.created_by;
+  const isAdmin = userAdminStatus?.is_admin || userAdminStatus?.is_super_admin || false;
   const canDelete = isOwner || isAdmin;
 
   return (
