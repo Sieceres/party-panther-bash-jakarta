@@ -144,7 +144,7 @@ export const EventDetailPage = () => {
             created_at,
             updated_at,
             user_id,
-            profiles!inner(
+            profiles:user_id(
               display_name,
               avatar_url
             )
@@ -163,7 +163,7 @@ export const EventDetailPage = () => {
             id,
             user_id,
             joined_at,
-            profiles!inner(
+            profiles:user_id(
               display_name,
               avatar_url
             )
@@ -237,7 +237,7 @@ export const EventDetailPage = () => {
           id,
           user_id,
           joined_at,
-          profiles!inner(
+          profiles:user_id(
             display_name,
             avatar_url
           )
@@ -287,7 +287,7 @@ export const EventDetailPage = () => {
           id,
           user_id,
           joined_at,
-          profiles!inner(
+          profiles:user_id(
             display_name,
             avatar_url
           )
@@ -376,7 +376,7 @@ export const EventDetailPage = () => {
           created_at,
           updated_at,
           user_id,
-          profiles!inner(
+          profiles:user_id(
             display_name,
             avatar_url
           )
