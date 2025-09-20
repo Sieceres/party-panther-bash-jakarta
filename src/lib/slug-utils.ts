@@ -1,8 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const getEventBySlugOrId = async (identifier: string) => {
-  // Use secure function to get events data that properly handles sensitive information
-  const { data: allEvents, error } = await supabase.rpc('get_events_safe');
+  // Get current user for personalized data
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  // Use function that includes attendee counts and user-specific data
+  const { data: allEvents, error } = await supabase.rpc('get_events_with_details', {
+    user_id_param: user?.id || null
+  });
   
   if (error) {
     return { data: null, error };
