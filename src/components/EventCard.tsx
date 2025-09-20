@@ -24,7 +24,8 @@ import { getEventUrl, getEditEventUrl } from "@/lib/slug-utils";
 interface Event extends Tables<'events'> {
   venue?: string;
   image?: string;
-  attendees: number;
+  attendees?: number;
+  attendee_count?: number;
   rating?: number;
   organizer?: string;
   isJoined?: boolean;
@@ -209,7 +210,7 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-1" style={{ color: '#E0E0E0' }}>
               <UserIcon className="w-4 h-4" />
-              <span>{event.attendees} going</span>
+              <span>{event.attendee_count || event.attendees || 0} going</span>
             </div>
             <div className="flex items-center space-x-2 text-xs" style={{ color: '#E0E0E0' }}>
               {creatorName && <span>Created by {creatorName}</span>}

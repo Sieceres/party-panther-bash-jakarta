@@ -47,6 +47,8 @@ interface Event {
   created_at: string;
   updated_at: string;
   slug?: string;
+  attendee_count?: number;
+  comment_count?: number;
 }
 
 export const EventDetailPage = () => {
@@ -130,7 +132,10 @@ export const EventDetailPage = () => {
           setHasJoined(!!attendeeData);
         }
 
-        // Fetch comments
+        // Use attendee count from RPC function (eventData has attendee_count)
+        setTotalAttendees(eventData.attendee_count || 0);
+
+        // Fetch comments for display
         const { data: commentsData, error: commentsError } = await supabase
           .from('event_comments')
           .select(`
@@ -151,7 +156,7 @@ export const EventDetailPage = () => {
           setComments(commentsData);
         }
 
-        // Fetch attendees with profiles
+        // Fetch attendees with profiles for display
         const { data: attendeesData, error: attendeesError } = await supabase
           .from('event_attendees')
           .select(`
@@ -168,7 +173,6 @@ export const EventDetailPage = () => {
 
         if (attendeesData && !attendeesError) {
           setAttendees(attendeesData);
-          setTotalAttendees(attendeesData.length);
         }
       } catch (error) {
         console.error('Error fetching event:', error);
