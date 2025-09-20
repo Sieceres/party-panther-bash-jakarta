@@ -135,44 +135,50 @@ export const EventDetailPage = () => {
         // Use attendee count from RPC function (eventData has attendee_count)
         setTotalAttendees(eventData.attendee_count || 0);
 
-        // Fetch comments for display
+        // Fetch comments for display - using separate queries to avoid foreign key issues
         const { data: commentsData, error: commentsError } = await supabase
           .from('event_comments')
-          .select(`
-            id,
-            comment,
-            created_at,
-            updated_at,
-            user_id,
-            profiles:user_id(
-              display_name,
-              avatar_url
-            )
-          `)
+          .select('id, comment, created_at, updated_at, user_id')
           .eq('event_id', eventData.id)
           .order('created_at', { ascending: false });
 
         if (commentsData && !commentsError) {
-          setComments(commentsData);
+          // Fetch profiles for comment authors
+          const userIds = [...new Set(commentsData.map(comment => comment.user_id))];
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('user_id, display_name, avatar_url')
+            .in('user_id', userIds);
+
+          // Join comments with profiles
+          const commentsWithProfiles = commentsData.map(comment => ({
+            ...comment,
+            profiles: profilesData?.find(profile => profile.user_id === comment.user_id) || null
+          }));
+          setComments(commentsWithProfiles);
         }
 
-        // Fetch attendees with profiles for display
+        // Fetch attendees with profiles for display - using separate queries
         const { data: attendeesData, error: attendeesError } = await supabase
           .from('event_attendees')
-          .select(`
-            id,
-            user_id,
-            joined_at,
-            profiles:user_id(
-              display_name,
-              avatar_url
-            )
-          `)
+          .select('id, user_id, joined_at')
           .eq('event_id', eventData.id)
           .order('joined_at', { ascending: false });
 
         if (attendeesData && !attendeesError) {
-          setAttendees(attendeesData);
+          // Fetch profiles for attendees
+          const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('user_id, display_name, avatar_url')
+            .in('user_id', userIds);
+
+          // Join attendees with profiles
+          const attendeesWithProfiles = attendeesData.map(attendee => ({
+            ...attendee,
+            profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
+          }));
+          setAttendees(attendeesWithProfiles);
         }
       } catch (error) {
         console.error('Error fetching event:', error);
@@ -233,20 +239,24 @@ export const EventDetailPage = () => {
       // Refresh attendees list
       const { data: attendeesData } = await supabase
         .from('event_attendees')
-        .select(`
-          id,
-          user_id,
-          joined_at,
-          profiles:user_id(
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('id, user_id, joined_at')
         .eq('event_id', event.id)
         .order('joined_at', { ascending: false });
 
       if (attendeesData) {
-        setAttendees(attendeesData);
+        // Fetch profiles for attendees
+        const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url')
+          .in('user_id', userIds);
+
+        // Join attendees with profiles
+        const attendeesWithProfiles = attendeesData.map(attendee => ({
+          ...attendee,
+          profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
+        }));
+        setAttendees(attendeesWithProfiles);
       }
     } catch (error) {
       console.error('Error joining event:', error);
@@ -283,20 +293,24 @@ export const EventDetailPage = () => {
       // Refresh attendees list
       const { data: attendeesData } = await supabase
         .from('event_attendees')
-        .select(`
-          id,
-          user_id,
-          joined_at,
-          profiles:user_id(
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('id, user_id, joined_at')
         .eq('event_id', event.id)
         .order('joined_at', { ascending: false });
 
       if (attendeesData) {
-        setAttendees(attendeesData);
+        // Fetch profiles for attendees
+        const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url')
+          .in('user_id', userIds);
+
+        // Join attendees with profiles
+        const attendeesWithProfiles = attendeesData.map(attendee => ({
+          ...attendee,
+          profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
+        }));
+        setAttendees(attendeesWithProfiles);
       }
     } catch (error) {
       console.error('Error leaving event:', error);
@@ -370,18 +384,30 @@ export const EventDetailPage = () => {
           user_id: user.id,
           comment: newComment.trim()
         })
-        .select(`
-          id,
-          comment,
-          created_at,
-          updated_at,
-          user_id,
-          profiles:user_id(
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('id, comment, created_at, updated_at, user_id')
         .single();
+
+      if (data && !error) {
+        // Fetch profile for the new comment
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url')
+          .eq('user_id', user.id)
+          .single();
+
+        const commentWithProfile = {
+          ...data,
+          profiles: profileData || null
+        };
+
+        setComments([commentWithProfile, ...comments]);
+        setNewComment("");
+        setLastCommentTime(now);
+        toast({
+          title: "Comment added!",
+          description: "Your comment has been posted.",
+        });
+      }
 
       if (error) throw error;
 
