@@ -41,6 +41,13 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_attendees_profiles"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       event_comments: {
@@ -75,6 +82,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "events"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_comments_profiles"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "fk_event_comments_profiles"
@@ -339,6 +353,7 @@ export type Database = {
           created_at: string
           id: string
           promo_id: string
+          promo_id_uuid: string | null
           rating: number
           updated_at: string
           user_id: string
@@ -348,6 +363,7 @@ export type Database = {
           created_at?: string
           id?: string
           promo_id: string
+          promo_id_uuid?: string | null
           rating: number
           updated_at?: string
           user_id: string
@@ -357,9 +373,40 @@ export type Database = {
           created_at?: string
           id?: string
           promo_id?: string
+          promo_id_uuid?: string | null
           rating?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      promo_reviews_backup: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string | null
+          promo_id: string | null
+          rating: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string | null
+          promo_id?: string | null
+          rating?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string | null
+          promo_id?: string | null
+          rating?: number | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -622,7 +669,7 @@ export type Database = {
         Returns: Json
       }
       get_promos_with_details: {
-        Args: { user_id_param?: string }
+        Args: { p_slug: string } | { user_id_param?: string }
         Returns: {
           area: string
           average_rating: number
