@@ -19,18 +19,27 @@ export type Database = {
           event_id: string
           id: string
           joined_at: string | null
+          payment_date: string | null
+          payment_marked_by: string | null
+          payment_status: boolean
           user_id: string
         }
         Insert: {
           event_id: string
           id?: string
           joined_at?: string | null
+          payment_date?: string | null
+          payment_marked_by?: string | null
+          payment_status?: boolean
           user_id: string
         }
         Update: {
           event_id?: string
           id?: string
           joined_at?: string | null
+          payment_date?: string | null
+          payment_marked_by?: string | null
+          payment_status?: boolean
           user_id?: string
         }
         Relationships: [

@@ -161,7 +161,7 @@ export const EventDetailPage = () => {
         // Fetch attendees with profiles for display - using separate queries
         const { data: attendeesData, error: attendeesError } = await supabase
           .from('event_attendees')
-          .select('id, user_id, joined_at')
+          .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by')
           .eq('event_id', eventData.id)
           .order('joined_at', { ascending: false });
 
@@ -239,7 +239,7 @@ export const EventDetailPage = () => {
       // Refresh attendees list
       const { data: attendeesData } = await supabase
         .from('event_attendees')
-        .select('id, user_id, joined_at')
+        .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by')
         .eq('event_id', event.id)
         .order('joined_at', { ascending: false });
 
@@ -293,7 +293,7 @@ export const EventDetailPage = () => {
       // Refresh attendees list
       const { data: attendeesData } = await supabase
         .from('event_attendees')
-        .select('id, user_id, joined_at')
+        .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by')
         .eq('event_id', event.id)
         .order('joined_at', { ascending: false });
 
@@ -504,6 +504,54 @@ export const EventDetailPage = () => {
     navigate(`/profile/${userId}`);
   };
 
+  const handleTogglePayment = async (attendeeId: string, currentStatus: boolean) => {
+    if (!isAdmin) {
+      toast({
+        title: "Unauthorized",
+        description: "Only admins can mark payment status.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('event_attendees')
+        .update({
+          payment_status: !currentStatus,
+          payment_date: !currentStatus ? new Date().toISOString() : null,
+          payment_marked_by: !currentStatus ? currentUser?.id : null
+        })
+        .eq('id', attendeeId);
+
+      if (error) throw error;
+
+      // Update local state
+      setAttendees(prev => prev.map(attendee => 
+        attendee.id === attendeeId 
+          ? { 
+              ...attendee, 
+              payment_status: !currentStatus,
+              payment_date: !currentStatus ? new Date().toISOString() : null,
+              payment_marked_by: !currentStatus ? currentUser?.id : null
+            }
+          : attendee
+      ));
+
+      toast({
+        title: "Payment status updated",
+        description: `Attendee marked as ${!currentStatus ? 'paid' : 'unpaid'}.`,
+      });
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update payment status. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return (
       <>
@@ -643,10 +691,12 @@ export const EventDetailPage = () => {
                     {displayedAttendees.map((attendee) => (
                       <div 
                         key={attendee.id} 
-                        className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted cursor-pointer transition-colors"
-                        onClick={() => handleProfileClick(attendee.user_id)}
+                        className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                       >
-                        <div className="flex items-center space-x-3">
+                        <div 
+                          className="flex items-center space-x-3 cursor-pointer"
+                          onClick={() => handleProfileClick(attendee.user_id)}
+                        >
                           <Avatar className="w-10 h-10">
                             <AvatarImage src={attendee.profiles?.avatar_url} />
                             <AvatarFallback>
@@ -654,9 +704,16 @@ export const EventDetailPage = () => {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <span className="font-medium">
-                              {attendee.profiles?.display_name || 'Anonymous'}
-                            </span>
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium">
+                                {attendee.profiles?.display_name || 'Anonymous'}
+                              </span>
+                              {attendee.payment_status && (
+                                <Badge variant="default" className="text-xs bg-green-500">
+                                  ✓ Paid
+                                </Badge>
+                              )}
+                            </div>
                             {attendee.profiles?.bio && (
                               <p className="text-sm text-muted-foreground line-clamp-1">
                                 {attendee.profiles.bio}
@@ -664,9 +721,24 @@ export const EventDetailPage = () => {
                             )}
                           </div>
                         </div>
-                        {attendee.profiles?.is_verified && (
-                          <Badge variant="secondary" className="text-xs">Verified</Badge>
-                        )}
+                        <div className="flex items-center space-x-2">
+                          {attendee.profiles?.is_verified && (
+                            <Badge variant="secondary" className="text-xs">Verified</Badge>
+                          )}
+                          {isAdmin && (
+                            <Button
+                              variant={attendee.payment_status ? "outline" : "default"}
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleTogglePayment(attendee.id, attendee.payment_status);
+                              }}
+                              className={attendee.payment_status ? "border-green-500 text-green-500" : "bg-green-500 hover:bg-green-600"}
+                            >
+                              {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     ))}
                     {attendees.length === 0 && (
