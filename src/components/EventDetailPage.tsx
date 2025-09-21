@@ -709,9 +709,7 @@ export const EventDetailPage = () => {
                                 {attendee.profiles?.display_name || 'Anonymous'}
                               </span>
                               {attendee.payment_status && (
-                                <Badge variant="default" className="text-xs bg-green-500">
-                                  ✓ Paid
-                                </Badge>
+                                <span className="text-lg">💰</span>
                               )}
                             </div>
                             {attendee.profiles?.bio && (
