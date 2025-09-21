@@ -62,10 +62,10 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
   };
 
   const menuItems = [
-    { id: 'home', label: 'Home', icon: Home, hidden: false },
-    { id: 'promos', label: 'Promos', icon: Zap, hidden: false },
-    { id: 'events', label: 'Events', icon: Calendar, hidden: false },
-    { id: 'profile', label: 'Profile', icon: User, hidden: false }
+    { id: 'home', label: 'Home', icon: Home, hidden: false, route: '/' },
+    { id: 'promos', label: 'Promos', icon: Zap, hidden: false, route: '/?section=promos' },
+    { id: 'events', label: 'Events', icon: Calendar, hidden: false, route: '/?section=events' },
+    { id: 'profile', label: 'Profile', icon: User, hidden: false, route: '/profile' }
   ];
 
   return (
@@ -101,7 +101,13 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                         return;
                       }
                       
-                      onSectionChange(item.id);
+                      // Navigate to route and scroll to top
+                      if (item.route) {
+                        navigate(item.route);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      } else {
+                        onSectionChange(item.id);
+                      }
                     }}
                     className={`flex items-center space-x-2 transition-all ${
                       activeSection === item.id 
@@ -176,7 +182,13 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                          return;
                        }
                        
-                       onSectionChange(item.id);
+                       // Navigate to route and scroll to top
+                       if (item.route) {
+                         navigate(item.route);
+                         window.scrollTo({ top: 0, behavior: 'smooth' });
+                       } else {
+                         onSectionChange(item.id);
+                       }
                        setIsMenuOpen(false);
                      }}
                     className="justify-start"
