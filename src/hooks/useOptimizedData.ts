@@ -29,7 +29,7 @@ interface CachedData {
   timestamp: number;
 }
 
-const CACHE_DURATION = 30000; // 30 seconds
+const CACHE_DURATION = 300000; // 5 minutes
 let globalCache: CachedData | null = null;
 
 export function useOptimizedData() {
@@ -70,31 +70,24 @@ export function useOptimizedData() {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       setUser(currentUser);
 
-      // Try detailed functions first, fallback to simple ones if they timeout
+      // Use simple functions by default for better performance
+      // Only use detailed functions when specifically needed
       let eventsResult, promosResult, adminStatusResult;
       
+      console.log('Fetching data with simple functions for optimal performance...');
+      
       try {
-        // Try detailed functions with timeout
-        const detailedPromise = Promise.all([
-          supabase.rpc('get_events_with_details', { user_id_param: currentUser?.id || null }),
-          supabase.rpc('get_promos_with_details', { user_id_param: currentUser?.id || null }),
-          currentUser ? supabase.rpc('get_user_admin_status', { user_id_param: currentUser.id }) : { data: null, error: null }
-        ]);
-        
-        const timeout = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('timeout')), 10000)
-        );
-        
-        const results = await Promise.race([detailedPromise, timeout]);
-        [eventsResult, promosResult, adminStatusResult] = results as any[];
-      } catch (timeoutError) {
-        console.warn('Detailed functions timed out, using fallback:', timeoutError);
-        // Fallback to simple functions
+        // Use simple functions first - they're fast and reliable
         [eventsResult, promosResult, adminStatusResult] = await Promise.all([
           supabase.rpc('get_events_simple'),
           supabase.rpc('get_promos_simple'),
           currentUser ? supabase.rpc('get_user_admin_status', { user_id_param: currentUser.id }) : { data: null, error: null }
         ]);
+        
+        console.log('Simple functions completed successfully');
+      } catch (error) {
+        console.error('Error with simple functions:', error);
+        throw error;
       }
 
       if (eventsResult.error) throw eventsResult.error;
