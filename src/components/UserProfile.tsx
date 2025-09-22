@@ -662,7 +662,7 @@ export const UserProfile = () => {
                 <div>
                   <h2 className="text-3xl font-bold gradient-text">{displayName}</h2>
                   <p className="text-sm text-muted-foreground mt-2 max-w-md">
-                    {profile?.bio || "Jakarta party enthusiast | Always looking for the next great party! 🎉"}
+                    {profile?.bio || "Jakarta party enthusiast 🎉"}
                   </p>
                   
                   {/* Additional Profile Info */}
