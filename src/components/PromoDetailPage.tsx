@@ -117,7 +117,12 @@ export const PromoDetailPage = () => {
 
   return (
     <>
-      <Header activeSection="promos" onSectionChange={() => navigate('/?section=promos')} />
+      <Header activeSection="promos" onSectionChange={(section) => {
+        if (section === 'home') navigate('/');
+        else if (section === 'profile') navigate('/profile');
+        else if (section === 'promos') navigate('/?section=promos');
+        else if (section === 'events') navigate('/?section=events');
+      }} />
       <div className="min-h-screen bg-background pt-20 px-4">
         <div className="container mx-auto max-w-4xl">
           <Button
