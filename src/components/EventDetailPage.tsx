@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getEventBySlugOrId, getEditEventUrl } from "@/lib/slug-utils";
 import Linkify from "linkify-react";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
+import defaultAvatar from "@/assets/default-avatar.png";
 
 interface Event {
   id: string;
@@ -713,10 +714,10 @@ export const EventDetailPage = () => {
                           onClick={() => handleProfileClick(attendee.user_id)}
                         >
                           <Avatar className="w-10 h-10">
-                            <AvatarImage src={attendee.profiles?.avatar_url} />
-                            <AvatarFallback>
-                              {attendee.profiles?.display_name?.[0]?.toUpperCase() || '?'}
-                            </AvatarFallback>
+            <AvatarImage src={attendee.profiles?.avatar_url || defaultAvatar} />
+            <AvatarFallback>
+              {attendee.profiles?.display_name?.[0]?.toUpperCase() || 'A'}
+            </AvatarFallback>
                           </Avatar>
                           <div>
                             <div className="flex items-center space-x-2">
@@ -828,10 +829,10 @@ export const EventDetailPage = () => {
                               className="cursor-pointer hover:opacity-80 transition-opacity"
                               onClick={() => handleProfileClick(comment.user_id)}
                             >
-                              <AvatarImage src={comment.profiles?.avatar_url} />
-                              <AvatarFallback>
-                                {comment.profiles?.display_name?.[0]?.toUpperCase() || '?'}
-                              </AvatarFallback>
+              <AvatarImage src={comment.profiles?.avatar_url || defaultAvatar} />
+              <AvatarFallback>
+                {comment.profiles?.display_name?.[0]?.toUpperCase() || 'A'}
+              </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">

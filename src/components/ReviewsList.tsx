@@ -9,6 +9,7 @@ import { ReviewForm } from "./ReviewForm";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
+import defaultAvatar from "@/assets/default-avatar.png";
 
 interface Review {
   id: string;
@@ -186,7 +187,7 @@ export const ReviewsList = ({ promoId, onReviewsChange }: ReviewsListProps) => {
                   className="w-10 h-10 cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={() => handleProfileClick(review.user_id)}
                 >
-                  <AvatarImage src={review.profiles?.avatar_url} />
+                  <AvatarImage src={review.profiles?.avatar_url || defaultAvatar} />
                   <AvatarFallback>
                     {review.profiles?.display_name?.[0]?.toUpperCase() || 'A'}
                   </AvatarFallback>

@@ -20,7 +20,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2, Heart } from "lucide-react";
 import { ReportDialog } from "./ReportDialog";
+import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
+import defaultAvatar from "@/assets/default-avatar.png";
 import { useToast } from "@/hooks/use-toast";
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { Tables } from "../integrations/supabase/types";
@@ -51,6 +53,7 @@ interface Profile {
 
 export const UserProfile = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [activeSection, setActiveSection] = useState('profile');
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -481,21 +484,26 @@ export const UserProfile = () => {
   // Only require authentication for non-shared profiles
   if (!user && !isSharedProfile) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
-        <Card className="bg-card border-border">
-          <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground">Please sign in to view your profile.</p>
-          </CardContent>
-        </Card>
-      </div>
+      <>
+        <Header activeSection={activeSection} onSectionChange={setActiveSection} />
+        <div className="max-w-4xl mx-auto space-y-6 pt-20 px-4">
+          <Card className="bg-card border-border">
+            <CardContent className="pt-6 text-center">
+              <p className="text-muted-foreground">Please sign in to view your profile.</p>
+            </CardContent>
+          </Card>
+        </div>
+      </>
     );
   }
 
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'User';
-  const avatarUrl = profile?.avatar_url || `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face`;
+  const avatarUrl = profile?.avatar_url || defaultAvatar;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pt-20 px-4">
+    <>
+      <Header activeSection={activeSection} onSectionChange={setActiveSection} />
+      <div className="max-w-4xl mx-auto space-y-6 pt-20 px-4">
       {/* Profile Header */}
       <Card className="bg-card border-border">
         <CardContent className="pt-6">
@@ -503,14 +511,14 @@ export const UserProfile = () => {
             {/* Profile Image */}
             <div className="relative">
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-primary neon-glow">
-                <img
-                  src={isEditing ? editForm.avatar_url || avatarUrl : avatarUrl}
-                  alt={displayName}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face`;
-                  }}
-                />
+                  <img
+                    src={isEditing ? editForm.avatar_url || avatarUrl || defaultAvatar : avatarUrl || defaultAvatar}
+                    alt={displayName}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = defaultAvatar;
+                    }}
+                  />
               </div>
               <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                 <Star className="w-4 h-4 text-primary-foreground fill-current" />
@@ -1120,6 +1128,7 @@ export const UserProfile = () => {
           />
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
