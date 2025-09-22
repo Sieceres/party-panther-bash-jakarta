@@ -70,12 +70,32 @@ export function useOptimizedData() {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       setUser(currentUser);
 
-      // Fetch all data in parallel
-      const [eventsResult, promosResult, adminStatusResult] = await Promise.all([
-        supabase.rpc('get_events_with_details', { user_id_param: currentUser?.id || null }),
-        supabase.rpc('get_promos_with_details', { user_id_param: currentUser?.id || null }),
-        currentUser ? supabase.rpc('get_user_admin_status', { user_id_param: currentUser.id }) : { data: null, error: null }
-      ]);
+      // Try detailed functions first, fallback to simple ones if they timeout
+      let eventsResult, promosResult, adminStatusResult;
+      
+      try {
+        // Try detailed functions with timeout
+        const detailedPromise = Promise.all([
+          supabase.rpc('get_events_with_details', { user_id_param: currentUser?.id || null }),
+          supabase.rpc('get_promos_with_details', { user_id_param: currentUser?.id || null }),
+          currentUser ? supabase.rpc('get_user_admin_status', { user_id_param: currentUser.id }) : { data: null, error: null }
+        ]);
+        
+        const timeout = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('timeout')), 10000)
+        );
+        
+        const results = await Promise.race([detailedPromise, timeout]);
+        [eventsResult, promosResult, adminStatusResult] = results as any[];
+      } catch (timeoutError) {
+        console.warn('Detailed functions timed out, using fallback:', timeoutError);
+        // Fallback to simple functions
+        [eventsResult, promosResult, adminStatusResult] = await Promise.all([
+          supabase.rpc('get_events_simple'),
+          supabase.rpc('get_promos_simple'),
+          currentUser ? supabase.rpc('get_user_admin_status', { user_id_param: currentUser.id }) : { data: null, error: null }
+        ]);
+      }
 
       if (eventsResult.error) throw eventsResult.error;
       if (promosResult.error) throw promosResult.error;
@@ -84,9 +104,14 @@ export function useOptimizedData() {
       // Process events data
       const eventsData = (eventsResult.data || []).map((event: any) => ({
         ...event,
+        // Handle both detailed and simple function results
         attendees: Number(event.attendee_count) || 0,
-        isJoined: Boolean(event.is_joined),
-        is_joined: Boolean(event.is_joined),
+        isJoined: Boolean(event.is_joined) || false,
+        is_joined: Boolean(event.is_joined) || false,
+        attendee_count: Number(event.attendee_count) || 0,
+        creator_name: event.creator_name || 'Anonymous',
+        creator_avatar: event.creator_avatar || null,
+        creator_verified: Boolean(event.creator_verified) || false,
         slug: event.slug || null
       })) as OptimizedEvent[];
 
@@ -102,7 +127,14 @@ export function useOptimizedData() {
         category: promo.category,
         day: promo.day_of_week,
         area: promo.area,
-        drinkType: promo.drink_type
+        drinkType: promo.drink_type,
+        // Handle both detailed and simple function results
+        creator_name: promo.creator_name || 'Anonymous',
+        creator_avatar: promo.creator_avatar || null,
+        creator_verified: Boolean(promo.creator_verified) || false,
+        average_rating: Number(promo.average_rating) || 0,
+        total_reviews: Number(promo.total_reviews) || 0,
+        is_favorite: Boolean(promo.is_favorite) || false
       })) as OptimizedPromo[];
 
       const adminStatus = adminStatusResult.data?.[0] || { is_admin: false, is_super_admin: false };

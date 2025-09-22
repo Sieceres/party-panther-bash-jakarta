@@ -632,6 +632,29 @@ export type Database = {
           venue_name: string
         }[]
       }
+      get_events_simple: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          created_by: string
+          date: string
+          description: string
+          id: string
+          image_url: string
+          is_recurrent: boolean
+          organizer_name: string
+          organizer_whatsapp: string
+          price_currency: string
+          slug: string
+          time: string
+          title: string
+          updated_at: string
+          venue_address: string
+          venue_latitude: number
+          venue_longitude: number
+          venue_name: string
+        }[]
+      }
       get_events_with_details: {
         Args: { user_id_param?: string }
         Returns: {
@@ -683,6 +706,33 @@ export type Database = {
       get_my_claim: {
         Args: { claim: string }
         Returns: Json
+      }
+      get_promos_simple: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          area: string
+          category: string
+          created_at: string
+          created_by: string
+          day_of_week: string[]
+          description: string
+          discount_text: string
+          discounted_price_amount: number
+          drink_type: string[]
+          id: string
+          image_url: string
+          original_price_amount: number
+          price_currency: string
+          promo_type: string
+          slug: string
+          title: string
+          updated_at: string
+          valid_until: string
+          venue_address: string
+          venue_latitude: number
+          venue_longitude: number
+          venue_name: string
+        }[]
       }
       get_promos_with_details: {
         Args: { p_slug: string } | { user_id_param?: string }
