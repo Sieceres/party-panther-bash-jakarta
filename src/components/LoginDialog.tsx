@@ -55,10 +55,13 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
         }
       } else {
         toast({
-          title: "Success",
-          description: "Login successful!",
+          title: "Welcome!",
+          description: "Account created successfully! Please complete your profile.",
         });
         onOpenChange(false);
+        // Mark as new signup and redirect to profile page
+        localStorage.setItem('newSignup', 'true');
+        window.location.href = "/profile";
       }
     } catch (error) {
       toast({
