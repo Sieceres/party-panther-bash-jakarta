@@ -227,29 +227,32 @@
   }
 
   .cta-button {
-    background: #00CFFF;
-    background: linear-gradient(135deg, #00CFFF, #4F8EFF);
-    color: #ffffff;
-    border: 1px solid #00CFFF;
-    padding: 10px 20px;
-    border-radius: 25px;
+    background: linear-gradient(135deg, hsl(191, 100%, 50%), hsl(214, 100%, 65%));
+    color: hsl(0, 0%, 100%);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 207, 255, 0.3);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px hsla(191, 100%, 50%, 0.25);
     opacity: 1;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     visibility: visible;
     position: relative;
     z-index: 10;
     min-width: 100px;
     text-align: center;
+    line-height: 1.2;
   }
 
   .cta-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 207, 255, 0.6);
+    background: linear-gradient(135deg, hsl(191, 100%, 55%), hsl(214, 100%, 70%));
+    box-shadow: 0 6px 16px hsla(191, 100%, 50%, 0.35);
+    transform: translateY(-1px);
   }
 
   .hero-bg {
