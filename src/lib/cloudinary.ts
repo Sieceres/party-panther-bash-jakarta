@@ -36,10 +36,22 @@ export const uploadToCloudinary = async (
   );
 
   if (!response.ok) {
-    throw new Error('Failed to upload image to Cloudinary');
+    const errorData = await response.json().catch(() => ({}));
+    console.error('Cloudinary upload failed:', {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorData,
+      url: response.url
+    });
+    
+    // Provide more specific error messages
+    const errorMessage = errorData?.error?.message || `Upload failed with status ${response.status}`;
+    throw new Error(`Cloudinary Error: ${errorMessage}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  console.log('Cloudinary upload successful:', result);
+  return result;
 };
 
 export const deleteFromCloudinary = async (publicId: string): Promise<void> => {

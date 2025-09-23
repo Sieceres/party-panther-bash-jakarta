@@ -115,9 +115,15 @@ export const ReceiptUpload = ({
       });
     } catch (error) {
       console.error('Error uploading receipt:', error);
+      
+      // Extract specific error message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
       toast({
         title: "Upload failed",
-        description: "Failed to upload receipt. Please try again.",
+        description: errorMessage.includes('Cloudinary Error:') 
+          ? errorMessage.replace('Cloudinary Error: ', '') 
+          : "Failed to upload receipt. Please try again.",
         variant: "destructive"
       });
     } finally {
