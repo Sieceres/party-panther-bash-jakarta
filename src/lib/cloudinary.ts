@@ -15,7 +15,7 @@ interface CloudinaryConfig {
 // You'll need to set these values in your Cloudinary dashboard
 const CLOUDINARY_CONFIG: CloudinaryConfig = {
   cloudName: 'dqett77uc', // Replace with your Cloudinary cloud name
-  uploadPreset: 'Party_Panther_receipts' // Replace with your upload preset
+  uploadPreset: 'party_panther_receipts' // Replace with your upload preset
 };
 
 export const uploadToCloudinary = async (
