@@ -18,14 +18,40 @@ const CLOUDINARY_CONFIG: CloudinaryConfig = {
   uploadPreset: 'Party_Panther_receipts' // Replace with your upload preset
 };
 
+interface UserInfo {
+  userId: string;
+  displayName?: string;
+}
+
 export const uploadToCloudinary = async (
   file: File,
-  folder: string = 'receipts'
+  folder: string = 'receipts',
+  userInfo?: UserInfo
 ): Promise<CloudinaryUploadResponse> => {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
-  formData.append('folder', folder);
+  
+  // Enhanced folder structure with user identification
+  if (userInfo) {
+    const userIdentifier = userInfo.displayName || userInfo.userId;
+    const sanitizedUserName = userIdentifier.replace(/[^a-zA-Z0-9-_]/g, '_');
+    formData.append('folder', `${folder}/${sanitizedUserName}`);
+    
+    // Add context metadata for searchability
+    formData.append('context', `user_id=${userInfo.userId}|display_name=${userInfo.displayName || 'Anonymous'}`);
+    
+    // Add tags for easy filtering
+    formData.append('tags', `user_${userInfo.userId},${userInfo.displayName ? `name_${userInfo.displayName.replace(/[^a-zA-Z0-9]/g, '_')}` : 'anonymous'}`);
+    
+    console.log('Uploading with user info:', {
+      userId: userInfo.userId,
+      displayName: userInfo.displayName,
+      folder: `${folder}/${sanitizedUserName}`
+    });
+  } else {
+    formData.append('folder', folder);
+  }
 
   const response = await fetch(
     `https://api.cloudinary.com/v1_1/dqett77uc/image/upload`,

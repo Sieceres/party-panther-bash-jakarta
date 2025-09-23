@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -25,7 +25,33 @@ export const ReceiptUpload = ({
   const [dragActive, setDragActive] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [userDisplayName, setUserDisplayName] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Fetch user display name for Cloudinary identification
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('user_id', userId)
+          .single();
+
+        if (error) {
+          console.warn('Could not fetch user display name:', error);
+          return;
+        }
+
+        setUserDisplayName(data?.display_name || null);
+        console.log('Fetched user display name for upload:', data?.display_name);
+      } catch (error) {
+        console.warn('Error fetching user info:', error);
+      }
+    };
+
+    fetchUserInfo();
+  }, [userId]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -89,8 +115,15 @@ export const ReceiptUpload = ({
 
     setIsUploading(true);
     try {
-      // Upload to Cloudinary
-      const uploadResult = await uploadToCloudinary(selectedFile, `receipts/${eventId}`);
+      // Upload to Cloudinary with user identification
+      const uploadResult = await uploadToCloudinary(
+        selectedFile, 
+        `receipts/${eventId}`,
+        {
+          userId,
+          displayName: userDisplayName || undefined
+        }
+      );
       
       // Update database
       const { error } = await supabase
