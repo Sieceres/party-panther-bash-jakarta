@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { User, Session } from '@supabase/supabase-js';
 import { Header } from "@/components/Header";
+import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -17,6 +18,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -187,6 +189,15 @@ const Auth = () => {
                       required
                     />
                   </div>
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setForgotPasswordOpen(true)}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
@@ -244,6 +255,11 @@ const Auth = () => {
           </CardContent>
         </Card>
       </div>
+      
+      <ForgotPasswordDialog 
+        open={forgotPasswordOpen} 
+        onOpenChange={setForgotPasswordOpen} 
+      />
     </div>
   );
 };

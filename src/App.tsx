@@ -17,6 +17,7 @@ import { EditPromoPage } from "./pages/EditPromoPage";
 import { UserProfile } from "./components/UserProfile"; // Import UserProfile
 import TermsConditions from "./pages/TermsConditions";
 import About from "./pages/About";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/event/:id" element={<EventDetailPage />} />
           <Route path="/promo/:id" element={<PromoDetailPage />} />
           <Route path="/admin" element={<AdminDashboard />} />

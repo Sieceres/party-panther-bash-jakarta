@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
 
 interface LoginDialogProps {
   open: boolean;
@@ -19,6 +20,7 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const { toast } = useToast();
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -155,6 +157,15 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
                   required
                 />
               </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setForgotPasswordOpen(true)}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Signing in..." : "Sign In"}
               </Button>
@@ -209,6 +220,11 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
           </TabsContent>
         </Tabs>
       </DialogContent>
+      
+      <ForgotPasswordDialog 
+        open={forgotPasswordOpen} 
+        onOpenChange={setForgotPasswordOpen} 
+      />
     </Dialog>
   );
 };
