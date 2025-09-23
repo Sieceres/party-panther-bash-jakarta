@@ -894,11 +894,12 @@ export const EventDetailPage = () => {
                   <CardTitle>Event Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {user && !hasJoined && (
+                   {user && !hasJoined && (
                     <Button
+                      variant="cta"
                       onClick={handleJoinEvent}
                       disabled={joiningEvent}
-                      className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold"
+                      className="w-full"
                     >
                       {joiningEvent ? "Joining..." : "Join Event"}
                     </Button>
@@ -908,15 +909,16 @@ export const EventDetailPage = () => {
                       variant="outline"
                       onClick={handleUnjoinEvent}
                       disabled={leavingEvent}
-                      className="w-full border-neon-pink text-neon-pink hover:bg-neon-pink hover:text-black"
+                      className="w-full border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-white"
                     >
                       {leavingEvent ? "Leaving..." : "✓ Joined - Click to Leave"}
                     </Button>
                   )}
                   {!user && (
                     <Button
+                      variant="cta"
                       onClick={() => navigate('/auth')}
-                      className="w-full bg-primary hover:bg-primary/90"
+                      className="w-full"
                     >
                       Join Event
                     </Button>
