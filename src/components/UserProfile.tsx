@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2, Heart } from "lucide-react";
+import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2, Heart, Eye } from "lucide-react";
 import { ReportDialog } from "./ReportDialog";
 import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
@@ -823,6 +823,14 @@ export const UserProfile = () => {
                     <p className="text-sm text-muted-foreground">{event.date} at {event.time}</p>
                   </div>
                   <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(getEventUrl(event))}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"

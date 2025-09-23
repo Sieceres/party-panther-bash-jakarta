@@ -171,7 +171,7 @@ export const EventDetailPage = () => {
           const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
           const { data: profilesData } = await supabase
             .from('profiles')
-            .select('user_id, display_name, avatar_url')
+            .select('user_id, display_name, avatar_url, is_verified, is_admin, is_super_admin')
             .in('user_id', userIds);
 
           // Join attendees with profiles
@@ -249,7 +249,7 @@ export const EventDetailPage = () => {
         const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
         const { data: profilesData } = await supabase
           .from('profiles')
-          .select('user_id, display_name, avatar_url')
+          .select('user_id, display_name, avatar_url, is_verified, is_admin, is_super_admin')
           .in('user_id', userIds);
 
         // Join attendees with profiles
@@ -303,7 +303,7 @@ export const EventDetailPage = () => {
         const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
         const { data: profilesData } = await supabase
           .from('profiles')
-          .select('user_id, display_name, avatar_url')
+          .select('user_id, display_name, avatar_url, is_verified, is_admin, is_super_admin')
           .in('user_id', userIds);
 
         // Join attendees with profiles
@@ -742,6 +742,12 @@ export const EventDetailPage = () => {
                         <div className="flex items-center space-x-2">
                           {attendee.profiles?.is_verified && (
                             <Badge variant="secondary" className="text-xs">Verified</Badge>
+                          )}
+                          {attendee.profiles?.is_admin && (
+                            <Badge variant="destructive" className="text-xs">Admin</Badge>
+                          )}
+                          {attendee.profiles?.is_super_admin && (
+                            <Badge variant="destructive" className="text-xs">Super Admin</Badge>
                           )}
                           {isAdmin && (
                             <Button
