@@ -757,7 +757,7 @@ export const EventDetailPage = () => {
                     ))}
                     {attendees.length === 0 && (
                       <p className="text-center text-muted-foreground py-8">
-                        No attendees yet. Be the first to join!
+                        {!user ? "Please log in to see Attendees" : "No attendees yet. Be the first to join!"}
                       </p>
                     )}
                     {attendees.length > 10 && !showAllAttendees && (
@@ -819,7 +819,7 @@ export const EventDetailPage = () => {
                   <div className="space-y-3">
                     {displayedComments.length === 0 ? (
                       <p className="text-center text-muted-foreground py-8">
-                        No comments yet. Be the first to share your thoughts!
+                        {!user ? "Please log in to see Comments" : "No comments yet. Be the first to share your thoughts!"}
                       </p>
                     ) : (
                       displayedComments.map((comment) => (
