@@ -227,15 +227,16 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
         }}>
           View Details
         </Button>
-        <button 
-          className="cta-button"
+        <Button 
+          variant="cta"
+          size="sm"
           onClick={(e) => {
             e.stopPropagation();
             onJoin && onJoin(event.id);
           }}
         >
           {event.isJoined || event.is_joined ? "Joined" : "Join Event"}
-        </button>
+        </Button>
       </CardFooter>
     </Card>
   );
