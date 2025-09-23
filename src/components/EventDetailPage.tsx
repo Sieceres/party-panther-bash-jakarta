@@ -469,12 +469,16 @@ export const EventDetailPage = () => {
 
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from('events')
-        .delete()
-        .eq('id', event?.id);
+      // Use secure-delete function with proper authorization checks
+      const { data, error } = await supabase.functions.invoke('secure-delete', {
+        body: { event_id: event?.id }
+      });
 
       if (error) throw error;
+
+      if (!data?.success) {
+        throw new Error(data?.error || 'Failed to delete event');
+      }
 
       toast({
         title: "Success",
