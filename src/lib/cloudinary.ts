@@ -15,7 +15,7 @@ interface CloudinaryConfig {
 // You'll need to set these values in your Cloudinary dashboard
 const CLOUDINARY_CONFIG: CloudinaryConfig = {
   cloudName: 'dqett77uc', // Replace with your Cloudinary cloud name
-  uploadPreset: 'party_panther_receipts' // Replace with your upload preset
+  uploadPreset: 'Party_Panther_receipts' // Replace with your upload preset
 };
 
 export const uploadToCloudinary = async (
@@ -28,7 +28,7 @@ export const uploadToCloudinary = async (
   formData.append('folder', folder);
 
   const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/image/upload`,
+    `https://api.cloudinary.com/v1_1/dqett77uc/image/upload`,
     {
       method: 'POST',
       body: formData
