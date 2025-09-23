@@ -22,6 +22,7 @@ import { format } from "date-fns";
 import { GoogleMap } from "./GoogleMap";
 import { CommentActions } from "./CommentActions";
 import { ReportDialog } from "./ReportDialog";
+import { ReceiptUpload } from "./ReceiptUpload";
 import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -160,11 +161,11 @@ export const EventDetailPage = () => {
         }
 
         // Fetch attendees with profiles for display - using separate queries
-        const { data: attendeesData, error: attendeesError } = await supabase
-          .from('event_attendees')
-          .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by')
-          .eq('event_id', eventData.id)
-          .order('joined_at', { ascending: false });
+          const { data: attendeesData, error: attendeesError } = await supabase
+            .from('event_attendees')
+            .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at')
+            .eq('event_id', eventData.id)
+            .order('joined_at', { ascending: false });
 
         if (attendeesData && !attendeesError) {
           // Fetch profiles for attendees
@@ -238,11 +239,11 @@ export const EventDetailPage = () => {
       });
 
       // Refresh attendees list
-      const { data: attendeesData } = await supabase
-        .from('event_attendees')
-        .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by')
-        .eq('event_id', event.id)
-        .order('joined_at', { ascending: false });
+        const { data: attendeesData } = await supabase
+          .from('event_attendees')
+          .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at')
+          .eq('event_id', event.id)
+          .order('joined_at', { ascending: false });
 
       if (attendeesData) {
         // Fetch profiles for attendees
@@ -292,11 +293,11 @@ export const EventDetailPage = () => {
       });
 
       // Refresh attendees list
-      const { data: attendeesData } = await supabase
-        .from('event_attendees')
-        .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by')
-        .eq('event_id', event.id)
-        .order('joined_at', { ascending: false });
+        const { data: attendeesData } = await supabase
+          .from('event_attendees')
+          .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at')
+          .eq('event_id', event.id)
+          .order('joined_at', { ascending: false });
 
       if (attendeesData) {
         // Fetch profiles for attendees
@@ -593,6 +594,19 @@ export const EventDetailPage = () => {
     }
   };
 
+  const handleReceiptUploaded = (attendeeId: string, receiptUrl: string) => {
+    // Update local state to show the uploaded receipt
+    setAttendees(prev => prev.map(attendee => 
+      attendee.id === attendeeId 
+        ? { 
+            ...attendee, 
+            receipt_url: receiptUrl,
+            receipt_uploaded_at: new Date().toISOString()
+          }
+        : attendee
+    ));
+  };
+
   if (loading) {
     return (
       <>
@@ -785,6 +799,32 @@ export const EventDetailPage = () => {
                           {attendee.profiles?.is_super_admin && (
                             <Badge variant="destructive" className="text-xs">Super Admin</Badge>
                           )}
+                          
+                          {/* Receipt Upload - show for the user themselves */}
+                          {user && attendee.user_id === user.id && (
+                            <ReceiptUpload
+                              eventId={event.id}
+                              userId={user.id}
+                              currentReceiptUrl={attendee.receipt_url}
+                              onReceiptUploaded={(receiptUrl) => handleReceiptUploaded(attendee.id, receiptUrl)}
+                            />
+                          )}
+                          
+                          {/* Receipt status for admins */}
+                          {isAdmin && attendee.receipt_url && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(attendee.receipt_url, '_blank');
+                              }}
+                              className="border-blue-500 text-blue-500 hover:bg-blue-50"
+                            >
+                              View Receipt
+                            </Button>
+                          )}
+                          
                           {isAdmin && (
                             <>
                               <Button

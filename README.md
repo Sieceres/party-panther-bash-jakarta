@@ -1,6 +1,62 @@
-# Welcome to your Lovable project
+# Party Panther - Event & Promo Platform
 
-## Project info
+## Cloudinary Setup Required
+
+To enable receipt uploads and image management, you need to configure Cloudinary:
+
+### 1. Create a Cloudinary Account
+- Go to [cloudinary.com](https://cloudinary.com) and create a free account
+- Note your Cloud Name from the dashboard
+
+### 2. Create Upload Preset
+- Go to Settings > Upload presets
+- Create a new preset with these settings:
+  - Signing Mode: "Unsigned" 
+  - Folder: "receipts" (or your preferred folder structure)
+  - Enable "Resource type: Image"
+  - Set max file size if desired (recommended: 10MB)
+
+### 3. Update Configuration
+Edit `src/lib/cloudinary.ts` and replace the placeholder values:
+```typescript
+const CLOUDINARY_CONFIG: CloudinaryConfig = {
+  cloudName: 'your-actual-cloud-name', // Replace with your cloud name
+  uploadPreset: 'your-actual-upload-preset' // Replace with your preset name
+};
+```
+
+### 4. Features Enabled
+Once configured, users can:
+- Upload payment receipts for events they've joined
+- View their uploaded receipts
+- Admins can view and approve all receipts
+- Admins can manage payment status based on receipt verification
+
+### 5. Admin Receipt Management
+Admins can access receipt management through:
+- Admin Dashboard > Receipts tab
+- View pending/approved receipts
+- Approve payments based on receipt verification
+- Download/view receipt images
+
+## Current Features
+- Event creation and management
+- Promo creation and management  
+- User authentication and profiles
+- Payment receipt uploads (via Cloudinary)
+- Admin dashboard with receipt management
+- Comments and attendee management
+
+## Tech Stack
+- React + TypeScript
+- Tailwind CSS
+- Supabase (Database & Auth)
+- Cloudinary (Image Storage)
+- Lucide React (Icons)
+
+---
+
+## Original Lovable Project Info
 
 **URL**: https://lovable.dev/projects/1ebb9f24-fda5-4dae-ac77-480d72954427
 
@@ -35,20 +91,6 @@ npm i
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
 
 ## What technologies are used for this project?
 

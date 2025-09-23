@@ -22,6 +22,8 @@ export type Database = {
           payment_date: string | null
           payment_marked_by: string | null
           payment_status: boolean
+          receipt_uploaded_at: string | null
+          receipt_url: string | null
           user_id: string
         }
         Insert: {
@@ -31,6 +33,8 @@ export type Database = {
           payment_date?: string | null
           payment_marked_by?: string | null
           payment_status?: boolean
+          receipt_uploaded_at?: string | null
+          receipt_url?: string | null
           user_id: string
         }
         Update: {
@@ -40,6 +44,8 @@ export type Database = {
           payment_date?: string | null
           payment_marked_by?: string | null
           payment_status?: boolean
+          receipt_uploaded_at?: string | null
+          receipt_url?: string | null
           user_id?: string
         }
         Relationships: [
