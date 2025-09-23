@@ -103,8 +103,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         return;
       }
 
-      // Validate event date is not in the past
-      if (eventDate && formData.time) {
+      // Validate event date is not in the past (only for new events)
+      if (!initialData && eventDate && formData.time) {
         const year = eventDate.getFullYear();
         const month = String(eventDate.getMonth() + 1).padStart(2, '0');
         const day = String(eventDate.getDate()).padStart(2, '0');
@@ -240,6 +240,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               time={formData.time}
               onDateChange={setEventDate}
               onTimeChange={(value) => handleInputChange("time", value)}
+              isEditing={!!initialData}
             />
 
             <EventVenue

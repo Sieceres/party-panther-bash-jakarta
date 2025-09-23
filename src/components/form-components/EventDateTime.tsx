@@ -12,9 +12,10 @@ interface EventDateTimeProps {
   time: string;
   onDateChange: (date: Date | undefined) => void;
   onTimeChange: (time: string) => void;
+  isEditing?: boolean;
 }
 
-export const EventDateTime = ({ eventDate, time, onDateChange, onTimeChange }: EventDateTimeProps) => {
+export const EventDateTime = ({ eventDate, time, onDateChange, onTimeChange, isEditing }: EventDateTimeProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -38,7 +39,7 @@ export const EventDateTime = ({ eventDate, time, onDateChange, onTimeChange }: E
               selected={eventDate}
               onSelect={onDateChange}
               initialFocus
-              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+              disabled={isEditing ? undefined : (date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
               className="pointer-events-auto"
             />
           </PopoverContent>
