@@ -770,13 +770,17 @@ export type Database = {
       get_public_profile_info: {
         Args: { profile_user_id: string }
         Returns: {
+          age: number
           avatar_url: string
           bio: string
           business_name: string
           display_name: string
+          gender: string
           id: string
+          instagram: string
           is_verified: boolean
           profile_type: string
+          whatsapp: string
         }[]
       }
       get_safe_profile_info: {
