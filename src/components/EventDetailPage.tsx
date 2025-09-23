@@ -557,6 +557,42 @@ export const EventDetailPage = () => {
     }
   };
 
+  const handleRemoveAttendee = async (attendeeId: string, attendeeName: string) => {
+    if (!isAdmin) {
+      toast({
+        title: "Unauthorized",
+        description: "Only admins can remove attendees.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('event_attendees')
+        .delete()
+        .eq('id', attendeeId);
+
+      if (error) throw error;
+
+      // Update local state
+      setAttendees(prev => prev.filter(attendee => attendee.id !== attendeeId));
+      setTotalAttendees(prev => prev - 1);
+
+      toast({
+        title: "Attendee removed",
+        description: `${attendeeName} has been removed from the event.`,
+      });
+    } catch (error) {
+      console.error('Error removing attendee:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove attendee. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return (
       <>
@@ -750,17 +786,48 @@ export const EventDetailPage = () => {
                             <Badge variant="destructive" className="text-xs">Super Admin</Badge>
                           )}
                           {isAdmin && (
-                            <Button
-                              variant={attendee.payment_status ? "outline" : "default"}
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleTogglePayment(attendee.id, attendee.payment_status);
-                              }}
-                              className={attendee.payment_status ? "border-green-500 text-green-500" : "bg-green-500 hover:bg-green-600"}
-                            >
-                              {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
-                            </Button>
+                            <>
+                              <Button
+                                variant={attendee.payment_status ? "outline" : "default"}
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleTogglePayment(attendee.id, attendee.payment_status);
+                                }}
+                                className={attendee.payment_status ? "border-green-500 text-green-500" : "bg-green-500 hover:bg-green-600"}
+                              >
+                                {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="border-red-500 text-red-500 hover:bg-red-50"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Remove Attendee</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to remove {attendee.profiles?.display_name || 'this user'} from the event? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction 
+                                      onClick={() => handleRemoveAttendee(attendee.id, attendee.profiles?.display_name || 'Anonymous')}
+                                      className="bg-red-600 hover:bg-red-700"
+                                    >
+                                      Remove
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </>
                           )}
                         </div>
                       </div>
