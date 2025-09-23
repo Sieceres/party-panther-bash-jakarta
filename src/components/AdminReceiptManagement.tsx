@@ -33,6 +33,8 @@ export const AdminReceiptManagement = () => {
 
   const fetchReceipts = async () => {
     try {
+      console.log('Fetching receipts...');
+      
       const { data, error } = await supabase
         .from('event_attendees')
         .select(`
@@ -43,12 +45,23 @@ export const AdminReceiptManagement = () => {
           receipt_uploaded_at,
           payment_status,
           events!inner(title, date),
-          profiles!inner(display_name, avatar_url)
+          profiles!fk_attendees_user_profiles(display_name, avatar_url)
         `)
         .not('receipt_url', 'is', null)
         .order('receipt_uploaded_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase query error:', {
+          error,
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
+
+      console.log('Supabase query successful:', data);
 
       const formattedReceipts = data?.map((item: any) => ({
         id: item.id,
@@ -63,12 +76,20 @@ export const AdminReceiptManagement = () => {
         user_avatar: item.profiles.avatar_url
       })) || [];
 
+      console.log('Formatted receipts:', formattedReceipts);
       setReceipts(formattedReceipts);
     } catch (error) {
       console.error('Error fetching receipts:', error);
+      
+      // Extract specific error message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const isSupabaseError = error && typeof error === 'object' && 'code' in error;
+      
       toast({
-        title: "Error",
-        description: "Failed to load receipts",
+        title: "Error loading receipts",
+        description: isSupabaseError 
+          ? `Database error: ${errorMessage}` 
+          : errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -78,6 +99,8 @@ export const AdminReceiptManagement = () => {
 
   const handleApproveReceipt = async (receiptId: string) => {
     try {
+      console.log('Approving receipt:', receiptId);
+      
       const { error } = await supabase
         .from('event_attendees')
         .update({
@@ -87,7 +110,17 @@ export const AdminReceiptManagement = () => {
         })
         .eq('id', receiptId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase update error:', {
+          error,
+          receiptId,
+          code: error.code,
+          message: error.message
+        });
+        throw error;
+      }
+
+      console.log('Receipt approved successfully:', receiptId);
 
       setReceipts(prev => prev.map(receipt => 
         receipt.id === receiptId 
@@ -101,9 +134,12 @@ export const AdminReceiptManagement = () => {
       });
     } catch (error) {
       console.error('Error approving receipt:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
       toast({
         title: "Error",
-        description: "Failed to approve receipt",
+        description: `Failed to approve receipt: ${errorMessage}`,
         variant: "destructive"
       });
     }
@@ -238,6 +274,18 @@ export const AdminReceiptManagement = () => {
                     src={getOptimizedImageUrl(selectedReceipt.receipt_url, { width: 800, quality: 90 })}
                     alt="Payment receipt" 
                     className="w-full h-auto rounded"
+                    onError={(e) => {
+                      console.error('Cloudinary image failed to load:', {
+                        originalUrl: selectedReceipt.receipt_url,
+                        optimizedUrl: getOptimizedImageUrl(selectedReceipt.receipt_url, { width: 800, quality: 90 }),
+                        error: e
+                      });
+                      // Fallback to original URL if optimized version fails
+                      e.currentTarget.src = selectedReceipt.receipt_url;
+                    }}
+                    onLoad={() => {
+                      console.log('Cloudinary image loaded successfully:', selectedReceipt.receipt_url);
+                    }}
                   />
                 </div>
                 {!selectedReceipt.payment_status && (
