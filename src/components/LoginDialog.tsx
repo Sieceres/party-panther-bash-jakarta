@@ -102,8 +102,8 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
         }
       } else {
         toast({
-          title: "Welcome!",
-          description: "You've been signed in successfully.",
+          title: "Login successful",
+          description: "",
         });
         onOpenChange(false);
         onSuccess?.();
