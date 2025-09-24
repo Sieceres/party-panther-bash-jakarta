@@ -92,11 +92,11 @@ const Auth = () => {
       } else {
         toast({
           title: "Success!",
-          description: "Account created! Check your email to confirm, then complete your profile.",
+          description: "Account created! Please complete your profile.",
         });
         // Mark this as a new signup for profile redirect
         localStorage.setItem('newSignup', 'true');
-        // Note: User will be redirected to profile page after email confirmation
+        // Note: User will be redirected to profile page after signup
       }
     } catch (error) {
       toast({
