@@ -32,11 +32,20 @@ export const uploadToCloudinary = async (
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
   
-  // Enhanced folder structure with user identification
+  // Generate custom public_id with username and timestamp
+  let customPublicId: string;
   if (userInfo) {
-    const userIdentifier = userInfo.displayName || userInfo.userId;
+    const userIdentifier = userInfo.displayName || userInfo.userId.slice(0, 8);
     const sanitizedUserName = userIdentifier.replace(/[^a-zA-Z0-9-_]/g, '_');
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    customPublicId = `${sanitizedUserName}_${timestamp}_${randomString}`;
+    
+    // Enhanced folder structure with user identification
     formData.append('folder', `${folder}/${sanitizedUserName}`);
+    
+    // Add custom public_id
+    formData.append('public_id', customPublicId);
     
     // Add context metadata for searchability
     formData.append('context', `user_id=${userInfo.userId}|display_name=${userInfo.displayName || 'Anonymous'}`);
@@ -44,13 +53,21 @@ export const uploadToCloudinary = async (
     // Add tags for easy filtering
     formData.append('tags', `user_${userInfo.userId},${userInfo.displayName ? `name_${userInfo.displayName.replace(/[^a-zA-Z0-9]/g, '_')}` : 'anonymous'}`);
     
-    console.log('Uploading with user info:', {
+    console.log('Uploading with custom public_id:', {
       userId: userInfo.userId,
       displayName: userInfo.displayName,
-      folder: `${folder}/${sanitizedUserName}`
+      folder: `${folder}/${sanitizedUserName}`,
+      publicId: customPublicId
     });
   } else {
     formData.append('folder', folder);
+    // Generate fallback public_id with timestamp
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    customPublicId = `anonymous_${timestamp}_${randomString}`;
+    formData.append('public_id', customPublicId);
+    
+    console.log('Uploading with fallback public_id:', customPublicId);
   }
 
   const response = await fetch(
