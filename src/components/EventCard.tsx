@@ -49,27 +49,14 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isCoOrganizer, setIsCoOrganizer] = useState(false);
 
   useEffect(() => {
     const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
-      
-      // Check if user is co-organizer
-      if (user && event?.id) {
-        const { data: attendeeData } = await supabase
-          .from('event_attendees')
-          .select('is_co_organizer')
-          .eq('event_id', event.id)
-          .eq('user_id', user.id)
-          .single();
-        
-        setIsCoOrganizer(attendeeData?.is_co_organizer || false);
-      }
     };
     getCurrentUser();
-  }, [event?.id]);
+  }, []);
 
   const handleCardClick = () => {
     navigate(getEventUrl(event));
@@ -141,7 +128,7 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
 
   const isOwner = currentUser && currentUser.id === event.created_by;
   const isAdmin = userAdminStatus?.is_admin || userAdminStatus?.is_super_admin || false;
-  const canDelete = isOwner || isAdmin || isCoOrganizer;
+  const canDelete = isOwner || isAdmin;
   
   // Use optimized creator name or fallback to fetching
   const creatorName = event.creator_name || 'Anonymous';

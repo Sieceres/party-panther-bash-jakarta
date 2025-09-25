@@ -18,7 +18,6 @@ export type Database = {
         Row: {
           event_id: string
           id: string
-          is_co_organizer: boolean
           joined_at: string | null
           payment_date: string | null
           payment_marked_by: string | null
@@ -30,7 +29,6 @@ export type Database = {
         Insert: {
           event_id: string
           id?: string
-          is_co_organizer?: boolean
           joined_at?: string | null
           payment_date?: string | null
           payment_marked_by?: string | null
@@ -42,7 +40,6 @@ export type Database = {
         Update: {
           event_id?: string
           id?: string
-          is_co_organizer?: boolean
           joined_at?: string | null
           payment_date?: string | null
           payment_marked_by?: string | null
@@ -616,16 +613,6 @@ export type Database = {
         Returns: {
           attendee_count: number
           event_id: string
-        }[]
-      }
-      get_event_co_organizers: {
-        Args: { event_id_param: string }
-        Returns: {
-          avatar_url: string
-          display_name: string
-          is_verified: boolean
-          joined_at: string
-          user_id: string
         }[]
       }
       get_events_safe: {
