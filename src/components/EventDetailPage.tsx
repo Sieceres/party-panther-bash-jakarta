@@ -168,7 +168,11 @@ export const EventDetailPage = () => {
             .eq('event_id', eventData.id)
             .order('joined_at', { ascending: false });
 
-        if (attendeesData && !attendeesError) {
+        if (attendeesError) {
+          console.error('Error fetching attendees:', attendeesError);
+        }
+
+        if (attendeesData && attendeesData.length > 0) {
           // Fetch profiles for attendees
           const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
           const { data: profilesData } = await supabase
@@ -188,6 +192,10 @@ export const EventDetailPage = () => {
             const userAttendee = attendeesWithProfiles.find(a => a.user_id === user.id);
             setIsCoOrganizer(userAttendee?.is_co_organizer || false);
           }
+        } else {
+          // If no attendees data but we have a count, there might be an RLS issue
+          console.log('No attendees data found, but count is:', eventData.attendee_count);
+          setAttendees([]);
         }
       } catch (error) {
         console.error('Error fetching event:', error);
