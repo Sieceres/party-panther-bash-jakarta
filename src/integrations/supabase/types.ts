@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           event_id: string
           id: string
+          is_co_organizer: boolean
           joined_at: string | null
           payment_date: string | null
           payment_marked_by: string | null
@@ -29,6 +30,7 @@ export type Database = {
         Insert: {
           event_id: string
           id?: string
+          is_co_organizer?: boolean
           joined_at?: string | null
           payment_date?: string | null
           payment_marked_by?: string | null
@@ -40,6 +42,7 @@ export type Database = {
         Update: {
           event_id?: string
           id?: string
+          is_co_organizer?: boolean
           joined_at?: string | null
           payment_date?: string | null
           payment_marked_by?: string | null
@@ -604,6 +607,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_event_attendees: {
+        Args: { event_id_param: string }
+        Returns: boolean
+      }
       generate_slug: {
         Args: { input_text: string }
         Returns: string
@@ -613,6 +620,16 @@ export type Database = {
         Returns: {
           attendee_count: number
           event_id: string
+        }[]
+      }
+      get_event_co_organizers: {
+        Args: { event_id_param: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          is_verified: boolean
+          joined_at: string
+          user_id: string
         }[]
       }
       get_events_safe: {
@@ -826,6 +843,10 @@ export type Database = {
       }
       is_current_user_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_event_co_organizer: {
+        Args: { event_id_param: string; user_id_param: string }
         Returns: boolean
       }
       should_show_organizer_contact: {
