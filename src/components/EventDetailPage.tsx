@@ -72,6 +72,7 @@ export const EventDetailPage = () => {
   const [lastCommentTime, setLastCommentTime] = useState<number>(0);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isCoOrganizer, setIsCoOrganizer] = useState(false);
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
 
@@ -163,7 +164,7 @@ export const EventDetailPage = () => {
         // Fetch attendees with profiles for display - using separate queries
           const { data: attendeesData, error: attendeesError } = await supabase
             .from('event_attendees')
-            .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at')
+            .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, is_co_organizer')
             .eq('event_id', eventData.id)
             .order('joined_at', { ascending: false });
 
@@ -181,6 +182,12 @@ export const EventDetailPage = () => {
             profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
           }));
           setAttendees(attendeesWithProfiles);
+          
+          // Check if current user is a co-organizer
+          if (user) {
+            const userAttendee = attendeesWithProfiles.find(a => a.user_id === user.id);
+            setIsCoOrganizer(userAttendee?.is_co_organizer || false);
+          }
         }
       } catch (error) {
         console.error('Error fetching event:', error);
@@ -500,7 +507,8 @@ export const EventDetailPage = () => {
   };
 
   const isOwner = user && user.id === event?.created_by;
-  const canDelete = isOwner || isAdmin;
+  const canEdit = isOwner || isAdmin || isCoOrganizer;
+  const canDelete = isOwner || isAdmin || isCoOrganizer;
 
   // Helper functions for pagination
   const displayedAttendees = showAllAttendees ? attendees : attendees.slice(0, 10);
@@ -511,10 +519,10 @@ export const EventDetailPage = () => {
   };
 
   const handleTogglePayment = async (attendeeId: string, currentStatus: boolean) => {
-    if (!isAdmin) {
+    if (!isAdmin && !isOwner && !isCoOrganizer) {
       toast({
         title: "Unauthorized",
-        description: "Only admins can mark payment status.",
+        description: "Only organizers, co-organizers, and admins can mark payment status.",
         variant: "destructive"
       });
       return;
@@ -559,10 +567,10 @@ export const EventDetailPage = () => {
   };
 
   const handleRemoveAttendee = async (attendeeId: string, attendeeName: string) => {
-    if (!isAdmin) {
+    if (!isAdmin && !isOwner && !isCoOrganizer) {
       toast({
         title: "Unauthorized",
-        description: "Only admins can remove attendees.",
+        description: "Only organizers, co-organizers, and admins can remove attendees.",
         variant: "destructive"
       });
       return;
@@ -605,6 +613,56 @@ export const EventDetailPage = () => {
           }
         : attendee
     ));
+  };
+
+  const handleToggleCoOrganizer = async (attendeeUserId: string, currentStatus: boolean) => {
+    if (!event || !user || !isOwner) {
+      toast({
+        title: "Unauthorized",
+        description: "Only the event owner can manage co-organizers.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('event_attendees')
+        .update({ is_co_organizer: !currentStatus })
+        .eq('event_id', event.id)
+        .eq('user_id', attendeeUserId);
+
+      if (error) {
+        console.error('Error updating co-organizer status:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update co-organizer status. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Update local state
+      setAttendees(prevAttendees => 
+        prevAttendees.map(attendee => 
+          attendee.user_id === attendeeUserId 
+            ? { ...attendee, is_co_organizer: !currentStatus }
+            : attendee
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: `${!currentStatus ? 'Added' : 'Removed'} co-organizer successfully.`
+      });
+    } catch (error) {
+      console.error('Error toggling co-organizer status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update co-organizer status. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {
@@ -789,16 +847,18 @@ export const EventDetailPage = () => {
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          {attendee.profiles?.is_verified && (
-                            <Badge variant="secondary" className="text-xs">Verified</Badge>
-                          )}
-                          {attendee.profiles?.is_admin && (
-                            <Badge variant="destructive" className="text-xs">Admin</Badge>
-                          )}
-                          {attendee.profiles?.is_super_admin && (
-                            <Badge variant="destructive" className="text-xs">Super Admin</Badge>
-                          )}
+                         <div className="flex items-center space-x-2">
+                           {attendee.is_co_organizer && (
+                             <Badge variant="secondary" className="bg-purple-500/10 text-purple-600 border-purple-200 dark:border-purple-800 text-xs">
+                               Co-Organizer
+                             </Badge>
+                           )}
+                           {attendee.profiles?.is_verified && (
+                             <Badge variant="secondary" className="text-xs">Verified</Badge>
+                           )}
+                           {attendee.profiles?.is_admin && (
+                             <Badge variant="destructive" className="text-xs">Admin</Badge>
+                           )}
                           
                           {/* Receipt Upload - show for the user themselves */}
                           {user && attendee.user_id === user.id && (
@@ -824,51 +884,66 @@ export const EventDetailPage = () => {
                               View Receipt
                             </Button>
                           )}
-                          
-                          {isAdmin && (
-                            <>
-                              <Button
-                                variant={attendee.payment_status ? "outline" : "default"}
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleTogglePayment(attendee.id, attendee.payment_status);
-                                }}
-                                className={attendee.payment_status ? "border-green-500 text-green-500" : "bg-green-500 hover:bg-green-600"}
-                              >
-                                {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="border-red-500 text-red-500 hover:bg-red-50"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Remove Attendee</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to remove {attendee.profiles?.display_name || 'this user'} from the event? This action cannot be undone.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction 
-                                      onClick={() => handleRemoveAttendee(attendee.id, attendee.profiles?.display_name || 'Anonymous')}
-                                      className="bg-red-600 hover:bg-red-700"
-                                    >
-                                      Remove
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </>
-                          )}
+                           
+                           {/* Co-organizer management - only for event owner */}
+                           {isOwner && attendee.user_id !== user?.id && (
+                             <Button
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleToggleCoOrganizer(attendee.user_id, attendee.is_co_organizer);
+                               }}
+                               variant={attendee.is_co_organizer ? "destructive" : "outline"}
+                               size="sm"
+                               className={attendee.is_co_organizer ? "" : "border-purple-500 text-purple-500 hover:bg-purple-50"}
+                             >
+                               {attendee.is_co_organizer ? "Remove Co-Organizer" : "Make Co-Organizer"}
+                             </Button>
+                           )}
+                           
+                           {(isAdmin || isOwner || isCoOrganizer) && (
+                             <>
+                               <Button
+                                 variant={attendee.payment_status ? "outline" : "default"}
+                                 size="sm"
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleTogglePayment(attendee.id, attendee.payment_status);
+                                 }}
+                                 className={attendee.payment_status ? "border-green-500 text-green-500" : "bg-green-500 hover:bg-green-600"}
+                               >
+                                 {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
+                               </Button>
+                               <AlertDialog>
+                                 <AlertDialogTrigger asChild>
+                                   <Button
+                                     variant="outline"
+                                     size="sm"
+                                     onClick={(e) => e.stopPropagation()}
+                                     className="border-red-500 text-red-500 hover:bg-red-50"
+                                   >
+                                     <Trash2 className="w-4 h-4" />
+                                   </Button>
+                                 </AlertDialogTrigger>
+                                 <AlertDialogContent>
+                                   <AlertDialogHeader>
+                                     <AlertDialogTitle>Remove Attendee</AlertDialogTitle>
+                                     <AlertDialogDescription>
+                                       Are you sure you want to remove {attendee.profiles?.display_name || 'this user'} from the event? This action cannot be undone.
+                                     </AlertDialogDescription>
+                                   </AlertDialogHeader>
+                                   <AlertDialogFooter>
+                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                     <AlertDialogAction 
+                                       onClick={() => handleRemoveAttendee(attendee.id, attendee.profiles?.display_name || 'Anonymous')}
+                                       className="bg-red-600 hover:bg-red-700"
+                                     >
+                                       Remove
+                                     </AlertDialogAction>
+                                   </AlertDialogFooter>
+                                 </AlertDialogContent>
+                               </AlertDialog>
+                             </>
+                           )}
                         </div>
                       </div>
                     ))}
@@ -1056,7 +1131,7 @@ export const EventDetailPage = () => {
                     Share Event
                   </Button>
                   
-                  {(isOwner || isAdmin) && (
+                  {canEdit && (
                     <>
                       <Button
                         variant="outline"
