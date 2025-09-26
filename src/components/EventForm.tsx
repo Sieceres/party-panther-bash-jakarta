@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BasicEventInfo } from "./form-components/BasicEventInfo";
 import { EventDateTime } from "./form-components/EventDateTime";
 import { EventVenue } from "./form-components/EventVenue";
+import { EventOrganizer } from "./form-components/EventOrganizer";
 import { ImageUpload } from "./form-components/ImageUpload";
 
 import { Tables } from "../integrations/supabase/types";
@@ -35,6 +36,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
     time: initialData?.time || "",
     venue: initialData?.venue_name || "",
     address: initialData?.venue_address || "",
+    organizer: initialData?.organizer_name || "",
     whatsapp: initialData?.organizer_whatsapp || "",
     image: initialData?.image_url || ""
   });
@@ -56,6 +58,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         time: initialData.time || "",
         venue: initialData.venue_name || "",
         address: initialData.venue_address || "",
+        organizer: initialData.organizer_name || "",
         whatsapp: initialData.organizer_whatsapp || "",
         image: initialData.image_url || ""
       });
@@ -133,7 +136,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         venue_address: formData.address,
         venue_latitude: location?.lat,
         venue_longitude: location?.lng,
-        organizer_name: null,
+        organizer_name: formData.organizer,
         organizer_whatsapp: formData.whatsapp,
         image_url: formData.image,
         is_recurrent: isRecurrent,
@@ -252,15 +255,12 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               onLocationChange={handleSetLocation}
             />
 
-            <div className="space-y-2">
-              <Label htmlFor="whatsapp">WhatsApp (Optional)</Label>
-              <Input
-                id="whatsapp"
-                placeholder="+62..."
-                value={formData.whatsapp}
-                onChange={(e) => handleInputChange("whatsapp", e.target.value)}
-              />
-            </div>
+            <EventOrganizer
+              organizer={formData.organizer}
+              whatsapp={formData.whatsapp}
+              onOrganizerChange={(value) => handleInputChange("organizer", value)}
+              onWhatsappChange={(value) => handleInputChange("whatsapp", value)}
+            />
 
             <ImageUpload
               label="Event Image"
