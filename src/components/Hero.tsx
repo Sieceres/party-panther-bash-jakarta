@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Zap, ExternalLink } from "lucide-react";
+import { Calendar, Zap } from "lucide-react";
 import heroBackground from "@/assets/hero-background.jpg";
 import floatingElements from "@/assets/floating-elements.png";
 import { useState, useEffect } from "react";
@@ -134,18 +134,6 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
               Explore Events
             </Button>
           </div>
-          
-          {/* Special Event Button - Always below */}
-          <Button
-            size="lg"
-            onClick={() => navigate('/event/angkot-pub-crawl')}
-            className="group relative bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-400 text-slate-900 font-black px-8 py-4 rounded-full transition-all hover:scale-110 hover:shadow-2xl hover:shadow-yellow-400/60 border-2 border-yellow-300 backdrop-blur-sm overflow-hidden shadow-xl shadow-yellow-300/60"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
-            <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-yellow-600/20 rounded-full"></div>
-            <ExternalLink className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform relative z-10 text-slate-900" />
-            <span className="relative z-10 text-slate-900 font-black drop-shadow-sm">Angkot Pub Crawl</span>
-          </Button>
         </div>
 
       </div>
