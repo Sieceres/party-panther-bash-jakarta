@@ -607,6 +607,50 @@ export const EventDetailPage = () => {
     ));
   };
 
+  const handleToggleCoOrganizer = async (attendeeId: string, currentStatus: boolean, attendeeName: string) => {
+    if (!isOwner && !isAdmin) {
+      toast({
+        title: "Unauthorized",
+        description: "Only event creators and admins can manage co-organizers.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('event_attendees')
+        .update({
+          is_co_organizer: !currentStatus
+        })
+        .eq('id', attendeeId);
+
+      if (error) throw error;
+
+      // Update local state
+      setAttendees(prev => prev.map(attendee => 
+        attendee.id === attendeeId 
+          ? { 
+              ...attendee, 
+              is_co_organizer: !currentStatus
+            }
+          : attendee
+      ));
+
+      toast({
+        title: currentStatus ? "Co-organizer removed" : "Co-organizer added",
+        description: `${attendeeName} is ${currentStatus ? 'no longer' : 'now'} a co-organizer of this event.`,
+      });
+    } catch (error) {
+      console.error('Error updating co-organizer status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update co-organizer status. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return (
       <>
@@ -799,6 +843,9 @@ export const EventDetailPage = () => {
                           {attendee.profiles?.is_super_admin && (
                             <Badge variant="destructive" className="text-xs">Super Admin</Badge>
                           )}
+                          {attendee.is_co_organizer && (
+                            <Badge variant="default" className="text-xs bg-purple-600 hover:bg-purple-700">Co-Organizer</Badge>
+                          )}
                           
                           {/* Receipt Upload - show for the user themselves */}
                           {user && attendee.user_id === user.id && (
@@ -825,6 +872,20 @@ export const EventDetailPage = () => {
                             </Button>
                           )}
                           
+                          {(isOwner || isAdmin) && attendee.user_id !== user?.id && (
+                            <Button
+                              variant={attendee.is_co_organizer ? "outline" : "default"}
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleCoOrganizer(attendee.id, attendee.is_co_organizer, attendee.profiles?.display_name || 'Anonymous');
+                              }}
+                              className={attendee.is_co_organizer ? "border-purple-500 text-purple-500" : "bg-purple-500 hover:bg-purple-600"}
+                            >
+                              {attendee.is_co_organizer ? "Remove Co-Organizer" : "Make Co-Organizer"}
+                            </Button>
+                          )}
+
                           {isAdmin && (
                             <>
                               <Button
