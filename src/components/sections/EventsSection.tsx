@@ -39,6 +39,7 @@ export const EventsSection = ({
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [searchTerm, setSearchTerm] = useState("");
+  const [showPastEvents, setShowPastEvents] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -60,6 +61,15 @@ export const EventsSection = ({
 
   const filterEvents = (events: EventWithSlug[]) => {
     return events.filter(event => {
+      // Past events filter
+      if (!showPastEvents) {
+        const eventDateTime = new Date(`${event.date} ${event.time}`);
+        const now = new Date();
+        if (eventDateTime < now) {
+          return false;
+        }
+      }
+      
       // Search filter
       if (
         searchTerm &&
@@ -86,38 +96,73 @@ export const EventsSection = ({
     setSearchTerm("");
   };
 
+  const getPastEventsCount = () => {
+    const now = new Date();
+    return events.filter(event => {
+      const eventDateTime = new Date(`${event.date} ${event.time}`);
+      return eventDateTime < now;
+    }).length;
+  };
+
+  const pastEventsCount = getPastEventsCount();
+
   return (
     <div className="pt-20 px-4">
       <div className="container mx-auto space-y-8">
         <div>
-          <h2 className="text-4xl font-bold gradient-text mb-2">Jakarta Events</h2>
-          <p className="text-muted-foreground mb-4">Discover the hottest parties and events in the city!</p>
-          {/* Always show "Create Event" as default while auth is loading */}
-          {authLoading ? (
-            <Button
-              onClick={handleCreateEventClick}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              <Star className="w-4 h-4 mr-2" />
-              Create Event
-            </Button>
-          ) : (
-            <Button
-              onClick={handleCreateEventClick}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              {user ? (
-                <>
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-4xl font-bold gradient-text mb-2">
+                {showPastEvents ? "Past Events" : "Jakarta Events"}
+              </h2>
+              <p className="text-muted-foreground">
+                {showPastEvents 
+                  ? "Browse events that have already taken place" 
+                  : "Discover the hottest parties and events in the city!"
+                }
+              </p>
+            </div>
+            {pastEventsCount > 0 && (
+              <Button
+                variant="outline"
+                onClick={() => setShowPastEvents(!showPastEvents)}
+                className="shrink-0"
+              >
+                {showPastEvents ? "View Upcoming Events" : `View Past Events (${pastEventsCount})`}
+              </Button>
+            )}
+          </div>
+          {/* Only show Create Event button for upcoming events view */}
+          {!showPastEvents && (
+            <>
+              {/* Always show "Create Event" as default while auth is loading */}
+              {authLoading ? (
+                <Button
+                  onClick={handleCreateEventClick}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
                   <Star className="w-4 h-4 mr-2" />
                   Create Event
-                </>
+                </Button>
               ) : (
-                <>
-                  <Lock className="w-4 h-4 mr-2" />
-                  Login to Create Event
-                </>
+                <Button
+                  onClick={handleCreateEventClick}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  {user ? (
+                    <>
+                      <Star className="w-4 h-4 mr-2" />
+                      Create Event
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-4 h-4 mr-2" />
+                      Login to Create Event
+                    </>
+                  )}
+                </Button>
               )}
-            </Button>
+            </>
           )}
         </div>
 
