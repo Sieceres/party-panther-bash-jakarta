@@ -222,6 +222,7 @@ export type Database = {
           slug: string | null
           time: string
           title: string
+          track_payments: boolean
           updated_at: string
           venue_address: string | null
           venue_latitude: number | null
@@ -242,6 +243,7 @@ export type Database = {
           slug?: string | null
           time: string
           title: string
+          track_payments?: boolean
           updated_at?: string
           venue_address?: string | null
           venue_latitude?: number | null
@@ -262,6 +264,7 @@ export type Database = {
           slug?: string | null
           time?: string
           title?: string
+          track_payments?: boolean
           updated_at?: string
           venue_address?: string | null
           venue_latitude?: number | null

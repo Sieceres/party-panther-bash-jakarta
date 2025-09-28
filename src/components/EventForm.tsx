@@ -30,6 +30,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   
   const [eventDate, setEventDate] = useState<Date | undefined>(initialData?.date ? new Date(initialData.date) : undefined);
   const [isRecurrent, setIsRecurrent] = useState(initialData?.is_recurrent || false);
+  const [trackPayments, setTrackPayments] = useState(initialData?.track_payments || false);
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
@@ -64,6 +65,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       });
       setEventDate(initialData.date ? new Date(initialData.date) : undefined);
       setIsRecurrent(initialData.is_recurrent || false);
+      setTrackPayments(initialData.track_payments || false);
       handleSetLocation(
         initialData.venue_latitude && initialData.venue_longitude
           ? { lat: initialData.venue_latitude, lng: initialData.venue_longitude, address: initialData.venue_address || "" }
@@ -140,6 +142,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         organizer_whatsapp: formData.whatsapp,
         image_url: formData.image,
         is_recurrent: isRecurrent,
+        track_payments: trackPayments,
         created_by: user.id
       };
 
@@ -277,6 +280,20 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
                 onCheckedChange={(checked) => setIsRecurrent(!!checked)}
               />
               <Label htmlFor="isRecurrent">Recurrent Event</Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="trackPayments"
+                checked={trackPayments}
+                onCheckedChange={(checked) => setTrackPayments(!!checked)}
+              />
+              <Label htmlFor="trackPayments">
+                Track Payments
+                <span className="block text-sm text-muted-foreground">
+                  Require attendees to upload payment receipts
+                </span>
+              </Label>
             </div>
 
             <Button

@@ -43,6 +43,7 @@ interface Event {
   venue_longitude: number;
   image_url: string;
   is_recurrent: boolean;
+  track_payments: boolean;
   organizer_name: string;
   organizer_whatsapp: string;
   created_by: string;
@@ -822,9 +823,9 @@ export const EventDetailPage = () => {
                               <span className="font-medium">
                                 {attendee.profiles?.display_name || 'Anonymous'}
                               </span>
-                              {attendee.payment_status && (
-                                <span className="text-lg">💰</span>
-                              )}
+                          {attendee.payment_status && event.track_payments && (
+                            <span className="text-lg">💰</span>
+                          )}
                             </div>
                             {attendee.profiles?.bio && (
                               <p className="text-sm text-muted-foreground line-clamp-1">
@@ -847,8 +848,8 @@ export const EventDetailPage = () => {
                             <Badge variant="default" className="text-xs bg-purple-600 hover:bg-purple-700">Co-Organizer</Badge>
                           )}
                           
-                          {/* Receipt Upload - show for the user themselves */}
-                          {user && attendee.user_id === user.id && (
+                          {/* Receipt Upload - show for the user themselves and only if payment tracking is enabled */}
+                          {user && attendee.user_id === user.id && event.track_payments && (
                             <ReceiptUpload
                               eventId={event.id}
                               userId={user.id}
@@ -857,8 +858,8 @@ export const EventDetailPage = () => {
                             />
                           )}
                           
-                          {/* Receipt status for admins */}
-                          {isAdmin && attendee.receipt_url && (
+                          {/* Receipt status for admins - only if payment tracking is enabled */}
+                          {isAdmin && attendee.receipt_url && event.track_payments && (
                             <Button
                               variant="outline"
                               size="sm"
@@ -888,17 +889,20 @@ export const EventDetailPage = () => {
 
                           {isAdmin && (
                             <>
-                              <Button
-                                variant={attendee.payment_status ? "outline" : "default"}
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleTogglePayment(attendee.id, attendee.payment_status);
-                                }}
-                                className={attendee.payment_status ? "border-green-500 text-green-500" : "bg-green-500 hover:bg-green-600"}
-                              >
-                                {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
-                              </Button>
+                              {/* Payment status toggle - only if payment tracking is enabled */}
+                              {event.track_payments && (
+                                <Button
+                                  variant={attendee.payment_status ? "outline" : "default"}
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleTogglePayment(attendee.id, attendee.payment_status);
+                                  }}
+                                  className={attendee.payment_status ? "border-green-500 text-green-500" : "bg-green-500 hover:bg-green-600"}
+                                >
+                                  {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
+                                </Button>
+                              )}
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button

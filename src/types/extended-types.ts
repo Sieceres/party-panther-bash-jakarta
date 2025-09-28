@@ -4,6 +4,7 @@ import { Tables } from "@/integrations/supabase/types";
 export type EventWithSlug = Tables<'events'> & {
   slug?: string | null;
   attendees?: number;
+  track_payments?: boolean;
 };
 
 export type PromoWithSlug = Tables<'promos'> & {
