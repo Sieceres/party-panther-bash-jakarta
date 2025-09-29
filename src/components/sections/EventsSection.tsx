@@ -39,7 +39,9 @@ export const EventsSection = ({
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [searchTerm, setSearchTerm] = useState("");
-  const [showPastEvents, setShowPastEvents] = useState(false);
+  // States for past events section
+  const [pastEventsSearchTerm, setPastEventsSearchTerm] = useState("");
+  const [pastEventsSelectedDate, setPastEventsSelectedDate] = useState<Date | undefined>();
 
   useEffect(() => {
     const getUser = async () => {
@@ -59,15 +61,15 @@ export const EventsSection = ({
     onToggleCreateEvent();
   };
 
-  const filterEvents = (events: EventWithSlug[]) => {
+  // Filter for upcoming events only (main section)
+  const filterUpcomingEvents = (events: EventWithSlug[]) => {
+    const now = new Date();
     return events.filter(event => {
-      // Past events filter
-      if (!showPastEvents) {
-        const eventDateTime = new Date(`${event.date} ${event.time}`);
-        const now = new Date();
-        if (eventDateTime < now) {
-          return false;
-        }
+      const eventDateTime = new Date(`${event.date} ${event.time}`);
+      
+      // Only show future events
+      if (eventDateTime < now) {
+        return false;
       }
       
       // Search filter
@@ -78,6 +80,7 @@ export const EventsSection = ({
       ) {
         return false;
       }
+      
       // Date filter
       if (selectedDate) {
         const eventDate = new Date(event.date);
@@ -85,84 +88,94 @@ export const EventsSection = ({
           return false;
         }
       }
+      
       return true;
     });
   };
 
-  const filteredEvents = filterEvents(events);
+  // Filter for past events only (past events section)
+  const filterPastEvents = (events: EventWithSlug[]) => {
+    const now = new Date();
+    return events.filter(event => {
+      const eventDateTime = new Date(`${event.date} ${event.time}`);
+      
+      // Only show past events
+      if (eventDateTime >= now) {
+        return false;
+      }
+      
+      // Search filter for past events
+      if (
+        pastEventsSearchTerm &&
+        !event.title.toLowerCase().includes(pastEventsSearchTerm.toLowerCase()) &&
+        !event.description?.toLowerCase().includes(pastEventsSearchTerm.toLowerCase())
+      ) {
+        return false;
+      }
+      
+      // Date filter for past events
+      if (pastEventsSelectedDate) {
+        const eventDate = new Date(event.date);
+        if (eventDate.toDateString() !== pastEventsSelectedDate.toDateString()) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  };
+
+  const upcomingEvents = filterUpcomingEvents(events);
+  const pastEvents = filterPastEvents(events);
 
   const handleResetFilters = () => {
     setSelectedDate(undefined);
     setSearchTerm("");
   };
 
-  const getPastEventsCount = () => {
-    const now = new Date();
-    return events.filter(event => {
-      const eventDateTime = new Date(`${event.date} ${event.time}`);
-      return eventDateTime < now;
-    }).length;
+  const handleResetPastFilters = () => {
+    setPastEventsSelectedDate(undefined);
+    setPastEventsSearchTerm("");
   };
-
-  const pastEventsCount = getPastEventsCount();
 
   return (
     <div className="pt-20 px-4">
       <div className="container mx-auto space-y-8">
+        {/* Main Events Section - Upcoming Events Only */}
         <div>
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h2 className="text-4xl font-bold gradient-text mb-2">
-                {showPastEvents ? "Past Events" : "Jakarta Events"}
-              </h2>
-              <p className="text-muted-foreground">
-                {showPastEvents 
-                  ? "Browse events that have already taken place" 
-                  : "Discover the hottest parties and events in the city!"
-                }
-              </p>
-            </div>
-            {pastEventsCount > 0 && (
-              <Button
-                variant="outline"
-                onClick={() => setShowPastEvents(!showPastEvents)}
-                className="shrink-0"
-              >
-                {showPastEvents ? "View Upcoming Events" : `View Past Events (${pastEventsCount})`}
-              </Button>
-            )}
+          <div className="mb-4">
+            <h2 className="text-4xl font-bold gradient-text mb-2">Jakarta Events</h2>
+            <p className="text-muted-foreground">
+              Discover the hottest parties and events in the city!
+            </p>
           </div>
-          {/* Only show Create Event button for upcoming events view */}
-          {!showPastEvents && (
-            <>
-              {/* Always show "Create Event" as default while auth is loading */}
-              {authLoading ? (
-                <Button
-                  onClick={handleCreateEventClick}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
+          
+          {/* Always show "Create Event" as default while auth is loading */}
+          {authLoading ? (
+            <Button
+              onClick={handleCreateEventClick}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <Star className="w-4 h-4 mr-2" />
+              Create Event
+            </Button>
+          ) : (
+            <Button
+              onClick={handleCreateEventClick}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {user ? (
+                <>
                   <Star className="w-4 h-4 mr-2" />
                   Create Event
-                </Button>
+                </>
               ) : (
-                <Button
-                  onClick={handleCreateEventClick}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  {user ? (
-                    <>
-                      <Star className="w-4 h-4 mr-2" />
-                      Create Event
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-4 h-4 mr-2" />
-                      Login to Create Event
-                    </>
-                  )}
-                </Button>
+                <>
+                  <Lock className="w-4 h-4 mr-2" />
+                  Login to Create Event
+                </>
               )}
-            </>
+            </Button>
           )}
         </div>
 
@@ -202,14 +215,15 @@ export const EventsSection = ({
           </div>
         </div>
 
+        {/* Upcoming Events Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             <div className="col-span-full flex justify-center items-center py-20">
               <SpinningPaws size="lg" />
             </div>
-          ) : filteredEvents.length === 0 ? (
+          ) : upcomingEvents.length === 0 ? (
             <div className="col-span-full text-center py-20">
-              <h3 className="text-xl font-semibold mb-2">No events found</h3>
+              <h3 className="text-xl font-semibold mb-2">No upcoming events found</h3>
               <p className="text-muted-foreground mb-4">
                 {events.length === 0
                   ? "No events are currently available."
@@ -223,7 +237,7 @@ export const EventsSection = ({
               )}
             </div>
           ) : (
-            filteredEvents.map((event) => (
+            upcomingEvents.map((event) => (
               <EventCard
                 key={event.id}
                 event={{
@@ -240,6 +254,60 @@ export const EventsSection = ({
             ))
           )}
         </div>
+
+        {/* Past Events Section */}
+        {pastEvents.length > 0 && (
+          <div className="mt-16 pt-8 border-t border-border">
+            <div className="mb-4">
+              <h2 className="text-3xl font-bold gradient-text mb-2">Past Events</h2>
+              <p className="text-muted-foreground">
+                Browse events that have already taken place
+              </p>
+            </div>
+
+            <div className="space-y-4 mb-8">
+              <EventFilters
+                onDateFilter={setPastEventsSelectedDate}
+                onSearchFilter={setPastEventsSearchTerm}
+                onResetFilters={handleResetPastFilters}
+                selectedDate={pastEventsSelectedDate}
+                searchTerm={pastEventsSearchTerm}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pastEvents.length === 0 ? (
+                <div className="col-span-full text-center py-20">
+                  <h3 className="text-xl font-semibold mb-2">No past events found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Try adjusting your filters to see more past events.
+                  </p>
+                  {(pastEventsSelectedDate || pastEventsSearchTerm) && (
+                    <Button onClick={handleResetPastFilters} variant="outline">
+                      Reset Filters
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                pastEvents.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={{
+                      ...event,
+                      venue: event.venue_name,
+                      image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
+                      attendees: event.attendees || 0,
+                      rating: 4.5 + Math.random() * 0.5,
+                      organizer: event.organizer_name
+                    }}
+                    onJoin={onJoinEvent}
+                    userAdminStatus={userAdminStatus}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        )}
 
         <LoginDialog
           open={showLoginDialog}
