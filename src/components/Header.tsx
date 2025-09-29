@@ -62,10 +62,10 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
   };
 
   const menuItems = [
-    { id: 'home', label: 'Home', icon: Home, hidden: false, route: '/' },
-    { id: 'promos', label: 'Promos', icon: Zap, hidden: false, route: '/?section=promos' },
-    { id: 'events', label: 'Events', icon: Calendar, hidden: false, route: '/?section=events' },
-    { id: 'profile', label: 'Profile', icon: User, hidden: false, route: '/profile' }
+    { id: 'home', label: 'Home', icon: Home, hidden: false },
+    { id: 'promos', label: 'Promos', icon: Zap, hidden: false },
+    { id: 'events', label: 'Events', icon: Calendar, hidden: false },
+    { id: 'profile', label: 'Profile', icon: User, hidden: false }
   ];
 
   return (
@@ -91,21 +91,18 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                   <Button
                     key={item.id}
                     variant={activeSection === item.id ? "default" : "ghost"}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      
+                    onClick={() => {
                       // Check if user is trying to access profile without being authenticated
                       if (item.id === 'profile' && !user) {
                         navigate('/auth');
                         return;
                       }
                       
-                      // Navigate to route and scroll to top
-                      if (item.route) {
-                        navigate(item.route);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      // Use proper navigation based on item type
+                      if (item.id === 'profile') {
+                        navigate('/profile');
                       } else {
+                        navigate('/');
                         onSectionChange(item.id);
                       }
                     }}
@@ -124,11 +121,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
               {user ? (
                 <Button
                   variant="outline"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleSignOut();
-                  }}
+                  onClick={handleSignOut}
                   className="flex items-center space-x-2 relative z-10 border-secondary text-secondary-foreground hover:bg-secondary"
                 >
                   <LogOut className="w-4 h-4" />
@@ -136,11 +129,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                 </Button>
               ) : (
                 <Button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    navigate('/auth');
-                  }}
+                  onClick={() => navigate('/auth')}
                   className="flex items-center space-x-2 relative z-10 bg-gradient-to-r from-neon-blue to-neon-cyan text-white hover:opacity-90"
                 >
                   <LogIn className="w-4 h-4" />
@@ -182,11 +171,11 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                          return;
                        }
                        
-                       // Navigate to route and scroll to top
-                       if (item.route) {
-                         navigate(item.route);
-                         window.scrollTo({ top: 0, behavior: 'smooth' });
+                       // Use proper navigation based on item type
+                       if (item.id === 'profile') {
+                         navigate('/profile');
                        } else {
+                         navigate('/');
                          onSectionChange(item.id);
                        }
                        setIsMenuOpen(false);
