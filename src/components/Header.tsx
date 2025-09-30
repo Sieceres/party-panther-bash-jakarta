@@ -73,13 +73,13 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3" onClick={() => onSectionChange('home')}>
+          <Link to="/" className="flex items-center space-x-2" onClick={() => onSectionChange('home')}>
             <div className="w-10 h-10 rounded-full party-gradient flex items-center justify-center p-1">
               <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="w-full h-full object-cover rounded-full" />
             </div>
-            <div className="flex items-baseline gap-1">
-              <h1 className="text-sm font-bold gradient-text">Party Panther</h1>
-              <span className="text-xs font-serif text-red-500 transform -rotate-12 font-bold">BETA</span>
+            <div className="flex items-baseline gap-1 whitespace-nowrap">
+              <h1 className="text-xs md:text-sm font-bold gradient-text">Party Panther</h1>
+              <span className="text-[10px] md:text-xs font-serif text-red-500 transform -rotate-12 font-bold">BETA</span>
             </div>
           </Link>
 
