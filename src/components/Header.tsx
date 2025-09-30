@@ -78,7 +78,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
               <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="w-full h-full object-cover rounded-full" />
             </div>
             <div className="flex items-baseline gap-1">
-              <h1 className="text-lg font-bold gradient-text">Party Panther</h1>
+              <h1 className="text-base font-bold gradient-text">Party Panther</h1>
               <span className="text-sm font-serif text-red-500 transform -rotate-12 font-bold">BETA</span>
             </div>
           </Link>
