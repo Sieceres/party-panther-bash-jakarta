@@ -72,14 +72,27 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2" onClick={() => onSectionChange('home')}>
-            <div className="w-10 h-10 rounded-full party-gradient flex items-center justify-center p-1">
-              <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="w-full h-full object-cover rounded-full" />
+          {/* Logo - Full Version (Desktop) */}
+          <Link to="/" className="hidden md:flex items-center space-x-3" onClick={() => onSectionChange('home')}>
+            <div className="relative w-10 h-10 rounded-full flex items-center justify-center group">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#00CFFF] to-[#4F8EFF] opacity-30 blur-md group-hover:opacity-50 transition-opacity"></div>
+              <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="relative w-full h-full object-cover rounded-full ring-2 ring-[#00CFFF] ring-offset-2 ring-offset-background" />
             </div>
-            <div className="flex items-baseline gap-1 whitespace-nowrap">
-              <h1 className="text-sm md:text-base font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Party Panther</h1>
-              <span className="text-[10px] md:text-xs font-serif text-red-500 transform -rotate-12 font-bold">BETA</span>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(0,207,255,0.5)]">
+                Party Panther
+              </h1>
+              <span className="text-[10px] font-semibold text-white bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] px-2 py-0.5 rounded-full shadow-[0_0_8px_rgba(0,207,255,0.6)]">
+                BETA
+              </span>
+            </div>
+          </Link>
+
+          {/* Logo - Compact Version (Mobile) */}
+          <Link to="/" className="flex md:hidden items-center space-x-2" onClick={() => onSectionChange('home')}>
+            <div className="relative w-9 h-9 rounded-full flex items-center justify-center group">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#00CFFF] to-[#4F8EFF] opacity-30 blur-md group-hover:opacity-50 transition-opacity"></div>
+              <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="relative w-full h-full object-cover rounded-full ring-2 ring-[#00CFFF] ring-offset-1 ring-offset-background" />
             </div>
           </Link>
 
