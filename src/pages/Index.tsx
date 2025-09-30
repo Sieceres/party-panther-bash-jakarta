@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { HomeContent } from "@/components/sections/HomeContent";
 import { EventsSection } from "@/components/sections/EventsSection";
@@ -11,6 +12,7 @@ import { useOptimizedData } from "@/hooks/useOptimizedData";
 
 const Index = () => {
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState("home");
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showCreatePromo, setShowCreatePromo] = useState(false);
@@ -38,9 +40,12 @@ const Index = () => {
     }
     setActiveSection(section);
     
-    // Update URL to reflect section change
-    const newUrl = section === 'home' ? '/' : `/?section=${section}`;
-    window.history.pushState({}, '', newUrl);
+    // Update URL to reflect section change using React Router
+    if (section === 'home') {
+      setSearchParams({});
+    } else {
+      setSearchParams({ section });
+    }
     
     // Scroll to top when changing sections
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -58,18 +63,14 @@ const Index = () => {
   const [eventSortBy, setEventSortBy] = useState("date-asc");
 
   useEffect(() => {
-    // Handle URL section parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const section = urlParams.get('section');
+    // Handle URL section parameter using React Router
+    const section = searchParams.get('section');
     if (section && ['home', 'events', 'promos', 'profile', 'contact'].includes(section)) {
       setActiveSection(section);
-      const newUrl = section === 'home' ? '/' : `/?section=${section}`;
-      window.history.replaceState({}, '', newUrl);
     } else {
       setActiveSection('home');
-      window.history.replaceState({}, '', '/');
     }
-  }, []);
+  }, [searchParams]);
 
   const filteredAndSortedPromos = promos
     .filter((promo) => {

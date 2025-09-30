@@ -101,10 +101,12 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                       // Use proper navigation based on item type
                       if (item.id === 'profile') {
                         navigate('/profile');
-                      } else {
+                      } else if (item.id === 'home') {
                         navigate('/');
-                        onSectionChange(item.id);
+                      } else {
+                        navigate(`/?section=${item.id}`);
                       }
+                      onSectionChange(item.id);
                     }}
                     className={`flex items-center space-x-2 transition-all ${
                       activeSection === item.id 
@@ -174,10 +176,12 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                        // Use proper navigation based on item type
                        if (item.id === 'profile') {
                          navigate('/profile');
-                       } else {
+                       } else if (item.id === 'home') {
                          navigate('/');
-                         onSectionChange(item.id);
+                       } else {
+                         navigate(`/?section=${item.id}`);
                        }
+                       onSectionChange(item.id);
                        setIsMenuOpen(false);
                      }}
                     className="justify-start"
