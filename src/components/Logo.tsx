@@ -23,50 +23,87 @@ export const Logo = ({ variant = 'full', onClick }: LogoProps) => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            {/* Panther silhouette sitting on martini glass */}
+            {/* Martini glass and panther silhouette */}
             <g>
-              {/* Martini glass base */}
+              {/* Martini Glass */}
+              {/* Glass bowl - triangular */}
               <path 
-                d="M35 85 L35 70 L40 70 L40 55 L30 55 L50 25 L70 55 L60 55 L60 70 L65 70 L65 85" 
+                d="M20 25 L80 25 L50 65 Z" 
                 fill="none"
                 stroke="#00CFFF"
-                strokeWidth="2.5"
+                strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
               
-              {/* Martini glass bowl */}
-              <path 
-                d="M25 30 L75 30 L50 60 Z" 
-                fill="none"
+              {/* Glass stem */}
+              <line 
+                x1="50" 
+                y1="65" 
+                x2="50" 
+                y2="85" 
                 stroke="#00CFFF"
-                strokeWidth="2.5"
+                strokeWidth="2"
                 strokeLinecap="round"
-                strokeLinejoin="round"
               />
               
-              {/* Panther body - sitting pose */}
-              <ellipse cx="50" cy="35" rx="12" ry="15" fill="#000000"/>
-              
-              {/* Panther head */}
-              <circle cx="50" cy="20" r="8" fill="#000000"/>
-              
-              {/* Panther ears */}
-              <path d="M45 15 L43 12 L47 14 Z" fill="#000000"/>
-              <path d="M55 15 L57 12 L53 14 Z" fill="#000000"/>
-              
-              {/* Panther tail - curved */}
-              <path 
-                d="M60 40 Q68 35 70 28" 
-                stroke="#000000" 
-                strokeWidth="3"
+              {/* Glass base */}
+              <line 
+                x1="42" 
+                y1="85" 
+                x2="58" 
+                y2="85" 
+                stroke="#00CFFF"
+                strokeWidth="2"
                 strokeLinecap="round"
-                fill="none"
               />
               
-              {/* Panther legs */}
-              <path d="M45 48 L43 55" stroke="#000000" strokeWidth="2.5" strokeLinecap="round"/>
-              <path d="M55 48 L57 55" stroke="#000000" strokeWidth="2.5" strokeLinecap="round"/>
+              {/* Panther Silhouette - sitting gracefully */}
+              <g transform="translate(50, 20)">
+                {/* Head */}
+                <ellipse cx="0" cy="0" rx="6" ry="7" fill="#000000"/>
+                
+                {/* Left ear */}
+                <path d="M-4 -6 L-6 -10 L-2 -7 Z" fill="#000000"/>
+                
+                {/* Right ear */}
+                <path d="M4 -6 L6 -10 L2 -7 Z" fill="#000000"/>
+                
+                {/* Neck and body */}
+                <path 
+                  d="M0 6 Q-2 10 -3 15 Q-4 20 -3 25 L-3 30" 
+                  fill="#000000"
+                  stroke="#000000"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                />
+                
+                {/* Body bulk - sitting position */}
+                <ellipse cx="-1" cy="20" rx="7" ry="12" fill="#000000"/>
+                
+                {/* Chest */}
+                <ellipse cx="-2" cy="12" rx="5" ry="6" fill="#000000"/>
+                
+                {/* Front leg */}
+                <path 
+                  d="M-6 25 L-7 35" 
+                  stroke="#000000"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+                
+                {/* Back haunch */}
+                <ellipse cx="3" cy="24" rx="6" ry="8" fill="#000000"/>
+                
+                {/* Tail - elegant curve */}
+                <path 
+                  d="M5 20 Q12 18 16 12 Q18 8 17 4" 
+                  stroke="#000000" 
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </g>
             </g>
           </svg>
         </div>
