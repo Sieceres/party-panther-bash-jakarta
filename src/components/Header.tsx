@@ -5,6 +5,7 @@ import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap } from "lucide
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
+import { Logo } from "@/components/Logo";
 
 interface HeaderProps {
   activeSection: string;
@@ -73,13 +74,14 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2" onClick={() => onSectionChange('home')}>
-            <div className="w-10 h-10 rounded-full party-gradient flex items-center justify-center p-1">
-              <img src="/lovable-uploads/f28f26bd-95f6-4171-b7b8-042f10b8bb1b.png" alt="Party Panther Logo" className="w-full h-full object-cover rounded-full" />
+          <Link to="/" onClick={() => onSectionChange('home')}>
+            {/* Desktop: Full logo */}
+            <div className="hidden md:block">
+              <Logo variant="full" />
             </div>
-            <div className="flex items-baseline gap-1 whitespace-nowrap">
-              <h1 className="text-sm md:text-base font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Party Panther</h1>
-              <span className="text-[10px] md:text-xs font-serif text-red-500 transform -rotate-12 font-bold">BETA</span>
+            {/* Mobile: Compact logo */}
+            <div className="md:hidden">
+              <Logo variant="compact" />
             </div>
           </Link>
 
