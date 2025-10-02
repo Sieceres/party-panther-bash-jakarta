@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Zap } from "lucide-react";
+import { Calendar, Zap, ChevronDown } from "lucide-react";
 import heroBackground from "@/assets/hero-background.jpg";
 import floatingElements from "@/assets/floating-elements.png";
 import { useState, useEffect } from "react";
@@ -95,7 +95,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
       <div className="relative z-20 text-center space-y-8 px-4 animate-fade-in">
         {/* Main Title */}
         <div className="space-y-4">
-          <h1 className="text-6xl md:text-8xl font-bold text-[#00BFFF] mb-4 animate-slide-up flex items-baseline justify-center gap-4 hero-title">
+          <h1 className="gradient-text animate-slide-up flex items-baseline justify-center gap-4">
            Party Panther
           </h1>
           <p className="text-xl md:text-2xl text-white mb-2 animate-slide-up hero-subtitle" style={{ animationDelay: '0.2s' }}>
@@ -128,7 +128,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
             <Button
               size="lg"
               onClick={() => onSectionChange('promos')}
-              className="group bg-gradient-to-r from-neon-blue to-neon-cyan text-white font-semibold px-8 py-4 rounded-full transition-all hover:scale-105 hover:shadow-lg hover:shadow-neon-blue/25"
+              className="cta-button group"
             >
               <Zap className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" />
               Find Hot Promos
@@ -136,12 +136,17 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
             <Button
               size="lg"
               onClick={() => onSectionChange('events')}
-              className="group bg-gradient-to-r from-neon-blue to-neon-cyan text-white font-semibold px-8 py-4 rounded-full transition-all hover:scale-105 hover:shadow-lg hover:shadow-neon-blue/25"
+              className="cta-button group"
             >
               <Calendar className="w-5 h-5 mr-2 group-hover:bounce transition-transform" />
               Explore Events
             </Button>
           </div>
+        </div>
+
+        {/* Scroll Cue Arrow */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-6 border-b-2 border-r-2 border-[#00CFFF] rotate-45 scroll-arrow"></div>
         </div>
 
       </div>

@@ -134,9 +134,17 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    font-size: 36px;
+    font-size: 72px;
     font-weight: 700;
     position: relative;
+    filter: drop-shadow(0 0 8px rgba(0, 207, 255, 0.6));
+    animation: neon-pulse 2s ease-in-out infinite alternate;
+  }
+
+  @media (max-width: 768px) {
+    .gradient-text {
+      font-size: 48px;
+    }
   }
 
   .gradient-text-glow {
@@ -227,16 +235,16 @@
   }
 
   .cta-button {
-    background: linear-gradient(135deg, hsl(191, 100%, 50%), hsl(214, 100%, 65%));
-    color: hsl(0, 0%, 100%);
+    background: linear-gradient(135deg, #00CFFF, #4F8EFF);
+    color: #FFFFFF;
     border: none;
     padding: 12px 24px;
-    border-radius: 12px;
+    border-radius: 25px;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 12px hsla(191, 100%, 50%, 0.25);
+    box-shadow: 0 4px 12px rgba(0, 207, 255, 0.25);
     opacity: 1;
     display: inline-flex;
     align-items: center;
@@ -250,9 +258,14 @@
   }
 
   .cta-button:hover {
-    background: linear-gradient(135deg, hsl(191, 100%, 55%), hsl(214, 100%, 70%));
-    box-shadow: 0 6px 16px hsla(191, 100%, 50%, 0.35);
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, #00CFFF, #4F8EFF);
+    box-shadow: 0 8px 20px rgba(0, 207, 255, 0.4);
+    transform: scale(1.05);
+  }
+
+  .scroll-arrow {
+    filter: drop-shadow(0 0 8px rgba(0, 207, 255, 0.8));
+    animation: arrow-pulse 2s ease-in-out infinite;
   }
 
   .hero-bg {
@@ -431,6 +444,17 @@
     }
     50% { 
       filter: drop-shadow(0 0 16px rgba(0, 207, 255, 0.9));
+    }
+  }
+
+  @keyframes arrow-pulse {
+    0%, 100% { 
+      filter: drop-shadow(0 0 8px rgba(0, 207, 255, 0.6));
+      transform: translateY(0);
+    }
+    50% { 
+      filter: drop-shadow(0 0 12px rgba(0, 207, 255, 1));
+      transform: translateY(4px);
     }
   }
 
