@@ -172,12 +172,56 @@
     border-radius: 25px;
     transition: all 0.3s ease;
     padding: 8px 16px;
+    min-width: 160px;
   }
 
   .glass-control:hover {
     border-color: #00CFFF;
     box-shadow: 0 0 16px rgba(0, 207, 255, 0.3);
     transform: scale(1.02);
+  }
+
+  .promo-card-enhanced {
+    background: rgba(15, 15, 15, 0.95);
+    border: 2px solid rgba(0, 207, 255, 0.3);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(0, 207, 255, 0.2);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+
+  .promo-card-enhanced:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 40px rgba(0, 207, 255, 0.4);
+    border-color: rgba(0, 207, 255, 0.6);
+  }
+
+  .promo-card-enhanced:hover .promo-card-image {
+    transform: scale(1.1);
+  }
+
+  .promo-card-image {
+    transition: transform 0.4s ease;
+  }
+
+  .promo-image-overlay {
+    background: linear-gradient(to bottom, 
+      transparent 0%,
+      transparent 30%,
+      rgba(0, 0, 0, 0.5) 60%,
+      rgba(0, 0, 0, 0.8) 100%
+    );
+    transition: all 0.3s ease;
+  }
+
+  .promo-card-enhanced:hover .promo-image-overlay {
+    background: linear-gradient(to bottom, 
+      transparent 0%,
+      transparent 20%,
+      rgba(0, 0, 0, 0.6) 50%,
+      rgba(0, 0, 0, 0.9) 100%
+    );
   }
 
   .neon-card {

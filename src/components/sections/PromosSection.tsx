@@ -114,8 +114,8 @@ export const PromosSection = ({
     <div className="pt-20 px-4">
       <div className="container mx-auto space-y-8">
         <div>
-          <h2 className="text-4xl font-bold gradient-text mb-2">Hot Promos</h2>
-          <p className="text-muted-foreground mb-4">Go big without going broke with these amazing deals!</p>
+          <h2 className="text-5xl font-bold gradient-text gradient-text-glow mb-2">Hot Promos</h2>
+          <p className="text-lg text-white/80 mb-6">Go big without going broke with these amazing deals!</p>
           {!user && (
             <Button
               onClick={handleCreatePromoClick}
@@ -145,9 +145,12 @@ export const PromosSection = ({
         {/* Filters and Sort */}
         <div className="flex flex-wrap gap-4 mb-6 items-end">
           <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium">Day</label>
+            <label className="text-sm font-medium text-white/90">
+              <Filter className="w-4 h-4 inline mr-1" />
+              Day
+            </label>
             <Select>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="glass-control">
                 <SelectValue>{getFilterDisplayText(dayFilter, "All days")}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -188,9 +191,12 @@ export const PromosSection = ({
           </div>
           
           <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium">Area</label>
+            <label className="text-sm font-medium text-white/90">
+              <Filter className="w-4 h-4 inline mr-1" />
+              Area
+            </label>
             <Select>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="glass-control">
                 <SelectValue>{getFilterDisplayText(areaFilter, "All areas")}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -231,9 +237,12 @@ export const PromosSection = ({
           </div>
           
           <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium">Drink Type</label>
+            <label className="text-sm font-medium text-white/90">
+              <Filter className="w-4 h-4 inline mr-1" />
+              Drink Type
+            </label>
             <Select>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="glass-control">
                 <SelectValue>{getFilterDisplayText(drinkTypeFilter, "All types")}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -274,10 +283,12 @@ export const PromosSection = ({
           </div>
           
           <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium">Sort By</label>
+            <label className="text-sm font-medium text-white/90">
+              <ArrowUpDown className="w-4 h-4 inline mr-1" />
+              Sort By
+            </label>
             <Select value={sortBy} onValueChange={onSortChange}>
-              <SelectTrigger className="w-48">
-                <ArrowUpDown className="w-4 h-4 mr-2" />
+              <SelectTrigger className="glass-control w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -315,7 +326,7 @@ export const PromosSection = ({
               </Button>
             </div>
           ) : (
-            filteredPromos.map((promo) => (
+            filteredPromos.map((promo, index) => (
                <PromoCard 
                 key={promo.id} 
                 promo={{
@@ -331,6 +342,7 @@ export const PromosSection = ({
                 }}
                 userAdminStatus={userAdminStatus}
                 onFavoriteToggle={onFavoriteToggle}
+                index={index}
               />
             ))
           )}

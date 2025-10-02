@@ -47,18 +47,20 @@ interface PromoCardProps {
   promo: Promo;
   userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
   onFavoriteToggle?: (promoId: string, isFavorite: boolean) => void;
+  index?: number;
 }
 
 import { format } from "date-fns";
 import { getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
 
-export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle }: PromoCardProps) => {
+export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 }: PromoCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showReviews, setShowReviews] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Use optimized data or fallback to defaults
   const averageRating = promo.average_rating || 0;
@@ -209,17 +211,23 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle }: PromoCar
   const canDelete = isOwner || isAdmin;
 
   return (
-    <Card className="neon-card bg-card/95 backdrop-blur-sm border border-border/50 group cursor-pointer" onClick={handleCardClick}>
-      <div className="relative overflow-hidden">
+    <Card 
+      className="promo-card-enhanced cursor-pointer animate-stagger-in" 
+      style={{ animationDelay: `${index * 80}ms` }}
+      onClick={handleCardClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="relative overflow-hidden rounded-t-2xl">
         <img 
           src={promo.image || promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop'}
           alt={promo.title}
-          className="card-image w-full h-48 object-cover"
+          className="promo-card-image w-full h-48 object-cover transition-transform duration-300"
           onError={(e) => {
             e.currentTarget.src = 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop';
           }}
         />
-        <div className="image-overlay absolute inset-0"></div>
+        <div className="promo-image-overlay absolute inset-0"></div>
         {promo.discount && (
           <div className={cn(
             "neon-tag absolute top-3",
@@ -297,10 +305,26 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle }: PromoCar
               )}
               disabled={isTogglingFavorite}
             >
-              <Heart className={cn("w-4 h-4", isFavorite && "fill-current")} />
+            <Heart className={cn("w-4 h-4", isFavorite && "fill-current")} />
             </Button>
           </div>
         )}
+        
+        {/* Hover "Claim Promo" Button */}
+        <div className={cn(
+          "absolute inset-x-0 bottom-0 p-4 transition-all duration-300",
+          isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        )}>
+          <Button
+            className="w-full cta-button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCardClick();
+            }}
+          >
+            Claim Promo
+          </Button>
+        </div>
       </div>
 
       <CardHeader className="pb-3">
