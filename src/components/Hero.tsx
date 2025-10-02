@@ -60,7 +60,14 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroBackground})` }}
       >
-        <div className="absolute inset-0 hero-bg"></div>
+        <div className="absolute inset-0 animated-hero-gradient"></div>
+      </div>
+
+      {/* Moving Light Streaks */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="light-streak light-streak-1"></div>
+        <div className="light-streak light-streak-2"></div>
+        <div className="light-streak light-streak-3"></div>
       </div>
 
       {/* Floating Elements */}
@@ -76,12 +83,13 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
       </div>
 
       {/* Particle Effects */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/3 w-2 h-2 bg-neon-blue rounded-full animate-pulse"></div>
-        <div className="absolute top-1/2 right-1/4 w-3 h-3 bg-neon-cyan rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-1/3 left-1/4 w-2 h-2 bg-neon-indigo rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-3/4 right-1/3 w-2 h-2 bg-neon-green rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-        <div className="absolute top-1/3 right-1/2 w-2 h-2 bg-neon-blue rounded-full animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="hero-particle hero-particle-1"></div>
+        <div className="hero-particle hero-particle-2"></div>
+        <div className="hero-particle hero-particle-3"></div>
+        <div className="hero-particle hero-particle-4"></div>
+        <div className="hero-particle hero-particle-5"></div>
+        <div className="hero-particle hero-particle-6"></div>
       </div>
 
       <div className="relative z-20 text-center space-y-8 px-4 animate-fade-in">
