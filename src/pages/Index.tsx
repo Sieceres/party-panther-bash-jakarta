@@ -111,6 +111,12 @@ const Index = () => {
     });
 
   const filteredAndSortedEvents = events
+    .filter((event) => {
+      // Filter out past events
+      const eventDateTime = new Date(`${event.date} ${event.time}`);
+      const now = new Date();
+      return eventDateTime >= now;
+    })
     .sort((a, b) => {
       switch (eventSortBy) {
         case "date-asc":
