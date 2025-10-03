@@ -74,11 +74,11 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3" onClick={() => onSectionChange('home')}>
+          <Link to="/" className="flex items-center space-x-2" onClick={() => onSectionChange('home')}>
             <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center">
               <img src={logoImage} alt="Party Panther Logo" className="w-full h-full object-contain" />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <h1 className="text-base md:text-2xl font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(0,207,255,0.5)]">
                 Party Panther
               </h1>
