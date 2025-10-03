@@ -226,7 +226,7 @@ export const EventsSection = ({
               <h3 className="text-xl font-semibold mb-2">No upcoming events found</h3>
               <p className="text-muted-foreground mb-4">
                 {events.length === 0
-                  ? "No events are currently available."
+                  ? "No events available right now. Be the first to create one!"
                   : "Try adjusting your filters to see more events."
                 }
               </p>
