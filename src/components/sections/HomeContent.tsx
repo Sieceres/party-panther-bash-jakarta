@@ -87,28 +87,36 @@ export const HomeContent = ({
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {promos.slice(0, 3).map((promo, index) => (
-                <div 
-                  key={promo.id} 
-                  className="animate-stagger-in opacity-0"
-                  style={{ animationDelay: `${0.08 * index}s` }}
-                >
-                   <PromoCard 
-                      promo={{
-                        ...promo,
-                        discount: promo.discount_text,
-                        venue: promo.venue_name,
-                        validUntil: promo.valid_until,
-                        image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
-                         day: Array.isArray(promo.day_of_week) ? promo.day_of_week.join(', ') : (promo.day_of_week || ''),
-                         area: promo.area?.toLowerCase(),
-                         drinkType: Array.isArray(promo.drink_type) ? promo.drink_type.join(', ') : (promo.drink_type || '')
-                      }} 
-                      userAdminStatus={userAdminStatus}
-                      onFavoriteToggle={onFavoriteToggle}
-                    />
+              {promos.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-muted-foreground text-lg">
+                    No promos available right now. Be the first to create one!
+                  </p>
                 </div>
-              ))}
+              ) : (
+                promos.slice(0, 3).map((promo, index) => (
+                  <div 
+                    key={promo.id} 
+                    className="animate-stagger-in opacity-0"
+                    style={{ animationDelay: `${0.08 * index}s` }}
+                  >
+                     <PromoCard 
+                        promo={{
+                          ...promo,
+                          discount: promo.discount_text,
+                          venue: promo.venue_name,
+                          validUntil: promo.valid_until,
+                          image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
+                           day: Array.isArray(promo.day_of_week) ? promo.day_of_week.join(', ') : (promo.day_of_week || ''),
+                           area: promo.area?.toLowerCase(),
+                           drinkType: Array.isArray(promo.drink_type) ? promo.drink_type.join(', ') : (promo.drink_type || '')
+                        }} 
+                        userAdminStatus={userAdminStatus}
+                        onFavoriteToggle={onFavoriteToggle}
+                      />
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -149,26 +157,34 @@ export const HomeContent = ({
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {events.slice(0, 3).map((event, index) => (
-                <div 
-                  key={event.id} 
-                  className="animate-stagger-in opacity-0"
-                  style={{ animationDelay: `${0.08 * index}s` }}
-                >
-                   <EventCard 
-                     event={{
-                       ...event,
-                       venue: event.venue_name,
-                       image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
-                       attendees: event.attendees || 0,
-                       rating: 4.5 + Math.random() * 0.5,
-                       organizer: event.organizer_name
-                     }} 
-                     onJoin={onJoinEvent}
-                     userAdminStatus={userAdminStatus}
-                   />
+              {events.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-muted-foreground text-lg">
+                    No events available right now. Be the first to create one!
+                  </p>
                 </div>
-              ))}
+              ) : (
+                events.slice(0, 3).map((event, index) => (
+                  <div 
+                    key={event.id} 
+                    className="animate-stagger-in opacity-0"
+                    style={{ animationDelay: `${0.08 * index}s` }}
+                  >
+                     <EventCard 
+                       event={{
+                         ...event,
+                         venue: event.venue_name,
+                         image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
+                         attendees: event.attendees || 0,
+                         rating: 4.5 + Math.random() * 0.5,
+                         organizer: event.organizer_name
+                       }} 
+                       onJoin={onJoinEvent}
+                       userAdminStatus={userAdminStatus}
+                     />
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
