@@ -1,0 +1,89 @@
+-- First, populate promo_id_uuid for all existing reviews where it's null
+UPDATE promo_reviews 
+SET promo_id_uuid = promo_id::uuid
+WHERE promo_id_uuid IS NULL 
+  AND promo_id ~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$';
+
+-- Create a simpler, more reliable version of get_promos_with_details
+CREATE OR REPLACE FUNCTION public.get_promos_with_details(user_id_param uuid DEFAULT NULL::uuid)
+RETURNS TABLE(
+  id uuid,
+  title text,
+  description text,
+  discount_text text,
+  venue_name text,
+  venue_address text,
+  venue_latitude numeric,
+  venue_longitude numeric,
+  image_url text,
+  price_currency text,
+  original_price_amount integer,
+  discounted_price_amount integer,
+  valid_until date,
+  area text,
+  category text,
+  promo_type text,
+  day_of_week text[],
+  drink_type text[],
+  created_by uuid,
+  created_at timestamp with time zone,
+  updated_at timestamp with time zone,
+  slug text,
+  creator_name text,
+  creator_avatar text,
+  creator_verified boolean,
+  average_rating numeric,
+  total_reviews bigint,
+  is_favorite boolean
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT 
+    pr.id,
+    pr.title,
+    pr.description,
+    pr.discount_text,
+    pr.venue_name,
+    pr.venue_address,
+    pr.venue_latitude,
+    pr.venue_longitude,
+    pr.image_url,
+    pr.price_currency,
+    pr.original_price_amount,
+    pr.discounted_price_amount,
+    pr.valid_until,
+    pr.area,
+    pr.category,
+    pr.promo_type,
+    pr.day_of_week,
+    pr.drink_type,
+    pr.created_by,
+    pr.created_at,
+    pr.updated_at,
+    pr.slug,
+    COALESCE(p.display_name, 'Anonymous') as creator_name,
+    p.avatar_url as creator_avatar,
+    COALESCE(p.is_verified, false) as creator_verified,
+    COALESCE(rs.average_rating, 0)::numeric as average_rating,
+    COALESCE(rs.total_reviews, 0)::bigint as total_reviews,
+    COALESCE(fav.is_favorite, false) as is_favorite
+  FROM public.promos pr
+  LEFT JOIN public.profiles p ON pr.created_by = p.user_id
+  LEFT JOIN (
+    SELECT 
+      promo_id_uuid as promo_uuid,
+      AVG(rating)::numeric as average_rating,
+      COUNT(*)::bigint as total_reviews
+    FROM public.promo_reviews
+    WHERE promo_id_uuid IS NOT NULL
+    GROUP BY promo_id_uuid
+  ) rs ON pr.id = rs.promo_uuid
+  LEFT JOIN (
+    SELECT promo_id, true as is_favorite
+    FROM public.user_favorite_promos
+    WHERE user_id = user_id_param
+  ) fav ON pr.id = fav.promo_id
+  ORDER BY pr.created_at DESC;
+$$;
