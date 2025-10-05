@@ -131,6 +131,31 @@ export const PromoDetailPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Promo Title and Info */}
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <h1 className="text-3xl gradient-text font-bold">{promo.title}</h1>
+                <div className="flex items-center space-x-2">
+                  <Badge className="bg-neon-pink text-black font-bold text-lg px-3 py-1 neon-glow">
+                    {promo.discount_text}
+                  </Badge>
+                  {promo.promo_type && (
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary">
+                      {promo.promo_type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="flex items-center space-x-1 text-sm text-muted-foreground mb-1">
+                  <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                  <span>{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
+                  <span>•</span>
+                  <span>{totalReviews} {totalReviews === 1 ? "review" : "reviews"}</span>
+                </div>
+              </div>
+            </div>
+
             {/* Promo Image */}
             {promo.image_url && (
               <div className="aspect-video rounded-lg overflow-hidden">
@@ -145,29 +170,7 @@ export const PromoDetailPage = () => {
             {/* Promo Details */}
             <Card>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <CardTitle className="text-3xl gradient-text">{promo.title}</CardTitle>
-                    <div className="flex items-center space-x-2">
-                      <Badge className="bg-neon-pink text-black font-bold text-lg px-3 py-1 neon-glow">
-                        {promo.discount_text}
-                      </Badge>
-                      {promo.promo_type && (
-                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary">
-                          {promo.promo_type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center space-x-1 text-sm text-muted-foreground mb-1">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span>{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
-                      <span>•</span>
-                      <span>{totalReviews} {totalReviews === 1 ? "review" : "reviews"}</span>
-                    </div>
-                  </div>
-                </div>
+                <CardTitle>Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
