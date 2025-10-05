@@ -232,8 +232,8 @@ export const PromoDetailPage = () => {
               </CardHeader>
               <CardContent>
                 <ReviewsList 
-                  promoId={id!} 
-                  onReviewsChange={handleReviewsChange}
+                 promoId={promo.id} 
+                 onReviewsChange={handleReviewsChange}
                 />
               </CardContent>
             </Card>
