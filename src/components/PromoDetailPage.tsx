@@ -74,12 +74,6 @@ export const PromoDetailPage = () => {
     fetchPromo();
   }, [id, toast]);
 
-  const handleClaimPromo = () => {
-    toast({
-      title: "Promo claimed! 🎊",
-      description: `"${promo?.title}" has been added to your account. Show this at the venue.`,
-    });
-  };
 
   const handleReviewsChange = (avgRating: number, total: number) => {
     setAverageRating(avgRating);
@@ -272,12 +266,6 @@ export const PromoDetailPage = () => {
                   </div>
                 )}
 
-                <Button
-                  onClick={handleClaimPromo}
-                  className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold"
-                >
-                  Claim Promo
-                </Button>
                 <Button
                   variant="outline"
                   className="w-full"
