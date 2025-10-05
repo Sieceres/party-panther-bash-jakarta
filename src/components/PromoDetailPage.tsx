@@ -132,14 +132,14 @@ export const PromoDetailPage = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Promo Title and Info */}
-            <div className="space-y-4">
+            <div className="space-y-6">
               <h1 className="text-3xl gradient-text font-bold">{promo.title}</h1>
               <div className="flex items-center space-x-2">
-                <Badge className="bg-neon-pink text-black font-bold text-lg px-3 py-1 neon-glow">
+                <Badge className="bg-neon-cyan text-background font-bold text-lg px-4 py-2 neon-glow">
                   {promo.discount_text}
                 </Badge>
               </div>
-              <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+              <div className="flex items-center space-x-1 text-sm text-foreground">
                 <Star className="w-4 h-4 text-yellow-400 fill-current" />
                 <span>{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
                 <span>•</span>
