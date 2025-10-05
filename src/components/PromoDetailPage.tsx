@@ -158,9 +158,6 @@ export const PromoDetailPage = () => {
                       <Badge className="bg-neon-pink text-black font-bold text-lg px-3 py-1 neon-glow">
                         {promo.discount_text}
                       </Badge>
-                      {promo.category && (
-                        <Badge variant="secondary">{promo.category}</Badge>
-                      )}
                       {promo.promo_type && (
                         <Badge variant="outline" className="bg-primary/10 text-primary border-primary">
                           {promo.promo_type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
