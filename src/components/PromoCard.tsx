@@ -322,7 +322,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
               handleCardClick();
             }}
           >
-            Claim Promo
+            View Promo
           </Button>
         </div>
       </div>
