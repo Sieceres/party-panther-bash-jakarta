@@ -614,6 +614,10 @@ export type Database = {
         Args: { event_id_param: string }
         Returns: boolean
       }
+      can_user_update_event: {
+        Args: { event_id_param: string }
+        Returns: boolean
+      }
       generate_slug: {
         Args: { input_text: string }
         Returns: string
