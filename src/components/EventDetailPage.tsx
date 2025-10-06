@@ -713,6 +713,22 @@ export const EventDetailPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Event Title and Date */}
+              <div className="space-y-3">
+                <h1 className="text-2xl font-semibold gradient-text">{event.title}</h1>
+                <div className="flex items-center space-x-4 text-muted-foreground">
+                  <span>{format(new Date(event.date), 'EEEE, MMMM do, yyyy')}</span>
+                  <span>•</span>
+                  <span>{event.time}</span>
+                  {event.is_recurrent && (
+                    <>
+                      <span>•</span>
+                      <Badge variant="secondary">Recurring</Badge>
+                    </>
+                  )}
+                </div>
+              </div>
+
               {/* Event Image */}
               {event.image_url && (
                 <div className="aspect-video rounded-lg overflow-hidden">
@@ -726,31 +742,7 @@ export const EventDetailPage = () => {
 
               {/* Event Details */}
               <Card>
-                <CardHeader>
-                  <CardTitle 
-                    className="text-4xl font-extrabold gradient-text tracking-wide leading-tight drop-shadow-[0_0_16px_rgba(0,207,255,0.6)]"
-  style={{
-                    letterSpacing: "0.5px",
-                    textShadow: "0 0 12px rgba(0,207,255,0.8), 0 0 24px rgba(79,142,255,0.6)",
-                    lineHeight: "1.2",
-                  }}
-                >
-                  {event.title}
-                </CardTitle>
-
-                  <div className="flex items-center space-x-4 text-muted-foreground">
-                    <span>{format(new Date(event.date), 'EEEE, MMMM do, yyyy')}</span>
-                    <span>•</span>
-                    <span>{event.time}</span>
-                    {event.is_recurrent && (
-                      <>
-                        <span>•</span>
-                        <Badge variant="secondary">Recurring</Badge>
-                      </>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 pt-6">
                   <div className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
                     <Linkify options={{ target: "_blank", rel: "noopener noreferrer", className: "text-primary hover:underline" }}>
                       {event.description}
