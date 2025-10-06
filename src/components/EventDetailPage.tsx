@@ -728,15 +728,16 @@ export const EventDetailPage = () => {
               <Card>
                 <CardHeader>
                   <CardTitle 
-                    className="text-xl sm:text-2xl md:text-3xl font-bold gradient-text tracking-wide leading-snug drop-shadow-[0_0_12px_rgba(0,207,255,0.6)]"
-                    style={{
-                      letterSpacing: "0.4px",
-                      textShadow: "0 0 10px rgba(0,207,255,0.8), 0 0 20px rgba(79,142,255,0.5)",
-                      lineHeight: "1.25",
-                    }}
-                  >
-                    {event.title}
-                  </CardTitle>
+                    className="text-4xl font-extrabold gradient-text tracking-wide leading-tight drop-shadow-[0_0_16px_rgba(0,207,255,0.6)]"
+  style={{
+                    letterSpacing: "0.5px",
+                    textShadow: "0 0 12px rgba(0,207,255,0.8), 0 0 24px rgba(79,142,255,0.6)",
+                    lineHeight: "1.2",
+                  }}
+                >
+                  {event.title}
+                </CardTitle>
+
                   <div className="flex items-center space-x-4 text-muted-foreground">
                     <span>{format(new Date(event.date), 'EEEE, MMMM do, yyyy')}</span>
                     <span>•</span>
