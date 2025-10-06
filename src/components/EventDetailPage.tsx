@@ -715,7 +715,7 @@ export const EventDetailPage = () => {
             <div className="lg:col-span-2 space-y-6">
               {/* Event Title and Date */}
               <div className="space-y-3">
-                <h1 className="text-xs md:text-sm lg:text-base font-semibold gradient-text leading-tight">{event.title}</h1>
+                <h1 className="text-[0.65rem] md:text-sm lg:text-base font-semibold gradient-text leading-tight">{event.title}</h1>
                 <div className="flex items-center space-x-4 text-muted-foreground">
                   <span>{format(new Date(event.date), 'EEEE, MMMM do, yyyy')}</span>
                   <span>•</span>
