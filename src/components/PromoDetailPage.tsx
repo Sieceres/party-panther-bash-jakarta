@@ -133,7 +133,7 @@ export const PromoDetailPage = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Promo Title and Info */}
             <div className="space-y-6">
-              <h1 className="text-3xl gradient-text font-bold">{promo.title}</h1>
+              <h1 className="text-xl md:text-2xl lg:text-3xl gradient-text font-bold">{promo.title}</h1>
               <div className="flex items-center space-x-2">
                 <Badge className="bg-neon-cyan text-background font-bold text-lg px-4 py-2 neon-glow">
                   {promo.discount_text}
