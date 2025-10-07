@@ -79,7 +79,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
               <img src={logoImage} alt="Party Panther Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex items-center gap-1.5">
-              <h1 className="text-base md:text-2xl font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(0,207,255,0.5)]">
+              <h1 className="text-base md:text-lg lg:text-2xl font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(0,207,255,0.5)]">
                 Party Panther
               </h1>
               <span className="px-2 py-0.5 text-xs font-bold text-white bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] rounded-full shadow-[0_0_10px_rgba(0,207,255,0.5)]">
