@@ -74,19 +74,19 @@ export function useOptimizedData() {
       // Only use detailed functions when specifically needed
       let eventsResult, promosResult, adminStatusResult;
       
-      console.log('Fetching data with simple functions for optimal performance...');
+      console.log('Fetching data with detailed functions for complete information...');
       
       try {
-        // Use simple functions first - they're fast and reliable
+        // Use detailed functions to get creator info and attendee counts
         [eventsResult, promosResult, adminStatusResult] = await Promise.all([
-          supabase.rpc('get_events_simple'),
-          supabase.rpc('get_promos_simple'),
+          supabase.rpc('get_events_with_details', { user_id_param: currentUser?.id || null }),
+          supabase.rpc('get_promos_with_details', { user_id_param: currentUser?.id || null }),
           currentUser ? supabase.rpc('get_user_admin_status', { user_id_param: currentUser.id }) : { data: null, error: null }
         ]);
         
-        console.log('Simple functions completed successfully');
+        console.log('Detailed functions completed successfully');
       } catch (error) {
-        console.error('Error with simple functions:', error);
+        console.error('Error with detailed functions:', error);
         throw error;
       }
 
