@@ -28,7 +28,14 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
-  const [eventDate, setEventDate] = useState<Date | undefined>(initialData?.date ? new Date(initialData.date) : undefined);
+  const [eventDate, setEventDate] = useState<Date | undefined>(
+    initialData?.date 
+      ? (() => {
+          const [year, month, day] = initialData.date.split('-').map(Number);
+          return new Date(year, month - 1, day); // Create date in local timezone
+        })()
+      : undefined
+  );
   const [isRecurrent, setIsRecurrent] = useState(initialData?.is_recurrent || false);
   const [trackPayments, setTrackPayments] = useState(initialData?.track_payments || false);
   const [formData, setFormData] = useState({
@@ -63,7 +70,14 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         whatsapp: initialData.organizer_whatsapp || "",
         image: initialData.image_url || ""
       });
-      setEventDate(initialData.date ? new Date(initialData.date) : undefined);
+      setEventDate(
+        initialData.date 
+          ? (() => {
+              const [year, month, day] = initialData.date.split('-').map(Number);
+              return new Date(year, month - 1, day); // Create date in local timezone
+            })()
+          : undefined
+      );
       setIsRecurrent(initialData.is_recurrent || false);
       setTrackPayments(initialData.track_payments || false);
       handleSetLocation(

@@ -145,10 +145,10 @@ export const PromoDetailPage = () => {
                     {promo.title}
                   </h1>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge className="bg-neon-pink text-black font-bold text-lg px-3 py-1 neon-glow">
+                    <Badge variant="secondary" className="font-bold text-base px-3 py-1.5">
                       {promo.discount_text}
                     </Badge>
-                    {promo.promo_type && (
+                    {promo.promo_type && promo.promo_type.toLowerCase() !== promo.discount_text.toLowerCase().replace(/\s+/g, '-') && (
                       <Badge variant="outline" className="bg-primary/10 text-primary border-primary">
                         {promo.promo_type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                       </Badge>
