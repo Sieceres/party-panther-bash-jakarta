@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2, Heart, Eye } from "lucide-react";
+import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2, Heart, Eye, Settings } from "lucide-react";
 import { ReportDialog } from "./ReportDialog";
 import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
@@ -660,8 +660,8 @@ export const UserProfile = () => {
                 </div>
               ) : (
                 <div>
-                  <h2 className="text-3xl font-bold gradient-text">{displayName}</h2>
-                  <p className="text-sm text-muted-foreground mt-2 max-w-md">
+                  <h2 className="text-3xl font-bold gradient-text break-words leading-tight mb-2">{displayName}</h2>
+                  <p className="text-sm text-muted-foreground mt-3 max-w-md">
                     {profile?.bio || "Jakarta party enthusiast 🎉"}
                   </p>
                   
@@ -774,6 +774,16 @@ export const UserProfile = () => {
                           <Share2 className="w-4 h-4 mr-2" />
                           Share Profile
                         </Button>
+                        {(profile?.is_admin || profile?.is_super_admin) && (
+                          <Button
+                            variant="outline"
+                            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                            onClick={() => navigate('/admin')}
+                          >
+                            <Settings className="w-4 h-4 mr-2" />
+                            Admin Dashboard
+                          </Button>
+                        )}
                       </>
                     )}
                     {isAdminView && (
@@ -784,15 +794,6 @@ export const UserProfile = () => {
                       >
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Back to Admin
-                      </Button>
-                    )}
-                    {!isAdminView && (profile?.is_admin || profile?.is_super_admin) && (
-                      <Button
-                        variant="outline"
-                        className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                        onClick={() => navigate('/admin')}
-                      >
-                        Admin Dashboard
                       </Button>
                     )}
                   </>
