@@ -92,13 +92,13 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         <div className="hero-particle hero-particle-6"></div>
       </div>
 
-      <div className="relative z-20 text-center space-y-8 px-4 animate-fade-in">
+      <div className="relative z-20 text-center space-y-12 px-4 animate-fade-in max-w-5xl mx-auto">
         {/* Main Title */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           <h1 className="gradient-text animate-slide-up flex items-baseline justify-center gap-2">
            Party Panther
           </h1>
-          <p className="text-xl md:text-2xl text-white mb-2 animate-slide-up hero-subtitle" style={{ animationDelay: '0.2s' }}>
+          <p className="text-xl md:text-2xl text-white animate-slide-up hero-subtitle" style={{ animationDelay: '0.2s' }}>
             Jakarta's Ultimate Party & Promo Hub
           </p>
           <p className="text-lg text-white/80 max-w-2xl mx-auto animate-slide-up hero-subtitle" style={{ animationDelay: '0.4s' }}>
@@ -123,7 +123,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         </div> */}
 
         {/* CTA Buttons */}
-        <div className="flex flex-col items-center justify-center gap-4 pt-4 animate-slide-up" style={{ animationDelay: '0.8s' }}>
+        <div className="flex flex-col items-center justify-center gap-4 pt-8 animate-slide-up" style={{ animationDelay: '0.8s' }}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button
               size="lg"
