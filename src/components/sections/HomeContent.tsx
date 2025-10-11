@@ -70,11 +70,11 @@ export const HomeContent = ({
           <div className="container mx-auto space-y-8">
             <div className="flex items-center justify-between animate-slide-up">
               <div className="space-y-2">
-                <h2 className="gradient-text flex items-center gap-3">
-                  <Zap className="w-10 h-10" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
+                <h2 className="gradient-text text-3xl md:text-4xl flex items-center gap-3">
+                  <Zap className="w-8 h-8" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
                   Hot Promos
                 </h2>
-                <p className="text-gray-300 text-lg">Go big without going broke!</p>
+                <p className="text-gray-300 text-base md:text-lg">Go big without going broke!</p>
               </div>
               <Button
                 onClick={() => onSectionChange("promos")}
@@ -140,11 +140,11 @@ export const HomeContent = ({
           <div className="container mx-auto space-y-8">
             <div className="flex items-center justify-between animate-slide-up">
               <div className="space-y-2">
-                <h2 className="gradient-text flex items-center gap-3">
-                  <Calendar className="w-10 h-10" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
+                <h2 className="gradient-text text-3xl md:text-4xl flex items-center gap-3">
+                  <Calendar className="w-8 h-8" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
                   Upcoming Events
                 </h2>
-                <p className="text-gray-300 text-lg">Don't miss these amazing parties!</p>
+                <p className="text-gray-300 text-base md:text-lg">Don't miss these amazing parties!</p>
               </div>
               <Button
                 onClick={() => onSectionChange("events")}
