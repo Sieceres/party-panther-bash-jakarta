@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapPin, Loader2, Navigation, X } from "lucide-react";
-import { searchPlaces, getCurrentLocation, reverseGeocode, MapboxFeature } from "@/lib/mapbox";
+import { searchPlaces, getCurrentLocation, reverseGeocode, PhotonFeature, formatAddress } from "@/lib/photon";
 import { useToast } from "@/hooks/use-toast";
 
 interface LocationAutocompleteProps {
@@ -20,7 +20,7 @@ export const LocationAutocomplete = ({
   placeholder = "Search for a venue or address..."
 }: LocationAutocompleteProps) => {
   const [searchQuery, setSearchQuery] = useState(location?.address || "");
-  const [suggestions, setSuggestions] = useState<MapboxFeature[]>([]);
+  const [suggestions, setSuggestions] = useState<PhotonFeature[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -66,14 +66,15 @@ export const LocationAutocomplete = ({
     };
   }, [searchQuery]);
 
-  const handleSelectSuggestion = (feature: MapboxFeature) => {
-    const [lng, lat] = feature.center;
+  const handleSelectSuggestion = (feature: PhotonFeature) => {
+    const [lng, lat] = feature.geometry.coordinates;
+    const address = formatAddress(feature);
     onLocationSelect({
       lat,
       lng,
-      address: feature.place_name,
+      address,
     });
-    setSearchQuery(feature.place_name);
+    setSearchQuery(address);
     setShowSuggestions(false);
     setSuggestions([]);
   };
@@ -168,18 +169,18 @@ export const LocationAutocomplete = ({
 
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto">
-            {suggestions.map((suggestion) => (
+            {suggestions.map((suggestion, index) => (
               <button
-                key={suggestion.id}
+                key={`${suggestion.properties.osm_id}-${index}`}
                 type="button"
                 onClick={() => handleSelectSuggestion(suggestion)}
                 className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-start gap-2 border-b last:border-b-0"
               >
                 <MapPin className="w-4 h-4 mt-1 flex-shrink-0 text-muted-foreground" />
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm">{suggestion.text}</div>
+                  <div className="font-medium text-sm">{suggestion.properties.name || "Unnamed location"}</div>
                   <div className="text-xs text-muted-foreground truncate">
-                    {suggestion.place_name}
+                    {formatAddress(suggestion)}
                   </div>
                 </div>
               </button>
@@ -207,11 +208,6 @@ export const LocationAutocomplete = ({
         </div>
       )}
 
-      {!import.meta.env.VITE_MAPBOX_TOKEN && (
-        <div className="text-xs text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 rounded-md p-2">
-          ⚠️ Mapbox token not configured. Please add VITE_MAPBOX_TOKEN to your environment.
-        </div>
-      )}
     </div>
   );
 };
