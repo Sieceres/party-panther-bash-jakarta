@@ -19,7 +19,6 @@ serve(async (req) => {
     const lat = url.searchParams.get('lat');
     const lon = url.searchParams.get('lon');
     const limit = url.searchParams.get('limit') || '10';
-    const osm_tag = url.searchParams.get('osm_tag');
 
     let photonUrl: string;
 
@@ -55,10 +54,6 @@ serve(async (req) => {
       if (lat && lon) {
         params.append('lat', lat);
         params.append('lon', lon);
-      }
-      
-      if (osm_tag) {
-        params.append('osm_tag', osm_tag);
       }
       
       photonUrl = `https://photon.komoot.io/api/?${params.toString()}`;

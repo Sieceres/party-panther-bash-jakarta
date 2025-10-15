@@ -43,7 +43,6 @@ export const searchPlaces = async (query: string): Promise<PhotonFeature[]> => {
       limit: "10",
       lat: "-6.2088", // Jakarta latitude
       lon: "106.8456", // Jakarta longitude
-      osm_tag: "!highway:footway,!highway:path,!highway:cycleway", // Exclude paths
     });
 
     const response = await fetch(`${EDGE_FUNCTION_URL}?${params}`);
