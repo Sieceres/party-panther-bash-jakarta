@@ -27,9 +27,9 @@ export interface PhotonResponse {
   type: string;
 }
 
-const PHOTON_API = "https://photon.komoot.io/api/";
+const EDGE_FUNCTION_URL = "https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/photon-proxy";
 
-// Search for places using Photon API
+// Search for places using Photon API via Edge Function proxy
 export const searchPlaces = async (query: string): Promise<PhotonFeature[]> => {
   if (!query || query.length < 3) {
     return [];
@@ -38,6 +38,7 @@ export const searchPlaces = async (query: string): Promise<PhotonFeature[]> => {
   try {
     // Bias results toward Indonesia and Jakarta
     const params = new URLSearchParams({
+      type: "search",
       q: query,
       limit: "10",
       lat: "-6.2088", // Jakarta latitude
@@ -45,10 +46,10 @@ export const searchPlaces = async (query: string): Promise<PhotonFeature[]> => {
       osm_tag: "!highway:footway,!highway:path,!highway:cycleway", // Exclude paths
     });
 
-    const response = await fetch(`${PHOTON_API}?${params}`);
+    const response = await fetch(`${EDGE_FUNCTION_URL}?${params}`);
     
     if (!response.ok) {
-      throw new Error("Photon API request failed");
+      throw new Error("Geocoding search failed");
     }
 
     const data: PhotonResponse = await response.json();
@@ -81,16 +82,17 @@ export const getCurrentLocation = (): Promise<{ lat: number; lng: number }> => {
   });
 };
 
-// Reverse geocode coordinates to address
+// Reverse geocode coordinates to address via Edge Function proxy
 export const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
   try {
     const params = new URLSearchParams({
+      type: "reverse",
       lat: lat.toString(),
       lon: lng.toString(),
       limit: "1",
     });
 
-    const response = await fetch(`${PHOTON_API}/reverse?${params}`);
+    const response = await fetch(`${EDGE_FUNCTION_URL}?${params}`);
     
     if (!response.ok) {
       throw new Error("Reverse geocoding failed");
