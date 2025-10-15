@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BasicPromoInfo } from "@/components/form-components/BasicPromoInfo";
 import { PromoDiscount } from "@/components/form-components/PromoDiscount";
-import { LocationSelector } from "@/components/form-components/LocationSelector";
+import { LocationAutocomplete } from "@/components/form-components/LocationAutocomplete";
 import { PromoDetails } from "@/components/form-components/PromoDetails";
 import { ImageUpload } from "@/components/form-components/ImageUpload";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
@@ -226,10 +226,11 @@ export const EditPromoPage = () => {
                 onAddressChange={(value) => handleInputChange('address', value)}
               />
 
-              <LocationSelector
+              <LocationAutocomplete
                 location={location}
                 onLocationSelect={setLocation}
                 label="Venue Location (Optional)"
+                placeholder="Search for venue address..."
               />
 
               <PromoDetails

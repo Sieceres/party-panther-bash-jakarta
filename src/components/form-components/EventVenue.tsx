@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LocationSelector } from "./LocationSelector";
+import { LocationAutocomplete } from "./LocationAutocomplete";
 
 interface EventVenueProps {
   venue: string;
@@ -43,9 +43,11 @@ export const EventVenue = ({
         </div>
       </div>
 
-      <LocationSelector
+      <LocationAutocomplete
         location={location}
         onLocationSelect={onLocationChange}
+        label="Venue Location"
+        placeholder="Search for venue address..."
       />
     </>
   );

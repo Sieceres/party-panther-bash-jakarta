@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BasicPromoInfo } from "./form-components/BasicPromoInfo";
 import { PromoDiscount } from "./form-components/PromoDiscount";
-import { LocationSelector } from "./form-components/LocationSelector";
+import { LocationAutocomplete } from "./form-components/LocationAutocomplete";
 import { PromoDetails } from "./form-components/PromoDetails";
 import { ImageUpload } from "./form-components/ImageUpload";
 
@@ -169,9 +169,11 @@ export const CreatePromoForm = () => {
               onAddressChange={(value) => handleInputChange("address", value)}
             />
 
-            <LocationSelector
+            <LocationAutocomplete
               location={location}
               onLocationSelect={setLocation}
+              label="Promo Venue Location"
+              placeholder="Search for venue address..."
             />
 
             <PromoDetails
