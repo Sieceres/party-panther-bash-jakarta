@@ -1,21 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapPin, Loader2, Navigation, X } from "lucide-react";
 import { searchPlaces, getCurrentLocation, reverseGeocode, PhotonFeature, formatAddress } from "@/lib/photon";
 import { useToast } from "@/hooks/use-toast";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
 
-// Fix for default marker icon
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-});
+// Lazy load map component
+const LocationMap = lazy(() => import("./LocationMap"));
 
 interface LocationAutocompleteProps {
   location: { lat: number; lng: number; address: string } | null;
@@ -219,22 +211,9 @@ export const LocationAutocomplete = ({
             </div>
           </div>
 
-          <div className="h-64 w-full rounded-md overflow-hidden border">
-            <MapContainer
-              center={[location.lat, location.lng]}
-              zoom={15}
-              style={{ height: "100%", width: "100%" }}
-              key={`${location.lat}-${location.lng}`}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Marker position={[location.lat, location.lng]}>
-                <Popup>{location.address}</Popup>
-              </Marker>
-            </MapContainer>
-          </div>
+          <Suspense fallback={<div className="h-64 w-full rounded-md border bg-muted animate-pulse" />}>
+            <LocationMap lat={location.lat} lng={location.lng} address={location.address} />
+          </Suspense>
         </div>
       )}
 
