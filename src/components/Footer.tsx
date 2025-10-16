@@ -43,17 +43,17 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
 
   return (
     <footer className="bg-card border-t border-border py-8 mt-12">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center md:items-start space-y-8 md:space-y-0">
+      <div className="container mx-auto px-6 md:px-8">
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-start space-y-8 md:space-y-0 md:gap-8">
           {/* Logo and Description */}
-          <div className="flex flex-col items-center md:items-start space-y-4">
+          <div className="flex flex-col items-center md:items-start space-y-4 min-w-0">
             <Link to="/" className="text-2xl font-bold gradient-text">
               Party Panther
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs text-center md:text-left">
               Your ultimate guide to Jakarta's hottest parties, events, and promotions.
             </p>
-            <img src="/logo-partypanyther.jpeg" alt="Party Panther Logo" className="mt-4 h-32" />
+            <img src="/logo-partypanyther.jpeg" alt="Party Panther Logo" className="mt-2 h-24 w-auto object-contain" />
           </div>
 
           {/* Links */}
