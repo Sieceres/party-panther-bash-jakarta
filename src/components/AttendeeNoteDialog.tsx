@@ -72,15 +72,15 @@ export const AttendeeNoteDialog = ({
         </DialogHeader>
         <div className="py-4">
           <Textarea
-            placeholder="E.g., Looking forward to meeting new people! Coming with 2 friends..."
+            placeholder="E.g., Looking forward to this!"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            rows={4}
-            maxLength={200}
+            rows={3}
+            maxLength={50}
             className="resize-none"
           />
           <p className="text-xs text-muted-foreground mt-2 text-right">
-            {note.length}/200 characters
+            {note.length}/50 characters
           </p>
         </div>
         <DialogFooter>
