@@ -144,7 +144,7 @@ export const EventsSection = ({
         {/* Main Events Section - Upcoming Events Only */}
         <div>
           <div className="mb-4">
-            <h2 className="text-4xl font-bold gradient-text mb-2">Jakarta Events</h2>
+            <h2 className="text-4xl font-bold gradient-text mb-2 overflow-hidden text-ellipsis">Events</h2>
             <p className="text-muted-foreground">
               Discover the hottest parties and events in the city!
             </p>
