@@ -20,6 +20,7 @@ export type Database = {
           id: string
           is_co_organizer: boolean
           joined_at: string | null
+          note: string | null
           payment_date: string | null
           payment_marked_by: string | null
           payment_status: boolean
@@ -32,6 +33,7 @@ export type Database = {
           id?: string
           is_co_organizer?: boolean
           joined_at?: string | null
+          note?: string | null
           payment_date?: string | null
           payment_marked_by?: string | null
           payment_status?: boolean
@@ -44,6 +46,7 @@ export type Database = {
           id?: string
           is_co_organizer?: boolean
           joined_at?: string | null
+          note?: string | null
           payment_date?: string | null
           payment_marked_by?: string | null
           payment_status?: boolean
@@ -767,34 +770,20 @@ export type Database = {
       get_promos_with_details: {
         Args: { p_slug: string } | { user_id_param?: string }
         Returns: {
-          area: string
-          average_rating: number
-          category: string
           created_at: string
           created_by: string
-          creator_avatar: string
-          creator_name: string
-          creator_verified: boolean
-          day_of_week: string[]
           description: string
-          discount_text: string
           discounted_price_amount: number
-          drink_type: string[]
           id: string
           image_url: string
-          is_favorite: boolean
           original_price_amount: number
           price_currency: string
           promo_type: string
+          review_avg: number
+          review_count: number
           slug: string
           title: string
-          total_reviews: number
           updated_at: string
-          valid_until: string
-          venue_address: string
-          venue_latitude: number
-          venue_longitude: number
-          venue_name: string
         }[]
       }
       get_public_profile_info: {

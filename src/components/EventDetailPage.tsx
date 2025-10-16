@@ -30,6 +30,7 @@ import { getEventBySlugOrId, getEditEventUrl } from "@/lib/slug-utils";
 import Linkify from "linkify-react";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import defaultAvatar from "@/assets/default-avatar.png";
+import { AttendeeNoteDialog } from "./AttendeeNoteDialog";
 
 interface Event {
   id: string;
@@ -75,6 +76,8 @@ export const EventDetailPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAllAttendees, setShowAllAttendees] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
+  const [showNoteDialog, setShowNoteDialog] = useState(false);
+  const [currentAttendeeId, setCurrentAttendeeId] = useState<string | null>(null);
 
   const memoizedCenter = useMemo(() => {
     if (!event?.venue_latitude || !event?.venue_longitude) {
@@ -164,7 +167,7 @@ export const EventDetailPage = () => {
         // Fetch attendees with profiles for display - using separate queries
           const { data: attendeesData, error: attendeesError } = await supabase
             .from('event_attendees')
-            .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at')
+            .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note')
             .eq('event_id', eventData.id)
             .order('joined_at', { ascending: false });
 
@@ -234,15 +237,30 @@ export const EventDetailPage = () => {
 
       setHasJoined(true);
       setTotalAttendees(prev => prev + 1);
+      
+      // Show success toast with action to add note
       toast({
         title: "Successfully joined event! 🎉",
-        description: `You're now registered for "${event.title}". See you there!`,
+        description: (
+          <div className="flex flex-col gap-2">
+            <p>You're now registered for "{event.title}". See you there!</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowNoteDialog(true)}
+              className="w-fit"
+            >
+              Add note?
+            </Button>
+          </div>
+        ),
+        duration: 8000,
       });
 
       // Refresh attendees list
         const { data: attendeesData } = await supabase
           .from('event_attendees')
-          .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at')
+          .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note')
           .eq('event_id', event.id)
           .order('joined_at', { ascending: false });
 
@@ -296,7 +314,7 @@ export const EventDetailPage = () => {
       // Refresh attendees list
         const { data: attendeesData } = await supabase
           .from('event_attendees')
-          .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at')
+          .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note')
           .eq('event_id', event.id)
           .order('joined_at', { ascending: false });
 
@@ -608,6 +626,31 @@ export const EventDetailPage = () => {
     ));
   };
 
+  const handleNoteSaved = async () => {
+    // Refresh attendees to show the updated note
+    if (!event) return;
+    
+    const { data: attendeesData } = await supabase
+      .from('event_attendees')
+      .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note')
+      .eq('event_id', event.id)
+      .order('joined_at', { ascending: false });
+
+    if (attendeesData) {
+      const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, avatar_url, is_verified, is_admin, is_super_admin')
+        .in('user_id', userIds);
+
+      const attendeesWithProfiles = attendeesData.map(attendee => ({
+        ...attendee,
+        profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
+      }));
+      setAttendees(attendeesWithProfiles);
+    }
+  };
+
   const handleToggleCoOrganizer = async (attendeeId: string, currentStatus: boolean, attendeeName: string) => {
     if (!isOwner && !isAdmin) {
       toast({
@@ -834,6 +877,11 @@ export const EventDetailPage = () => {
                                 {attendee.profiles.bio}
                               </p>
                             )}
+                            {attendee.note && (
+                              <p className="text-sm text-primary/80 italic line-clamp-2 mt-1">
+                                💭 {attendee.note}
+                              </p>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -858,6 +906,22 @@ export const EventDetailPage = () => {
                               currentReceiptUrl={attendee.receipt_url}
                               onReceiptUploaded={(receiptUrl) => handleReceiptUploaded(attendee.id, receiptUrl)}
                             />
+                          )}
+                          
+                          {/* Edit Note - show for the user themselves */}
+                          {user && attendee.user_id === user.id && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCurrentAttendeeId(attendee.id);
+                                setShowNoteDialog(true);
+                              }}
+                              className="border-cyan-500 text-cyan-500 hover:bg-cyan-50"
+                            >
+                              {attendee.note ? "Edit Note" : "Add Note"}
+                            </Button>
                           )}
                           
                           {/* Receipt status for admins - only if payment tracking is enabled */}
@@ -1178,6 +1242,16 @@ export const EventDetailPage = () => {
           </div>
         </div>
       </div>
+      
+      {/* Attendee Note Dialog */}
+      <AttendeeNoteDialog
+        open={showNoteDialog}
+        onOpenChange={setShowNoteDialog}
+        eventId={event?.id || ""}
+        userId={user?.id || ""}
+        initialNote={attendees.find(a => a.user_id === user?.id)?.note || ""}
+        onNoteSaved={handleNoteSaved}
+      />
     </>
   );
 };
