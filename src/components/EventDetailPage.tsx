@@ -878,7 +878,7 @@ export const EventDetailPage = () => {
                               </p>
                             )}
                             {attendee.note && (
-                              <p className="text-sm text-primary/80 italic line-clamp-2 mt-1">
+                              <p className="text-sm text-muted-foreground italic line-clamp-2 mt-1">
                                 💭 {attendee.note}
                               </p>
                             )}
