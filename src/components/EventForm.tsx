@@ -146,7 +146,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       const eventData = {
         title: formData.title,
         description: formData.description,
-        date: eventDate?.toISOString().split('T')[0],
+        date: eventDate ? `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}` : undefined,
         time: formData.time,
         venue_name: formData.venue,
         venue_address: formData.address,

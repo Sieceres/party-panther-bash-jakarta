@@ -329,7 +329,7 @@ export const EventDetailPage = () => {
 
   const handleContactOrganizer = () => {
     if (event?.organizer_whatsapp) {
-      const message = `Hi! I'm interested in attending "${event.title}" on ${format(new Date(event.date), 'MMMM do, yyyy')} at ${event.time}.`;
+      const message = `Hi! I'm interested in attending "${event.title}" on ${format(new Date(event.date + 'T00:00:00'), 'MMMM do, yyyy')} at ${event.time}.`;
       const whatsappUrl = `https://wa.me/${event.organizer_whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     }
@@ -717,7 +717,7 @@ export const EventDetailPage = () => {
               <div className="space-y-3">
                 <h1 className="text-[0.65rem] md:text-sm lg:text-base font-semibold gradient-text leading-tight">{event.title}</h1>
                 <div className="flex items-center space-x-4 text-muted-foreground">
-                  <span>{format(new Date(event.date), 'EEEE, MMMM do, yyyy')}</span>
+                  <span>{format(new Date(event.date + 'T00:00:00'), 'EEEE, MMMM do, yyyy')}</span>
                   <span>•</span>
                   <span>{event.time}</span>
                   {event.is_recurrent && (

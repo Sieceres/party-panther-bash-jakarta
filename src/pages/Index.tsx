@@ -113,19 +113,19 @@ const Index = () => {
   const filteredAndSortedEvents = events
     .filter((event) => {
       // Filter out past events
-      const eventDateTime = new Date(`${event.date} ${event.time}`);
+      const eventDateTime = new Date(`${event.date}T${event.time}`);
       const now = new Date();
       return eventDateTime >= now;
     })
     .sort((a, b) => {
       switch (eventSortBy) {
         case "date-asc":
-          const aDateTime = new Date(`${a.date} ${a.time}`).getTime();
-          const bDateTime = new Date(`${b.date} ${b.time}`).getTime();
+          const aDateTime = new Date(`${a.date}T${a.time}`).getTime();
+          const bDateTime = new Date(`${b.date}T${b.time}`).getTime();
           return aDateTime - bDateTime;
         case "date-desc":
-          const aDateTimeDesc = new Date(`${a.date} ${a.time}`).getTime();
-          const bDateTimeDesc = new Date(`${b.date} ${b.time}`).getTime();
+          const aDateTimeDesc = new Date(`${a.date}T${a.time}`).getTime();
+          const bDateTimeDesc = new Date(`${b.date}T${b.time}`).getTime();
           return bDateTimeDesc - aDateTimeDesc;
         case "newest":
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();

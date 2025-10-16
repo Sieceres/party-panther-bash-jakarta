@@ -65,7 +65,7 @@ export const EventsSection = ({
   const filterUpcomingEvents = (events: EventWithSlug[]) => {
     const now = new Date();
     return events.filter(event => {
-      const eventDateTime = new Date(`${event.date} ${event.time}`);
+      const eventDateTime = new Date(`${event.date}T${event.time}`);
       
       // Only show future events
       if (eventDateTime < now) {
@@ -83,7 +83,7 @@ export const EventsSection = ({
       
       // Date filter
       if (selectedDate) {
-        const eventDate = new Date(event.date);
+        const eventDate = new Date(event.date + 'T00:00:00');
         if (eventDate.toDateString() !== selectedDate.toDateString()) {
           return false;
         }
@@ -97,7 +97,7 @@ export const EventsSection = ({
   const filterPastEvents = (events: EventWithSlug[]) => {
     const now = new Date();
     return events.filter(event => {
-      const eventDateTime = new Date(`${event.date} ${event.time}`);
+      const eventDateTime = new Date(`${event.date}T${event.time}`);
       
       // Only show past events
       if (eventDateTime >= now) {
@@ -115,7 +115,7 @@ export const EventsSection = ({
       
       // Date filter for past events
       if (pastEventsSelectedDate) {
-        const eventDate = new Date(event.date);
+        const eventDate = new Date(event.date + 'T00:00:00');
         if (eventDate.toDateString() !== pastEventsSelectedDate.toDateString()) {
           return false;
         }

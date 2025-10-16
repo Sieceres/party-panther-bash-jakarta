@@ -262,7 +262,7 @@ export const AdminReceiptManagement = () => {
                   <div>
                     <p className="font-medium">{selectedReceipt.user_name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {selectedReceipt.event_title} • {new Date(selectedReceipt.event_date).toLocaleDateString()}
+                      {selectedReceipt.event_title} • {new Date(selectedReceipt.event_date + 'T00:00:00').toLocaleDateString()}
                     </p>
                   </div>
                   <Badge variant={selectedReceipt.payment_status ? "default" : "secondary"}>
