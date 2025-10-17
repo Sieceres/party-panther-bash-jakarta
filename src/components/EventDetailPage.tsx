@@ -851,7 +851,7 @@ export const EventDetailPage = () => {
                     {displayedAttendees.map((attendee) => (
                       <div 
                         key={attendee.id} 
-                        className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                        className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                       >
                         <div 
                           className="flex items-center space-x-3 cursor-pointer"
@@ -878,13 +878,13 @@ export const EventDetailPage = () => {
                               </p>
                             )}
                             {attendee.note && (
-                              <p className="text-sm text-muted-foreground italic line-clamp-2 mt-1">
+                              <p className="text-sm text-muted-foreground italic line-clamp-2 mt-1 max-w-full break-words">
                                 💭 {attendee.note}
                               </p>
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center flex-wrap gap-2 w-full md:w-auto md:justify-end">
                           {attendee.profiles?.is_verified && (
                             <Badge variant="secondary" className="text-xs">Verified</Badge>
                           )}
