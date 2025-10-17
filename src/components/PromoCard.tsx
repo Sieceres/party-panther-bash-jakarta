@@ -327,20 +327,20 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
         </div>
       </div>
 
-      <CardHeader className="pb-3">
-        <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">{promo.title}</h3>
-        <p className="text-sm line-clamp-2 whitespace-pre-wrap" style={{ color: '#E0E0E0', fontSize: '14px' }}>{promo.description}</p>
+      <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
+        <h3 className="text-base sm:text-lg font-bold text-white mb-1 sm:mb-2 line-clamp-2">{promo.title}</h3>
+        <p className="text-xs sm:text-sm line-clamp-2 whitespace-pre-wrap" style={{ color: '#E0E0E0' }}>{promo.description}</p>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2 sm:space-y-3 p-3 sm:p-4 pt-0">
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-white">{promo.venue}</p>
-            <p className="text-xs" style={{ color: '#E0E0E0' }}>Valid until {promo.validUntil}</p>
+          <div className="space-y-0.5 sm:space-y-1">
+            <p className="text-xs sm:text-sm font-medium text-white line-clamp-1">{promo.venue}</p>
+            <p className="text-[10px] sm:text-xs" style={{ color: '#E0E0E0' }}>Valid until {promo.validUntil}</p>
             {creatorName && (
-              <div className="flex items-center space-x-1 text-xs" style={{ color: '#E0E0E0' }}>
-                <User className="w-3 h-3" />
-                <span>by {creatorName}</span>
+              <div className="flex items-center space-x-1 text-[10px] sm:text-xs" style={{ color: '#E0E0E0' }}>
+                <User className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                <span className="line-clamp-1">by {creatorName}</span>
               </div>
             )}
           </div>
@@ -348,11 +348,11 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
 
         {/* Rating/Reviews */}
         <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-1 text-sm" style={{ color: '#E0E0E0' }}>
-            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-            <span>{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
+        <div className="flex items-center space-x-1 text-xs sm:text-sm" style={{ color: '#E0E0E0' }}>
+            <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-current" />
+            <span className="text-xs sm:text-sm">{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
             <span>•</span>
-            <span>{totalReviews} {totalReviews === 1 ? "review" : "reviews"}</span>
+            <span className="text-xs sm:text-sm">{totalReviews} {totalReviews === 1 ? "review" : "reviews"}</span>
           </div>
           <Button
             variant="ghost"
@@ -361,9 +361,9 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
               e.stopPropagation();
               setShowReviews(!showReviews);
             }}
-            className="text-xs text-white hover:text-primary"
+            className="text-[10px] sm:text-xs text-white hover:text-primary h-7 sm:h-8 px-2"
           >
-            <MessageSquare className="w-4 h-4 mr-1" />
+            <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
             {showReviews ? "Hide" : "Reviews"}
           </Button>
         </div>

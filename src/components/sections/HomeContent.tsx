@@ -66,23 +66,24 @@ export const HomeContent = ({
           <div className="floating-element absolute bottom-20 left-10 w-20 h-20 rounded-full bg-neon-indigo blur-md"></div>
         </div>
 
-        <div className="relative z-10 px-4 py-8">
-          <div className="container mx-auto space-y-8">
-            <div className="flex items-center justify-between animate-slide-up">
-              <div className="space-y-2">
-                <h2 className="gradient-text text-3xl md:text-4xl flex items-center gap-3">
-                  <Zap className="w-8 h-8" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
+        <div className="relative z-10 px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-12">
+          <div className="container mx-auto space-y-6 sm:space-y-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-slide-up">
+              <div className="space-y-1 sm:space-y-2">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent flex items-center gap-2 sm:gap-3">
+                  <Zap className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
                   Hot Promos
                 </h2>
-                <p className="text-gray-300 text-base md:text-lg">Go big without going broke!</p>
+                <p className="text-gray-300 text-sm sm:text-base md:text-lg">Go big without going broke!</p>
               </div>
               <Button
                 onClick={() => onSectionChange("promos")}
                 variant="outline"
-                className="glass-control hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105"
+                size="sm"
+                className="glass-control hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
               >
                 See More
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
             
@@ -136,23 +137,24 @@ export const HomeContent = ({
           <div className="floating-element absolute bottom-20 right-1/3 w-32 h-32 border-2 border-neon-cyan rounded-full"></div>
         </div>
 
-        <div className="relative z-10 px-4 py-16">
-          <div className="container mx-auto space-y-8">
-            <div className="flex items-center justify-between animate-slide-up">
-              <div className="space-y-2">
-                <h2 className="gradient-text text-3xl md:text-4xl flex items-center gap-3">
-                  <Calendar className="w-8 h-8" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
+        <div className="relative z-10 px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16">
+          <div className="container mx-auto space-y-6 sm:space-y-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-slide-up">
+              <div className="space-y-1 sm:space-y-2">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent flex items-center gap-2 sm:gap-3">
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
                   Upcoming Events
                 </h2>
-                <p className="text-gray-300 text-base md:text-lg">Don't miss these amazing parties!</p>
+                <p className="text-gray-300 text-sm sm:text-base md:text-lg">Don't miss these amazing parties!</p>
               </div>
               <Button
                 onClick={() => onSectionChange("events")}
                 variant="outline"
-                className="glass-control hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105"
+                size="sm"
+                className="glass-control hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
               >
                 See More
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
             

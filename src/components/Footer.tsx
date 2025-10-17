@@ -42,57 +42,57 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
   };
 
   return (
-    <footer className="bg-card border-t border-border py-8 mt-12">
-      <div className="container mx-auto px-6 md:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-center md:items-start space-y-8 md:space-y-0 md:gap-8">
+    <footer className="bg-card border-t border-border py-6 sm:py-8 md:py-12 mt-8 sm:mt-10 md:mt-12">
+      <div className="container mx-auto px-4 sm:px-6 md:px-8">
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-start space-y-6 sm:space-y-8 md:space-y-0 md:gap-8">
           {/* Logo and Description */}
-          <div className="flex flex-col items-center md:items-start space-y-4 min-w-0">
-            <Link to="/" className="text-2xl font-bold gradient-text">
+          <div className="flex flex-col items-center md:items-start space-y-3 sm:space-y-4 min-w-0">
+            <Link to="/" className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent">
               Party Panther
             </Link>
-            <p className="text-sm text-muted-foreground max-w-xs text-center md:text-left">
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-xs text-center md:text-left">
               Your ultimate guide to Jakarta's hottest parties, events, and promotions.
             </p>
-            <img src="/logo-partypanyther.jpeg" alt="Party Panther Logo" className="mt-2 h-24 w-auto object-contain" />
+            <img src="/logo-partypanyther.jpeg" alt="Party Panther Logo" className="mt-2 h-16 sm:h-20 md:h-24 w-auto object-contain" />
           </div>
 
           {/* Links */}
           <div className="flex flex-col items-center md:items-start space-y-2">
-            <h3 className="font-semibold text-lg mb-2">Links</h3>
-            <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About Us</Link>
-            <Link to="/terms-conditions" className="text-muted-foreground hover:text-primary transition-colors">Terms and Conditions</Link>
+            <h3 className="font-semibold text-base sm:text-lg mb-2">Links</h3>
+            <Link to="/about" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors">About Us</Link>
+            <Link to="/terms-conditions" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors">Terms and Conditions</Link>
           </div>
 
           {/* Social Media */}
-          <div className="flex flex-col items-center md:items-start space-y-4">
+          <div className="flex flex-col items-center md:items-start space-y-3 sm:space-y-4">
             <div>
-              <h3 className="font-semibold text-lg mb-2">Follow Us</h3>
+              <h3 className="font-semibold text-base sm:text-lg mb-2">Follow Us</h3>
               <div className="flex space-x-2">
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="text-muted-foreground hover:text-primary"
+                  className="text-muted-foreground hover:text-primary h-8 w-8 sm:h-10 sm:w-10"
                   onClick={() => window.open("https://instagram.com/partypantherid", "_blank")}
                 >
-                  <Instagram className="h-5 w-5" />
+                  <Instagram className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="text-muted-foreground hover:text-primary"
+                  className="text-muted-foreground hover:text-primary h-8 w-8 sm:h-10 sm:w-10"
                   onClick={handleWhatsAppClick}
                 >
-                  <img src="/lovable-uploads/3204a251-393a-4b1a-8696-230c48ed85a2.png" alt="WhatsApp" className="h-5 w-5" />
+                  <img src="/lovable-uploads/3204a251-393a-4b1a-8696-230c48ed85a2.png" alt="WhatsApp" className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </div>
             </div>
             
             {/* Contact Info */}
-            <div className="flex flex-col items-center md:items-start space-y-2">
-              <h3 className="font-semibold text-lg mb-2">Contact Us</h3>
-              <p className="text-sm text-muted-foreground">Email: info@partypanther.id</p>
-              <p className="text-sm text-muted-foreground">Phone: +62 812 3456 7890</p>
-              <p className="text-sm text-muted-foreground">Instagram: @partypanther.id</p>
+            <div className="flex flex-col items-center md:items-start space-y-1 sm:space-y-2">
+              <h3 className="font-semibold text-base sm:text-lg mb-2">Contact Us</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Email: info@partypanther.id</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Phone: +62 812 3456 7890</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Instagram: @partypanther.id</p>
             </div>
           </div>
         </div>

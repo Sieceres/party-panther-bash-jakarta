@@ -134,16 +134,31 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    font-size: 72px;
     font-weight: 700;
     position: relative;
-    filter: drop-shadow(0 0 12px rgba(0, 230, 255, 0.8)) drop-shadow(0 0 20px rgba(79, 142, 255, 0.6));
-    animation: neon-pulse 2s ease-in-out infinite alternate;
   }
-
-  @media (max-width: 768px) {
+  
+  /* Mobile - tone down glow */
+  @media (max-width: 640px) {
     .gradient-text {
-      font-size: 48px;
+      filter: drop-shadow(0 0 6px rgba(0, 230, 255, 0.3)) drop-shadow(0 0 10px rgba(79, 142, 255, 0.2));
+      animation: none; /* Disable pulsing on mobile for better readability */
+    }
+  }
+  
+  /* Tablet */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .gradient-text {
+      filter: drop-shadow(0 0 10px rgba(0, 230, 255, 0.5)) drop-shadow(0 0 15px rgba(79, 142, 255, 0.4));
+      animation: neon-pulse 2s ease-in-out infinite alternate;
+    }
+  }
+  
+  /* Desktop - full effect */
+  @media (min-width: 1025px) {
+    .gradient-text {
+      filter: drop-shadow(0 0 12px rgba(0, 230, 255, 0.8)) drop-shadow(0 0 20px rgba(79, 142, 255, 0.6));
+      animation: neon-pulse 2s ease-in-out infinite alternate;
     }
   }
 
@@ -186,15 +201,32 @@
     border: 2px solid rgba(0, 207, 255, 0.3);
     border-radius: 16px;
     backdrop-filter: blur(10px);
-    box-shadow: 0 0 20px rgba(0, 207, 255, 0.2);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
   }
-
-  .promo-card-enhanced:hover {
-    transform: translateY(-12px);
-    box-shadow: 0 20px 40px rgba(0, 207, 255, 0.4);
-    border-color: rgba(0, 207, 255, 0.6);
+  
+  /* Mobile - subtle effect */
+  @media (max-width: 640px) {
+    .promo-card-enhanced {
+      box-shadow: 0 0 12px rgba(0, 207, 255, 0.15);
+    }
+    .promo-card-enhanced:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(0, 207, 255, 0.25);
+      border-color: rgba(0, 207, 255, 0.4);
+    }
+  }
+  
+  /* Tablet and Desktop - full effect */
+  @media (min-width: 641px) {
+    .promo-card-enhanced {
+      box-shadow: 0 0 20px rgba(0, 207, 255, 0.2);
+    }
+    .promo-card-enhanced:hover {
+      transform: translateY(-12px);
+      box-shadow: 0 20px 40px rgba(0, 207, 255, 0.4);
+      border-color: rgba(0, 207, 255, 0.6);
+    }
   }
 
   .promo-card-enhanced:hover .promo-card-image {
@@ -229,15 +261,32 @@
     border: 1px solid rgba(0, 207, 255, 0.2);
     border-radius: 16px;
     backdrop-filter: blur(10px);
-    box-shadow: 0 0 12px rgba(0, 207, 255, 0.25);
     transition: all 0.3s ease;
     overflow: hidden;
   }
-
-  .neon-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 40px rgba(0, 207, 255, 0.3);
-    border-color: rgba(0, 207, 255, 0.4);
+  
+  /* Mobile - subtle glow */
+  @media (max-width: 640px) {
+    .neon-card {
+      box-shadow: 0 0 8px rgba(0, 207, 255, 0.15);
+    }
+    .neon-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 207, 255, 0.2);
+      border-color: rgba(0, 207, 255, 0.3);
+    }
+  }
+  
+  /* Tablet and Desktop - full effect */
+  @media (min-width: 641px) {
+    .neon-card {
+      box-shadow: 0 0 12px rgba(0, 207, 255, 0.25);
+    }
+    .neon-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(0, 207, 255, 0.3);
+      border-color: rgba(0, 207, 255, 0.4);
+    }
   }
 
   .neon-card .card-image {
@@ -270,12 +319,27 @@
   .neon-tag {
     background: linear-gradient(135deg, #00CFFF, #4F8EFF);
     color: #000000;
-    padding: 4px 12px;
     border-radius: 20px;
-    font-size: 12px;
     font-weight: 600;
-    box-shadow: 0 0 12px rgba(0, 207, 255, 0.4);
     display: inline-block;
+  }
+  
+  /* Mobile */
+  @media (max-width: 640px) {
+    .neon-tag {
+      padding: 3px 8px;
+      font-size: 10px;
+      box-shadow: 0 0 8px rgba(0, 207, 255, 0.3);
+    }
+  }
+  
+  /* Tablet and Desktop */
+  @media (min-width: 641px) {
+    .neon-tag {
+      padding: 4px 12px;
+      font-size: 12px;
+      box-shadow: 0 0 12px rgba(0, 207, 255, 0.4);
+    }
   }
 
   .cta-button {

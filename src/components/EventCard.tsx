@@ -135,8 +135,8 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
 
   return (
     <Card className="neon-card bg-card/95 backdrop-blur-sm border border-border/50 group cursor-pointer" onClick={handleCardClick}>
-      <div className="p-4 pb-3">
-        <h3 className="text-xl font-bold text-white mb-3 line-clamp-2" style={{ fontSize: '20px' }}>{event.title}</h3>
+      <div className="p-3 sm:p-4 pb-2 sm:pb-3">
+        <h3 className="text-base sm:text-lg md:text-xl font-bold text-white mb-2 sm:mb-3 line-clamp-2">{event.title}</h3>
       </div>
       <div className="relative overflow-hidden">
         <img 
@@ -199,29 +199,29 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
         )}
       </div>
 
-      <CardContent className="p-4">
-        <div className="space-y-3">
+      <CardContent className="p-3 sm:p-4">
+        <div className="space-y-2 sm:space-y-3">
           <div>
-            <p className="text-sm whitespace-pre-wrap" style={{ color: '#E0E0E0', fontSize: '14px' }}>{format(new Date(event.date + 'T00:00:00'), 'EEEE, MMMM do')} at {event.time}</p>
+            <p className="text-xs sm:text-sm whitespace-pre-wrap" style={{ color: '#E0E0E0' }}>{format(new Date(event.date + 'T00:00:00'), 'EEEE, MMMM do')} at {event.time}</p>
           </div>
           
-          <p className="text-sm text-white">{event.venue || event.venue_name}</p>
+          <p className="text-xs sm:text-sm text-white line-clamp-1">{event.venue || event.venue_name}</p>
           
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
             <div className="flex items-center space-x-1" style={{ color: '#E0E0E0' }}>
-              <UserIcon className="w-4 h-4" />
-              <span>{event.attendee_count || event.attendees || 0} going</span>
+              <UserIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="text-xs sm:text-sm">{event.attendee_count || event.attendees || 0} going</span>
             </div>
-            <div className="flex items-center space-x-2 text-xs" style={{ color: '#E0E0E0' }}>
-              {creatorName && <span>Created by {creatorName}</span>}
+            <div className="flex items-center space-x-2 text-[10px] sm:text-xs" style={{ color: '#E0E0E0' }}>
+              {creatorName && <span className="line-clamp-1">by {creatorName}</span>}
             </div>
           </div>
 
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 flex justify-between items-center">
-        <Button variant="outline" size="sm" onClick={(e) => {
+      <CardFooter className="p-3 sm:p-4 pt-0 flex justify-between items-center gap-2">
+        <Button variant="outline" size="sm" className="text-xs sm:text-sm" onClick={(e) => {
           e.stopPropagation();
           handleCardClick();
         }}>
@@ -230,6 +230,7 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
         <Button 
           variant="cta"
           size="sm"
+          className="text-xs sm:text-sm"
           onClick={(e) => {
             e.stopPropagation();
             onJoin && onJoin(event.id);

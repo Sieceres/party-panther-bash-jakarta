@@ -139,13 +139,13 @@ export const EventsSection = ({
   };
 
   return (
-    <div className="pt-20 px-4">
-      <div className="container mx-auto space-y-8">
+    <div className="pt-20 px-4 sm:px-6 md:px-8">
+      <div className="container mx-auto space-y-6 sm:space-y-8">
         {/* Main Events Section - Upcoming Events Only */}
         <div>
           <div className="mb-4">
-            <h2 className="text-4xl font-bold gradient-text mb-2 overflow-hidden text-ellipsis">Events</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent mb-2">Events</h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
               Discover the hottest parties and events in the city!
             </p>
           </div>
@@ -258,12 +258,12 @@ export const EventsSection = ({
         {/* Past Events Section */}
         {pastEvents.length > 0 && (
           <div className="mt-16 pt-8 border-t border-border">
-            <div className="mb-4">
-              <h2 className="text-3xl font-bold gradient-text mb-2">Past Events</h2>
-              <p className="text-muted-foreground">
-                Browse events that have already taken place
-              </p>
-            </div>
+          <div className="mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent mb-2">Past Events</h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Browse events that have already taken place
+            </p>
+          </div>
 
             <div className="space-y-4 mb-8">
               <EventFilters

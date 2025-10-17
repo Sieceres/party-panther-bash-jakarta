@@ -111,11 +111,11 @@ export const PromosSection = ({
   ];
 
   return (
-    <div className="pt-20 px-4">
-      <div className="container mx-auto space-y-8">
+    <div className="pt-20 px-4 sm:px-6 md:px-8">
+      <div className="container mx-auto space-y-6 sm:space-y-8">
         <div>
-          <h2 className="text-5xl font-bold gradient-text gradient-text-glow mb-2">Hot Promos</h2>
-          <p className="text-lg text-white/80 mb-6">Go big without going broke with these amazing deals!</p>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent mb-2">Hot Promos</h2>
+          <p className="text-sm sm:text-base md:text-lg text-white/80 mb-4 sm:mb-6">Go big without going broke with these amazing deals!</p>
           {!user && (
             <Button
               onClick={handleCreatePromoClick}
