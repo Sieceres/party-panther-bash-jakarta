@@ -74,15 +74,15 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-1" onClick={() => onSectionChange('home')}>
-            <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center">
+          <Link to="/" className="flex items-center gap-1 sm:gap-1.5" onClick={() => onSectionChange('home')}>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center flex-shrink-0">
               <img src={logoImage} alt="Party Panther Logo" className="w-full h-full object-contain" />
             </div>
-            <div className="flex items-center gap-1.5">
-              <h1 className="text-base md:text-lg lg:text-2xl font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(0,207,255,0.5)]">
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <h1 className="text-sm sm:text-base md:text-lg lg:text-2xl font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(0,207,255,0.5)] whitespace-nowrap">
                 Party Panther
               </h1>
-              <span className="px-2 py-0.5 text-xs font-bold text-white bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] rounded-full shadow-[0_0_10px_rgba(0,207,255,0.5)]">
+              <span className="px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-bold text-white bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] rounded-full shadow-[0_0_10px_rgba(0,207,255,0.5)] flex-shrink-0">
                 BETA
               </span>
             </div>
@@ -93,54 +93,54 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
              {menuItems.filter(item => !item.hidden).map((item) => {
                const Icon = item.icon;
                return (
-                  <Button
-                    key={item.id}
-                    variant={activeSection === item.id ? "default" : "ghost"}
-                    onClick={() => {
-                      // Check if user is trying to access profile without being authenticated
-                      if (item.id === 'profile' && !user) {
-                        navigate('/auth');
-                        return;
-                      }
-                      
-                      // Use proper navigation based on item type
-                      if (item.id === 'profile') {
-                        navigate('/profile');
-                      } else if (item.id === 'home') {
-                        navigate('/');
-                      } else {
-                        navigate(`/?section=${item.id}`);
-                      }
-                      onSectionChange(item.id);
-                    }}
-                    className={`flex items-center space-x-2 transition-all ${
-                      activeSection === item.id 
-                        ? "bg-primary text-primary-foreground" 
-                        : "hover:bg-gradient-to-r hover:from-neon-blue hover:to-neon-cyan hover:text-white"
-                    }`}
-                 >
-                   <Icon className="w-4 h-4" />
-                   <span>{item.label}</span>
-                 </Button>
+                   <Button
+                     key={item.id}
+                     variant={activeSection === item.id ? "default" : "ghost"}
+                     onClick={() => {
+                       // Check if user is trying to access profile without being authenticated
+                       if (item.id === 'profile' && !user) {
+                         navigate('/auth');
+                         return;
+                       }
+                       
+                       // Use proper navigation based on item type
+                       if (item.id === 'profile') {
+                         navigate('/profile');
+                       } else if (item.id === 'home') {
+                         navigate('/');
+                       } else {
+                         navigate(`/?section=${item.id}`);
+                       }
+                       onSectionChange(item.id);
+                     }}
+                     className={`flex items-center gap-2 transition-all text-sm ${
+                       activeSection === item.id 
+                         ? "bg-primary text-primary-foreground" 
+                         : "hover:bg-gradient-to-r hover:from-neon-blue hover:to-neon-cyan hover:text-white"
+                     }`}
+                  >
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="whitespace-nowrap">{item.label}</span>
+                  </Button>
                );
              })}
-             {/* Auth Button */}
+              {/* Auth Button */}
               {user ? (
                 <Button
                   variant="outline"
                   onClick={handleSignOut}
-                  className="flex items-center space-x-2 relative z-10 border-secondary text-secondary-foreground hover:bg-secondary"
+                  className="flex items-center gap-2 relative z-10 border-secondary text-secondary-foreground hover:bg-secondary text-sm"
                 >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
+                  <LogOut className="w-4 h-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">Sign Out</span>
                 </Button>
               ) : (
                 <Button
                   onClick={() => navigate('/auth')}
-                  className="flex items-center space-x-2 relative z-10 bg-gradient-to-r from-neon-blue to-neon-cyan text-white hover:opacity-90"
+                  className="flex items-center gap-2 relative z-10 bg-gradient-to-r from-neon-blue to-neon-cyan text-white hover:opacity-90 text-sm"
                 >
-                  <LogIn className="w-4 h-4" />
-                  <span>Sign In/Sign Up</span>
+                  <LogIn className="w-4 h-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">Sign In/Sign Up</span>
                 </Button>
               )}
            </nav>

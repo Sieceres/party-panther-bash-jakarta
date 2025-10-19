@@ -758,15 +758,15 @@ export const EventDetailPage = () => {
             <div className="lg:col-span-2 space-y-6">
               {/* Event Title and Date */}
               <div className="space-y-3">
-                <h1 className="text-[0.65rem] md:text-sm lg:text-base font-semibold gradient-text leading-tight">{event.title}</h1>
-                <div className="flex items-center space-x-4 text-muted-foreground">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold gradient-text leading-tight">{event.title}</h1>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm sm:text-base text-muted-foreground">
                   <span>{format(new Date(event.date + 'T00:00:00'), 'EEEE, MMMM do, yyyy')}</span>
                   <span>•</span>
                   <span>{event.time}</span>
                   {event.is_recurrent && (
                     <>
                       <span>•</span>
-                      <Badge variant="secondary">Recurring</Badge>
+                      <Badge variant="secondary" className="text-xs">Recurring</Badge>
                     </>
                   )}
                 </div>
@@ -785,8 +785,8 @@ export const EventDetailPage = () => {
 
               {/* Event Details */}
               <Card>
-                <CardContent className="space-y-4 pt-6">
-                  <div className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                <CardContent className="space-y-4 p-4 sm:p-5 md:p-6 pt-6">
+                  <div className="text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
                     <Linkify options={{ target: "_blank", rel: "noopener noreferrer", className: "text-primary hover:underline" }}>
                       {event.description}
                     </Linkify>
@@ -796,27 +796,27 @@ export const EventDetailPage = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <h4 className="font-semibold">Venue</h4>
-                      <div className="flex items-start space-x-2">
-                        <MapPin className="w-4 h-4 mt-1 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">{event.venue_name}</p>
-                          <p className="text-sm text-muted-foreground">{event.venue_address}</p>
+                      <h4 className="text-base sm:text-lg font-semibold">Venue</h4>
+                      <div className="flex items-start gap-2">
+                        <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-sm sm:text-base font-medium">{event.venue_name}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">{event.venue_address}</p>
                         </div>
                       </div>
                     </div>
                     
                     <div className="space-y-2">
-                      <h4 className="font-semibold">Organizer</h4>
-                      <div className="flex items-center space-x-2">
-                        <UserIcon className="w-4 h-4 text-muted-foreground" />
-                        <span>{event.organizer_name}</span>
+                      <h4 className="text-base sm:text-lg font-semibold">Organizer</h4>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <UserIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-sm sm:text-base">{event.organizer_name}</span>
                         {event.organizer_whatsapp && user && (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={handleContactOrganizer}
-                            className="ml-2"
+                            className="text-xs sm:text-sm"
                           >
                             Contact
                           </Button>
@@ -827,7 +827,7 @@ export const EventDetailPage = () => {
 
                   {markers.length > 0 && (
                     <div className="space-y-2">
-                      <h4 className="font-semibold">Location</h4>
+                      <h4 className="text-base sm:text-lg font-semibold">Location</h4>
                       <GoogleMap
                         center={memoizedCenter}
                         markers={markers}
@@ -840,13 +840,13 @@ export const EventDetailPage = () => {
 
               {/* Attendees Section */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <UserIcon className="w-5 h-5" />
+                <CardHeader className="p-4 sm:p-5 md:p-6">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    <UserIcon className="w-5 h-5 flex-shrink-0" />
                     <span>Attendees ({totalAttendees})</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
                   <div className="space-y-3">
                     {displayedAttendees.map((attendee) => (
                       <div 
@@ -854,31 +854,31 @@ export const EventDetailPage = () => {
                         className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                       >
                         <div 
-                          className="flex items-center space-x-3 cursor-pointer"
+                          className="flex items-center gap-3 cursor-pointer min-w-0"
                           onClick={() => handleProfileClick(attendee.user_id)}
                         >
-                          <Avatar className="w-10 h-10">
+                          <Avatar className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0">
             <AvatarImage src={attendee.profiles?.avatar_url || defaultAvatar} />
-            <AvatarFallback>
+            <AvatarFallback className="text-xs sm:text-sm">
               {attendee.profiles?.display_name?.[0]?.toUpperCase() || 'A'}
             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <div className="flex items-center space-x-2">
-                              <span className="font-medium">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm sm:text-base font-medium">
                                 {attendee.profiles?.display_name || 'Anonymous'}
                               </span>
                           {attendee.payment_status && event.track_payments && (
-                            <span className="text-lg">💰</span>
+                            <span className="text-base sm:text-lg">💰</span>
                           )}
                             </div>
                             {attendee.profiles?.bio && (
-                              <p className="text-sm text-muted-foreground line-clamp-1">
+                              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
                                 {attendee.profiles.bio}
                               </p>
                             )}
                             {attendee.note && (
-                              <p className="text-sm text-muted-foreground italic line-clamp-2 mt-1 max-w-full break-words">
+                              <p className="text-xs sm:text-sm text-muted-foreground italic line-clamp-2 mt-1 max-w-full break-words">
                                 💭 {attendee.note}
                               </p>
                             )}
@@ -1032,21 +1032,22 @@ export const EventDetailPage = () => {
 
               {/* Comments Section */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
+                <CardHeader className="p-4 sm:p-5 md:p-6">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     <span>Discussion ({comments.length})</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 p-4 sm:p-5 md:p-6 pt-0">
                   {/* Add Comment Form */}
                   {user && (
-                    <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
+                    <div className="space-y-3 p-3 sm:p-4 bg-muted/50 rounded-lg">
                       <Textarea
                         placeholder="Share your thoughts about this event..."
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         onKeyDown={handleKeyPress}
                         rows={3}
+                        className="text-sm sm:text-base"
                       />
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-muted-foreground">
@@ -1056,6 +1057,7 @@ export const EventDetailPage = () => {
                           onClick={handleAddComment}
                           disabled={!newComment.trim() || commentsLoading}
                           size="sm"
+                          className="text-xs sm:text-sm"
                         >
                           {commentsLoading ? "Posting..." : "Post Comment"}
                         </Button>
@@ -1066,33 +1068,33 @@ export const EventDetailPage = () => {
                   {/* Comments List */}
                   <div className="space-y-3">
                     {displayedComments.length === 0 ? (
-                      <p className="text-center text-muted-foreground py-8">
+                      <p className="text-center text-sm sm:text-base text-muted-foreground py-6 sm:py-8">
                         {!user ? "Please log in to see Comments" : "No comments yet. Be the first to share your thoughts!"}
                       </p>
                     ) : (
                       displayedComments.map((comment) => (
-                        <div key={comment.id} className="p-4 bg-muted/50 rounded-lg">
-                          <div className="flex space-x-3">
+                        <div key={comment.id} className="p-3 sm:p-4 bg-muted/50 rounded-lg">
+                          <div className="flex gap-3">
                             <Avatar 
-                              className="cursor-pointer hover:opacity-80 transition-opacity"
+                              className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                               onClick={() => handleProfileClick(comment.user_id)}
                             >
               <AvatarImage src={comment.profiles?.avatar_url || defaultAvatar} />
-              <AvatarFallback>
+              <AvatarFallback className="text-xs sm:text-sm">
                 {comment.profiles?.display_name?.[0]?.toUpperCase() || 'A'}
               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-2">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-center gap-2 flex-wrap min-w-0">
                                   <span 
-                                    className="font-medium text-sm cursor-pointer hover:text-primary transition-colors"
+                                    className="text-sm sm:text-base font-medium cursor-pointer hover:text-primary transition-colors"
                                     onClick={() => handleProfileClick(comment.user_id)}
                                   >
                                     {comment.profiles?.display_name || 'Anonymous'}
                                   </span>
                                   {comment.profiles?.is_verified && (
-                                    <Badge variant="secondary" className="text-xs">Verified</Badge>
+                                    <Badge variant="secondary" className="text-xs flex-shrink-0">Verified</Badge>
                                   )}
                                   <span className="text-xs text-muted-foreground">
                                     {new Date(comment.created_at).toLocaleString()}

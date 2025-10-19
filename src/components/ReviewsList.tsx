@@ -174,63 +174,65 @@ export const ReviewsList = ({ promoId, onReviewsChange }: ReviewsListProps) => {
 
       {/* Reviews List */}
       {reviews.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
+        <div className="text-center py-6 sm:py-8 text-sm sm:text-base text-muted-foreground">
           No reviews yet. Be the first to review this promo!
         </div>
       ) : (
-        <div className="space-y-4">
-          <h3 className="font-semibold">Reviews ({reviews.length})</h3>
+        <div className="space-y-3 sm:space-y-4">
+          <h3 className="text-lg sm:text-xl font-semibold">Reviews ({reviews.length})</h3>
           {displayedReviews.map((review) => (
-            <div key={review.id} className="p-4 bg-muted/50 rounded-lg space-y-3">
-              <div className="flex items-start space-x-3">
+            <div key={review.id} className="p-3 sm:p-4 md:p-5 bg-muted/50 rounded-lg space-y-2 sm:space-y-3">
+              <div className="flex items-start gap-3">
                 <Avatar 
-                  className="w-10 h-10 cursor-pointer hover:opacity-80 transition-opacity"
+                  className="w-9 h-9 sm:w-10 sm:h-10 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
                   onClick={() => handleProfileClick(review.user_id)}
                 >
                   <AvatarImage src={review.profiles?.avatar_url || defaultAvatar} />
-                  <AvatarFallback>
+                  <AvatarFallback className="text-xs sm:text-sm">
                     {review.profiles?.display_name?.[0]?.toUpperCase() || 'A'}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-wrap min-w-0">
                       <span 
-                        className="font-medium cursor-pointer hover:text-primary transition-colors"
+                        className="text-sm sm:text-base font-medium cursor-pointer hover:text-primary transition-colors truncate"
                         onClick={() => handleProfileClick(review.user_id)}
                       >
                         {review.profiles?.display_name || 'Anonymous'}
                       </span>
                       {review.profiles?.is_verified && (
-                        <Badge variant="secondary" className="text-xs">Verified</Badge>
+                        <Badge variant="secondary" className="text-xs flex-shrink-0">Verified</Badge>
                       )}
                     </div>
                     {currentUser?.id === review.user_id && !editingReview && !showReviewForm && (
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center gap-1 flex-shrink-0">
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => setEditingReview(review)}
+                          className="h-8 w-8 p-0"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => handleDeleteReview(review.id)}
+                          className="h-8 w-8 p-0"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </Button>
                       </div>
                     )}
                   </div>
                   
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <div className="flex">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 ${
+                          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
                             i < review.rating
                               ? "text-yellow-400 fill-current"
                               : "text-muted-foreground"
@@ -244,7 +246,7 @@ export const ReviewsList = ({ promoId, onReviewsChange }: ReviewsListProps) => {
                   </div>
                   
                   {review.comment && (
-                    <p className="text-sm text-muted-foreground font-light leading-relaxed">{review.comment}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words">{review.comment}</p>
                   )}
                 </div>
               </div>

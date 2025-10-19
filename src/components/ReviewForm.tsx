@@ -99,15 +99,15 @@ export const ReviewForm = ({ promoId, existingReview, onReviewSubmitted, onCance
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-card rounded-lg border">
-      <h3 className="font-semibold">
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 sm:p-5 md:p-6 bg-card rounded-lg border">
+      <h3 className="text-lg sm:text-xl font-semibold">
         {existingReview ? "Edit Your Review" : "Write a Review"}
       </h3>
       
       {/* Star Rating */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Rating</label>
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center gap-1 sm:gap-2">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
@@ -115,10 +115,10 @@ export const ReviewForm = ({ promoId, existingReview, onReviewSubmitted, onCance
               onClick={() => setRating(star)}
               onMouseEnter={() => setHoveredRating(star)}
               onMouseLeave={() => setHoveredRating(0)}
-              className="p-1 hover:scale-110 transition-transform"
+              className="p-1 hover:scale-110 transition-transform touch-manipulation"
             >
               <Star
-                className={`w-6 h-6 ${
+                className={`w-5 h-5 sm:w-6 sm:h-6 ${
                   star <= (hoveredRating || rating)
                     ? "text-yellow-400 fill-current"
                     : "text-muted-foreground"
@@ -136,16 +136,16 @@ export const ReviewForm = ({ promoId, existingReview, onReviewSubmitted, onCance
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="Share your experience with this promo..."
-          className="min-h-20"
+          className="min-h-20 text-sm sm:text-base"
         />
       </div>
 
       {/* Buttons */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <Button
           type="submit"
           disabled={isSubmitting || rating === 0}
-          className="bg-primary hover:bg-primary/90"
+          className="bg-primary hover:bg-primary/90 text-sm sm:text-base"
         >
           {isSubmitting ? "Submitting..." : existingReview ? "Update Review" : "Submit Review"}
         </Button>
@@ -155,6 +155,7 @@ export const ReviewForm = ({ promoId, existingReview, onReviewSubmitted, onCance
             variant="outline"
             onClick={onCancel}
             disabled={isSubmitting}
+            className="text-sm sm:text-base"
           >
             Cancel
           </Button>
