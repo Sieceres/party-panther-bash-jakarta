@@ -70,9 +70,9 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border/50 shadow-lg">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-16 sm:h-18">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-1 sm:gap-1.5" onClick={() => onSectionChange('home')}>
             <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center flex-shrink-0">
@@ -88,14 +88,15 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-           <nav className="hidden md:flex items-center space-x-1 relative z-10">
+           {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-2 relative z-10">
              {menuItems.filter(item => !item.hidden).map((item) => {
                const Icon = item.icon;
                return (
                    <Button
                      key={item.id}
                      variant={activeSection === item.id ? "default" : "ghost"}
+                     size="default"
                      onClick={() => {
                        // Check if user is trying to access profile without being authenticated
                        if (item.id === 'profile' && !user) {
@@ -148,28 +149,30 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
           {/* Mobile Menu Button */}
 <Button
   variant="ghost"
-  size="sm"
-  className="md:hidden text-foreground hover:text-primary"
+  size="default"
+  className="md:hidden text-foreground hover:text-primary min-w-[44px] min-h-[44px]"
   onClick={() => setIsMenuOpen(!isMenuOpen)}
+  aria-label={isMenuOpen ? "Close menu" : "Open menu"}
 >
-  <div className="w-6 h-6 flex flex-col justify-center space-y-1">
-    <div className="w-full h-0.5 bg-foreground"></div>
-    <div className="w-full h-0.5 bg-foreground"></div>
-    <div className="w-full h-0.5 bg-foreground"></div>
+  <div className="w-6 h-6 flex flex-col justify-center gap-1.5">
+    <div className={`w-full h-0.5 bg-foreground transition-transform ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></div>
+    <div className={`w-full h-0.5 bg-foreground transition-opacity ${isMenuOpen ? 'opacity-0' : ''}`}></div>
+    <div className={`w-full h-0.5 bg-foreground transition-transform ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></div>
   </div>
 </Button>
         </div>
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-border">
-            <div className="flex flex-col space-y-2">
+          <nav className="md:hidden py-4 border-t border-border/50 bg-background/95 backdrop-blur-sm">
+            <div className="flex flex-col gap-2">
               {menuItems.filter(item => !item.hidden).map((item) => {
                 const Icon = item.icon;
                 return (
                   <Button
                      key={item.id}
                      variant={activeSection === item.id ? "default" : "ghost"}
+                     size="lg"
                      onClick={() => {
                        // Check if user is trying to access profile without being authenticated
                        if (item.id === 'profile' && !user) {
@@ -187,13 +190,13 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                          navigate(`/?section=${item.id}`);
                        }
                        onSectionChange(item.id);
-                       setIsMenuOpen(false);
-                     }}
-                    className="justify-start"
-                  >
-                    <Icon className="w-4 h-4 mr-2" />
-                    {item.label}
-                  </Button>
+                        setIsMenuOpen(false);
+                      }}
+                     className="justify-start min-h-[44px] text-base"
+                   >
+                     <Icon className="w-5 h-5 mr-3" />
+                     {item.label}
+                   </Button>
                 );
               })}
               
@@ -201,24 +204,26 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                {user ? (
                  <Button
                    variant="ghost"
+                   size="lg"
                    onClick={() => {
                      handleSignOut();
                      setIsMenuOpen(false);
                    }}
-                   className="justify-start mt-2"
+                   className="justify-start mt-2 min-h-[44px] text-base"
                  >
-                   <LogOut className="w-4 h-4 mr-2" />
+                   <LogOut className="w-5 h-5 mr-3" />
                    Sign Out
                  </Button>
                ) : (
                  <Button
+                   size="lg"
                    onClick={() => {
                      navigate('/auth');
                      setIsMenuOpen(false);
                    }}
-                   className="justify-start mt-2 bg-gradient-to-r from-neon-blue to-neon-cyan text-white"
+                   className="justify-start mt-2 bg-gradient-to-r from-neon-blue to-neon-cyan text-white min-h-[44px] text-base"
                  >
-                   <LogIn className="w-4 h-4 mr-2" />
+                   <LogIn className="w-5 h-5 mr-3" />
                    Sign In/Sign Up
                  </Button>
                )}

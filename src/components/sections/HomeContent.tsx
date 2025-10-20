@@ -35,11 +35,11 @@ export const HomeContent = ({
 }: HomeContentProps) => {
   if (loading) {
     return (
-      <div className="pt-20 px-4">
+      <div className="pt-20 px-4 min-h-[60vh] flex items-center justify-center">
         <div className="container mx-auto">
           <div className="text-center flex flex-col items-center space-y-4">
             <SpinningPaws size="lg" />
-            <p className="text-muted-foreground">Loading amazing events and promos...</p>
+            <p className="text-base sm:text-lg text-muted-foreground">Loading amazing events and promos...</p>
           </div>
         </div>
       </div>
@@ -79,20 +79,23 @@ export const HomeContent = ({
               <Button
                 onClick={() => onSectionChange("promos")}
                 variant="outline"
-                size="sm"
-                className="glass-control hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
+                size="default"
+                className="glass-control hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105 text-sm min-h-[44px]"
               >
                 See More
-                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {promos.length === 0 ? (
-                <div className="col-span-full text-center py-12">
-                  <p className="text-muted-foreground text-lg">
-                    No promos available right now. Be the first to create one!
-                  </p>
+                <div className="col-span-full text-center py-12 px-4">
+                  <div className="max-w-md mx-auto space-y-3">
+                    <div className="text-5xl mb-3">🍹</div>
+                    <p className="text-base sm:text-lg text-muted-foreground">
+                      No promos yet — be the first to share an amazing deal! 🎉
+                    </p>
+                  </div>
                 </div>
               ) : (
                 promos.slice(0, 3).map((promo, index) => (
@@ -150,20 +153,23 @@ export const HomeContent = ({
               <Button
                 onClick={() => onSectionChange("events")}
                 variant="outline"
-                size="sm"
-                className="glass-control hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
+                size="default"
+                className="glass-control hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105 text-sm min-h-[44px]"
               >
                 See More
-                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {events.length === 0 ? (
-                <div className="col-span-full text-center py-12">
-                  <p className="text-muted-foreground text-lg">
-                    No events available right now. Be the first to create one!
-                  </p>
+                <div className="col-span-full text-center py-12 px-4">
+                  <div className="max-w-md mx-auto space-y-3">
+                    <div className="text-5xl mb-3">🎉</div>
+                    <p className="text-base sm:text-lg text-muted-foreground">
+                      No events yet — start the party! 🎊
+                    </p>
+                  </div>
                 </div>
               ) : (
                 events.slice(0, 3).map((event, index) => (

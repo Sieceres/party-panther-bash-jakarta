@@ -212,7 +212,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
 
   return (
     <Card 
-      className="promo-card-enhanced cursor-pointer animate-stagger-in" 
+      className="promo-card-enhanced cursor-pointer animate-stagger-in hover:border-primary/50 transition-all duration-300 flex flex-col h-full" 
       style={{ animationDelay: `${index * 80}ms` }}
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -312,58 +312,58 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
         
         {/* Hover "Claim Promo" Button */}
         <div className={cn(
-          "absolute inset-x-0 bottom-0 p-4 transition-all duration-300",
+          "absolute inset-x-0 bottom-0 p-3 sm:p-4 transition-all duration-300",
           isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         )}>
           <Button
-            className="w-full cta-button"
+            variant="cta"
+            size="default"
+            className="w-full min-h-[44px] font-semibold"
             onClick={(e) => {
               e.stopPropagation();
               handleCardClick();
             }}
           >
-            View Promo
+            View Promo Details
           </Button>
         </div>
       </div>
 
-      <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
-        <h3 className="text-base sm:text-lg font-bold text-white mb-1 sm:mb-2 line-clamp-2">{promo.title}</h3>
-        <p className="text-xs sm:text-sm line-clamp-2 whitespace-pre-wrap" style={{ color: '#E0E0E0' }}>{promo.description}</p>
+      <CardHeader className="pb-2 sm:pb-3 p-4 sm:p-5">
+        <h3 className="text-lg sm:text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-primary transition-colors break-words">{promo.title}</h3>
+        <p className="text-sm sm:text-base line-clamp-2 text-muted-foreground break-words">{promo.description}</p>
       </CardHeader>
 
-      <CardContent className="space-y-2 sm:space-y-3 p-3 sm:p-4 pt-0">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5 sm:space-y-1">
-            <p className="text-xs sm:text-sm font-medium text-white line-clamp-1">{promo.venue}</p>
-            <p className="text-[10px] sm:text-xs" style={{ color: '#E0E0E0' }}>Valid until {promo.validUntil}</p>
-            {creatorName && (
-              <div className="flex items-center space-x-1 text-[10px] sm:text-xs" style={{ color: '#E0E0E0' }}>
-                <User className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                <span className="line-clamp-1">by {creatorName}</span>
-              </div>
-            )}
-          </div>
+      <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-5 pt-0 flex-grow">
+        <div className="space-y-2">
+          <p className="text-sm sm:text-base font-semibold text-white truncate">{promo.venue}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">Valid until {promo.validUntil}</p>
+          {creatorName && (
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
+              <User className="w-3.5 h-3.5" />
+              <span className="truncate">by {creatorName}</span>
+            </div>
+          )}
         </div>
 
         {/* Rating/Reviews */}
-        <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-1 text-xs sm:text-sm" style={{ color: '#E0E0E0' }}>
-            <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-current" />
-            <span className="text-xs sm:text-sm">{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
+        <div className="flex items-center justify-between pt-2 border-t border-border/30">
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
+            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+            <span>{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
             <span>•</span>
-            <span className="text-xs sm:text-sm">{totalReviews} {totalReviews === 1 ? "review" : "reviews"}</span>
+            <span>{totalReviews} {totalReviews === 1 ? "review" : "reviews"}</span>
           </div>
           <Button
             variant="ghost"
-            size="sm"
+            size="default"
             onClick={(e) => {
               e.stopPropagation();
               setShowReviews(!showReviews);
             }}
-            className="text-[10px] sm:text-xs text-white hover:text-primary h-7 sm:h-8 px-2"
+            className="text-xs sm:text-sm text-muted-foreground hover:text-primary min-h-[36px] px-3"
           >
-            <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+            <MessageSquare className="w-4 h-4 mr-1.5" />
             {showReviews ? "Hide" : "Reviews"}
           </Button>
         </div>
@@ -371,7 +371,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
 
       {/* Reviews Section */}
       {showReviews && (
-        <CardFooter className="p-4 pt-0">
+        <CardFooter className="p-4 sm:p-5 pt-0">
           <ReviewsList 
             promoId={promo.id} 
             onReviewsChange={handleReviewsChange}

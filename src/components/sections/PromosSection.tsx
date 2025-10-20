@@ -119,18 +119,20 @@ export const PromosSection = ({
           {!user && (
             <Button
               onClick={handleCreatePromoClick}
-              className="bg-gradient-to-r from-neon-blue to-neon-cyan text-white hover:opacity-90"
+              size="lg"
+              className="bg-gradient-to-r from-neon-blue to-neon-cyan text-white hover:opacity-90 min-h-[44px]"
             >
-              <Lock className="w-4 h-4 mr-2" />
+              <Lock className="w-5 h-5 mr-2" />
               Login to Create Promo
             </Button>
           )}
           {user && (
             <Button
               onClick={handleCreatePromoClick}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground min-h-[44px]"
             >
-              <Star className="w-4 h-4 mr-2" />
+              <Star className="w-5 h-5 mr-2" />
               Create Promo
             </Button>
           )}
@@ -309,21 +311,26 @@ export const PromosSection = ({
               <SpinningPaws size="lg" />
             </div>
           ) : filteredPromos.length === 0 ? (
-            <div className="col-span-full text-center py-20">
-              <h3 className="text-xl font-semibold mb-2">No promos found</h3>
-              <p className="text-muted-foreground mb-4">
-                Try adjusting your filters to see more promotions.
-              </p>
-              <Button 
-                onClick={() => {
-                  onDayFilterChange(["all"]);
-                  onAreaFilterChange(["all"]);
-                  onDrinkTypeFilterChange(["all"]);
-                }}
-                variant="outline"
-              >
-                Reset filters
-              </Button>
+            <div className="col-span-full text-center py-16 sm:py-20 px-4">
+              <div className="max-w-md mx-auto space-y-4">
+                <div className="text-6xl mb-4">🍹</div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white">No promos match your filters</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Try adjusting your filters to discover amazing drink deals and promotions! 🎊
+                </p>
+                <Button 
+                  onClick={() => {
+                    onDayFilterChange(["all"]);
+                    onAreaFilterChange(["all"]);
+                    onDrinkTypeFilterChange(["all"]);
+                  }}
+                  variant="default"
+                  size="lg"
+                  className="mt-4"
+                >
+                  Reset All Filters
+                </Button>
+              </div>
             </div>
           ) : (
             filteredPromos.map((promo, index) => (

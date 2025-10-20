@@ -134,11 +134,11 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
   const creatorName = event.creator_name || 'Anonymous';
 
   return (
-    <Card className="neon-card bg-card/95 backdrop-blur-sm border border-border/50 group cursor-pointer" onClick={handleCardClick}>
-      <div className="p-3 sm:p-4 pb-2 sm:pb-3">
-        <h3 className="text-base sm:text-lg md:text-xl font-bold text-white mb-2 sm:mb-3 line-clamp-2">{event.title}</h3>
+    <Card className="neon-card bg-card/95 backdrop-blur-sm border border-border/50 group hover:border-primary/50 transition-all duration-300 flex flex-col h-full">
+      <div className="p-4 sm:p-5 pb-3 sm:pb-4 cursor-pointer" onClick={handleCardClick}>
+        <h3 className="text-lg sm:text-xl font-bold text-white mb-1 line-clamp-2 group-hover:text-primary transition-colors">{event.title}</h3>
       </div>
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden cursor-pointer" onClick={handleCardClick}>
         <img 
           src={event.image || event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop'}
           alt={event.title}
@@ -199,44 +199,53 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
         )}
       </div>
 
-      <CardContent className="p-3 sm:p-4">
-        <div className="space-y-2 sm:space-y-3">
-          <div>
-            <p className="text-xs sm:text-sm whitespace-pre-wrap" style={{ color: '#E0E0E0' }}>{format(new Date(event.date + 'T00:00:00'), 'EEEE, MMMM do')} at {event.time}</p>
-          </div>
-          
-          <p className="text-xs sm:text-sm text-white line-clamp-1">{event.venue || event.venue_name}</p>
-          
-          <div className="flex items-center justify-between text-xs sm:text-sm">
-            <div className="flex items-center space-x-1" style={{ color: '#E0E0E0' }}>
-              <UserIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="text-xs sm:text-sm">{event.attendee_count || event.attendees || 0} going</span>
-            </div>
-            <div className="flex items-center space-x-2 text-[10px] sm:text-xs" style={{ color: '#E0E0E0' }}>
-              {creatorName && <span className="line-clamp-1">by {creatorName}</span>}
+      <CardContent className="p-4 sm:p-5 flex-grow cursor-pointer" onClick={handleCardClick}>
+        <div className="space-y-3 sm:space-y-4">
+          {/* Date & Time - Most Important */}
+          <div className="flex items-start gap-2">
+            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm sm:text-base font-semibold text-white break-words">{format(new Date(event.date + 'T00:00:00'), 'EEEE, MMM do')}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">{event.time}</p>
             </div>
           </div>
-
+          
+          {/* Location */}
+          <p className="text-sm sm:text-base text-muted-foreground line-clamp-2 break-words pl-6">{event.venue || event.venue_name}</p>
+          
+          {/* Meta Info */}
+          <div className="flex items-center justify-between text-xs sm:text-sm pt-2 border-t border-border/30">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <UserIcon className="w-4 h-4" />
+              <span>{event.attendee_count || event.attendees || 0} going</span>
+            </div>
+            {creatorName && <span className="text-muted-foreground text-xs truncate max-w-[120px]">by {creatorName}</span>}
+          </div>
         </div>
       </CardContent>
 
-      <CardFooter className="p-3 sm:p-4 pt-0 flex justify-between items-center gap-2">
-        <Button variant="outline" size="sm" className="text-xs sm:text-sm" onClick={(e) => {
-          e.stopPropagation();
-          handleCardClick();
-        }}>
-          View Details
-        </Button>
+      <CardFooter className="p-4 sm:p-5 pt-0 flex flex-col sm:flex-row gap-2 sm:gap-3">
         <Button 
           variant="cta"
-          size="sm"
-          className="text-xs sm:text-sm"
+          size="default"
+          className="w-full sm:flex-1 min-h-[44px] text-sm sm:text-base font-semibold"
           onClick={(e) => {
             e.stopPropagation();
             onJoin && onJoin(event.id);
           }}
         >
-          {event.isJoined || event.is_joined ? "Joined" : "Join Event"}
+          {event.isJoined || event.is_joined ? "✓ Joined" : "Join Event"}
+        </Button>
+        <Button 
+          variant="outline" 
+          size="default" 
+          className="w-full sm:w-auto min-h-[44px] text-sm sm:text-base" 
+          onClick={(e) => {
+            e.stopPropagation();
+            handleCardClick();
+          }}
+        >
+          View Details
         </Button>
       </CardFooter>
     </Card>

@@ -154,24 +154,26 @@ export const EventsSection = ({
           {authLoading ? (
             <Button
               onClick={handleCreateEventClick}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground min-h-[44px]"
             >
-              <Star className="w-4 h-4 mr-2" />
+              <Star className="w-5 h-5 mr-2" />
               Create Event
             </Button>
           ) : (
             <Button
               onClick={handleCreateEventClick}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground min-h-[44px]"
             >
               {user ? (
                 <>
-                  <Star className="w-4 h-4 mr-2" />
+                  <Star className="w-5 h-5 mr-2" />
                   Create Event
                 </>
               ) : (
                 <>
-                  <Lock className="w-4 h-4 mr-2" />
+                  <Lock className="w-5 h-5 mr-2" />
                   Login to Create Event
                 </>
               )}
@@ -222,19 +224,24 @@ export const EventsSection = ({
               <SpinningPaws size="lg" />
             </div>
           ) : upcomingEvents.length === 0 ? (
-            <div className="col-span-full text-center py-20">
-              <h3 className="text-xl font-semibold mb-2">No upcoming events found</h3>
-              <p className="text-muted-foreground mb-4">
-                {events.length === 0
-                  ? "No events available right now. Be the first to create one!"
-                  : "Try adjusting your filters to see more events."
-                }
-              </p>
-              {(selectedDate || searchTerm) && (
-                <Button onClick={handleResetFilters} variant="outline">
-                  Reset Filters
-                </Button>
-              )}
+            <div className="col-span-full text-center py-16 sm:py-20 px-4">
+              <div className="max-w-md mx-auto space-y-4">
+                <div className="text-6xl mb-4">🎉</div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white">
+                  {events.length === 0 ? "No events yet — start the party!" : "No events match your filters"}
+                </h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  {events.length === 0
+                    ? "Be the first to create an amazing event and get the party started! 🎊"
+                    : "Try adjusting your search or filters to discover more events."
+                  }
+                </p>
+                {(selectedDate || searchTerm) && (
+                  <Button onClick={handleResetFilters} variant="default" size="lg" className="mt-4">
+                    Reset Filters
+                  </Button>
+                )}
+              </div>
             </div>
           ) : (
             upcomingEvents.map((event) => (
@@ -277,16 +284,19 @@ export const EventsSection = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pastEvents.length === 0 ? (
-                <div className="col-span-full text-center py-20">
-                  <h3 className="text-xl font-semibold mb-2">No past events found</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Try adjusting your filters to see more past events.
-                  </p>
-                  {(pastEventsSelectedDate || pastEventsSearchTerm) && (
-                    <Button onClick={handleResetPastFilters} variant="outline">
-                      Reset Filters
-                    </Button>
-                  )}
+                <div className="col-span-full text-center py-16 sm:py-20 px-4">
+                  <div className="max-w-md mx-auto space-y-4">
+                    <div className="text-6xl mb-4">📅</div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white">No past events found</h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">
+                      Try adjusting your filters to discover past events.
+                    </p>
+                    {(pastEventsSelectedDate || pastEventsSearchTerm) && (
+                      <Button onClick={handleResetPastFilters} variant="default" size="lg" className="mt-4">
+                        Reset Filters
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 pastEvents.map((event) => (
