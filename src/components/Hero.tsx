@@ -95,13 +95,35 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
       <div className="relative z-20 text-center space-y-8 sm:space-y-10 md:space-y-12 px-4 sm:px-6 md:px-8 animate-fade-in max-w-5xl mx-auto">
         {/* Main Title */}
         <div className="space-y-4 sm:space-y-5 md:space-y-6">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent animate-slide-up flex items-baseline justify-center gap-2 [text-shadow:0_0_20px_rgba(0,207,255,0.3)] sm:[text-shadow:0_0_30px_rgba(0,207,255,0.4)] md:[text-shadow:0_0_40px_rgba(0,207,255,0.5)]">
+          <h1 
+            className="font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent animate-slide-up" 
+            style={{
+              fontSize: 'clamp(2rem, 6vw + 0.5rem, 4.5rem)',
+              lineHeight: '1.1',
+              letterSpacing: '-0.02em',
+              filter: 'drop-shadow(0 0 8px rgba(0, 207, 255, 0.3))'
+            }}
+          >
            Party Panther
           </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white animate-slide-up hero-subtitle" style={{ animationDelay: '0.2s' }}>
+          <p 
+            className="text-white font-semibold animate-slide-up hero-subtitle" 
+            style={{ 
+              animationDelay: '0.2s',
+              fontSize: 'clamp(1rem, 2.5vw + 0.25rem, 1.5rem)',
+              lineHeight: '1.4'
+            }}
+          >
             Jakarta's Ultimate Party & Promo Hub
           </p>
-          <p className="text-sm sm:text-base md:text-lg text-white/80 max-w-2xl mx-auto animate-slide-up hero-subtitle" style={{ animationDelay: '0.4s' }}>
+          <p 
+            className="text-white/90 max-w-2xl mx-auto animate-slide-up hero-subtitle" 
+            style={{ 
+              animationDelay: '0.4s',
+              fontSize: 'clamp(0.875rem, 1.5vw + 0.25rem, 1.125rem)',
+              lineHeight: '1.6'
+            }}
+          >
             Discover promos that make you purr, events that make you roar, and connect with other Party Panthers in Jakarta
           </p>
         </div>

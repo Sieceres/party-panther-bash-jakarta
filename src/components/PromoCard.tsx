@@ -219,7 +219,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative overflow-hidden rounded-t-2xl">
-        <img 
+        <img
           src={promo.image || promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop'}
           alt={promo.title}
           className="promo-card-image w-full h-48 object-cover transition-transform duration-300"
