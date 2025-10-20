@@ -144,11 +144,6 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
           </div>
         </div>
 
-        {/* Scroll Cue Arrow */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-6 border-b-2 border-r-2 border-[#00CFFF] rotate-45 scroll-arrow"></div>
-        </div>
-
       </div>
     </section>
   );
