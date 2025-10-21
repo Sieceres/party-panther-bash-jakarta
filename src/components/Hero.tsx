@@ -54,7 +54,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
     fetchStats();
   }, []);
   return (
-    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden pt-16">
+    <section className="relative min-h-[75vh] sm:min-h-[80vh] md:min-h-[85vh] flex items-center justify-center overflow-hidden pt-16">
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
@@ -92,11 +92,11 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         <div className="hero-particle hero-particle-6"></div>
       </div>
 
-      <div className="relative z-20 text-center space-y-8 sm:space-y-10 md:space-y-12 px-4 sm:px-6 md:px-8 animate-fade-in max-w-5xl mx-auto">
+      <div className="relative z-20 text-center space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12 px-4 sm:px-6 md:px-8 animate-fade-in max-w-5xl mx-auto py-6 sm:py-8">
         {/* Main Title */}
-        <div className="space-y-4 sm:space-y-5 md:space-y-6">
+        <div className="space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6">
           <h1 
-            className="font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent animate-slide-up" 
+            className="font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent animate-slide-up break-words" 
             style={{
               fontSize: 'clamp(2rem, 5vw + 0.5rem, 4rem)',
               lineHeight: '1.1',
@@ -107,7 +107,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
            Party Panther
           </h1>
           <p 
-            className="text-white font-semibold animate-slide-up hero-subtitle" 
+            className="text-white font-semibold animate-slide-up hero-subtitle break-words px-2" 
             style={{ 
               animationDelay: '0.2s',
               fontSize: 'clamp(1rem, 2.5vw + 0.25rem, 1.5rem)',
@@ -117,7 +117,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
             Jakarta's Ultimate Party & Promo Hub
           </p>
           <p 
-            className="text-white/90 max-w-2xl mx-auto animate-slide-up hero-subtitle" 
+            className="text-white/90 max-w-2xl mx-auto animate-slide-up hero-subtitle break-words px-2" 
             style={{ 
               animationDelay: '0.4s',
               fontSize: 'clamp(0.875rem, 1.5vw + 0.25rem, 1.125rem)',
@@ -145,23 +145,25 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         </div> */}
 
         {/* CTA Buttons */}
-        <div className="flex flex-col items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6 md:pt-8 animate-slide-up" style={{ animationDelay: '0.8s' }}>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0">
+        <div className="flex flex-col items-center justify-center gap-3 sm:gap-4 pt-2 sm:pt-4 md:pt-6 lg:pt-8 animate-slide-up" style={{ animationDelay: '0.8s' }}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0 max-w-md sm:max-w-none">
             <Button
               size="lg"
               onClick={() => onSectionChange('promos')}
-              className="cta-button group w-full sm:w-auto text-sm sm:text-base"
+              className="cta-button group w-full sm:w-auto min-h-[48px]"
+              style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
             >
-              <Zap className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:rotate-12 transition-transform" />
-              Find Hot Promos
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0 group-hover:rotate-12 transition-transform" />
+              <span className="truncate">Find Hot Promos</span>
             </Button>
             <Button
               size="lg"
               onClick={() => onSectionChange('events')}
-              className="cta-button group w-full sm:w-auto text-sm sm:text-base"
+              className="cta-button group w-full sm:w-auto min-h-[48px]"
+              style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
             >
-              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:bounce transition-transform" />
-              Explore Events
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0 group-hover:bounce transition-transform" />
+              <span className="truncate">Explore Events</span>
             </Button>
           </div>
         </div>

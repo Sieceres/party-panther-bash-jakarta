@@ -51,7 +51,7 @@ export const HomeContent = ({
       <Hero onSectionChange={onSectionChange} />
       
       {/* Featured Promos Section */}
-      <section className="relative py-16 md:py-20 lg:py-24 overflow-hidden">
+      <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{ backgroundImage: `url(${sectionBackground})` }}
@@ -126,7 +126,7 @@ export const HomeContent = ({
       </section>
 
       {/* Featured Events Section */}
-      <section className="relative py-16 md:py-20 lg:py-24 overflow-hidden">
+      <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full party-gradient blur-3xl"></div>

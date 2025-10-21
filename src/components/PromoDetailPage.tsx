@@ -140,12 +140,12 @@ export const PromoDetailPage = () => {
             {/* Title and Badges - Above Image */}
             <div className="space-y-4">
               <div className="flex items-start justify-between flex-wrap gap-4">
-                <div className="space-y-2 flex-1">
-                  <h1 className="text-[0.65rem] md:text-sm lg:text-base gradient-text leading-tight">
+                <div className="space-y-2 flex-1 min-w-0">
+                  <h1 className="gradient-text leading-tight break-words" style={{ fontSize: 'clamp(1.5rem, 4vw + 0.5rem, 2.5rem)' }}>
                     {promo.title}
                   </h1>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="secondary" className="font-bold text-base px-3 py-1.5">
+                    <Badge variant="secondary" className="font-bold px-3 py-1.5" style={{ fontSize: 'clamp(0.875rem, 1.5vw, 1rem)' }}>
                       {promo.discount_text}
                     </Badge>
                     {promo.promo_type && 
@@ -157,7 +157,7 @@ export const PromoDetailPage = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1 text-muted-foreground" style={{ fontSize: 'clamp(0.813rem, 1.2vw, 0.875rem)' }}>
                   <Star className="w-4 h-4 text-yellow-400 fill-current" />
                   <span>{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
                   <span>•</span>
@@ -168,11 +168,11 @@ export const PromoDetailPage = () => {
 
             {/* Promo Image */}
             {promo.image_url && (
-              <div className="aspect-video rounded-lg overflow-hidden">
+              <div className="aspect-video rounded-lg overflow-hidden bg-muted">
                 <img 
                   src={promo.image_url} 
                   alt={promo.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-center"
                 />
               </div>
             )}
@@ -183,7 +183,7 @@ export const PromoDetailPage = () => {
                 <CardTitle>About This Promo</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                <div className="text-muted-foreground leading-relaxed whitespace-pre-wrap break-words" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}>
                   <Linkify options={{ target: "_blank", rel: "noopener noreferrer", className: "text-primary hover:underline" }}>
                     {promo.description}
                   </Linkify>
@@ -191,26 +191,26 @@ export const PromoDetailPage = () => {
                 
                 <Separator />
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
-                    <h4 className="font-semibold">Venue</h4>
+                    <h4 className="font-semibold" style={{ fontSize: 'clamp(0.938rem, 1.5vw, 1.125rem)' }}>Venue</h4>
                     <div className="flex items-start space-x-2">
-                      <MapPin className="w-4 h-4 mt-1 text-muted-foreground" />
-                      <div>
-                        <p className="font-medium">{promo.venue_name}</p>
-                        <p className="text-sm text-muted-foreground">{promo.venue_address}</p>
+                      <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-medium break-words" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}>{promo.venue_name}</p>
+                        <p className="text-muted-foreground break-words" style={{ fontSize: 'clamp(0.813rem, 1.1vw, 0.875rem)' }}>{promo.venue_address}</p>
                       </div>
                     </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <h4 className="font-semibold">Validity</h4>
+                    <h4 className="font-semibold" style={{ fontSize: 'clamp(0.938rem, 1.5vw, 1.125rem)' }}>Validity</h4>
                     <div className="space-y-1">
                       {promo.day_of_week && (
-                        <p className="text-sm">Every {promo.day_of_week}</p>
+                        <p style={{ fontSize: 'clamp(0.813rem, 1.1vw, 0.875rem)' }}>Every {promo.day_of_week}</p>
                       )}
                       {promo.valid_until && (
-                        <p className="text-sm">Valid until {promo.valid_until}</p>
+                        <p style={{ fontSize: 'clamp(0.813rem, 1.1vw, 0.875rem)' }}>Valid until {promo.valid_until}</p>
                       )}
                     </div>
                   </div>
@@ -218,12 +218,14 @@ export const PromoDetailPage = () => {
 
                 {markers.length > 0 && (
                   <div className="space-y-2">
-                    <h4 className="font-semibold">Location</h4>
-                    <GoogleMap
-                      center={{ lat: Number(promo.venue_latitude), lng: Number(promo.venue_longitude) }}
-                      markers={markers}
-                      height="300px"
-                    />
+                    <h4 className="font-semibold" style={{ fontSize: 'clamp(0.938rem, 1.5vw, 1.125rem)' }}>Location</h4>
+                    <div className="rounded-lg overflow-hidden">
+                      <GoogleMap
+                        center={{ lat: Number(promo.venue_latitude), lng: Number(promo.venue_longitude) }}
+                        markers={markers}
+                        height="300px"
+                      />
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -251,15 +253,15 @@ export const PromoDetailPage = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Original Price</span>
-                    <span className="line-through text-muted-foreground">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-muted-foreground" style={{ fontSize: 'clamp(0.813rem, 1.2vw, 0.875rem)' }}>Original Price</span>
+                    <span className="line-through text-muted-foreground" style={{ fontSize: 'clamp(0.813rem, 1.2vw, 0.875rem)' }}>
                       {promo.original_price_amount ? `${promo.price_currency} ${promo.original_price_amount.toLocaleString()}` : 'N/A'}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">Your Price</span>
-                    <span className="font-bold text-neon-pink text-xl">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold" style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}>Your Price</span>
+                    <span className="font-bold text-neon-pink" style={{ fontSize: 'clamp(1.25rem, 2vw, 1.5rem)' }}>
                       {promo.discounted_price_amount ? `${promo.price_currency} ${promo.discounted_price_amount.toLocaleString()}` : 'FREE'}
                     </span>
                   </div>
@@ -281,13 +283,15 @@ export const PromoDetailPage = () => {
 
                 <Button
                   onClick={handleClaimPromo}
-                  className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold"
+                  className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold min-h-[44px]"
+                  style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
                 >
                   Claim Promo
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full"
+                  className="w-full min-h-[44px]"
+                  style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
                   onClick={() => {
                     navigator.clipboard.writeText(window.location.href);
                     toast({

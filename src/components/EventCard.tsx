@@ -138,11 +138,11 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
       <div className="p-4 sm:p-5 pb-3 sm:pb-4 cursor-pointer" onClick={handleCardClick}>
         <h3 className="text-lg sm:text-xl font-bold text-white mb-1 line-clamp-2 group-hover:text-primary transition-colors">{event.title}</h3>
       </div>
-      <div className="relative overflow-hidden cursor-pointer" onClick={handleCardClick}>
+      <div className="relative overflow-hidden cursor-pointer bg-muted" onClick={handleCardClick}>
         <img 
           src={event.image || event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop'}
           alt={event.title}
-          className="card-image w-full h-48 object-cover"
+          className="card-image w-full h-48 object-cover object-center"
           onError={(e) => {
             e.currentTarget.src = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop';
           }}

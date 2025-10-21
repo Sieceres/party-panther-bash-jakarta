@@ -42,9 +42,9 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
   };
 
   return (
-    <footer className="bg-card border-t border-border py-6 sm:py-8 md:py-12 mt-8 sm:mt-10 md:mt-12">
+    <footer className="bg-card border-t border-border py-8 sm:py-10 md:py-12 lg:py-16 mt-12 sm:mt-16 md:mt-20 lg:mt-24">
       <div className="container mx-auto px-4 sm:px-6 md:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-center md:items-start space-y-6 sm:space-y-8 md:space-y-0 md:gap-8">
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-start space-y-8 sm:space-y-10 md:space-y-0 md:gap-8 lg:gap-12">
           {/* Logo and Description */}
           <div className="flex flex-col items-center md:items-start space-y-3 sm:space-y-4 min-w-0">
             <Link to="/" className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent">
