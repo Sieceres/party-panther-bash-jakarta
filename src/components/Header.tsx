@@ -73,23 +73,23 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border/50 shadow-lg">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 sm:h-18">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 sm:gap-3" onClick={() => onSectionChange('home')}>
-            <div className="w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 flex items-center justify-center flex-shrink-0">
+           {/* Logo */}
+          <Link to="/" className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5" onClick={() => onSectionChange('home')}>
+            <div className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 flex items-center justify-center flex-shrink-0">
               <img src={logoImage} alt="Party Panther Logo" className="w-full h-full object-contain drop-shadow-[0_0_12px_rgba(0,207,255,0.4)]" />
             </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <h1 className="text-base sm:text-lg md:text-xl lg:text-3xl font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(0,207,255,0.4)] whitespace-nowrap">
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5">
+              <h1 className="text-sm sm:text-base md:text-lg lg:text-2xl xl:text-3xl font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(0,207,255,0.4)] whitespace-nowrap">
                 Party Panther
               </h1>
-              <span className="px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-bold text-white bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] rounded-full shadow-[0_0_12px_rgba(0,207,255,0.4)] flex-shrink-0">
+              <span className="px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] md:text-xs font-bold text-white bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] rounded-full shadow-[0_0_12px_rgba(0,207,255,0.4)] flex-shrink-0">
                 BETA
               </span>
             </div>
           </Link>
 
            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-2 relative z-10">
+            <nav className="hidden lg:flex items-center gap-2 relative z-10">
              {menuItems.filter(item => !item.hidden).map((item) => {
                const Icon = item.icon;
                return (
@@ -146,11 +146,11 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
               )}
            </nav>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile & Tablet Menu Button */}
 <Button
   variant="ghost"
   size="default"
-  className="md:hidden text-foreground hover:text-primary min-w-[44px] min-h-[44px]"
+  className="lg:hidden text-foreground hover:text-primary min-w-[44px] min-h-[44px]"
   onClick={() => setIsMenuOpen(!isMenuOpen)}
   aria-label={isMenuOpen ? "Close menu" : "Open menu"}
 >
@@ -162,9 +162,9 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
 </Button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile & Tablet Navigation */}
         {isMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-border/50 bg-background/95 backdrop-blur-sm">
+          <nav className="lg:hidden py-4 border-t border-border/50 bg-background/95 backdrop-blur-sm">
             <div className="flex flex-col gap-2">
               {menuItems.filter(item => !item.hidden).map((item) => {
                 const Icon = item.icon;
