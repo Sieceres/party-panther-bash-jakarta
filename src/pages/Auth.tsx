@@ -29,17 +29,9 @@ const Auth = () => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Redirect authenticated users
+        // Redirect authenticated users to home page
         if (session?.user) {
-          // Check if this was a new signup
-          const isNewSignup = localStorage.getItem('newSignup') === 'true';
-          
-          if (isNewSignup) {
-            localStorage.removeItem('newSignup');
-            navigate("/profile");
-          } else {
-            navigate("/");
-          }
+          navigate("/");
         }
       }
     );
@@ -91,12 +83,13 @@ const Auth = () => {
         }
       } else {
         toast({
-          title: "Success!",
-          description: "Account created! Please complete your profile.",
+          title: "Check your email!",
+          description: "We've sent you a confirmation link. Please verify your email to complete signup.",
+          duration: 6000,
         });
-        // Mark this as a new signup for profile redirect
-        localStorage.setItem('newSignup', 'true');
-        // Note: User will be redirected to profile page after signup
+        setEmail("");
+        setPassword("");
+        setDisplayName("");
       }
     } catch (error) {
       toast({

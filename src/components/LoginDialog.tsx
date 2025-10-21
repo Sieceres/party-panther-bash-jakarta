@@ -57,13 +57,14 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
         }
       } else {
         toast({
-          title: "Welcome!",
-          description: "Account created successfully! Please complete your profile.",
+          title: "Check your email!",
+          description: "We've sent you a confirmation link. Please verify your email to complete signup.",
+          duration: 6000,
         });
         onOpenChange(false);
-        // Mark as new signup and redirect to profile page
-        localStorage.setItem('newSignup', 'true');
-        window.location.href = "/profile";
+        setEmail("");
+        setPassword("");
+        setDisplayName("");
       }
     } catch (error) {
       toast({
