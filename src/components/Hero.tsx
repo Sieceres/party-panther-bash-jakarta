@@ -98,10 +98,10 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
           <h1 
             className="font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent animate-slide-up" 
             style={{
-              fontSize: 'clamp(2rem, 6vw + 0.5rem, 4.5rem)',
+              fontSize: 'clamp(2rem, 5vw + 0.5rem, 4rem)',
               lineHeight: '1.1',
               letterSpacing: '-0.02em',
-              filter: 'drop-shadow(0 0 8px rgba(0, 207, 255, 0.3))'
+              filter: 'drop-shadow(0 0 10px rgba(0, 207, 255, 0.25))'
             }}
           >
            Party Panther

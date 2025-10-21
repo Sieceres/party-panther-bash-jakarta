@@ -51,8 +51,7 @@ export const HomeContent = ({
       <Hero onSectionChange={onSectionChange} />
       
       {/* Featured Promos Section */}
-      <div className="relative overflow-hidden">
-        {/* Background */}
+      <section className="relative py-16 md:py-20 lg:py-24 overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{ backgroundImage: `url(${sectionBackground})` }}
@@ -66,7 +65,7 @@ export const HomeContent = ({
           <div className="floating-element absolute bottom-20 left-10 w-20 h-20 rounded-full bg-neon-indigo blur-md"></div>
         </div>
 
-        <div className="relative z-10 px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-12">
+        <div className="relative z-10 px-4 sm:px-6 md:px-8">
           <div className="container mx-auto space-y-6 sm:space-y-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-slide-up">
               <div className="space-y-1 sm:space-y-2">
@@ -124,10 +123,10 @@ export const HomeContent = ({
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Featured Events Section */}
-      <div className="relative overflow-hidden">
+      <section className="relative py-16 md:py-20 lg:py-24 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full party-gradient blur-3xl"></div>
@@ -140,7 +139,7 @@ export const HomeContent = ({
           <div className="floating-element absolute bottom-20 right-1/3 w-32 h-32 border-2 border-neon-cyan rounded-full"></div>
         </div>
 
-        <div className="relative z-10 px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16">
+        <div className="relative z-10 px-4 sm:px-6 md:px-8">
           <div className="container mx-auto space-y-6 sm:space-y-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-slide-up">
               <div className="space-y-1 sm:space-y-2">
@@ -196,7 +195,7 @@ export const HomeContent = ({
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

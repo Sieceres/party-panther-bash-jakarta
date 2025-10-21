@@ -74,15 +74,15 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 sm:h-18">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-1 sm:gap-1.5" onClick={() => onSectionChange('home')}>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center flex-shrink-0">
-              <img src={logoImage} alt="Party Panther Logo" className="w-full h-full object-contain" />
+          <Link to="/" className="flex items-center gap-2 sm:gap-3" onClick={() => onSectionChange('home')}>
+            <div className="w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 flex items-center justify-center flex-shrink-0">
+              <img src={logoImage} alt="Party Panther Logo" className="w-full h-full object-contain drop-shadow-[0_0_12px_rgba(0,207,255,0.4)]" />
             </div>
-            <div className="flex items-center gap-1 sm:gap-1.5">
-              <h1 className="text-sm sm:text-base md:text-lg lg:text-2xl font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(0,207,255,0.5)] whitespace-nowrap">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <h1 className="text-base sm:text-lg md:text-xl lg:text-3xl font-extrabold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(0,207,255,0.4)] whitespace-nowrap">
                 Party Panther
               </h1>
-              <span className="px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-bold text-white bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] rounded-full shadow-[0_0_10px_rgba(0,207,255,0.5)] flex-shrink-0">
+              <span className="px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-bold text-white bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] rounded-full shadow-[0_0_12px_rgba(0,207,255,0.4)] flex-shrink-0">
                 BETA
               </span>
             </div>
