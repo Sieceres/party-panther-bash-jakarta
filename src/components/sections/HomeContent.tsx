@@ -12,7 +12,6 @@ import { EventCard } from "../EventCard";
 import { PromoCard } from "../PromoCard";
 import { EventCardSkeleton, PromoCardSkeleton } from "../ui/skeleton-card";
 import { ArrowRight, Zap, TrendingUp, Calendar } from "lucide-react";
-import sectionBackground from "@/assets/section-background.jpg";
 
 interface HomeContentProps {
   loading: boolean;
@@ -34,25 +33,30 @@ export const HomeContent = ({
   onFavoriteToggle,
 }: HomeContentProps) => {
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="relative">
+      {/* Hero Section */}
       <Hero onSectionChange={onSectionChange} />
+      
+      {/* Smooth Transition Gradient */}
+      <div className="absolute top-0 left-0 right-0 h-[200vh] hero-to-content-transition pointer-events-none -z-10"></div>
+      
+      {/* Content Container with subtle background */}
+      <div className="relative space-y-4 sm:space-y-6">
+        {/* Featured Promos Section */}
+        <section className="relative pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
+          {/* Subtle neon accent background */}
+          <div className="absolute inset-0 section-neon-accent opacity-40"></div>
+          
+          {/* Readability overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-transparent"></div>
 
-      {/* Featured Promos Section */}
-      <section className="relative pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-20"
-          style={{ backgroundImage: `url(${sectionBackground})` }}
-        >
-          <div className="absolute inset-0 section-bg"></div>
-        </div>
+          {/* Floating decorative elements - more subtle */}
+          <div className="absolute inset-0 opacity-5 pointer-events-none">
+            <div className="floating-element absolute top-10 right-20 w-16 h-16 rounded-full bg-cyan-400 blur-xl"></div>
+            <div className="floating-element absolute bottom-20 left-10 w-20 h-20 rounded-full bg-indigo-500 blur-xl"></div>
+          </div>
 
-        {/* Floating decorative elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="floating-element absolute top-10 right-20 w-16 h-16 rounded-full bg-neon-cyan blur-md"></div>
-          <div className="floating-element absolute bottom-20 left-10 w-20 h-20 rounded-full bg-neon-indigo blur-md"></div>
-        </div>
-
-        <div className="relative z-10 px-4 sm:px-6 md:px-8">
+          <div className="relative z-10 px-4 sm:px-6 md:px-8">
           <div className="container mx-auto space-y-6 sm:space-y-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-slide-up">
               <div className="space-y-1 sm:space-y-2">
@@ -130,21 +134,27 @@ export const HomeContent = ({
         </div>
       </section>
 
-      {/* Featured Events Section */}
-      <section className="relative pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full party-gradient blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-neon-green blur-3xl"></div>
-        </div>
+        {/* Featured Events Section */}
+        <section className="relative pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
+          {/* Subtle neon accent background */}
+          <div className="absolute inset-0 section-neon-accent-alt opacity-40"></div>
+          
+          {/* Readability overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-transparent"></div>
 
-        {/* Geometric decorations */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="floating-element absolute top-20 left-1/3 w-24 h-24 border-2 border-neon-blue rounded-lg rotate-45"></div>
-          <div className="floating-element absolute bottom-20 right-1/3 w-32 h-32 border-2 border-neon-cyan rounded-full"></div>
-        </div>
+          {/* Background Pattern - more subtle */}
+          <div className="absolute inset-0 opacity-3 pointer-events-none">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-600/20 blur-3xl"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-gradient-to-br from-purple-500/20 to-indigo-600/20 blur-3xl"></div>
+          </div>
 
-        <div className="relative z-10 px-4 sm:px-6 md:px-8">
+          {/* Geometric decorations - very subtle */}
+          <div className="absolute inset-0 opacity-5 pointer-events-none">
+            <div className="floating-element absolute top-20 left-1/3 w-24 h-24 border border-cyan-400/30 rounded-lg rotate-45"></div>
+            <div className="floating-element absolute bottom-20 right-1/3 w-32 h-32 border border-blue-400/30 rounded-full"></div>
+          </div>
+
+          <div className="relative z-10 px-4 sm:px-6 md:px-8">
           <div className="container mx-auto space-y-6 sm:space-y-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-slide-up">
               <div className="space-y-1 sm:space-y-2">
@@ -215,8 +225,9 @@ export const HomeContent = ({
               )}
             </div>
           </div>
-        </div>
-      </section>
+          </div>
+        </section>
+      </div>
     </div>
   );
 };

@@ -107,6 +107,8 @@
   body {
     @apply bg-background text-foreground font-sans;
     line-height: 1.6;
+    background: linear-gradient(180deg, #0d1b3e 0%, #0a1528 50%, #050a14 100%);
+    background-attachment: fixed;
   }
   
   /* Typography hierarchy with fluid sizing */
@@ -416,6 +418,61 @@
       rgba(0, 0, 0, 0.8) 100%
     );
     backdrop-filter: blur(2px);
+  }
+  
+  /* Smooth transition from hero to content */
+  .hero-to-content-transition {
+    background: linear-gradient(
+      to bottom,
+      rgba(13, 27, 62, 0) 0%,
+      rgba(13, 27, 62, 0.3) 15%,
+      rgba(13, 27, 62, 0.6) 30%,
+      rgba(13, 27, 62, 0.85) 50%,
+      rgba(13, 27, 62, 0.95) 70%,
+      rgba(13, 27, 62, 1) 100%
+    );
+  }
+  
+  /* Subtle neon accents for sections */
+  .section-neon-accent {
+    background: radial-gradient(
+      ellipse at top left,
+      rgba(0, 207, 255, 0.05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(79, 142, 255, 0.05) 0%,
+      transparent 50%
+    );
+  }
+  
+  .section-neon-accent-alt {
+    background: radial-gradient(
+      ellipse at top right,
+      rgba(139, 92, 246, 0.05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at bottom left,
+      rgba(0, 191, 255, 0.05) 0%,
+      transparent 50%
+    );
+  }
+  
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .floating-element {
+      animation-duration: 8s; /* Slower animations on mobile for better performance */
+    }
+    
+    .hero-particle {
+      display: none; /* Hide particles on mobile to improve performance */
+    }
+    
+    .light-streak {
+      opacity: 0.3; /* Reduce light streak opacity on mobile */
+    }
   }
 
   .light-streak {
