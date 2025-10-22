@@ -31,7 +31,7 @@ export const EventsSection = ({
   onJoinEvent,
   onSortChange,
   loading,
-  userAdminStatus
+  userAdminStatus,
 }: EventsSectionProps) => {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
@@ -46,7 +46,9 @@ export const EventsSection = ({
   useEffect(() => {
     const getUser = async () => {
       setAuthLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setUser(user);
       setAuthLoading(false);
     };
@@ -64,14 +66,14 @@ export const EventsSection = ({
   // Filter for upcoming events only (main section)
   const filterUpcomingEvents = (events: EventWithSlug[]) => {
     const now = new Date();
-    return events.filter(event => {
+    return events.filter((event) => {
       const eventDateTime = new Date(`${event.date}T${event.time}`);
-      
+
       // Only show future events
       if (eventDateTime < now) {
         return false;
       }
-      
+
       // Search filter
       if (
         searchTerm &&
@@ -80,15 +82,15 @@ export const EventsSection = ({
       ) {
         return false;
       }
-      
+
       // Date filter
       if (selectedDate) {
-        const eventDate = new Date(event.date + 'T00:00:00');
+        const eventDate = new Date(event.date + "T00:00:00");
         if (eventDate.toDateString() !== selectedDate.toDateString()) {
           return false;
         }
       }
-      
+
       return true;
     });
   };
@@ -96,14 +98,14 @@ export const EventsSection = ({
   // Filter for past events only (past events section)
   const filterPastEvents = (events: EventWithSlug[]) => {
     const now = new Date();
-    return events.filter(event => {
+    return events.filter((event) => {
       const eventDateTime = new Date(`${event.date}T${event.time}`);
-      
+
       // Only show past events
       if (eventDateTime >= now) {
         return false;
       }
-      
+
       // Search filter for past events
       if (
         pastEventsSearchTerm &&
@@ -112,15 +114,15 @@ export const EventsSection = ({
       ) {
         return false;
       }
-      
+
       // Date filter for past events
       if (pastEventsSelectedDate) {
-        const eventDate = new Date(event.date + 'T00:00:00');
+        const eventDate = new Date(event.date + "T00:00:00");
         if (eventDate.toDateString() !== pastEventsSelectedDate.toDateString()) {
           return false;
         }
       }
-      
+
       return true;
     });
   };
@@ -144,12 +146,14 @@ export const EventsSection = ({
         {/* Main Events Section - Upcoming Events Only */}
         <div>
           <div className="mb-4">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent mb-2">Events</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent mb-2">
+              Events
+            </h2>
             <p className="text-muted-foreground text-sm sm:text-base">
               Discover the hottest parties and events in the city!
             </p>
           </div>
-          
+
           {/* Always show "Create Event" as default while auth is loading */}
           {authLoading ? (
             <Button
@@ -228,13 +232,14 @@ export const EventsSection = ({
               <div className="max-w-md mx-auto space-y-4">
                 <div className="text-6xl mb-4">🎉</div>
                 <h3 className="text-xl sm:text-2xl font-bold text-white">
-                  {events.length === 0 ? "No events yet — start the party!" : "No events match your filters"}
+                  {events.length === 0
+                    ? "No events yet — create one and start the party!"
+                    : "No events match your filters"}
                 </h3>
                 <p className="text-sm sm:text-base text-muted-foreground">
                   {events.length === 0
                     ? "Be the first to create an amazing event and get the party started! 🎊"
-                    : "Try adjusting your search or filters to discover more events."
-                  }
+                    : "Try adjusting your search or filters to discover more events."}
                 </p>
                 {(selectedDate || searchTerm) && (
                   <Button onClick={handleResetFilters} variant="default" size="lg" className="mt-4">
@@ -250,10 +255,12 @@ export const EventsSection = ({
                 event={{
                   ...event,
                   venue: event.venue_name,
-                  image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
+                  image:
+                    event.image_url ||
+                    "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop",
                   attendees: event.attendees || 0,
                   rating: 4.5 + Math.random() * 0.5,
-                  organizer: event.organizer_name
+                  organizer: event.organizer_name,
                 }}
                 onJoin={onJoinEvent}
                 userAdminStatus={userAdminStatus}
@@ -265,12 +272,12 @@ export const EventsSection = ({
         {/* Past Events Section */}
         {pastEvents.length > 0 && (
           <div className="mt-16 pt-8 border-t border-border">
-          <div className="mb-4">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent mb-2">Past Events</h2>
-            <p className="text-muted-foreground text-sm sm:text-base">
-              Browse events that have already taken place
-            </p>
-          </div>
+            <div className="mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent mb-2">
+                Past Events
+              </h2>
+              <p className="text-muted-foreground text-sm sm:text-base">Browse events that have already taken place</p>
+            </div>
 
             <div className="space-y-4 mb-8">
               <EventFilters
@@ -305,10 +312,12 @@ export const EventsSection = ({
                     event={{
                       ...event,
                       venue: event.venue_name,
-                      image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
+                      image:
+                        event.image_url ||
+                        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop",
                       attendees: event.attendees || 0,
                       rating: 4.5 + Math.random() * 0.5,
-                      organizer: event.organizer_name
+                      organizer: event.organizer_name,
                     }}
                     onJoin={onJoinEvent}
                     userAdminStatus={userAdminStatus}
