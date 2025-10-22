@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "../../integrations/supabase/types";
 import { EventCard } from "../EventCard";
 import { PromoCard } from "../PromoCard";
+import { EventCardSkeleton, PromoCardSkeleton } from "../ui/skeleton-card";
 import { ArrowRight, Zap, TrendingUp, Calendar } from "lucide-react";
 import sectionBackground from "@/assets/section-background.jpg";
 
@@ -32,19 +33,6 @@ export const HomeContent = ({
   userAdminStatus,
   onFavoriteToggle,
 }: HomeContentProps) => {
-  if (loading) {
-    return (
-      <div className="pt-20 px-4 min-h-[60vh] flex items-center justify-center">
-        <div className="container mx-auto">
-          <div className="text-center flex flex-col items-center space-y-4">
-            <SpinningPaws size="lg" />
-            <p className="text-base sm:text-lg text-muted-foreground">Loading amazing events and promos...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-12">
       <Hero onSectionChange={onSectionChange} />
@@ -89,7 +77,18 @@ export const HomeContent = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {promos.length === 0 ? (
+              {loading ? (
+                // Show skeleton cards while loading
+                [...Array(3)].map((_, index) => (
+                  <div
+                    key={`promo-skeleton-${index}`}
+                    className="animate-stagger-in opacity-0"
+                    style={{ animationDelay: `${0.08 * index}s` }}
+                  >
+                    <PromoCardSkeleton />
+                  </div>
+                ))
+              ) : promos.length === 0 ? (
                 <div className="col-span-full text-center py-12 px-4">
                   <div className="max-w-md mx-auto space-y-3">
                     <div className="text-5xl mb-3">🍹</div>
@@ -170,7 +169,18 @@ export const HomeContent = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {events.length === 0 ? (
+              {loading ? (
+                // Show skeleton cards while loading
+                [...Array(3)].map((_, index) => (
+                  <div
+                    key={`event-skeleton-${index}`}
+                    className="animate-stagger-in opacity-0"
+                    style={{ animationDelay: `${0.08 * index}s` }}
+                  >
+                    <EventCardSkeleton />
+                  </div>
+                ))
+              ) : events.length === 0 ? (
                 <div className="col-span-full text-center py-12 px-4">
                   <div className="max-w-md mx-auto space-y-3">
                     <div className="text-5xl mb-3">🎉</div>
