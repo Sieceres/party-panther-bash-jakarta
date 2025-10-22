@@ -4,6 +4,8 @@ import { EventsSection } from "./EventsSection";
 import { PromosSection } from "./PromosSection";
 
 import { Hero } from "../Hero";
+import { ContinuousStarfield } from "../ContinuousStarfield";
+import { AmbientEffects } from "../AmbientEffects";
 import { SpinningPaws } from "../ui/spinning-paws";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,27 +36,27 @@ export const HomeContent = ({
 }: HomeContentProps) => {
   return (
     <div className="relative">
+      {/* Continuous Starfield - behind everything */}
+      <ContinuousStarfield />
+      
+      {/* Ambient Effects - floating orbs, scan lines, subtle streaks */}
+      <AmbientEffects />
+      
       {/* Hero Section */}
       <Hero onSectionChange={onSectionChange} />
       
-      {/* Smooth Transition Gradient */}
-      <div className="absolute top-0 left-0 right-0 h-[200vh] hero-to-content-transition pointer-events-none -z-10"></div>
+      {/* Smooth Fade Transition Zone */}
+      <div className="absolute left-0 right-0 hero-fade-transition pointer-events-none z-[2]" style={{ top: 'calc(85vh - 100px)', height: '200px' }}></div>
       
       {/* Content Container with subtle background */}
       <div className="relative space-y-4 sm:space-y-6">
         {/* Featured Promos Section */}
         <section className="relative pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
-          {/* Subtle neon accent background */}
-          <div className="absolute inset-0 section-neon-accent opacity-40"></div>
+          {/* Subtle neon accent background - more diffused */}
+          <div className="absolute inset-0 section-neon-accent-soft"></div>
           
           {/* Readability overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-transparent"></div>
-
-          {/* Floating decorative elements - more subtle */}
-          <div className="absolute inset-0 opacity-5 pointer-events-none">
-            <div className="floating-element absolute top-10 right-20 w-16 h-16 rounded-full bg-cyan-400 blur-xl"></div>
-            <div className="floating-element absolute bottom-20 left-10 w-20 h-20 rounded-full bg-indigo-500 blur-xl"></div>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10"></div>
 
           <div className="relative z-10 px-4 sm:px-6 md:px-8">
           <div className="container mx-auto space-y-6 sm:space-y-8">
@@ -136,23 +138,11 @@ export const HomeContent = ({
 
         {/* Featured Events Section */}
         <section className="relative pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
-          {/* Subtle neon accent background */}
-          <div className="absolute inset-0 section-neon-accent-alt opacity-40"></div>
+          {/* Subtle neon accent background - more diffused */}
+          <div className="absolute inset-0 section-neon-accent-alt-soft"></div>
           
           {/* Readability overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-transparent"></div>
-
-          {/* Background Pattern - more subtle */}
-          <div className="absolute inset-0 opacity-3 pointer-events-none">
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-600/20 blur-3xl"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-gradient-to-br from-purple-500/20 to-indigo-600/20 blur-3xl"></div>
-          </div>
-
-          {/* Geometric decorations - very subtle */}
-          <div className="absolute inset-0 opacity-5 pointer-events-none">
-            <div className="floating-element absolute top-20 left-1/3 w-24 h-24 border border-cyan-400/30 rounded-lg rotate-45"></div>
-            <div className="floating-element absolute bottom-20 right-1/3 w-32 h-32 border border-blue-400/30 rounded-full"></div>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10"></div>
 
           <div className="relative z-10 px-4 sm:px-6 md:px-8">
           <div className="container mx-auto space-y-6 sm:space-y-8">

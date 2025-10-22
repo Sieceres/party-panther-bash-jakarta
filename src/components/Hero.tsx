@@ -52,7 +52,11 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
     fetchStats();
   }, []);
   return (
-    <section className="relative min-h-[75vh] sm:min-h-[80vh] md:min-h-[85vh] flex items-center justify-center overflow-hidden pt-16">
+    <section className="relative min-h-[85vh] sm:min-h-[88vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden pt-16">
+      {/* Hero edge glow effect */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 hero-edge-glow"></div>
+      </div>
       {/* Vibrant Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0d1b3e] via-[#1a1a2e] to-[#0d1b3e]">
         <div className="absolute inset-0 animated-hero-gradient"></div>
