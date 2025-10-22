@@ -1,4 +1,3 @@
-
 import { EventWithSlug, PromoWithSlug } from "@/types/extended-types";
 import { Button } from "@/components/ui/button";
 import { EventsSection } from "./EventsSection";
@@ -24,14 +23,14 @@ interface HomeContentProps {
   onFavoriteToggle?: (promoId: string, isFavorite: boolean) => void;
 }
 
-export const HomeContent = ({ 
-  loading, 
-  events, 
-  promos, 
-  onSectionChange, 
+export const HomeContent = ({
+  loading,
+  events,
+  promos,
+  onSectionChange,
   onJoinEvent,
   userAdminStatus,
-  onFavoriteToggle
+  onFavoriteToggle,
 }: HomeContentProps) => {
   if (loading) {
     return (
@@ -49,16 +48,16 @@ export const HomeContent = ({
   return (
     <div className="space-y-12">
       <Hero onSectionChange={onSectionChange} />
-      
+
       {/* Featured Promos Section */}
       <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{ backgroundImage: `url(${sectionBackground})` }}
         >
           <div className="absolute inset-0 section-bg"></div>
         </div>
-        
+
         {/* Floating decorative elements */}
         <div className="absolute inset-0 opacity-10">
           <div className="floating-element absolute top-10 right-20 w-16 h-16 rounded-full bg-neon-cyan blur-md"></div>
@@ -70,7 +69,10 @@ export const HomeContent = ({
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-slide-up">
               <div className="space-y-1 sm:space-y-2">
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent flex items-center gap-2 sm:gap-3">
-                  <Zap className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
+                  <Zap
+                    className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8"
+                    style={{ color: "#00CFFF", animation: "neon-pulse 2s ease-in-out infinite" }}
+                  />
                   Hot Promos
                 </h2>
                 <p className="text-gray-300 text-sm sm:text-base md:text-lg">Go big without going broke!</p>
@@ -85,7 +87,7 @@ export const HomeContent = ({
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {promos.length === 0 ? (
                 <div className="col-span-full text-center py-12 px-4">
@@ -98,25 +100,29 @@ export const HomeContent = ({
                 </div>
               ) : (
                 promos.slice(0, 3).map((promo, index) => (
-                  <div 
-                    key={promo.id} 
+                  <div
+                    key={promo.id}
                     className="animate-stagger-in opacity-0"
                     style={{ animationDelay: `${0.08 * index}s` }}
                   >
-                     <PromoCard 
-                        promo={{
-                          ...promo,
-                          discount: promo.discount_text,
-                          venue: promo.venue_name,
-                          validUntil: promo.valid_until,
-                          image: promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop',
-                           day: Array.isArray(promo.day_of_week) ? promo.day_of_week.join(', ') : (promo.day_of_week || ''),
-                           area: promo.area?.toLowerCase(),
-                           drinkType: Array.isArray(promo.drink_type) ? promo.drink_type.join(', ') : (promo.drink_type || '')
-                        }} 
-                        userAdminStatus={userAdminStatus}
-                        onFavoriteToggle={onFavoriteToggle}
-                      />
+                    <PromoCard
+                      promo={{
+                        ...promo,
+                        discount: promo.discount_text,
+                        venue: promo.venue_name,
+                        validUntil: promo.valid_until,
+                        image:
+                          promo.image_url ||
+                          "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop",
+                        day: Array.isArray(promo.day_of_week) ? promo.day_of_week.join(", ") : promo.day_of_week || "",
+                        area: promo.area?.toLowerCase(),
+                        drinkType: Array.isArray(promo.drink_type)
+                          ? promo.drink_type.join(", ")
+                          : promo.drink_type || "",
+                      }}
+                      userAdminStatus={userAdminStatus}
+                      onFavoriteToggle={onFavoriteToggle}
+                    />
                   </div>
                 ))
               )}
@@ -144,7 +150,10 @@ export const HomeContent = ({
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-slide-up">
               <div className="space-y-1 sm:space-y-2">
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent flex items-center gap-2 sm:gap-3">
-                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" style={{ color: '#00CFFF', animation: 'neon-pulse 2s ease-in-out infinite' }} />
+                  <Calendar
+                    className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8"
+                    style={{ color: "#00CFFF", animation: "neon-pulse 2s ease-in-out infinite" }}
+                  />
                   Upcoming Events
                 </h2>
                 <p className="text-gray-300 text-sm sm:text-base md:text-lg">Don't miss these amazing parties!</p>
@@ -159,36 +168,38 @@ export const HomeContent = ({
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {events.length === 0 ? (
                 <div className="col-span-full text-center py-12 px-4">
                   <div className="max-w-md mx-auto space-y-3">
                     <div className="text-5xl mb-3">🎉</div>
                     <p className="text-base sm:text-lg text-muted-foreground">
-                      No events yet — start the party! 🎊
+                      No events yet — create one and start the party! 🎊
                     </p>
                   </div>
                 </div>
               ) : (
                 events.slice(0, 3).map((event, index) => (
-                  <div 
-                    key={event.id} 
+                  <div
+                    key={event.id}
                     className="animate-stagger-in opacity-0"
                     style={{ animationDelay: `${0.08 * index}s` }}
                   >
-                     <EventCard 
-                       event={{
-                         ...event,
-                         venue: event.venue_name,
-                         image: event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop',
-                         attendees: event.attendees || 0,
-                         rating: 4.5 + Math.random() * 0.5,
-                         organizer: event.organizer_name
-                       }} 
-                       onJoin={onJoinEvent}
-                       userAdminStatus={userAdminStatus}
-                     />
+                    <EventCard
+                      event={{
+                        ...event,
+                        venue: event.venue_name,
+                        image:
+                          event.image_url ||
+                          "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop",
+                        attendees: event.attendees || 0,
+                        rating: 4.5 + Math.random() * 0.5,
+                        organizer: event.organizer_name,
+                      }}
+                      onJoin={onJoinEvent}
+                      userAdminStatus={userAdminStatus}
+                    />
                   </div>
                 ))
               )}
