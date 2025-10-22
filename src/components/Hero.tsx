@@ -1,7 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, Zap, ChevronDown } from "lucide-react";
-import heroBackground from "@/assets/hero-background.jpg";
-import floatingElements from "@/assets/floating-elements.png";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -55,19 +53,24 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
   }, []);
   return (
     <section className="relative min-h-[75vh] sm:min-h-[80vh] md:min-h-[85vh] flex items-center justify-center overflow-hidden pt-16">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroBackground})` }}
-      >
+      {/* Vibrant Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0d1b3e] via-[#1a1a2e] to-[#0d1b3e]">
         <div className="absolute inset-0 animated-hero-gradient"></div>
+        {/* Text readability overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"></div>
       </div>
 
-      {/* Moving Light Streaks */}
+      {/* Moving Light Streaks - Enhanced */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="light-streak light-streak-1"></div>
         <div className="light-streak light-streak-2"></div>
         <div className="light-streak light-streak-3"></div>
+        {/* Additional diagonal streaks for more vibrance */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-30">
+          <div className="absolute top-10 left-0 w-64 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse"></div>
+          <div className="absolute top-1/3 right-0 w-48 h-[2px] bg-gradient-to-l from-transparent via-blue-400 to-transparent animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-1/4 left-1/4 w-56 h-[2px] bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-pulse" style={{ animationDelay: '2s' }}></div>
+        </div>
       </div>
 
       {/* Floating Elements */}
@@ -101,7 +104,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
               fontSize: 'clamp(2rem, 5vw + 0.5rem, 4rem)',
               lineHeight: '1.1',
               letterSpacing: '-0.02em',
-              filter: 'drop-shadow(0 0 10px rgba(0, 207, 255, 0.25))'
+              filter: 'drop-shadow(0 0 20px rgba(0, 207, 255, 0.5)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.9))'
             }}
           >
            Party Panther
@@ -111,7 +114,8 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
             style={{ 
               animationDelay: '0.2s',
               fontSize: 'clamp(1rem, 2.5vw + 0.25rem, 1.5rem)',
-              lineHeight: '1.4'
+              lineHeight: '1.4',
+              textShadow: '0 2px 8px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 207, 255, 0.3)'
             }}
           >
             Jakarta's Ultimate Party & Promo Hub
@@ -121,7 +125,8 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
             style={{ 
               animationDelay: '0.4s',
               fontSize: 'clamp(0.875rem, 1.5vw + 0.25rem, 1.125rem)',
-              lineHeight: '1.6'
+              lineHeight: '1.6',
+              textShadow: '0 2px 6px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 0, 0, 0.5)'
             }}
           >
             Discover promos that make you purr, events that make you roar, and connect with other Party Panthers in Jakarta

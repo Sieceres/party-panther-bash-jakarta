@@ -394,13 +394,28 @@
   }
 
   .animated-hero-gradient {
-    background: linear-gradient(180deg, 
-      rgba(0, 0, 0, 0.7) 0%, 
-      rgba(0, 191, 255, 0.3) 40%, 
-      rgba(13, 27, 62, 0.8) 100%
+    background: linear-gradient(
+      135deg,
+      rgba(13, 27, 62, 0.95) 0%,
+      rgba(79, 70, 229, 0.4) 15%,
+      rgba(0, 191, 255, 0.45) 35%,
+      rgba(79, 142, 255, 0.5) 50%,
+      rgba(139, 92, 246, 0.4) 65%,
+      rgba(0, 207, 255, 0.45) 85%,
+      rgba(13, 27, 62, 0.95) 100%
     );
-    background-size: 200% 200%;
-    animation: gradient-shift 8s ease infinite;
+    background-size: 400% 400%;
+    animation: vibrant-gradient-shift 12s ease-in-out infinite;
+  }
+  
+  .hero-text-overlay {
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0.3) 0%,
+      rgba(0, 0, 0, 0.6) 50%,
+      rgba(0, 0, 0, 0.8) 100%
+    );
+    backdrop-filter: blur(2px);
   }
 
   .light-streak {
@@ -598,6 +613,24 @@
     }
     100% {
       background-position: 0% 50%;
+    }
+  }
+  
+  @keyframes vibrant-gradient-shift {
+    0% {
+      background-position: 0% 0%;
+    }
+    25% {
+      background-position: 50% 50%;
+    }
+    50% {
+      background-position: 100% 100%;
+    }
+    75% {
+      background-position: 50% 50%;
+    }
+    100% {
+      background-position: 0% 0%;
     }
   }
 
