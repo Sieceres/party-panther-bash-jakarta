@@ -34,11 +34,11 @@ export const HomeContent = ({
   onFavoriteToggle,
 }: HomeContentProps) => {
   return (
-    <div className="space-y-12">
+    <div className="space-y-4 sm:space-y-6">
       <Hero onSectionChange={onSectionChange} />
 
       {/* Featured Promos Section */}
-      <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden">
+      <section className="relative pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{ backgroundImage: `url(${sectionBackground})` }}
@@ -131,7 +131,7 @@ export const HomeContent = ({
       </section>
 
       {/* Featured Events Section */}
-      <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden">
+      <section className="relative pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full party-gradient blur-3xl"></div>
