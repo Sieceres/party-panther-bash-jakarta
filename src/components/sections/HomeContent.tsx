@@ -50,12 +50,9 @@ export const HomeContent = ({
       
       {/* Content Container with subtle background */}
       <div className="relative space-y-4 sm:space-y-6">
-        {/* Global background for all sections including header - starts from top of page */}
-        <div className="fixed inset-0 section-neon-accent-soft pointer-events-none z-[1]" style={{ top: '0' }}></div>
-        <div className="fixed inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10 pointer-events-none z-[1]" style={{ top: '0' }}></div>
-        
-        {/* Cover the hero section with transparent overlay to hide the background there */}
-        <div className="fixed inset-0 bg-background pointer-events-none z-[1]" style={{ bottom: 'calc(100vh - 85vh)' }}></div>
+        {/* Global background for all sections */}
+        <div className="fixed inset-0 section-neon-accent-soft pointer-events-none z-[1]" style={{ top: '85vh' }}></div>
+        <div className="fixed inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10 pointer-events-none z-[1]" style={{ top: '85vh' }}></div>
         {/* Featured Promos Section */}
         <section className="relative pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
 
