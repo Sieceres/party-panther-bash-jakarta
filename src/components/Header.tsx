@@ -70,9 +70,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/30 shadow-lg section-neon-accent-soft">
-      {/* Readability overlay for header */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10 pointer-events-none"></div>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-lg border-b border-border/30">
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="flex items-center justify-between h-16 sm:h-18">
            {/* Logo */}
