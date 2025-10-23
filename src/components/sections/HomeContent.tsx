@@ -49,9 +49,6 @@ export const HomeContent = ({
       {/* Hero Section */}
       <Hero onSectionChange={onSectionChange} />
       
-      {/* Smooth Fade Transition Zone */}
-      <div className="absolute left-0 right-0 hero-fade-transition pointer-events-none z-[2]" style={{ top: 'calc(85vh - 100px)', height: '200px' }}></div>
-      
       {/* Content Container with subtle background */}
       <div className="relative space-y-4 sm:space-y-6">
         {/* Featured Promos Section */}
