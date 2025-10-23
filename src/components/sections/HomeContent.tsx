@@ -50,13 +50,11 @@ export const HomeContent = ({
       
       {/* Content Container with subtle background */}
       <div className="relative space-y-4 sm:space-y-6">
+        {/* Global background for all sections */}
+        <div className="fixed inset-0 section-neon-accent-soft pointer-events-none z-[1]" style={{ top: '85vh' }}></div>
+        <div className="fixed inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10 pointer-events-none z-[1]" style={{ top: '85vh' }}></div>
         {/* Featured Promos Section */}
         <section className="relative pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
-          {/* Subtle neon accent background - more diffused */}
-          <div className="absolute inset-0 section-neon-accent-soft"></div>
-          
-          {/* Readability overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10"></div>
 
           <div className="relative z-10 px-4 sm:px-6 md:px-8">
           <div className="container mx-auto space-y-6 sm:space-y-8">
@@ -138,11 +136,6 @@ export const HomeContent = ({
 
         {/* Featured Events Section */}
         <section className="relative pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
-          {/* Subtle neon accent background - more diffused */}
-          <div className="absolute inset-0 section-neon-accent-alt-soft"></div>
-          
-          {/* Readability overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10"></div>
 
           <div className="relative z-10 px-4 sm:px-6 md:px-8">
           <div className="container mx-auto space-y-6 sm:space-y-8">
