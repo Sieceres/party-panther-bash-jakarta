@@ -42,6 +42,10 @@ export const HomeContent = ({
       {/* Ambient Effects - floating orbs, scan lines, subtle streaks */}
       <AmbientEffects />
       
+      {/* Global mid-layer background for header and content below hero */}
+      <div className="fixed inset-0 section-neon-accent-soft pointer-events-none z-0"></div>
+      <div className="fixed inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10 pointer-events-none z-0"></div>
+      
       {/* Hero Section */}
       <Hero onSectionChange={onSectionChange} />
       
@@ -50,12 +54,6 @@ export const HomeContent = ({
       
       {/* Content Container with subtle background */}
       <div className="relative space-y-4 sm:space-y-6">
-        {/* Global mid-layer background for entire page */}
-        <div className="fixed inset-0 section-neon-accent-soft pointer-events-none z-0"></div>
-        <div className="fixed inset-0 bg-gradient-to-b from-black/10 via-black/15 to-black/10 pointer-events-none z-0"></div>
-        
-        {/* Hero section masking layer - covers the mid-layer in hero area */}
-        <div className="fixed inset-0 bg-background pointer-events-none z-[1]" style={{ height: '85vh' }}></div>
         {/* Featured Promos Section */}
         <section className="relative pt-6 sm:pt-8 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
 
