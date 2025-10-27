@@ -621,12 +621,9 @@ export type Database = {
         Args: { event_id_param: string }
         Returns: boolean
       }
-      generate_slug: {
-        Args: { input_text: string }
-        Returns: string
-      }
+      generate_slug: { Args: { input_text: string }; Returns: string }
       get_event_attendee_counts: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           attendee_count: number
           event_id: string
@@ -643,7 +640,7 @@ export type Database = {
         }[]
       }
       get_events_safe: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           created_by: string
@@ -666,7 +663,7 @@ export type Database = {
         }[]
       }
       get_events_simple: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           created_by: string
@@ -736,12 +733,9 @@ export type Database = {
           whatsapp: string
         }[]
       }
-      get_my_claim: {
-        Args: { claim: string }
-        Returns: Json
-      }
+      get_my_claim: { Args: { claim: string }; Returns: Json }
       get_promos_simple: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           area: string
           category: string
@@ -767,25 +761,59 @@ export type Database = {
           venue_name: string
         }[]
       }
-      get_promos_with_details: {
-        Args: { p_slug: string } | { user_id_param?: string }
-        Returns: {
-          created_at: string
-          created_by: string
-          description: string
-          discounted_price_amount: number
-          id: string
-          image_url: string
-          original_price_amount: number
-          price_currency: string
-          promo_type: string
-          review_avg: number
-          review_count: number
-          slug: string
-          title: string
-          updated_at: string
-        }[]
-      }
+      get_promos_with_details:
+        | {
+            Args: { p_slug: string }
+            Returns: {
+              created_at: string
+              created_by: string
+              description: string
+              discounted_price_amount: number
+              id: string
+              image_url: string
+              original_price_amount: number
+              price_currency: string
+              promo_type: string
+              review_avg: number
+              review_count: number
+              slug: string
+              title: string
+              updated_at: string
+            }[]
+          }
+        | {
+            Args: { user_id_param?: string }
+            Returns: {
+              area: string
+              average_rating: number
+              category: string
+              created_at: string
+              created_by: string
+              creator_avatar: string
+              creator_name: string
+              creator_verified: boolean
+              day_of_week: string[]
+              description: string
+              discount_text: string
+              discounted_price_amount: number
+              drink_type: string[]
+              id: string
+              image_url: string
+              is_favorite: boolean
+              original_price_amount: number
+              price_currency: string
+              promo_type: string
+              slug: string
+              title: string
+              total_reviews: number
+              updated_at: string
+              valid_until: string
+              venue_address: string
+              venue_latitude: number
+              venue_longitude: number
+              venue_name: string
+            }[]
+          }
       get_public_profile_info: {
         Args: { profile_user_id: string }
         Returns: {
@@ -829,26 +857,16 @@ export type Database = {
           is_super_admin: boolean
         }[]
       }
-      get_user_role: {
-        Args: Record<PropertyKey, never> | { _user_id: string }
-        Returns: string
-      }
-      is_admin_or_superadmin: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
-      is_current_user_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      get_user_role:
+        | { Args: { _user_id: string }; Returns: string }
+        | { Args: never; Returns: string }
+      is_admin_or_superadmin: { Args: { _user_id: string }; Returns: boolean }
+      is_current_user_admin: { Args: never; Returns: boolean }
       is_event_co_organizer: {
         Args: { event_id_param: string; user_id_param: string }
         Returns: boolean
       }
-      should_show_organizer_contact: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      should_show_organizer_contact: { Args: never; Returns: boolean }
     }
     Enums: {
       user_role: "user" | "admin" | "superadmin"

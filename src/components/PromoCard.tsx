@@ -222,6 +222,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
         <img
           src={promo.image || promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop'}
           alt={promo.title}
+          loading="lazy"
           className="promo-card-image w-full h-48 object-cover object-center transition-transform duration-300"
           onError={(e) => {
             e.currentTarget.src = 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop';

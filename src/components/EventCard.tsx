@@ -142,6 +142,7 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
         <img 
           src={event.image || event.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop'}
           alt={event.title}
+          loading="lazy"
           className="card-image w-full h-48 object-cover object-center"
           onError={(e) => {
             e.currentTarget.src = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop';

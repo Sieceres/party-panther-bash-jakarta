@@ -19,9 +19,10 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Fetch events count using secure function
+        // Fetch events count
         const { count: eventsCount } = await supabase
-          .rpc('get_events_safe', {}, { count: 'exact', head: true });
+          .from('events')
+          .select('*', { count: 'exact', head: true });
 
         // Fetch promos count
         const { count: promosCount } = await supabase

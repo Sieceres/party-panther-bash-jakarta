@@ -284,6 +284,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               imageUrl={formData.image}
               onImageChange={(value) => handleInputChange("image", value)}
               inputId="event-image"
+              uploadToStorage={true}
+              storageFolder="events"
             />
 
 

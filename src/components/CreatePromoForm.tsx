@@ -199,6 +199,8 @@ export const CreatePromoForm = () => {
                 imageUrl={formData.image}
                 onImageChange={(value) => handleInputChange("image", value)}
                 inputId="promo-image"
+                uploadToStorage={true}
+                storageFolder="promos"
               />
 
             {formErrors.length > 0 && (
