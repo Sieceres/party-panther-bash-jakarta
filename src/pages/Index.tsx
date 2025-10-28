@@ -27,6 +27,10 @@ const Index = () => {
     refreshData, 
     updateEventAttendance,
     updatePromoFavorite,
+    loadMoreEvents,
+    loadMorePromos,
+    hasMoreEvents,
+    hasMorePromos,
     isDataFresh 
   } = useOptimizedData();
 
@@ -243,6 +247,8 @@ const Index = () => {
             onSortChange={setEventSortBy}
             loading={loading}
             userAdminStatus={userAdminStatus}
+            onLoadMore={loadMoreEvents}
+            hasMore={hasMoreEvents}
           />
         );
       
@@ -264,6 +270,8 @@ const Index = () => {
             onSortChange={setPromoSortBy}
             userAdminStatus={userAdminStatus}
             onFavoriteToggle={updatePromoFavorite}
+            onLoadMore={loadMorePromos}
+            hasMore={hasMorePromos}
           />
         );
       

@@ -30,6 +30,8 @@ interface PromosSectionProps {
   onSortChange: (sort: string) => void;
   userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
   onFavoriteToggle?: (promoId: string, isFavorite: boolean) => void;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
 }
 
 export const PromosSection = ({ 
@@ -46,7 +48,9 @@ export const PromosSection = ({
   onDrinkTypeFilterChange,
   onSortChange,
   userAdminStatus,
-  onFavoriteToggle
+  onFavoriteToggle,
+  onLoadMore,
+  hasMore = false
 }: PromosSectionProps) => {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
@@ -354,8 +358,17 @@ export const PromosSection = ({
             ))
           )}
         </div>
+
+        {/* Load More Button */}
+        {!loading && hasMore && filteredPromos.length > 0 && (
+          <div className="flex justify-center mt-8">
+            <Button onClick={onLoadMore} size="lg" variant="outline">
+              Load More Promos
+            </Button>
+          </div>
+        )}
         
-        <LoginDialog 
+        <LoginDialog
           open={showLoginDialog} 
           onOpenChange={setShowLoginDialog}
           onSuccess={() => {

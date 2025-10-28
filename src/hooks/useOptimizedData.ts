@@ -30,6 +30,7 @@ interface CachedData {
 }
 
 const CACHE_DURATION = 300000; // 5 minutes
+const ITEMS_PER_PAGE = 20;
 let globalCache: CachedData | null = null;
 
 export function useOptimizedData() {
@@ -39,6 +40,12 @@ export function useOptimizedData() {
   const [user, setUser] = useState<User | null>(null);
   const [userAdminStatus, setUserAdminStatus] = useState<{ is_admin: boolean; is_super_admin: boolean } | null>(null);
   const lastFetchRef = useRef<number>(0);
+  const [eventsPage, setEventsPage] = useState(1);
+  const [promosPage, setPromosPage] = useState(1);
+  const [hasMoreEvents, setHasMoreEvents] = useState(true);
+  const [hasMorePromos, setHasMorePromos] = useState(true);
+  const [allEvents, setAllEvents] = useState<OptimizedEvent[]>([]);
+  const [allPromos, setAllPromos] = useState<OptimizedPromo[]>([]);
 
   const isDataFresh = useCallback(() => {
     if (!globalCache) return false;
@@ -56,8 +63,12 @@ export function useOptimizedData() {
 
     // Use cache if fresh and not forcing refresh
     if (!forceRefresh && globalCache && isDataFresh()) {
-      setEvents(globalCache.events);
-      setPromos(globalCache.promos);
+      setAllEvents(globalCache.events);
+      setAllPromos(globalCache.promos);
+      setEvents(globalCache.events.slice(0, ITEMS_PER_PAGE));
+      setPromos(globalCache.promos.slice(0, ITEMS_PER_PAGE));
+      setHasMoreEvents(globalCache.events.length > ITEMS_PER_PAGE);
+      setHasMorePromos(globalCache.promos.length > ITEMS_PER_PAGE);
       setUserAdminStatus(globalCache.userAdminStatus);
       setLoading(false);
       return;
@@ -132,7 +143,7 @@ export function useOptimizedData() {
 
       const adminStatus = adminStatusResult.data?.[0] || { is_admin: false, is_super_admin: false };
 
-      // Update cache
+      // Update cache with all data
       globalCache = {
         events: eventsData,
         promos: promosData,
@@ -140,8 +151,15 @@ export function useOptimizedData() {
         timestamp: now
       };
 
-      setEvents(eventsData);
-      setPromos(promosData);
+      // Store all data for pagination
+      setAllEvents(eventsData);
+      setAllPromos(promosData);
+      
+      // Set initial paginated data
+      setEvents(eventsData.slice(0, ITEMS_PER_PAGE));
+      setPromos(promosData.slice(0, ITEMS_PER_PAGE));
+      setHasMoreEvents(eventsData.length > ITEMS_PER_PAGE);
+      setHasMorePromos(promosData.length > ITEMS_PER_PAGE);
       setUserAdminStatus(adminStatus);
       
     } catch (error) {
@@ -155,8 +173,36 @@ export function useOptimizedData() {
   }, [isDataFresh]);
 
   const refreshData = useCallback(() => {
+    setEventsPage(1);
+    setPromosPage(1);
     fetchData(true);
   }, [fetchData]);
+
+  const loadMoreEvents = useCallback(() => {
+    const nextPage = eventsPage + 1;
+    const startIdx = nextPage * ITEMS_PER_PAGE;
+    const endIdx = startIdx + ITEMS_PER_PAGE;
+    const newEvents = allEvents.slice(startIdx, endIdx);
+    
+    if (newEvents.length > 0) {
+      setEvents(prev => [...prev, ...newEvents]);
+      setEventsPage(nextPage);
+      setHasMoreEvents(endIdx < allEvents.length);
+    }
+  }, [eventsPage, allEvents]);
+
+  const loadMorePromos = useCallback(() => {
+    const nextPage = promosPage + 1;
+    const startIdx = nextPage * ITEMS_PER_PAGE;
+    const endIdx = startIdx + ITEMS_PER_PAGE;
+    const newPromos = allPromos.slice(startIdx, endIdx);
+    
+    if (newPromos.length > 0) {
+      setPromos(prev => [...prev, ...newPromos]);
+      setPromosPage(nextPage);
+      setHasMorePromos(endIdx < allPromos.length);
+    }
+  }, [promosPage, allPromos]);
 
   const updateEventAttendance = useCallback((eventId: string, isJoined: boolean) => {
     setEvents(prevEvents =>
@@ -219,6 +265,10 @@ export function useOptimizedData() {
     refreshData,
     updateEventAttendance,
     updatePromoFavorite,
+    loadMoreEvents,
+    loadMorePromos,
+    hasMoreEvents,
+    hasMorePromos,
     isDataFresh: isDataFresh()
   };
 }

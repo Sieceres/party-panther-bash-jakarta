@@ -21,6 +21,8 @@ interface EventsSectionProps {
   onSortChange: (sort: string) => void;
   loading: boolean;
   userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
 }
 
 export const EventsSection = ({
@@ -32,6 +34,8 @@ export const EventsSection = ({
   onSortChange,
   loading,
   userAdminStatus,
+  onLoadMore,
+  hasMore = false,
 }: EventsSectionProps) => {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
@@ -268,6 +272,15 @@ export const EventsSection = ({
             ))
           )}
         </div>
+
+        {/* Load More Button for Upcoming Events */}
+        {!loading && hasMore && upcomingEvents.length > 0 && (
+          <div className="flex justify-center mt-8">
+            <Button onClick={onLoadMore} size="lg" variant="outline">
+              Load More Events
+            </Button>
+          </div>
+        )}
 
         {/* Past Events Section */}
         {pastEvents.length > 0 && (
