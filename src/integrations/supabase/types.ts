@@ -610,7 +610,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      event_attendee_stats: {
+        Row: {
+          attendee_count: number | null
+          event_id: string | null
+          last_join_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_attendees_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promo_review_stats: {
+        Row: {
+          avg_rating: number | null
+          promo_id: string | null
+          total_reviews: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_manage_event_attendees: {
@@ -866,6 +889,8 @@ export type Database = {
         Args: { event_id_param: string; user_id_param: string }
         Returns: boolean
       }
+      refresh_event_attendee_stats: { Args: never; Returns: undefined }
+      refresh_promo_review_stats: { Args: never; Returns: undefined }
       should_show_organizer_contact: { Args: never; Returns: boolean }
     }
     Enums: {
