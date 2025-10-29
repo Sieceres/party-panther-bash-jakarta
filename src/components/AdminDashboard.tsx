@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft } from "lucide-react";
+import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw } from "lucide-react";
 import { Header } from "./Header";
 import { AdminReceiptManagement } from "./AdminReceiptManagement";
 import { AdminAnalytics } from "./AdminAnalytics";
@@ -63,6 +63,8 @@ export const AdminDashboard = () => {
     isCurrentlyAdmin?: boolean;
     isCurrentlySuperAdmin?: boolean;
   } | null>(null);
+  const [refreshingPromoStats, setRefreshingPromoStats] = useState(false);
+  const [refreshingEventStats, setRefreshingEventStats] = useState(false);
 
   const checkAuthAndPermissions = async () => {
     try {
@@ -404,6 +406,42 @@ export const AdminDashboard = () => {
     }
   };
 
+  const refreshPromoStats = async () => {
+    setRefreshingPromoStats(true);
+    try {
+      const { error } = await supabase.rpc('refresh_promo_review_stats');
+      if (error) throw error;
+      toast({ title: "Success", description: "Promo review stats refreshed successfully" });
+    } catch (error) {
+      console.error('Error refreshing promo stats:', error);
+      toast({
+        title: "Error",
+        description: `Failed to refresh promo stats: ${error.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setRefreshingPromoStats(false);
+    }
+  };
+
+  const refreshEventStats = async () => {
+    setRefreshingEventStats(true);
+    try {
+      const { error } = await supabase.rpc('refresh_event_attendee_stats');
+      if (error) throw error;
+      toast({ title: "Success", description: "Event attendee stats refreshed successfully" });
+    } catch (error) {
+      console.error('Error refreshing event stats:', error);
+      toast({
+        title: "Error",
+        description: `Failed to refresh event stats: ${error.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setRefreshingEventStats(false);
+    }
+  };
+
   const getConfirmationMessage = () => {
     if (!pendingAction) return '';
     
@@ -508,12 +546,13 @@ export const AdminDashboard = () => {
 
         {/* Management Tabs */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="promos">Promos</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="receipts">Receipts</TabsTrigger>
+            <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="migration">Migration</TabsTrigger>
           </TabsList>
 
@@ -715,6 +754,57 @@ export const AdminDashboard = () => {
 
           <TabsContent value="receipts" className="space-y-4">
             <AdminReceiptManagement />
+          </TabsContent>
+
+          <TabsContent value="database" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="h-5 w-5" />
+                  Database Maintenance
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Materialized Views</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    These views cache aggregated data for better performance. They refresh automatically every 10 minutes, but you can manually refresh them here if needed.
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-semibold">Promo Review Stats</h4>
+                        <p className="text-sm text-muted-foreground">Caches review counts and average ratings for all promos</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        onClick={refreshPromoStats}
+                        disabled={refreshingPromoStats}
+                      >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${refreshingPromoStats ? 'animate-spin' : ''}`} />
+                        {refreshingPromoStats ? 'Refreshing...' : 'Refresh Stats'}
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-semibold">Event Attendee Stats</h4>
+                        <p className="text-sm text-muted-foreground">Caches attendee counts for all events</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        onClick={refreshEventStats}
+                        disabled={refreshingEventStats}
+                      >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${refreshingEventStats ? 'animate-spin' : ''}`} />
+                        {refreshingEventStats ? 'Refreshing...' : 'Refresh Stats'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="migration" className="space-y-4">
