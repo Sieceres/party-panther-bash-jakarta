@@ -49,6 +49,14 @@ interface Profile {
   is_admin: boolean;
   is_super_admin: boolean;
   is_verified: boolean;
+  profile_type: string | null;
+  business_name: string | null;
+  venue_whatsapp: string | null;
+  venue_address: string | null;
+  venue_opening_hours: string | null;
+  venue_status: string;
+  venue_applied_at: string | null;
+  venue_verified_at: string | null;
 }
 
 export const UserProfile = () => {
@@ -70,7 +78,11 @@ export const UserProfile = () => {
     age: '',
     instagram: '',
     whatsapp: '',
-    party_style: ''
+    party_style: '',
+    business_name: '',
+    venue_whatsapp: '',
+    venue_address: '',
+    venue_opening_hours: '',
   });
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -149,7 +161,11 @@ export const UserProfile = () => {
           age: profile.age?.toString() || '',
           instagram: profile.instagram || '',
           whatsapp: profile.whatsapp || '',
-          party_style: profile.party_style || ''
+          party_style: profile.party_style || '',
+          business_name: profile.business_name || '',
+          venue_whatsapp: profile.venue_whatsapp || '',
+          venue_address: profile.venue_address || '',
+          venue_opening_hours: profile.venue_opening_hours || '',
         });
       }
 
@@ -263,7 +279,7 @@ export const UserProfile = () => {
 
     setSaving(true);
     try {
-      const profileData = {
+      const profileData: any = {
         user_id: user.id,
         display_name: editForm.display_name || null,
         bio: editForm.bio || null,
@@ -273,8 +289,18 @@ export const UserProfile = () => {
         instagram: editForm.instagram || null,
         whatsapp: editForm.whatsapp || null,
         party_style: editForm.party_style || null,
+        business_name: editForm.business_name || null,
+        venue_whatsapp: editForm.venue_whatsapp || null,
+        venue_address: editForm.venue_address || null,
+        venue_opening_hours: editForm.venue_opening_hours || null,
         updated_at: new Date().toISOString()
       };
+
+      // If user is filling venue info for the first time, set status to pending
+      if (profile?.venue_status === 'none' && editForm.business_name && editForm.venue_whatsapp) {
+        profileData.venue_status = 'pending';
+        profileData.venue_applied_at = new Date().toISOString();
+      }
 
       console.log('Saving profile data:', profileData);
       console.log('Gender value being saved:', editForm.gender);
@@ -326,7 +352,11 @@ export const UserProfile = () => {
         age: profile.age?.toString() || '',
         instagram: profile.instagram || '',
         whatsapp: profile.whatsapp || '',
-        party_style: profile.party_style || ''
+        party_style: profile.party_style || '',
+        business_name: profile.business_name || '',
+        venue_whatsapp: profile.venue_whatsapp || '',
+        venue_address: profile.venue_address || '',
+        venue_opening_hours: profile.venue_opening_hours || '',
       });
     }
     setIsEditing(false);
@@ -649,6 +679,124 @@ export const UserProfile = () => {
                       )}
                     </div>
                   </div>
+
+                  {/* Venue Registration Section */}
+                  {profile?.venue_status !== 'verified' && (
+                    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg p-4 border border-purple-200/50">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="text-lg">🏢</div>
+                        <h4 className="font-medium text-base">Register as Venue</h4>
+                        {profile?.venue_status === 'pending' && (
+                          <Badge variant="secondary">Pending Review</Badge>
+                        )}
+                      </div>
+                      {profile?.venue_status === 'pending' ? (
+                        <p className="text-sm text-muted-foreground">
+                          Your venue application is pending admin review. We'll notify you once it's approved!
+                        </p>
+                      ) : (
+                        <>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            Are you a venue owner? Register to manage your venue and connect with party-goers!
+                          </p>
+                          <div className="space-y-3">
+                            <div>
+                              <Label htmlFor="business_name" className="text-sm font-medium">Business Name *</Label>
+                              <Input
+                                id="business_name"
+                                value={editForm.business_name}
+                                onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })}
+                                placeholder="Your venue or business name"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="venue_whatsapp" className="text-sm font-medium">Venue WhatsApp *</Label>
+                              <Input
+                                id="venue_whatsapp"
+                                value={editForm.venue_whatsapp}
+                                onChange={(e) => setEditForm({ ...editForm, venue_whatsapp: e.target.value })}
+                                placeholder="+62 XXX XXX XXXX"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="venue_address" className="text-sm font-medium">Venue Address</Label>
+                              <Input
+                                id="venue_address"
+                                value={editForm.venue_address}
+                                onChange={(e) => setEditForm({ ...editForm, venue_address: e.target.value })}
+                                placeholder="Full address of your venue"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="venue_opening_hours" className="text-sm font-medium">Opening Hours</Label>
+                              <Input
+                                id="venue_opening_hours"
+                                value={editForm.venue_opening_hours}
+                                onChange={(e) => setEditForm({ ...editForm, venue_opening_hours: e.target.value })}
+                                placeholder="e.g., Mon-Sat 6PM-2AM"
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {profile?.venue_status === 'verified' && (
+                    <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-lg p-4 border border-green-200/50">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="text-lg">✅</div>
+                        <h4 className="font-medium text-base">Verified Venue</h4>
+                        <Badge className="bg-green-500">Verified</Badge>
+                      </div>
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="business_name" className="text-sm font-medium">Business Name</Label>
+                          <Input
+                            id="business_name"
+                            value={editForm.business_name}
+                            onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })}
+                            placeholder="Your venue or business name"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="venue_whatsapp" className="text-sm font-medium">Venue WhatsApp</Label>
+                          <Input
+                            id="venue_whatsapp"
+                            value={editForm.venue_whatsapp}
+                            onChange={(e) => setEditForm({ ...editForm, venue_whatsapp: e.target.value })}
+                            placeholder="+62 XXX XXX XXXX"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="venue_address" className="text-sm font-medium">Venue Address</Label>
+                          <Input
+                            id="venue_address"
+                            value={editForm.venue_address}
+                            onChange={(e) => setEditForm({ ...editForm, venue_address: e.target.value })}
+                            placeholder="Full address of your venue"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="venue_opening_hours" className="text-sm font-medium">Opening Hours</Label>
+                          <Input
+                            id="venue_opening_hours"
+                            value={editForm.venue_opening_hours}
+                            onChange={(e) => setEditForm({ ...editForm, venue_opening_hours: e.target.value })}
+                            placeholder="e.g., Mon-Sat 6PM-2AM"
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
 
                   <ImageUpload
