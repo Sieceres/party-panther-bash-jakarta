@@ -5,8 +5,12 @@ export const getEventBySlugOrId = async (identifier: string) => {
   const { data: { user } } = await supabase.auth.getUser();
   
   // Use function that includes attendee counts and user-specific data
+  // Pass explicit NULL for optional parameters to avoid function overload ambiguity
   const { data: allEvents, error } = await supabase.rpc('get_events_with_details', {
-    user_id_param: user?.id || null
+    user_id_param: user?.id || null,
+    p_limit: null,
+    p_after_date: null,
+    p_after_time: null
   });
   
   if (error) {
