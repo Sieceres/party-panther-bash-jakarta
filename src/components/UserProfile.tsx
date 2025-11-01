@@ -915,18 +915,16 @@ export const UserProfile = () => {
                           Edit Profile
                         </Button>
                         <Button 
-                          variant="outline" 
                           onClick={handleShareProfile}
-                          className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
                         >
                           <Share2 className="w-4 h-4 mr-2" />
                           Share Profile
                         </Button>
                         {(profile?.is_admin || profile?.is_super_admin) && (
                           <Button
-                            variant="outline"
-                            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                             onClick={() => navigate('/admin')}
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground"
                           >
                             <Settings className="w-4 h-4 mr-2" />
                             Admin Dashboard
