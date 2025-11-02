@@ -81,13 +81,15 @@ export const AdminDashboard = () => {
         return;
       }
 
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('is_admin,is_super_admin')
+      // Check user_roles table for admin/superadmin status
+      const { data: roles, error } = await supabase
+        .from('user_roles')
+        .select('role')
         .eq('user_id', user.id)
-        .single();
+        .in('role', ['admin', 'superadmin']);
 
-      if (error || !profile) {
+      if (error) {
+        console.error('Error checking roles:', error);
         toast({
           title: "Access Denied",
           description: "Unable to verify your permissions",
@@ -97,7 +99,11 @@ export const AdminDashboard = () => {
         return;
       }
 
-      if (!profile.is_admin && !profile.is_super_admin) {
+      // Check if user has admin or superadmin role
+      const isAdmin = roles && roles.length > 0;
+      const isSuperAdminUser = roles && roles.some(r => r.role === 'superadmin');
+
+      if (!isAdmin) {
         toast({
           title: "Access Denied",
           description: "You don't have permission to access the admin dashboard",
@@ -108,7 +114,7 @@ export const AdminDashboard = () => {
       }
 
       setIsAuthorized(true);
-      setIsSuperAdmin(profile.is_super_admin);
+      setIsSuperAdmin(isSuperAdminUser);
     } catch (error) {
       console.error('Error checking authentication:', error);
       toast({
