@@ -66,6 +66,7 @@ export const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [userEvents, setUserEvents] = useState<EventWithSlug[]>([]);
   const [userPromos, setUserPromos] = useState<PromoWithSlug[]>([]);
   const [joinedEvents, setJoinedEvents] = useState<EventWithSlug[]>([]);
@@ -89,6 +90,26 @@ export const UserProfile = () => {
   const { userId } = useParams();
   const isAdminView = window.location.pathname.includes('/admin/user/');
   const isSharedProfile = window.location.pathname.includes('/profile/') && !!userId;
+
+  const checkAdminStatus = async (userId?: string) => {
+    if (!userId) {
+      setIsAdmin(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .single();
+
+      setIsAdmin(!!data && !error);
+    } catch (error) {
+      setIsAdmin(false);
+    }
+  };
 
   const fetchUserProfile = useCallback(async () => {
     try {
@@ -272,6 +293,21 @@ export const UserProfile = () => {
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile]);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+        checkAdminStatus(session?.user?.id);
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      checkAdminStatus(session?.user?.id);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSaveProfile = async () => {
     // ... (handleSaveProfile remains the same)
@@ -921,7 +957,7 @@ export const UserProfile = () => {
                           <Share2 className="w-4 h-4 mr-2" />
                           Share Profile
                         </Button>
-                        {(profile?.is_admin || profile?.is_super_admin) && (
+                        {isAdmin && (
                           <Button
                             onClick={() => navigate('/admin')}
                             className="bg-primary hover:bg-primary/90 text-primary-foreground"
