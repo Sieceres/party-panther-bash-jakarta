@@ -102,7 +102,7 @@ export const UserProfile = () => {
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .eq('role', 'admin')
+        .in('role', ['admin', 'superadmin'])
         .single();
 
       setIsAdmin(!!data && !error);
