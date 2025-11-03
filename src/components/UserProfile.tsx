@@ -916,6 +916,93 @@ export const UserProfile = () => {
                 </div>
               )}
 
+              {/* Venue Registration CTA & Status Cards (Non-Edit Mode) */}
+              {!isEditing && !isSharedProfile && (
+                <>
+                  {/* CTA Card for non-venue users */}
+                  {profile?.venue_status === 'none' && (
+                    <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-200/50 mt-6">
+                      <CardContent className="pt-6">
+                        <div className="flex items-start gap-4">
+                          <div className="text-4xl">🏢</div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold mb-1">
+                              Are you a venue owner?
+                            </h3>
+                            <p className="text-sm text-muted-foreground mb-4">
+                              Register as venue to create promos, manage events, and connect with Jakarta's party community!
+                            </p>
+                            <Button 
+                              onClick={() => setIsEditing(true)}
+                              className="bg-purple-600 hover:bg-purple-700"
+                            >
+                              Register as venue
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Pending Status Card */}
+                  {profile?.venue_status === 'pending' && (
+                    <Card className="bg-amber-50 border-amber-200 mt-6">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-2xl">⏳</span>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">Venue Application Pending</h3>
+                            <Badge variant="secondary">Under Review</Badge>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Your venue application is being reviewed by our team. 
+                          You'll receive a notification once it's approved!
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Verified Venue Card */}
+                  {profile?.venue_status === 'verified' && (
+                    <Card className="bg-green-50 border-green-200 mt-6">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-2xl">✅</span>
+                          <h3 className="font-semibold">Verified Venue</h3>
+                          <Badge className="bg-green-500">Verified</Badge>
+                        </div>
+                        <dl className="space-y-2 text-sm">
+                          {profile.business_name && (
+                            <div className="flex gap-2">
+                              <dt className="font-medium w-32">Business:</dt>
+                              <dd className="text-muted-foreground">{profile.business_name}</dd>
+                            </div>
+                          )}
+                          {profile.venue_whatsapp && (
+                            <div className="flex gap-2">
+                              <dt className="font-medium w-32">WhatsApp:</dt>
+                              <dd className="text-muted-foreground">{profile.venue_whatsapp}</dd>
+                            </div>
+                          )}
+                          {profile.venue_address && (
+                            <div className="flex gap-2">
+                              <dt className="font-medium w-32">Address:</dt>
+                              <dd className="text-muted-foreground">{profile.venue_address}</dd>
+                            </div>
+                          )}
+                          {profile.venue_opening_hours && (
+                            <div className="flex gap-2">
+                              <dt className="font-medium w-32">Hours:</dt>
+                              <dd className="text-muted-foreground">{profile.venue_opening_hours}</dd>
+                            </div>
+                          )}
+                        </dl>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              )}
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
