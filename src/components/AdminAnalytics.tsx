@@ -34,10 +34,11 @@ export const AdminAnalytics = () => {
       const startDate = subDays(endDate, days);
       
       const response = await fetch(
-        `/api/analytics?startdate=${format(startDate, 'yyyy-MM-dd')}&enddate=${format(endDate, 'yyyy-MM-dd')}&granularity=daily`,
+        `https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/analytics?startdate=${format(startDate, 'yyyy-MM-dd')}&enddate=${format(endDate, 'yyyy-MM-dd')}&granularity=daily`,
         {
           headers: {
             'Content-Type': 'application/json',
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFndHRiYWliaG16Ym1rbmpsZ2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MzAyODAsImV4cCI6MjA2NTUwNjI4MH0.jChcXNsowGgb4dz1WTnoTWrBPTK8HeZsUjQA1Mhe5gc'
           },
         }
       );

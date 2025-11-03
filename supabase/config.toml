@@ -1,5 +1,8 @@
 project_id = "qgttbaibhmzbmknjlghj"
 
+[functions.analytics]
+verify_jwt = false
+
 [functions.secure-delete]
 verify_jwt = true
 
