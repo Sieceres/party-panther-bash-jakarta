@@ -58,6 +58,13 @@
     /* Link colors for better contrast */
     --link: 193 100% 65%;
     --link-hover: 210 100% 70%;
+    
+    /* Chart colors - vibrant and visible on dark backgrounds */
+    --chart-1: 193 100% 65%; /* Neon cyan */
+    --chart-2: 280 100% 70%; /* Bright purple */
+    --chart-3: 123 100% 65%; /* Neon green */
+    --chart-4: 340 100% 65%; /* Hot pink */
+    --chart-5: 45 100% 60%; /* Bright gold */
   }
 
   .light {
@@ -96,6 +103,13 @@
     /* Link colors for light mode */
     --link: 210 100% 45%;
     --link-hover: 193 100% 50%;
+    
+    /* Chart colors - adjusted for light mode visibility */
+    --chart-1: 210 100% 50%; /* Deep cyan */
+    --chart-2: 280 100% 55%; /* Deep purple */
+    --chart-3: 145 85% 40%; /* Forest green */
+    --chart-4: 340 85% 50%; /* Deep pink */
+    --chart-5: 35 100% 45%; /* Deep gold */
   }
 }
 
