@@ -18,7 +18,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2, Heart, Eye, Settings } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2, Heart, Eye, Settings, Building2 } from "lucide-react";
 import { ReportDialog } from "./ReportDialog";
 import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,6 +76,7 @@ export const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showVenueDialog, setShowVenueDialog] = useState(false);
   const [userEvents, setUserEvents] = useState<EventWithSlug[]>([]);
   const [userPromos, setUserPromos] = useState<PromoWithSlug[]>([]);
   const [joinedEvents, setJoinedEvents] = useState<EventWithSlug[]>([]);
@@ -716,69 +726,101 @@ export const UserProfile = () => {
                     </div>
                   </div>
 
-                  {/* Venue Registration Section */}
-                  {profile?.venue_status !== 'verified' && (
+                  {/* Venue Registration Button */}
+                  {profile?.venue_status === 'none' && (
                     <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg p-4 border border-purple-200/50">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="text-lg">🏢</div>
-                        <h4 className="font-medium text-base">Register as Venue</h4>
-                        {profile?.venue_status === 'pending' && (
-                          <Badge variant="secondary">Pending Review</Badge>
-                        )}
-                      </div>
-                      {profile?.venue_status === 'pending' ? (
-                        <p className="text-sm text-muted-foreground">
-                          Your venue application is pending admin review. We'll notify you once it's approved!
-                        </p>
-                      ) : (
-                        <>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Are you a venue owner? Register to manage your venue and connect with party-goers!
-                          </p>
-                          <div className="space-y-3">
-                            <div>
-                              <Label htmlFor="business_name" className="text-sm font-medium">Business Name *</Label>
-                              <Input
-                                id="business_name"
-                                value={editForm.business_name}
-                                onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })}
-                                placeholder="Your venue or business name"
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="venue_whatsapp" className="text-sm font-medium">Venue WhatsApp *</Label>
-                              <Input
-                                id="venue_whatsapp"
-                                value={editForm.venue_whatsapp}
-                                onChange={(e) => setEditForm({ ...editForm, venue_whatsapp: e.target.value })}
-                                placeholder="+62 XXX XXX XXXX"
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="venue_address" className="text-sm font-medium">Venue Address</Label>
-                              <Input
-                                id="venue_address"
-                                value={editForm.venue_address}
-                                onChange={(e) => setEditForm({ ...editForm, venue_address: e.target.value })}
-                                placeholder="Full address of your venue"
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="venue_opening_hours" className="text-sm font-medium">Opening Hours</Label>
-                              <Input
-                                id="venue_opening_hours"
-                                value={editForm.venue_opening_hours}
-                                onChange={(e) => setEditForm({ ...editForm, venue_opening_hours: e.target.value })}
-                                placeholder="e.g., Mon-Sat 6PM-2AM"
-                                className="mt-1"
-                              />
-                            </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-5 h-5 text-purple-600" />
+                          <div>
+                            <h4 className="font-medium text-base">Are you a venue owner?</h4>
+                            <p className="text-sm text-muted-foreground">Register to manage your venue and connect with party-goers!</p>
                           </div>
-                        </>
-                      )}
+                        </div>
+                        <Dialog open={showVenueDialog} onOpenChange={setShowVenueDialog}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" className="border-purple-300 hover:bg-purple-50">
+                              Register as Venue
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[500px]">
+                            <DialogHeader>
+                              <DialogTitle>Register as Venue</DialogTitle>
+                              <DialogDescription>
+                                Fill in your venue details to get started. Our team will review your application.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                              <div>
+                                <Label htmlFor="business_name" className="text-sm font-medium">Business Name *</Label>
+                                <Input
+                                  id="business_name"
+                                  value={editForm.business_name}
+                                  onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })}
+                                  placeholder="Your venue or business name"
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="venue_whatsapp" className="text-sm font-medium">Venue WhatsApp *</Label>
+                                <Input
+                                  id="venue_whatsapp"
+                                  value={editForm.venue_whatsapp}
+                                  onChange={(e) => setEditForm({ ...editForm, venue_whatsapp: e.target.value })}
+                                  placeholder="+62 XXX XXX XXXX"
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="venue_address" className="text-sm font-medium">Venue Address</Label>
+                                <Input
+                                  id="venue_address"
+                                  value={editForm.venue_address}
+                                  onChange={(e) => setEditForm({ ...editForm, venue_address: e.target.value })}
+                                  placeholder="Full address of your venue"
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="venue_opening_hours" className="text-sm font-medium">Opening Hours</Label>
+                                <Input
+                                  id="venue_opening_hours"
+                                  value={editForm.venue_opening_hours}
+                                  onChange={(e) => setEditForm({ ...editForm, venue_opening_hours: e.target.value })}
+                                  placeholder="e.g., Mon-Sat 6PM-2AM"
+                                  className="mt-1"
+                                />
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <Button variant="outline" onClick={() => setShowVenueDialog(false)}>
+                                Cancel
+                              </Button>
+                              <Button onClick={() => {
+                                setShowVenueDialog(false);
+                                // Fields are already in editForm, will be saved when user clicks Save Profile
+                              }}>
+                                Continue
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </div>
+                  )}
+
+                  {profile?.venue_status === 'pending' && (
+                    <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-lg p-4 border border-amber-200/50">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-5 h-5 text-amber-600" />
+                        <div>
+                          <h4 className="font-medium text-base">Venue Registration Pending</h4>
+                          <Badge variant="secondary" className="mt-1">Pending Review</Badge>
+                          <p className="text-sm text-muted-foreground mt-2">
+                            Your venue application is under review. We'll notify you once it's approved!
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
 
