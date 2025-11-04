@@ -116,14 +116,14 @@ export const EventDetailPage = () => {
         setUser(user);
         
         if (user) {
-          // Check if user is admin
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_admin, is_super_admin')
+          // Check if user is admin using the new user_roles table
+          const { data: roles } = await supabase
+            .from('user_roles')
+            .select('role')
             .eq('user_id', user.id)
-            .single();
+            .in('role', ['admin', 'superadmin']);
           
-          setIsAdmin(profile?.is_admin || profile?.is_super_admin || false);
+          setIsAdmin(roles && roles.length > 0);
         }
 
         // Check if user has joined this event
@@ -153,7 +153,7 @@ export const EventDetailPage = () => {
           const userIds = [...new Set(commentsData.map(comment => comment.user_id))];
           const { data: profilesData } = await supabase
             .from('profiles')
-            .select('user_id, display_name, avatar_url')
+            .select('user_id, display_name, avatar_url, is_verified')
             .in('user_id', userIds);
 
           // Join comments with profiles
@@ -176,7 +176,7 @@ export const EventDetailPage = () => {
           const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
           const { data: profilesData } = await supabase
             .from('profiles')
-            .select('user_id, display_name, avatar_url, is_verified, is_admin, is_super_admin')
+            .select('user_id, display_name, avatar_url, is_verified')
             .in('user_id', userIds);
 
           // Join attendees with profiles
@@ -264,21 +264,21 @@ export const EventDetailPage = () => {
           .eq('event_id', event.id)
           .order('joined_at', { ascending: false });
 
-      if (attendeesData) {
-        // Fetch profiles for attendees
-        const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
-        const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('user_id, display_name, avatar_url, is_verified, is_admin, is_super_admin')
-          .in('user_id', userIds);
+        if (attendeesData) {
+          // Fetch profiles for attendees
+          const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('user_id, display_name, avatar_url, is_verified')
+            .in('user_id', userIds);
 
-        // Join attendees with profiles
-        const attendeesWithProfiles = attendeesData.map(attendee => ({
-          ...attendee,
-          profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
-        }));
-        setAttendees(attendeesWithProfiles);
-      }
+          // Join attendees with profiles
+          const attendeesWithProfiles = attendeesData.map(attendee => ({
+            ...attendee,
+            profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
+          }));
+          setAttendees(attendeesWithProfiles);
+        }
     } catch (error) {
       console.error('Error joining event:', error);
       toast({
@@ -323,7 +323,7 @@ export const EventDetailPage = () => {
         const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
         const { data: profilesData } = await supabase
           .from('profiles')
-          .select('user_id, display_name, avatar_url, is_verified, is_admin, is_super_admin')
+          .select('user_id, display_name, avatar_url, is_verified')
           .in('user_id', userIds);
 
         // Join attendees with profiles
@@ -640,7 +640,7 @@ export const EventDetailPage = () => {
       const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
       const { data: profilesData } = await supabase
         .from('profiles')
-        .select('user_id, display_name, avatar_url, is_verified, is_admin, is_super_admin')
+        .select('user_id, display_name, avatar_url, is_verified')
         .in('user_id', userIds);
 
       const attendeesWithProfiles = attendeesData.map(attendee => ({

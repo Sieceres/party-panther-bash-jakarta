@@ -682,22 +682,19 @@ export const AdminDashboard = () => {
                           <span>Joined: {new Date(user.created_at).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Badge variant={user.profile_type === 'business' ? 'default' : 'secondary'}>
-                            {user.profile_type}
+                          <Badge variant={user.roles?.some(r => r.role === 'user') ? 'secondary' : 'default'}>
+                            {user.roles?.find(r => r.role === 'superadmin') ? 'Super Admin' : 
+                             user.roles?.find(r => r.role === 'admin') ? 'Admin' : 
+                             user.profile_type}
                           </Badge>
                           {user.is_verified && (
                             <Badge variant="outline" className="text-green-600 border-green-600">
                               Verified
                             </Badge>
                           )}
-                          {user.is_admin && (
+                          {user.roles?.some(r => r.role === 'admin' || r.role === 'superadmin') && (
                             <Badge variant="destructive">
-                              Admin
-                            </Badge>
-                          )}
-                          {user.is_super_admin && (
-                            <Badge variant="destructive">
-                              Super Admin
+                              {user.roles.find(r => r.role === 'superadmin') ? 'Super Admin' : 'Admin'}
                             </Badge>
                           )}
                         </div>
@@ -719,10 +716,10 @@ export const AdminDashboard = () => {
                             type: 'makeAdmin', 
                             id: user.id, 
                             userName: user.display_name || 'Unnamed User',
-                            isCurrentlyAdmin: user.is_admin 
+                            isCurrentlyAdmin: user.roles?.some(r => r.role === 'admin' || r.role === 'superadmin') || false
                           })}
                         >
-                          {user.is_admin ? 'Revoke Admin' : 'Make Admin'}
+                          {user.roles?.some(r => r.role === 'admin' || r.role === 'superadmin') ? 'Revoke Admin' : 'Make Admin'}
                         </Button>
                         {isSuperAdmin && (
                           <Button 
@@ -732,10 +729,10 @@ export const AdminDashboard = () => {
                               type: 'makeSuperAdmin', 
                               id: user.id, 
                               userName: user.display_name || 'Unnamed User',
-                              isCurrentlySuperAdmin: user.is_super_admin 
+                              isCurrentlySuperAdmin: user.roles?.some(r => r.role === 'superadmin') || false
                             })}
                           >
-                            {user.is_super_admin ? 'Revoke Super Admin' : 'Make Super Admin'}
+                            {user.roles?.some(r => r.role === 'superadmin') ? 'Revoke Super Admin' : 'Make Super Admin'}
                           </Button>
                         )}
                         <Button 
