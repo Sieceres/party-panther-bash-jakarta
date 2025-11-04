@@ -51,14 +51,15 @@ serve(async (req) => {
       }
     );
 
-    // Check user's admin status
-    const { data: profile } = await adminClient
-      .from('profiles')
-      .select('is_admin, is_super_admin')
+    // Check user's admin status using user_roles table
+    const { data: userRole } = await adminClient
+      .from('user_roles')
+      .select('role')
       .eq('user_id', user.id)
+      .in('role', ['admin', 'superadmin'])
       .single();
 
-    const isAdmin = profile?.is_admin === true || profile?.is_super_admin === true;
+    const isAdmin = userRole?.role === 'admin' || userRole?.role === 'superadmin';
 
     if (event_id || type === 'event') {
       const id = event_id;
@@ -145,7 +146,7 @@ serve(async (req) => {
       const id = user_id;
       
       // Only super admins can delete users
-      if (!profile?.is_super_admin) {
+      if (userRole?.role !== 'superadmin') {
         return new Response(JSON.stringify({ error: 'Only super admins can delete users' }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 403,
@@ -192,7 +193,9 @@ serve(async (req) => {
     }
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    // Never expose error details to client - log server-side only
+    console.error('Delete operation failed:', error);
+    return new Response(JSON.stringify({ error: 'Operation failed. Please try again.' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     })

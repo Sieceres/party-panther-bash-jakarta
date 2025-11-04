@@ -6,6 +6,7 @@ import { Calendar, User as UserIcon, Star, Edit2, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -78,13 +79,8 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
     }
 
     // Check if user is owner or admin
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin, is_super_admin')
-      .eq('user_id', user.id)
-      .single();
-    
-    const isAdmin = profile?.is_admin || profile?.is_super_admin || false;
+    const adminStatus = await checkUserAdminStatus(user.id);
+    const isAdmin = adminStatus.is_admin || adminStatus.is_super_admin;
     const isOwner = user.id === event.created_by;
     
     if (!isOwner && !isAdmin) {

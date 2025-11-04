@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -101,13 +102,8 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
     }
 
     // Check if user is owner or admin
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin, is_super_admin')
-      .eq('user_id', user.id)
-      .single();
-    
-    const isAdmin = profile?.is_admin || profile?.is_super_admin || false;
+    const adminStatus = await checkUserAdminStatus(user.id);
+    const isAdmin = adminStatus.is_admin || adminStatus.is_super_admin;
     const isOwner = user.id === promo.created_by;
     
     if (!isOwner && !isAdmin) {

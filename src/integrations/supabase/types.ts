@@ -320,8 +320,6 @@ export type Database = {
           gender: string | null
           id: string
           instagram: string | null
-          is_admin: boolean
-          is_super_admin: boolean
           is_verified: boolean | null
           party_style: string | null
           profile_type: string | null
@@ -346,8 +344,6 @@ export type Database = {
           gender?: string | null
           id?: string
           instagram?: string | null
-          is_admin?: boolean
-          is_super_admin?: boolean
           is_verified?: boolean | null
           party_style?: string | null
           profile_type?: string | null
@@ -372,8 +368,6 @@ export type Database = {
           gender?: string | null
           id?: string
           instagram?: string | null
-          is_admin?: boolean
-          is_super_admin?: boolean
           is_verified?: boolean | null
           party_style?: string | null
           profile_type?: string | null
@@ -1008,6 +1002,8 @@ export type Database = {
       get_user_role:
         | { Args: { _user_id: string }; Returns: string }
         | { Args: never; Returns: string }
+      has_admin_role: { Args: { _user_id: string }; Returns: boolean }
+      has_superadmin_role: { Args: { _user_id: string }; Returns: boolean }
       is_admin_or_superadmin: { Args: { _user_id: string }; Returns: boolean }
       is_current_user_admin: { Args: never; Returns: boolean }
       is_event_co_organizer: {

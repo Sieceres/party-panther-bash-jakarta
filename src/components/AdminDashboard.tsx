@@ -38,12 +38,12 @@ interface Promo {
 
 interface User {
   id: string;
+  user_id: string;
   display_name: string;
   profile_type: string;
   created_at: string;
   is_verified: boolean;
-  is_admin: boolean;
-  is_super_admin: boolean;
+  roles?: { role: string }[];
 }
 
 export const AdminDashboard = () => {
@@ -144,7 +144,15 @@ export const AdminDashboard = () => {
           error: result.error 
         })),
         supabase.from('promos').select('id, title, venue_name, discount_text, valid_until, created_at, slug').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('id, display_name, profile_type, created_at, is_verified, is_admin, is_super_admin').order('created_at', { ascending: false })
+        supabase.from('profiles').select(`
+          id,
+          user_id,
+          display_name,
+          profile_type,
+          created_at,
+          is_verified,
+          user_roles!inner(role)
+        `).order('created_at', { ascending: false })
       ]);
 
       if (eventsData.error) throw eventsData.error;
@@ -325,10 +333,8 @@ export const AdminDashboard = () => {
       
       console.log('Admin role update successful:', result);
       
-      // Update local state
-      setUsers(users.map(user => 
-        user.id === userId ? { ...user, is_admin: isAdmin } : user
-      ));
+      // Refresh data to get updated roles
+      await fetchData();
       
       toast({
         title: "Success",
@@ -371,10 +377,8 @@ export const AdminDashboard = () => {
       
       console.log('Super admin role update successful:', result);
       
-      // Update local state
-      setUsers(users.map(user => 
-        user.id === userId ? { ...user, is_super_admin: isSuperAdmin } : user
-      ));
+      // Refresh data to get updated roles
+      await fetchData();
       
       toast({
         title: "Success",
