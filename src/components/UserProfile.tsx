@@ -27,7 +27,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2, Heart, Eye, Settings, Building2 } from "lucide-react";
+import { User, Star, Calendar, Edit, Save, X, ArrowLeft, Trash2, Gift, Share2, Heart, Eye, Settings, Building2, Pencil } from "lucide-react";
 import { ReportDialog } from "./ReportDialog";
 import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
@@ -90,6 +90,7 @@ export const UserProfile = () => {
     instagram: '',
     whatsapp: '',
     party_style: '',
+    custom_party_style: '',
     business_name: '',
     venue_whatsapp: '',
     venue_address: '',
@@ -184,6 +185,7 @@ export const UserProfile = () => {
         console.log('Profile loaded:', profile);
         console.log('Gender from profile:', profile.gender);
         setProfile(profile);
+        const isCustomPartyStyle = profile.party_style && !['clubbing', 'rooftop-parties', 'underground-raves', 'beach-parties', 'live-music', 'cocktail-lounges', 'casual-hangouts', 'vip-experiences'].includes(profile.party_style);
         setEditForm({
           display_name: profile.display_name || '',
           bio: profile.bio || '',
@@ -192,7 +194,8 @@ export const UserProfile = () => {
           age: profile.age?.toString() || '',
           instagram: profile.instagram || '',
           whatsapp: profile.whatsapp || '',
-          party_style: profile.party_style || '',
+          party_style: isCustomPartyStyle ? 'custom' : (profile.party_style || ''),
+          custom_party_style: isCustomPartyStyle ? profile.party_style : '',
           business_name: profile.business_name || '',
           venue_whatsapp: profile.venue_whatsapp || '',
           venue_address: profile.venue_address || '',
@@ -334,7 +337,7 @@ export const UserProfile = () => {
         age: editForm.age ? parseInt(editForm.age) : null,
         instagram: editForm.instagram || null,
         whatsapp: editForm.whatsapp || null,
-        party_style: editForm.party_style || null,
+        party_style: editForm.party_style === 'custom' ? editForm.custom_party_style : editForm.party_style || null,
         business_name: editForm.business_name || null,
         venue_whatsapp: editForm.venue_whatsapp || null,
         venue_address: editForm.venue_address || null,
@@ -390,6 +393,7 @@ export const UserProfile = () => {
   const handleCancelEdit = () => {
     // ... (handleCancelEdit remains the same)
      if (profile) {
+      const isCustomPartyStyle = profile.party_style && !['clubbing', 'rooftop-parties', 'underground-raves', 'beach-parties', 'live-music', 'cocktail-lounges', 'casual-hangouts', 'vip-experiences'].includes(profile.party_style);
       setEditForm({
         display_name: profile.display_name || '',
         bio: profile.bio || '',
@@ -398,7 +402,8 @@ export const UserProfile = () => {
         age: profile.age?.toString() || '',
         instagram: profile.instagram || '',
         whatsapp: profile.whatsapp || '',
-        party_style: profile.party_style || '',
+        party_style: isCustomPartyStyle ? 'custom' : (profile.party_style || ''),
+        custom_party_style: isCustomPartyStyle ? profile.party_style : '',
         business_name: profile.business_name || '',
         venue_whatsapp: profile.venue_whatsapp || '',
         venue_address: profile.venue_address || '',
@@ -586,15 +591,27 @@ export const UserProfile = () => {
           <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-6">
             {/* Profile Image */}
             <div className="relative">
-              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-primary neon-glow">
-                  <img
-                    src={isEditing ? editForm.avatar_url || avatarUrl || defaultAvatar : avatarUrl || defaultAvatar}
-                    alt={displayName}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = defaultAvatar;
-                    }}
-                  />
+              <div 
+                className="w-24 h-24 rounded-full overflow-hidden border-4 border-primary neon-glow cursor-pointer group"
+                onClick={() => {
+                  if (isEditing || (!isSharedProfile && user?.id === profile?.user_id)) {
+                    document.getElementById('avatar-upload-trigger')?.click();
+                  }
+                }}
+              >
+                <img
+                  src={isEditing ? editForm.avatar_url || avatarUrl || defaultAvatar : avatarUrl || defaultAvatar}
+                  alt={displayName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = defaultAvatar;
+                  }}
+                />
+                {(isEditing || (!isSharedProfile && user?.id === profile?.user_id)) && (
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Pencil className="w-6 h-6 text-white" />
+                  </div>
+                )}
               </div>
               <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                 <Star className="w-4 h-4 text-primary-foreground fill-current" />
@@ -681,8 +698,19 @@ export const UserProfile = () => {
                         <SelectItem value="cocktail-lounges">🍹 Cocktail Lounges</SelectItem>
                         <SelectItem value="casual-hangouts">😎 Casual Hangouts</SelectItem>
                         <SelectItem value="vip-experiences">✨ VIP Experiences</SelectItem>
+                        <SelectItem value="custom">✍️ Custom Style</SelectItem>
                       </SelectContent>
                     </Select>
+                    {editForm.party_style === 'custom' && (
+                      <div className="mt-3">
+                        <Input
+                          value={editForm.custom_party_style}
+                          onChange={(e) => setEditForm({ ...editForm, custom_party_style: e.target.value })}
+                          placeholder="Enter your custom party style..."
+                          className="border-primary/30 focus:border-primary"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-muted/20 rounded-lg p-4 border border-green-200/50">
@@ -726,88 +754,54 @@ export const UserProfile = () => {
                     </div>
                   </div>
 
-                  {/* Venue Registration Button */}
-                  {profile?.venue_status === 'none' && (
-                    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg p-4 border border-purple-200/50">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-5 h-5 text-purple-600" />
-                          <div>
-                            <h4 className="font-medium text-base">Are you a venue owner?</h4>
-                            <p className="text-sm text-muted-foreground">Register to manage your venue and connect with party-goers!</p>
-                          </div>
-                        </div>
-                        <Dialog open={showVenueDialog} onOpenChange={setShowVenueDialog}>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" className="border-purple-300 hover:bg-purple-50">
-                              Register as Venue
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="sm:max-w-[500px]">
-                            <DialogHeader>
-                              <DialogTitle>Register as Venue</DialogTitle>
-                              <DialogDescription>
-                                Fill in your venue details to get started. Our team will review your application.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4 py-4">
-                              <div>
-                                <Label htmlFor="business_name" className="text-sm font-medium">Business Name *</Label>
-                                <Input
-                                  id="business_name"
-                                  value={editForm.business_name}
-                                  onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })}
-                                  placeholder="Your venue or business name"
-                                  className="mt-1"
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor="venue_whatsapp" className="text-sm font-medium">Venue WhatsApp *</Label>
-                                <Input
-                                  id="venue_whatsapp"
-                                  value={editForm.venue_whatsapp}
-                                  onChange={(e) => setEditForm({ ...editForm, venue_whatsapp: e.target.value })}
-                                  placeholder="+62 XXX XXX XXXX"
-                                  className="mt-1"
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor="venue_address" className="text-sm font-medium">Venue Address</Label>
-                                <Input
-                                  id="venue_address"
-                                  value={editForm.venue_address}
-                                  onChange={(e) => setEditForm({ ...editForm, venue_address: e.target.value })}
-                                  placeholder="Full address of your venue"
-                                  className="mt-1"
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor="venue_opening_hours" className="text-sm font-medium">Opening Hours</Label>
-                                <Input
-                                  id="venue_opening_hours"
-                                  value={editForm.venue_opening_hours}
-                                  onChange={(e) => setEditForm({ ...editForm, venue_opening_hours: e.target.value })}
-                                  placeholder="e.g., Mon-Sat 6PM-2AM"
-                                  className="mt-1"
-                                />
-                              </div>
-                            </div>
-                            <DialogFooter>
-                              <Button variant="outline" onClick={() => setShowVenueDialog(false)}>
-                                Cancel
-                              </Button>
-                              <Button onClick={() => {
-                                setShowVenueDialog(false);
-                                // Fields are already in editForm, will be saved when user clicks Save Profile
-                              }}>
-                                Continue
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-                      </div>
-                    </div>
-                  )}
+                  {/* Hidden file input for avatar upload */}
+                  <Input
+                    id="avatar-upload-trigger"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      
+                      try {
+                        const { data: { user } } = await supabase.auth.getUser();
+                        if (!user) {
+                          toast({
+                            title: "Error",
+                            description: "You must be logged in to upload images",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        // Preview immediately
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                          const result = e.target?.result as string;
+                          setEditForm({ ...editForm, avatar_url: result });
+                        };
+                        reader.readAsDataURL(file);
+
+                        // Upload to Supabase Storage
+                        const { uploadImage } = await import('@/lib/supabase-storage');
+                        const publicUrl = await uploadImage(file, 'events', user.id);
+                        
+                        setEditForm({ ...editForm, avatar_url: publicUrl });
+                        toast({
+                          title: "Success",
+                          description: "Avatar uploaded successfully!",
+                        });
+                      } catch (error) {
+                        console.error("Upload error:", error);
+                        toast({
+                          title: "Error",
+                          description: "Failed to upload avatar",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  />
 
                   {profile?.venue_status === 'pending' && (
                     <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-lg p-4 border border-amber-200/50">
@@ -974,12 +968,75 @@ export const UserProfile = () => {
                             <p className="text-sm text-muted-foreground mb-4">
                               Register as venue to create promos, manage events, and connect with Jakarta's party community!
                             </p>
-                            <Button 
-                              onClick={() => setIsEditing(true)}
-                              className="bg-purple-600 hover:bg-purple-700"
-                            >
-                              Register as venue
-                            </Button>
+                            <Dialog open={showVenueDialog} onOpenChange={setShowVenueDialog}>
+                              <DialogTrigger asChild>
+                                <Button className="bg-purple-600 hover:bg-purple-700">
+                                  <Building2 className="w-4 h-4 mr-2" />
+                                  Register as Venue
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-[500px]">
+                                <DialogHeader>
+                                  <DialogTitle>Register as Venue</DialogTitle>
+                                  <DialogDescription>
+                                    Fill in your venue details to get started. Our team will review your application.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                  <div>
+                                    <Label htmlFor="business_name_dialog" className="text-sm font-medium">Business Name *</Label>
+                                    <Input
+                                      id="business_name_dialog"
+                                      value={editForm.business_name}
+                                      onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })}
+                                      placeholder="Your venue or business name"
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="venue_whatsapp_dialog" className="text-sm font-medium">Venue WhatsApp *</Label>
+                                    <Input
+                                      id="venue_whatsapp_dialog"
+                                      value={editForm.venue_whatsapp}
+                                      onChange={(e) => setEditForm({ ...editForm, venue_whatsapp: e.target.value })}
+                                      placeholder="+62 XXX XXX XXXX"
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="venue_address_dialog" className="text-sm font-medium">Venue Address</Label>
+                                    <Input
+                                      id="venue_address_dialog"
+                                      value={editForm.venue_address}
+                                      onChange={(e) => setEditForm({ ...editForm, venue_address: e.target.value })}
+                                      placeholder="Full address of your venue"
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="venue_opening_hours_dialog" className="text-sm font-medium">Opening Hours</Label>
+                                    <Input
+                                      id="venue_opening_hours_dialog"
+                                      value={editForm.venue_opening_hours}
+                                      onChange={(e) => setEditForm({ ...editForm, venue_opening_hours: e.target.value })}
+                                      placeholder="e.g., Mon-Sat 6PM-2AM"
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                </div>
+                                <DialogFooter>
+                                  <Button variant="outline" onClick={() => setShowVenueDialog(false)}>
+                                    Cancel
+                                  </Button>
+                                  <Button onClick={async () => {
+                                    setShowVenueDialog(false);
+                                    await handleSaveProfile();
+                                  }}>
+                                    Submit Application
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
                           </div>
                         </div>
                       </CardContent>
