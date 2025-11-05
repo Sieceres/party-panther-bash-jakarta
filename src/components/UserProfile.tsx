@@ -208,9 +208,7 @@ export const UserProfile = () => {
       
       if (targetUserId) {
         const { data: eventsData, error: eventsError } = await supabase
-          .rpc('get_events_safe')
-          .eq('created_by', targetUserId)
-          .order('created_at', { ascending: false });
+          .rpc('get_events_safe');
 
         if (eventsError) {
           console.error('Error fetching user events:', eventsError);
@@ -220,7 +218,9 @@ export const UserProfile = () => {
             variant: "destructive",
           });
         } else {
-          setUserEvents((eventsData?.map((event: any) => ({ ...event, slug: event.slug || null })) as EventWithSlug[]) || []);
+          // Filter events by the target user ID
+          const filteredEvents = eventsData?.filter((event: any) => event.created_by === targetUserId) || [];
+          setUserEvents(filteredEvents.map((event: any) => ({ ...event, slug: event.slug || null })) as EventWithSlug[]);
         }
 
         // Fetch promos created by the user
