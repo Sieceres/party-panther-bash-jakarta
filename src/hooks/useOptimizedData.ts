@@ -118,6 +118,8 @@ export function useOptimizedData() {
       // Process events data
       const eventsData = (eventsResult.data || []).map((event: any) => ({
         ...event,
+        // Explicitly include created_by to ensure it's always present
+        created_by: event.created_by,
         // Handle both detailed and simple function results
         attendees: Number(event.attendee_count) || 0,
         isJoined: Boolean(event.is_joined) || false,
@@ -132,6 +134,8 @@ export function useOptimizedData() {
       // Process promos data  
       const promosData = (promosResult.data || []).map((promo: any) => ({
         ...promo,
+        // Explicitly include created_by to ensure it's always present
+        created_by: promo.created_by,
         slug: promo.slug || null,
         // Map the database fields to component expected fields
         discount: promo.discount_text,
