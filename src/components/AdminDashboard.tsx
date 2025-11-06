@@ -150,8 +150,7 @@ export const AdminDashboard = () => {
           display_name,
           profile_type,
           created_at,
-          is_verified,
-          user_roles!inner(role)
+          is_verified
         `).order('created_at', { ascending: false })
       ]);
 
