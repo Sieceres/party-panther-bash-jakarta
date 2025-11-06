@@ -956,7 +956,7 @@ export const UserProfile = () => {
               {!isEditing && !isSharedProfile && (
                 <>
                   {/* CTA Card for non-venue users */}
-                  {profile?.venue_status === 'none' && (
+                  {(!profile?.venue_status || profile?.venue_status === 'none') && (
                     <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-200/50 mt-6">
                       <CardContent className="pt-6">
                         <div className="flex items-start gap-4">
