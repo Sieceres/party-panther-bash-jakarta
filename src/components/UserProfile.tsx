@@ -77,6 +77,9 @@ export const UserProfile = () => {
   const [saving, setSaving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showVenueDialog, setShowVenueDialog] = useState(false);
+  const [venueCtaDismissed, setVenueCtaDismissed] = useState(() => {
+    return localStorage.getItem('venueCtaDismissed') === 'true';
+  });
   const [userEvents, setUserEvents] = useState<EventWithSlug[]>([]);
   const [userPromos, setUserPromos] = useState<PromoWithSlug[]>([]);
   const [joinedEvents, setJoinedEvents] = useState<EventWithSlug[]>([]);
@@ -956,18 +959,30 @@ export const UserProfile = () => {
               {!isEditing && !isSharedProfile && (
                 <>
                   {/* CTA Card for non-venue users */}
-                  {(!profile?.venue_status || profile?.venue_status === 'none') && (
+                  {(!profile?.venue_status || profile?.venue_status === 'none') && !venueCtaDismissed && (
                     <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-200/50 mt-6">
                       <CardContent className="pt-6">
-                        <div className="flex items-start gap-4">
-                          <div className="text-4xl">🏢</div>
-                          <div className="flex-1">
-                            <h3 className="text-lg font-semibold mb-1">
-                              Are you a venue owner?
-                            </h3>
-                            <p className="text-sm text-muted-foreground mb-4">
-                              Register as venue to create promos, manage events, and connect with Jakarta's party community!
-                            </p>
+                        <div className="relative">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-8 w-8"
+                            onClick={() => {
+                              setVenueCtaDismissed(true);
+                              localStorage.setItem('venueCtaDismissed', 'true');
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                          <div className="flex items-start gap-4">
+                            <div className="text-4xl">🏢</div>
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold mb-1">
+                                Are you a venue owner?
+                              </h3>
+                              <p className="text-sm text-muted-foreground mb-4">
+                                Register as venue to create promos, manage events, and connect with Jakarta's party community!
+                              </p>
                             <Dialog open={showVenueDialog} onOpenChange={setShowVenueDialog}>
                               <DialogTrigger asChild>
                                 <Button className="bg-purple-600 hover:bg-purple-700">
@@ -1038,6 +1053,7 @@ export const UserProfile = () => {
                               </DialogContent>
                             </Dialog>
                           </div>
+                            </div>
                         </div>
                       </CardContent>
                     </Card>
