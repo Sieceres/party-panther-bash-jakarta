@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Star, Share2 } from "lucide-react";
+import { MapPin, ArrowLeft, Star, Share2, User as UserIcon, BadgeCheck } from "lucide-react";
 import { GoogleMap } from "./GoogleMap";
 import { ReviewsList } from "./ReviewsList";
 import { ReportDialog } from "./ReportDialog";
@@ -35,6 +35,7 @@ interface Promo {
   area: string;
   drink_type: string;
   created_at: string;
+  created_by: string;
 }
 
 export const PromoDetailPage = () => {
@@ -45,6 +46,7 @@ export const PromoDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
+  const [creatorProfile, setCreatorProfile] = useState<any>(null);
 
   useEffect(() => {
     const fetchPromo = async () => {
@@ -59,6 +61,17 @@ export const PromoDetailPage = () => {
           throw new Error('Promo not found');
         }
         setPromo(data as any);
+
+        // Fetch creator profile
+        if (data.created_by) {
+          const { data: creatorProfileData } = await supabase
+            .from('profiles')
+            .select('user_id, display_name, avatar_url, is_verified, venue_status, business_name')
+            .eq('user_id', data.created_by)
+            .single();
+          
+          setCreatorProfile(creatorProfileData);
+        }
       } catch (error) {
         console.error('Error fetching promo:', error);
         toast({
@@ -214,6 +227,24 @@ export const PromoDetailPage = () => {
                       )}
                     </div>
                   </div>
+
+                  {creatorProfile && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold" style={{ fontSize: 'clamp(0.938rem, 1.5vw, 1.125rem)' }}>Posted by</h4>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <UserIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span style={{ fontSize: 'clamp(0.813rem, 1.1vw, 0.875rem)' }}>
+                          {creatorProfile.display_name || 'Anonymous'}
+                        </span>
+                        {creatorProfile.venue_status === 'verified' && (
+                          <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                            <BadgeCheck className="w-3 h-3" />
+                            Verified Venue
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {markers.length > 0 && (

@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { MapPin, ArrowLeft, User as UserIcon, Star, Share2, Edit2, Trash2 } from "lucide-react";
+import { MapPin, ArrowLeft, User as UserIcon, Star, Share2, Edit2, Trash2, BadgeCheck } from "lucide-react";
 import { format } from "date-fns";
 import { GoogleMap } from "./GoogleMap";
 import { CommentActions } from "./CommentActions";
@@ -78,6 +78,7 @@ export const EventDetailPage = () => {
   const [showAllComments, setShowAllComments] = useState(false);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentAttendeeId, setCurrentAttendeeId] = useState<string | null>(null);
+  const [creatorProfile, setCreatorProfile] = useState<any>(null);
 
   const memoizedCenter = useMemo(() => {
     if (!event?.venue_latitude || !event?.venue_longitude) {
@@ -140,6 +141,15 @@ export const EventDetailPage = () => {
 
         // Use attendee count from RPC function (eventData has attendee_count)
         setTotalAttendees(eventData.attendee_count || 0);
+
+        // Fetch creator profile
+        const { data: creatorProfileData } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url, is_verified, venue_status, business_name')
+          .eq('user_id', eventData.created_by)
+          .single();
+        
+        setCreatorProfile(creatorProfileData);
 
         // Fetch comments for display - using separate queries to avoid foreign key issues
         const { data: commentsData, error: commentsError } = await supabase
@@ -811,6 +821,12 @@ export const EventDetailPage = () => {
                       <div className="flex items-center gap-2 flex-wrap">
                         <UserIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         <span className="text-sm sm:text-base">{event.organizer_name}</span>
+                        {creatorProfile?.venue_status === 'verified' && (
+                          <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                            <BadgeCheck className="w-3 h-3" />
+                            Verified Venue
+                          </Badge>
+                        )}
                         {event.organizer_whatsapp && user && (
                           <Button
                             variant="outline"
