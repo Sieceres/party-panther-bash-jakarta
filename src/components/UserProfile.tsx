@@ -77,9 +77,7 @@ export const UserProfile = () => {
   const [saving, setSaving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showVenueDialog, setShowVenueDialog] = useState(false);
-  const [venueCtaDismissed, setVenueCtaDismissed] = useState(() => {
-    return localStorage.getItem('venueCtaDismissed') === 'true';
-  });
+  const [venueCtaDismissed, setVenueCtaDismissed] = useState(false);
   const [userEvents, setUserEvents] = useState<EventWithSlug[]>([]);
   const [userPromos, setUserPromos] = useState<PromoWithSlug[]>([]);
   const [joinedEvents, setJoinedEvents] = useState<EventWithSlug[]>([]);
@@ -351,6 +349,16 @@ export const UserProfile = () => {
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile]);
+
+  // Load user-specific venue CTA dismissal state
+  useEffect(() => {
+    if (user?.id) {
+      const dismissed = localStorage.getItem(`venueCtaDismissed_${user.id}`) === 'true';
+      setVenueCtaDismissed(dismissed);
+    } else {
+      setVenueCtaDismissed(false);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -1011,7 +1019,9 @@ export const UserProfile = () => {
                             className="absolute -top-2 -right-2 h-8 w-8"
                             onClick={() => {
                               setVenueCtaDismissed(true);
-                              localStorage.setItem('venueCtaDismissed', 'true');
+                              if (user?.id) {
+                                localStorage.setItem(`venueCtaDismissed_${user.id}`, 'true');
+                              }
                             }}
                           >
                             <X className="h-4 w-4" />
