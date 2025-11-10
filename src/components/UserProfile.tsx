@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { ContinuousStarfield } from "@/components/ContinuousStarfield";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -619,8 +620,9 @@ export const UserProfile = () => {
   if (!user && !isSharedProfile) {
     return (
       <>
+        <ContinuousStarfield />
         <Header activeSection={activeSection} onSectionChange={setActiveSection} />
-        <div className="max-w-4xl mx-auto space-y-6 pt-20 px-4">
+        <div className="max-w-4xl mx-auto space-y-6 pt-20 px-4 relative z-10">
           <Card className="bg-card border-border">
             <CardContent className="pt-6 text-center">
               <p className="text-muted-foreground">Please sign in to view your profile.</p>
@@ -636,8 +638,9 @@ export const UserProfile = () => {
 
   return (
     <>
+      <ContinuousStarfield />
       <Header activeSection={activeSection} onSectionChange={setActiveSection} />
-      <div className="max-w-4xl mx-auto space-y-6 pt-20 px-4">
+      <div className="max-w-4xl mx-auto space-y-6 pt-20 px-4 relative z-10">
       {/* Profile Header */}
       <Card className="bg-card border-border">
         <CardContent className="pt-6">

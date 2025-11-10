@@ -5,6 +5,7 @@ import { EventForm } from "@/components/EventForm";
 import { EventFilters } from "@/components/EventFilters";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { LoginDialog } from "@/components/LoginDialog";
+import { ContinuousStarfield } from "@/components/ContinuousStarfield";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Star, Lock, ArrowUpDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -145,8 +146,10 @@ export const EventsSection = ({
   };
 
   return (
-    <div className="pt-20 px-4 sm:px-6 md:px-8">
-      <div className="container mx-auto space-y-6 sm:space-y-8">
+    <div className="relative">
+      <ContinuousStarfield />
+      <div className="pt-20 px-4 sm:px-6 md:px-8 relative z-10">
+        <div className="container mx-auto space-y-6 sm:space-y-8">
         {/* Main Events Section - Upcoming Events Only */}
         <div>
           <div className="mb-4">
@@ -349,6 +352,7 @@ export const EventsSection = ({
             onToggleCreateEvent();
           }}
         />
+      </div>
       </div>
     </div>
   );
