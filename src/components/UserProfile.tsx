@@ -84,6 +84,12 @@ export const UserProfile = () => {
   const [userPromos, setUserPromos] = useState<PromoWithSlug[]>([]);
   const [joinedEvents, setJoinedEvents] = useState<EventWithSlug[]>([]);
   const [favoritePromos, setFavoritePromos] = useState<PromoWithSlug[]>([]);
+  const [badgeStats, setBadgeStats] = useState({
+    totalAttendees: 0,
+    commentsCount: 0,
+    reviewsCount: 0,
+    accountAge: 0,
+  });
   const [editForm, setEditForm] = useState({
     display_name: '',
     bio: '',
@@ -291,6 +297,42 @@ export const UserProfile = () => {
               .map((promo: any) => ({ ...promo, slug: promo.slug || null })) as PromoWithSlug[];
             setFavoritePromos(favoritePromosWithSlug || []);
           }
+
+          // Fetch badge statistics
+          // Get total attendees across all user's events
+          const { data: attendeesData } = await supabase
+            .from('event_attendees')
+            .select('event_id, events!inner(created_by)', { count: 'exact' })
+            .eq('events.created_by', targetUserId);
+
+          // Get comments count
+          const { count: eventCommentsCount } = await supabase
+            .from('event_comments')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', targetUserId);
+
+          const { count: promoCommentsCount } = await supabase
+            .from('promo_comments')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', targetUserId);
+
+          // Get reviews count
+          const { count: reviewsCount } = await supabase
+            .from('promo_reviews')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', targetUserId);
+
+          // Calculate account age in days
+          const accountAge = profile?.created_at 
+            ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
+            : 0;
+
+          setBadgeStats({
+            totalAttendees: attendeesData?.length || 0,
+            commentsCount: (eventCommentsCount || 0) + (promoCommentsCount || 0),
+            reviewsCount: reviewsCount || 0,
+            accountAge,
+          });
         }
       }
 
@@ -1425,6 +1467,7 @@ export const UserProfile = () => {
           <CardContent>
             <div className="space-y-3">
               <div className="flex flex-wrap gap-2">
+                {/* Admin Badges */}
                 {profile?.is_super_admin && (
                   <Badge variant="destructive" className="bg-gradient-to-r from-red-500 to-purple-600 text-white border-none">
                     🔥 Super Admin
@@ -1435,28 +1478,167 @@ export const UserProfile = () => {
                     ⚡ Admin
                   </Badge>
                 )}
+                
+                {/* Verified Status Badges */}
                 {profile?.is_verified && (
                   <Badge variant="outline" className="border-primary text-primary">
                     ✓ Verified
                   </Badge>
                 )}
-                {userEvents.length >= 5 && (
-                  <Badge variant="outline" className="border-yellow-500 text-yellow-600">
-                    🎉 Event Creator
+                {profile?.venue_status === 'verified' && (
+                  <Badge variant="outline" className="border-green-500 text-green-600 bg-green-50">
+                    🏢 Verified Venue
                   </Badge>
                 )}
-                {userPromos.length >= 3 && (
-                  <Badge variant="outline" className="border-green-500 text-green-600">
-                    💰 Deal Master
+
+                {/* Event Creator - Tiered */}
+                {userEvents.length >= 30 && (
+                  <Badge variant="outline" className="border-yellow-600 text-yellow-700 bg-gradient-to-r from-yellow-50 to-amber-50 font-semibold">
+                    🏆 Event Creator (Gold)
                   </Badge>
                 )}
+                {userEvents.length >= 15 && userEvents.length < 30 && (
+                  <Badge variant="outline" className="border-slate-400 text-slate-600 bg-gradient-to-r from-slate-50 to-gray-50">
+                    🥈 Event Creator (Silver)
+                  </Badge>
+                )}
+                {userEvents.length >= 5 && userEvents.length < 15 && (
+                  <Badge variant="outline" className="border-orange-500 text-orange-600 bg-orange-50">
+                    🥉 Event Creator (Bronze)
+                  </Badge>
+                )}
+
+                {/* Deal Master - Tiered */}
+                {userPromos.length >= 20 && (
+                  <Badge variant="outline" className="border-emerald-600 text-emerald-700 bg-gradient-to-r from-emerald-50 to-green-50 font-semibold">
+                    🏆 Deal Master (Gold)
+                  </Badge>
+                )}
+                {userPromos.length >= 10 && userPromos.length < 20 && (
+                  <Badge variant="outline" className="border-slate-400 text-slate-600 bg-gradient-to-r from-slate-50 to-gray-50">
+                    🥈 Deal Master (Silver)
+                  </Badge>
+                )}
+                {userPromos.length >= 3 && userPromos.length < 10 && (
+                  <Badge variant="outline" className="border-green-500 text-green-600 bg-green-50">
+                    🥉 Deal Master (Bronze)
+                  </Badge>
+                )}
+
+                {/* Social Butterfly - Tiered (based on joined events) */}
+                {joinedEvents.length >= 50 && (
+                  <Badge variant="outline" className="border-pink-600 text-pink-700 bg-gradient-to-r from-pink-50 to-rose-50 font-semibold">
+                    🏆 Social Butterfly (Gold)
+                  </Badge>
+                )}
+                {joinedEvents.length >= 25 && joinedEvents.length < 50 && (
+                  <Badge variant="outline" className="border-slate-400 text-slate-600 bg-gradient-to-r from-slate-50 to-gray-50">
+                    🥈 Social Butterfly (Silver)
+                  </Badge>
+                )}
+                {joinedEvents.length >= 10 && joinedEvents.length < 25 && (
+                  <Badge variant="outline" className="border-pink-500 text-pink-600 bg-pink-50">
+                    🥉 Social Butterfly (Bronze)
+                  </Badge>
+                )}
+
+                {/* Popular Creator - Tiered (based on total attendees) */}
+                {badgeStats.totalAttendees >= 500 && (
+                  <Badge variant="outline" className="border-purple-600 text-purple-700 bg-gradient-to-r from-purple-50 to-violet-50 font-semibold">
+                    🏆 Popular Creator (Gold)
+                  </Badge>
+                )}
+                {badgeStats.totalAttendees >= 200 && badgeStats.totalAttendees < 500 && (
+                  <Badge variant="outline" className="border-slate-400 text-slate-600 bg-gradient-to-r from-slate-50 to-gray-50">
+                    🥈 Popular Creator (Silver)
+                  </Badge>
+                )}
+                {badgeStats.totalAttendees >= 50 && badgeStats.totalAttendees < 200 && (
+                  <Badge variant="outline" className="border-purple-500 text-purple-600 bg-purple-50">
+                    🥉 Popular Creator (Bronze)
+                  </Badge>
+                )}
+
+                {/* Active Commenter - Tiered */}
+                {badgeStats.commentsCount >= 100 && (
+                  <Badge variant="outline" className="border-blue-600 text-blue-700 bg-gradient-to-r from-blue-50 to-indigo-50 font-semibold">
+                    🏆 Active Commenter (Gold)
+                  </Badge>
+                )}
+                {badgeStats.commentsCount >= 50 && badgeStats.commentsCount < 100 && (
+                  <Badge variant="outline" className="border-slate-400 text-slate-600 bg-gradient-to-r from-slate-50 to-gray-50">
+                    🥈 Active Commenter (Silver)
+                  </Badge>
+                )}
+                {badgeStats.commentsCount >= 10 && badgeStats.commentsCount < 50 && (
+                  <Badge variant="outline" className="border-blue-500 text-blue-600 bg-blue-50">
+                    🥉 Active Commenter (Bronze)
+                  </Badge>
+                )}
+
+                {/* Reviewer - Tiered */}
+                {badgeStats.reviewsCount >= 50 && (
+                  <Badge variant="outline" className="border-amber-600 text-amber-700 bg-gradient-to-r from-amber-50 to-yellow-50 font-semibold">
+                    🏆 Reviewer (Gold)
+                  </Badge>
+                )}
+                {badgeStats.reviewsCount >= 20 && badgeStats.reviewsCount < 50 && (
+                  <Badge variant="outline" className="border-slate-400 text-slate-600 bg-gradient-to-r from-slate-50 to-gray-50">
+                    🥈 Reviewer (Silver)
+                  </Badge>
+                )}
+                {badgeStats.reviewsCount >= 5 && badgeStats.reviewsCount < 20 && (
+                  <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50">
+                    🥉 Reviewer (Bronze)
+                  </Badge>
+                )}
+
+                {/* Promo Hunter - Tiered (based on favorites) */}
+                {favoritePromos.length >= 30 && (
+                  <Badge variant="outline" className="border-red-600 text-red-700 bg-gradient-to-r from-red-50 to-pink-50 font-semibold">
+                    🏆 Promo Hunter (Gold)
+                  </Badge>
+                )}
+                {favoritePromos.length >= 15 && favoritePromos.length < 30 && (
+                  <Badge variant="outline" className="border-slate-400 text-slate-600 bg-gradient-to-r from-slate-50 to-gray-50">
+                    🥈 Promo Hunter (Silver)
+                  </Badge>
+                )}
+                {favoritePromos.length >= 5 && favoritePromos.length < 15 && (
+                  <Badge variant="outline" className="border-red-500 text-red-600 bg-red-50">
+                    🥉 Promo Hunter (Bronze)
+                  </Badge>
+                )}
+
+                {/* Early Adopter (account less than 90 days old) */}
+                {badgeStats.accountAge <= 90 && badgeStats.accountAge > 0 && (
+                  <Badge variant="outline" className="border-cyan-500 text-cyan-600 bg-cyan-50">
+                    🌟 Early Adopter
+                  </Badge>
+                )}
+
+                {/* Party Style */}
                 {profile?.party_style && (
-                  <Badge variant="outline" className="border-purple-500 text-purple-600">
+                  <Badge variant="outline" className="border-violet-500 text-violet-600 bg-violet-50">
                     🕺 {profile.party_style.charAt(0).toUpperCase() + profile.party_style.slice(1).replace('-', ' ')}
                   </Badge>
                 )}
-                {(!profile?.is_admin && !profile?.is_super_admin && !profile?.is_verified && userEvents.length < 5 && userPromos.length < 3 && !profile?.party_style) && (
-                  <p className="text-sm text-muted-foreground">No badges yet. Keep creating events and promos to earn achievements!</p>
+
+                {/* No badges message */}
+                {(!profile?.is_admin && 
+                  !profile?.is_super_admin && 
+                  !profile?.is_verified && 
+                  profile?.venue_status !== 'verified' &&
+                  userEvents.length < 5 && 
+                  userPromos.length < 3 && 
+                  joinedEvents.length < 10 &&
+                  badgeStats.totalAttendees < 50 &&
+                  badgeStats.commentsCount < 10 &&
+                  badgeStats.reviewsCount < 5 &&
+                  favoritePromos.length < 5 &&
+                  badgeStats.accountAge > 90 &&
+                  !profile?.party_style) && (
+                  <p className="text-sm text-muted-foreground">No badges yet. Keep creating events and promos, joining parties, and engaging with the community to earn achievements!</p>
                 )}
               </div>
             </div>
