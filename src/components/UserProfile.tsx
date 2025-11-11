@@ -400,9 +400,18 @@ export const UserProfile = () => {
       };
 
       // If user is filling venue info for the first time, set status to pending
-      if (profile?.venue_status === 'none' && editForm.business_name && editForm.venue_whatsapp) {
+      const currentStatus = profile?.venue_status || 'none';
+      const isFirstVenueApplication = currentStatus === 'none' || !profile?.venue_status;
+      const hasRequiredVenueInfo = editForm.business_name && editForm.venue_whatsapp;
+      
+      if (isFirstVenueApplication && hasRequiredVenueInfo) {
         profileData.venue_status = 'pending';
         profileData.venue_applied_at = new Date().toISOString();
+        console.log('Setting venue status to pending:', { 
+          business_name: editForm.business_name, 
+          venue_whatsapp: editForm.venue_whatsapp,
+          currentStatus 
+        });
       }
 
       console.log('Saving profile data:', profileData);
