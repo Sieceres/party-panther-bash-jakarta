@@ -354,7 +354,7 @@ export const UserProfile = () => {
   // Load user-specific venue CTA dismissal state
   useEffect(() => {
     if (user?.id) {
-      const dismissed = localStorage.getItem(`venueCtaDismissed_${user.id}`) === 'true';
+      const dismissed = localStorage.getItem(`venueCtaDismissed_v2_${user.id}`) === 'true';
       setVenueCtaDismissed(dismissed);
     } else {
       setVenueCtaDismissed(false);
@@ -1020,12 +1020,12 @@ export const UserProfile = () => {
                             variant="ghost"
                             size="icon"
                             className="absolute -top-2 -right-2 h-8 w-8"
-                            onClick={() => {
-                              setVenueCtaDismissed(true);
-                              if (user?.id) {
-                                localStorage.setItem(`venueCtaDismissed_${user.id}`, 'true');
-                              }
-                            }}
+                      onClick={() => {
+                        setVenueCtaDismissed(true);
+                        if (user?.id) {
+                          localStorage.setItem(`venueCtaDismissed_v2_${user.id}`, 'true');
+                        }
+                      }}
                           >
                             <X className="h-4 w-4" />
                           </Button>
