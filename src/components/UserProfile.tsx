@@ -434,9 +434,11 @@ export const UserProfile = () => {
         return;
       }
 
+      // Show different message for venue applications
+      const isVenueApplication = isFirstVenueApplication && hasRequiredVenueInfo;
       toast({
         title: "Success",
-        description: "Profile updated successfully!",
+        description: isVenueApplication ? "Success! Application submitted!" : "Profile updated successfully!",
       });
 
       await fetchUserProfile();
