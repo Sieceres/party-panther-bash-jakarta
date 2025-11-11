@@ -399,18 +399,20 @@ export const UserProfile = () => {
         updated_at: new Date().toISOString()
       };
 
-      // If user is filling venue info for the first time, set status to pending
+      // If user is filling venue info for the first time or reapplying after rejection, set status to pending
       const currentStatus = profile?.venue_status || 'none';
       const isFirstVenueApplication = currentStatus === 'none' || !profile?.venue_status;
+      const isReapplication = currentStatus === 'rejected';
       const hasRequiredVenueInfo = editForm.business_name && editForm.venue_whatsapp;
       
-      if (isFirstVenueApplication && hasRequiredVenueInfo) {
+      if ((isFirstVenueApplication || isReapplication) && hasRequiredVenueInfo) {
         profileData.venue_status = 'pending';
         profileData.venue_applied_at = new Date().toISOString();
         console.log('Setting venue status to pending:', { 
           business_name: editForm.business_name, 
           venue_whatsapp: editForm.venue_whatsapp,
-          currentStatus 
+          currentStatus,
+          isReapplication
         });
       }
 
@@ -435,14 +437,28 @@ export const UserProfile = () => {
       }
 
       // Show different message for venue applications
-      const isVenueApplication = isFirstVenueApplication && hasRequiredVenueInfo;
+      const isVenueApplication = (isFirstVenueApplication || isReapplication) && hasRequiredVenueInfo;
       toast({
         title: "Success",
         description: isVenueApplication ? "Success! Application submitted!" : "Profile updated successfully!",
       });
 
+      // Immediately update local state for instant UI feedback
+      if (isVenueApplication && profile) {
+        setProfile({
+          ...profile,
+          venue_status: 'pending',
+          venue_applied_at: new Date().toISOString(),
+          business_name: editForm.business_name,
+          venue_whatsapp: editForm.venue_whatsapp,
+          venue_address: editForm.venue_address || profile.venue_address,
+          venue_opening_hours: editForm.venue_opening_hours || profile.venue_opening_hours,
+        });
+      }
+
       await fetchUserProfile();
       setIsEditing(false);
+      setShowVenueDialog(false);
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -872,14 +888,25 @@ export const UserProfile = () => {
 
                   {profile?.venue_status === 'pending' && (
                     <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-lg p-4 border border-amber-200/50">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="w-5 h-5 text-amber-600" />
-                        <div>
-                          <h4 className="font-medium text-base">Venue Registration Pending</h4>
-                          <Badge variant="secondary" className="mt-1">Pending Review</Badge>
-                          <p className="text-sm text-muted-foreground mt-2">
+                      <div className="flex items-center gap-3">
+                        <Building2 className="w-6 h-6 text-amber-600" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium text-base">Venue Registration Pending</h4>
+                            <Badge variant="secondary" className="bg-amber-100 text-amber-700 border-amber-300">Pending Review</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">
                             Your venue application is under review. We'll notify you once it's approved!
                           </p>
+                          {profile?.venue_applied_at && (
+                            <p className="text-xs text-muted-foreground">
+                              Submitted on {new Date(profile.venue_applied_at).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                              })} • Typical review time: 2-3 business days
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -887,10 +914,23 @@ export const UserProfile = () => {
 
                   {profile?.venue_status === 'verified' && (
                     <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-lg p-4 border border-green-200/50">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="text-lg">✅</div>
-                        <h4 className="font-medium text-base">Verified Venue</h4>
-                        <Badge className="bg-green-500">Verified</Badge>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="text-2xl">✅</div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium text-base">Verified Venue</h4>
+                            <Badge className="bg-green-600 hover:bg-green-700">Verified</Badge>
+                          </div>
+                          {profile?.venue_verified_at && (
+                            <p className="text-xs text-muted-foreground">
+                              Verified on {new Date(profile.venue_verified_at).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                              })}
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <div className="space-y-3">
                         <div>
@@ -932,6 +972,65 @@ export const UserProfile = () => {
                             placeholder="e.g., Mon-Sat 6PM-2AM"
                             className="mt-1"
                           />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {profile?.venue_status === 'rejected' && (
+                    <div className="bg-gradient-to-r from-red-500/10 to-rose-500/10 rounded-lg p-4 border border-red-200/50">
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">❌</div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium text-base">Application Not Approved</h4>
+                            <Badge variant="destructive" className="bg-red-600">Rejected</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Your venue application was not approved. Please review your information and submit a new application with updated details.
+                          </p>
+                          <div className="space-y-3 mt-4">
+                            <div>
+                              <Label htmlFor="business_name_rejected" className="text-sm font-medium">Business Name *</Label>
+                              <Input
+                                id="business_name_rejected"
+                                value={editForm.business_name}
+                                onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })}
+                                placeholder="Your venue or business name"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="venue_whatsapp_rejected" className="text-sm font-medium">Venue WhatsApp *</Label>
+                              <Input
+                                id="venue_whatsapp_rejected"
+                                value={editForm.venue_whatsapp}
+                                onChange={(e) => setEditForm({ ...editForm, venue_whatsapp: e.target.value })}
+                                placeholder="+62 XXX XXX XXXX"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="venue_address_rejected" className="text-sm font-medium">Venue Address</Label>
+                              <Input
+                                id="venue_address_rejected"
+                                value={editForm.venue_address}
+                                onChange={(e) => setEditForm({ ...editForm, venue_address: e.target.value })}
+                                placeholder="Full address of your venue"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="venue_opening_hours_rejected" className="text-sm font-medium">Opening Hours</Label>
+                              <Input
+                                id="venue_opening_hours_rejected"
+                                value={editForm.venue_opening_hours}
+                                onChange={(e) => setEditForm({ ...editForm, venue_opening_hours: e.target.value })}
+                                placeholder="e.g., Mon-Sat 6PM-2AM"
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1022,7 +1121,7 @@ export const UserProfile = () => {
               {/* Venue Registration CTA & Status Cards (Non-Edit Mode) */}
               {!isEditing && !isSharedProfile && (
                 <>
-                  {/* CTA Card for non-venue users */}
+                  {/* CTA Card - only show for users with no venue status or 'none' status */}
                   {(!profile?.venue_status || profile?.venue_status === 'none') && !venueCtaDismissed && (
                     <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-200/50 mt-6">
                       <CardContent className="pt-6">
