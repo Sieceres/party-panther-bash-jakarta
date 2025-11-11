@@ -18,7 +18,8 @@ interface ContactLog {
   contacted_by: string;
   created_at: string;
   contacted_by_profile?: {
-    display_name: string;
+    display_name: string | null;
+    user_id: string;
   };
 }
 
@@ -228,7 +229,7 @@ export const ContactLogManager = ({ contactId, contactName }: ContactLogManagerP
                       </div>
                       <p className="text-sm whitespace-pre-wrap">{log.notes}</p>
                       <div className="mt-2 text-xs text-muted-foreground">
-                        Logged by {log.contacted_by_profile?.display_name || "Unknown"} on{" "}
+                        Logged by {log.contacted_by_profile?.display_name || "Admin User"} on{" "}
                         {format(new Date(log.created_at), "PP")}
                       </div>
                     </div>
