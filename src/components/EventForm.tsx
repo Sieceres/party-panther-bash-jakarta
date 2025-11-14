@@ -14,6 +14,7 @@ import { EventVenue } from "./form-components/EventVenue";
 import { EventOrganizer } from "./form-components/EventOrganizer";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { EventTagSelector } from "./form-components/EventTagSelector";
+import { EventPrivacySettings } from "./form-components/EventPrivacySettings";
 
 import { Tables } from "../integrations/supabase/types";
 import { getEventUrl } from "@/lib/slug-utils";
@@ -40,6 +41,10 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [isRecurrent, setIsRecurrent] = useState(initialData?.is_recurrent || false);
   const [trackPayments, setTrackPayments] = useState(initialData?.track_payments || false);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [accessLevel, setAccessLevel] = useState<string>(initialData?.access_level || 'public');
+  const [maxAttendees, setMaxAttendees] = useState<number | null>(initialData?.max_attendees || null);
+  const [enableCheckIn, setEnableCheckIn] = useState(initialData?.enable_check_in || false);
+  const [enablePhotos, setEnablePhotos] = useState(initialData?.enable_photos || false);
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
@@ -82,6 +87,10 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       );
       setIsRecurrent(initialData.is_recurrent || false);
       setTrackPayments(initialData.track_payments || false);
+      setAccessLevel(initialData.access_level || 'public');
+      setMaxAttendees(initialData.max_attendees || null);
+      setEnableCheckIn(initialData.enable_check_in || false);
+      setEnablePhotos(initialData.enable_photos || false);
       handleSetLocation(
         initialData.venue_latitude && initialData.venue_longitude
           ? { lat: initialData.venue_latitude, lng: initialData.venue_longitude, address: initialData.venue_address || "" }
@@ -326,6 +335,17 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
             <EventTagSelector
               selectedTagIds={selectedTagIds}
               onChange={setSelectedTagIds}
+            />
+
+            <EventPrivacySettings
+              accessLevel={accessLevel}
+              maxAttendees={maxAttendees}
+              enableCheckIn={enableCheckIn}
+              enablePhotos={enablePhotos}
+              onAccessLevelChange={setAccessLevel}
+              onMaxAttendeesChange={setMaxAttendees}
+              onEnableCheckInChange={setEnableCheckIn}
+              onEnablePhotosChange={setEnablePhotos}
             />
 
             <div className="flex items-center space-x-2">

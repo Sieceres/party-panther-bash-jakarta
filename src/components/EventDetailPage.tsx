@@ -32,6 +32,9 @@ import Linkify from "linkify-react";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import defaultAvatar from "@/assets/default-avatar.png";
 import { AttendeeNoteDialog } from "./AttendeeNoteDialog";
+import { EventCheckIn } from "./EventCheckIn";
+import { EventPhotoGallery } from "./EventPhotoGallery";
+import { EventInviteCodes } from "./EventInviteCodes";
 
 interface Event {
   id: string;
@@ -54,6 +57,10 @@ interface Event {
   slug?: string;
   attendee_count?: number;
   comment_count?: number;
+  access_level?: string;
+  max_attendees?: number;
+  enable_check_in?: boolean;
+  enable_photos?: boolean;
 }
 
 export const EventDetailPage = () => {
@@ -553,6 +560,7 @@ export const EventDetailPage = () => {
   };
 
   const isOwner = user && user.id === event?.created_by;
+  const isCoOrganizer = user && attendees.some(a => a.user_id === user.id && a.is_co_organizer);
   const canDelete = isOwner || isAdmin;
 
   // Helper functions for pagination
@@ -884,6 +892,26 @@ export const EventDetailPage = () => {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Check-In Section */}
+              {event.enable_check_in && (
+                <EventCheckIn
+                  eventId={event.id}
+                  eventDate={event.date}
+                  eventTime={event.time}
+                  isJoined={hasJoined}
+                  canManage={isOwner || isCoOrganizer || isAdmin}
+                />
+              )}
+
+              {/* Photo Gallery Section */}
+              {event.enable_photos && (
+                <EventPhotoGallery
+                  eventId={event.id}
+                  isJoined={hasJoined}
+                  canManage={isOwner || isCoOrganizer || isAdmin}
+                />
+              )}
 
               {/* Attendees Section */}
               <Card>
@@ -1280,13 +1308,22 @@ export const EventDetailPage = () => {
                     </>
                   )}
                   
-                  <ReportDialog
+                   <ReportDialog
                     type="event"
                     targetId={event.id}
                     targetTitle={event.title}
                   />
                 </CardContent>
               </Card>
+
+              {/* Invite Codes Management - only for organizers of private events */}
+              {(isOwner || isCoOrganizer) && event.access_level !== 'public' && (
+                <EventInviteCodes
+                  eventId={event.id}
+                  eventDate={event.date}
+                  eventTime={event.time}
+                />
+              )}
             </div>
           </div>
         </div>
