@@ -45,9 +45,11 @@ export const EventsSection = ({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [eventTagAssignments, setEventTagAssignments] = useState<Record<string, string[]>>({});
   // States for past events section
   const [pastEventsSearchTerm, setPastEventsSearchTerm] = useState("");
   const [pastEventsSelectedDate, setPastEventsSelectedDate] = useState<Date | undefined>();
+  const [pastEventsSelectedTagIds, setPastEventsSelectedTagIds] = useState<string[]>([]);
 
   useEffect(() => {
     const getUser = async () => {
@@ -59,6 +61,24 @@ export const EventsSection = ({
       setAuthLoading(false);
     };
     getUser();
+
+    const fetchEventTagAssignments = async () => {
+      const { data } = await supabase
+        .from("event_tag_assignments")
+        .select("event_id, tag_id");
+      
+      if (data) {
+        const assignments: Record<string, string[]> = {};
+        data.forEach(({ event_id, tag_id }) => {
+          if (!assignments[event_id]) {
+            assignments[event_id] = [];
+          }
+          assignments[event_id].push(tag_id);
+        });
+        setEventTagAssignments(assignments);
+      }
+    };
+    fetchEventTagAssignments();
   }, []);
 
   const handleCreateEventClick = () => {
@@ -82,7 +102,9 @@ export const EventsSection = ({
       }
       // Tag filter: event must have ALL selected tags
       if (selectedTagIds.length > 0) {
-        // This would require fetching tags for each event - simplified for now
+        const eventTags = eventTagAssignments[event.id] || [];
+        const hasAllTags = selectedTagIds.every(tagId => eventTags.includes(tagId));
+        if (!hasAllTags) return false;
       }
       return true;
     });
@@ -116,6 +138,13 @@ export const EventsSection = ({
         }
       }
 
+      // Tag filter for past events
+      if (pastEventsSelectedTagIds.length > 0) {
+        const eventTags = eventTagAssignments[event.id] || [];
+        const hasAllTags = pastEventsSelectedTagIds.every(tagId => eventTags.includes(tagId));
+        if (!hasAllTags) return false;
+      }
+
       return true;
     });
   };
@@ -132,6 +161,7 @@ export const EventsSection = ({
   const handleResetPastFilters = () => {
     setPastEventsSelectedDate(undefined);
     setPastEventsSearchTerm("");
+    setPastEventsSelectedTagIds([]);
   };
 
   return (
@@ -191,9 +221,11 @@ export const EventsSection = ({
           <EventFilters
             onDateFilter={setSelectedDate}
             onSearchFilter={setSearchTerm}
+            onTagFilter={setSelectedTagIds}
             onResetFilters={handleResetFilters}
             selectedDate={selectedDate}
             searchTerm={searchTerm}
+            selectedTagIds={selectedTagIds}
           />
 
           <div className="flex justify-end">
@@ -237,7 +269,7 @@ export const EventsSection = ({
                     ? "Be the first to create an amazing event and get the party started! 🎊"
                     : "Try adjusting your search or filters to discover more events."}
                 </p>
-                {(selectedDate || searchTerm) && (
+                {(selectedDate || searchTerm || selectedTagIds.length > 0) && (
                   <Button onClick={handleResetFilters} variant="default" size="lg" className="mt-4">
                     Reset Filters
                   </Button>
@@ -288,9 +320,11 @@ export const EventsSection = ({
               <EventFilters
                 onDateFilter={setPastEventsSelectedDate}
                 onSearchFilter={setPastEventsSearchTerm}
+                onTagFilter={setPastEventsSelectedTagIds}
                 onResetFilters={handleResetPastFilters}
                 selectedDate={pastEventsSelectedDate}
                 searchTerm={pastEventsSearchTerm}
+                selectedTagIds={pastEventsSelectedTagIds}
               />
             </div>
 
@@ -303,7 +337,7 @@ export const EventsSection = ({
                     <p className="text-sm sm:text-base text-muted-foreground">
                       Try adjusting your filters to discover past events.
                     </p>
-                    {(pastEventsSelectedDate || pastEventsSearchTerm) && (
+                    {(pastEventsSelectedDate || pastEventsSearchTerm || pastEventsSelectedTagIds.length > 0) && (
                       <Button onClick={handleResetPastFilters} variant="default" size="lg" className="mt-4">
                         Reset Filters
                       </Button>
