@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { checkUserAdminStatus } from "@/lib/auth-helpers";
+import { EventTags } from "./EventTags";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,6 +51,7 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [eventTags, setEventTags] = useState<any[]>([]);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -57,7 +59,28 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
       setCurrentUser(user);
     };
     getCurrentUser();
-  }, []);
+
+    // Fetch event tags
+    const fetchTags = async () => {
+      const { data } = await supabase
+        .from('event_tag_assignments')
+        .select(`
+          tag_id,
+          event_tags:tag_id (
+            id,
+            name,
+            category
+          )
+        `)
+        .eq('event_id', event.id);
+
+      if (data) {
+        const tags = data.map(t => t.event_tags).filter(Boolean);
+        setEventTags(tags);
+      }
+    };
+    fetchTags();
+  }, [event.id]);
 
   const handleCardClick = () => {
     navigate(getEventUrl(event));
@@ -209,6 +232,13 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
           
           {/* Location */}
           <p className="text-sm sm:text-base text-muted-foreground line-clamp-2 break-words pl-6">{event.venue || event.venue_name}</p>
+          
+          {/* Event Tags */}
+          {eventTags.length > 0 && (
+            <div className="pl-6">
+              <EventTags tags={eventTags} variant="compact" />
+            </div>
+          )}
           
           {/* Meta Info */}
           <div className="flex items-center justify-between text-xs sm:text-sm pt-2 border-t border-border/30">

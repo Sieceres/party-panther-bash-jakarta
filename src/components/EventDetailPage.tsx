@@ -24,6 +24,7 @@ import { CommentActions } from "./CommentActions";
 import { ReportDialog } from "./ReportDialog";
 import { ReceiptUpload } from "./ReceiptUpload";
 import { Header } from "./Header";
+import { EventTags } from "./EventTags";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEventBySlugOrId, getEditEventUrl } from "@/lib/slug-utils";
@@ -79,6 +80,7 @@ export const EventDetailPage = () => {
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentAttendeeId, setCurrentAttendeeId] = useState<string | null>(null);
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
+  const [eventTags, setEventTags] = useState<any[]>([]);
 
   const memoizedCenter = useMemo(() => {
     if (!event?.venue_latitude || !event?.venue_longitude) {
@@ -195,6 +197,28 @@ export const EventDetailPage = () => {
             profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
           }));
           setAttendees(attendeesWithProfiles);
+        }
+
+        // Fetch event tags
+        const { data: tagsData } = await supabase
+          .from('event_tag_assignments')
+          .select(`
+            tag_id,
+            event_tags:tag_id (
+              id,
+              name,
+              category,
+              sort_order
+            )
+          `)
+          .eq('event_id', eventData.id);
+
+        if (tagsData) {
+          const tags = tagsData
+            .map(t => t.event_tags)
+            .filter(Boolean)
+            .sort((a: any, b: any) => a.sort_order - b.sort_order);
+          setEventTags(tags);
         }
       } catch (error) {
         console.error('Error fetching event:', error);
@@ -801,6 +825,13 @@ export const EventDetailPage = () => {
                       {event.description}
                     </Linkify>
                   </div>
+                  
+                  {eventTags.length > 0 && (
+                    <>
+                      <Separator />
+                      <EventTags tags={eventTags} variant="full" />
+                    </>
+                  )}
                   
                   <Separator />
                   
