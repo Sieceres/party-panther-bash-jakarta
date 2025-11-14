@@ -11,10 +11,14 @@ interface EventPrivacySettingsProps {
   maxAttendees: number | null;
   enableCheckIn: boolean;
   enablePhotos: boolean;
+  isRecurrent: boolean;
+  trackPayments: boolean;
   onAccessLevelChange: (value: string) => void;
   onMaxAttendeesChange: (value: number | null) => void;
   onEnableCheckInChange: (value: boolean) => void;
   onEnablePhotosChange: (value: boolean) => void;
+  onIsRecurrentChange: (value: boolean) => void;
+  onTrackPaymentsChange: (value: boolean) => void;
 }
 
 export const EventPrivacySettings = ({
@@ -22,10 +26,14 @@ export const EventPrivacySettings = ({
   maxAttendees,
   enableCheckIn,
   enablePhotos,
+  isRecurrent,
+  trackPayments,
   onAccessLevelChange,
   onMaxAttendeesChange,
   onEnableCheckInChange,
-  onEnablePhotosChange
+  onEnablePhotosChange,
+  onIsRecurrentChange,
+  onTrackPaymentsChange
 }: EventPrivacySettingsProps) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -101,6 +109,34 @@ export const EventPrivacySettings = ({
               id="enablePhotos"
               checked={enablePhotos}
               onCheckedChange={onEnablePhotosChange}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="isRecurrent">Recurrent Event</Label>
+              <p className="text-sm text-muted-foreground">
+                Mark this as a recurring event
+              </p>
+            </div>
+            <Switch
+              id="isRecurrent"
+              checked={isRecurrent}
+              onCheckedChange={onIsRecurrentChange}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="trackPayments">Track Payments</Label>
+              <p className="text-sm text-muted-foreground">
+                Require attendees to upload payment receipts
+              </p>
+            </div>
+            <Switch
+              id="trackPayments"
+              checked={trackPayments}
+              onCheckedChange={onTrackPaymentsChange}
             />
           </div>
         </CollapsibleContent>

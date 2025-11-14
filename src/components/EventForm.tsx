@@ -342,34 +342,15 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               maxAttendees={maxAttendees}
               enableCheckIn={enableCheckIn}
               enablePhotos={enablePhotos}
+              isRecurrent={isRecurrent}
+              trackPayments={trackPayments}
               onAccessLevelChange={setAccessLevel}
               onMaxAttendeesChange={setMaxAttendees}
               onEnableCheckInChange={setEnableCheckIn}
               onEnablePhotosChange={setEnablePhotos}
+              onIsRecurrentChange={setIsRecurrent}
+              onTrackPaymentsChange={setTrackPayments}
             />
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isRecurrent"
-                checked={isRecurrent}
-                onCheckedChange={(checked) => setIsRecurrent(!!checked)}
-              />
-              <Label htmlFor="isRecurrent">Recurrent Event</Label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="trackPayments"
-                checked={trackPayments}
-                onCheckedChange={(checked) => setTrackPayments(!!checked)}
-              />
-              <Label htmlFor="trackPayments">
-                Track Payments
-                <span className="block text-sm text-muted-foreground">
-                  Require attendees to upload payment receipts
-                </span>
-              </Label>
-            </div>
 
             <Button
               type="submit"
