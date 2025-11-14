@@ -50,9 +50,9 @@ export const EventTagSelector = ({ selectedTagIds, onChange }: EventTagSelectorP
 
   const fetchTags = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_event_tags_by_category');
+      const { data, error } = await supabase.rpc('get_event_tags_by_category' as any);
       if (error) throw error;
-      setTags(data || []);
+      setTags((data as EventTag[]) || []);
     } catch (error) {
       console.error('Error fetching tags:', error);
     } finally {

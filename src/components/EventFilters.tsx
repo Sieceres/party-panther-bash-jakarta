@@ -41,8 +41,8 @@ export const EventFilters = ({
 
   useEffect(() => {
     const fetchTags = async () => {
-      const { data } = await supabase.rpc('get_event_tags_by_category');
-      if (data) setTags(data);
+      const { data } = await supabase.rpc('get_event_tags_by_category' as any);
+      if (data) setTags(data as any[]);
     };
     fetchTags();
   }, []);
