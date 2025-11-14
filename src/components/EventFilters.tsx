@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CalendarIcon, Search, X, Music, Calendar as CalendarTag, Building2, Users } from "lucide-react";
+import { CalendarIcon, Search, X, Music, Calendar as CalendarTag, Building2, Users, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -116,49 +116,68 @@ export const EventFilters = ({
 
       {/* Tag Filters */}
       {Object.keys(groupedTags).length > 0 && (
-        <div className="space-y-3 p-4 bg-card/50 rounded-lg border border-border/50">
-          <h4 className="text-sm font-medium">Filter by Tags</h4>
-          <div className="space-y-3">
-            {Object.entries(groupedTags).map(([category, categoryTags]) => {
-              const config = categoryConfig[category as keyof typeof categoryConfig];
-              if (!config) return null;
-              const Icon = config.icon;
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="glass-control justify-start text-left font-normal flex items-center gap-2 h-10 px-4"
+              style={{ background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '25px' }}
+            >
+              <Filter className="h-4 w-4 text-cyan-400" />
+              <span>Filter by Tags</span>
+              {selectedTagIds.length > 0 && (
+                <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
+                  {selectedTagIds.length}
+                </Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[400px] p-4" align="start">
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium">Filter by Tags</h4>
+              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                {Object.entries(groupedTags).map(([category, categoryTags]) => {
+                  const config = categoryConfig[category as keyof typeof categoryConfig];
+                  if (!config) return null;
+                  const Icon = config.icon;
 
-              return (
-                <div key={category} className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Icon className="w-3.5 h-3.5" />
-                    <span className="font-medium">{config.label}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {(categoryTags as any[]).map((tag: any) => {
-                      const isSelected = selectedTagIds.includes(tag.id);
-                      return (
-                        <label key={tag.id} className="cursor-pointer">
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "cursor-pointer transition-colors",
-                              isSelected ? config.color : "bg-muted/50 hover:bg-muted"
-                            )}
-                            onClick={() => handleTagToggle(tag.id)}
-                          >
-                            <Checkbox
-                              checked={isSelected}
-                              className="mr-1.5 w-3 h-3"
-                              onCheckedChange={() => handleTagToggle(tag.id)}
-                            />
-                            {tag.name}
-                          </Badge>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                  return (
+                    <div key={category} className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Icon className="w-3.5 h-3.5" />
+                        <span className="font-medium">{config.label}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {(categoryTags as any[]).map((tag: any) => {
+                          const isSelected = selectedTagIds.includes(tag.id);
+                          return (
+                            <label key={tag.id} className="cursor-pointer">
+                              <Badge
+                                variant="outline"
+                                className={cn(
+                                  "cursor-pointer transition-colors",
+                                  isSelected ? config.color : "bg-muted/50 hover:bg-muted"
+                                )}
+                                onClick={() => handleTagToggle(tag.id)}
+                              >
+                                <Checkbox
+                                  checked={isSelected}
+                                  className="mr-1.5 w-3 h-3"
+                                  onCheckedChange={() => handleTagToggle(tag.id)}
+                                />
+                                {tag.name}
+                              </Badge>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       )}
     </div>
   );
