@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Music, Calendar, Building2, Users } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown, Tag } from "lucide-react";
 
 interface EventTag {
   id: string;
@@ -17,32 +18,11 @@ interface EventTagSelectorProps {
   onChange: (tagIds: string[]) => void;
 }
 
-const categoryConfig = {
-  music_type: {
-    label: "Music Type",
-    icon: Music,
-    color: "bg-purple-500/10 text-purple-700 border-purple-500/20"
-  },
-  event_type: {
-    label: "Event Type",
-    icon: Calendar,
-    color: "bg-blue-500/10 text-blue-700 border-blue-500/20"
-  },
-  venue: {
-    label: "Venue",
-    icon: Building2,
-    color: "bg-green-500/10 text-green-700 border-green-500/20"
-  },
-  crowd: {
-    label: "Crowd",
-    icon: Users,
-    color: "bg-orange-500/10 text-orange-700 border-orange-500/20"
-  }
-};
 
 export const EventTagSelector = ({ selectedTagIds, onChange }: EventTagSelectorProps) => {
   const [tags, setTags] = useState<EventTag[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     fetchTags();
@@ -68,61 +48,53 @@ export const EventTagSelector = ({ selectedTagIds, onChange }: EventTagSelectorP
     }
   };
 
-  const groupedTags = tags.reduce((acc, tag) => {
-    if (!acc[tag.category]) {
-      acc[tag.category] = [];
-    }
-    acc[tag.category].push(tag);
-    return acc;
-  }, {} as Record<string, EventTag[]>);
-
   if (loading) {
     return <div className="text-sm text-muted-foreground">Loading tags...</div>;
   }
 
+  const selectedCount = selectedTagIds.length;
+
   return (
-    <div className="space-y-6">
-      <Label className="text-base">Event Tags (Optional)</Label>
-      
-      {Object.entries(groupedTags).map(([category, categoryTags]) => {
-        const config = categoryConfig[category as keyof typeof categoryConfig];
-        if (!config) return null;
-        
-        const Icon = config.icon;
-        
-        return (
-          <div key={category} className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Icon className="w-4 h-4 text-muted-foreground" />
-              <Label className="text-sm font-medium">{config.label}</Label>
-            </div>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Label className="text-base">Event Tags (Optional)</Label>
+        <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          {selectedCount > 0 && (
+            <Badge variant="secondary" className="h-5">
+              {selectedCount}
+            </Badge>
+          )}
+          <span>{isOpen ? "Hide tags" : "Select tags"}</span>
+          <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        </CollapsibleTrigger>
+      </div>
+
+      <CollapsibleContent className="space-y-3">
+        <div className="flex flex-wrap gap-2 p-4 border rounded-lg bg-muted/20">
+          {tags.map((tag) => {
+            const isSelected = selectedTagIds.includes(tag.id);
             
-            <div className="flex flex-wrap gap-2">
-              {categoryTags.map((tag) => {
-                const isSelected = selectedTagIds.includes(tag.id);
-                
-                return (
-                  <label
-                    key={tag.id}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => handleTagToggle(tag.id)}
-                    />
-                    <Badge
-                      variant="outline"
-                      className={`${isSelected ? config.color : 'bg-muted/50'} cursor-pointer`}
-                    >
-                      {tag.name}
-                    </Badge>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
-    </div>
+            return (
+              <label
+                key={tag.id}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={() => handleTagToggle(tag.id)}
+                />
+                <Badge
+                  variant="outline"
+                  className={`${isSelected ? 'bg-primary/10 text-primary border-primary/20' : 'bg-muted/50'} cursor-pointer hover:bg-primary/20 transition-colors`}
+                >
+                  <Tag className="w-3 h-3 mr-1" />
+                  {tag.name}
+                </Badge>
+              </label>
+            );
+          })}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
