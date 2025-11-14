@@ -13,6 +13,7 @@ import { EventDateTime } from "./form-components/EventDateTime";
 import { EventVenue } from "./form-components/EventVenue";
 import { EventOrganizer } from "./form-components/EventOrganizer";
 import { ImageUpload } from "./form-components/ImageUpload";
+import { EventTagSelector } from "./form-components/EventTagSelector";
 
 import { Tables } from "../integrations/supabase/types";
 import { getEventUrl } from "@/lib/slug-utils";
@@ -38,6 +39,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   );
   const [isRecurrent, setIsRecurrent] = useState(initialData?.is_recurrent || false);
   const [trackPayments, setTrackPayments] = useState(initialData?.track_payments || false);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
@@ -85,6 +87,18 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
           ? { lat: initialData.venue_latitude, lng: initialData.venue_longitude, address: initialData.venue_address || "" }
           : null
       );
+
+      // Fetch existing tags for this event
+      const fetchTags = async () => {
+        const { data, error } = await supabase
+          .from('event_tag_assignments')
+          .select('tag_id')
+          .eq('event_id', initialData.id);
+        if (!error && data) {
+          setSelectedTagIds(data.map(t => t.tag_id));
+        }
+      };
+      fetchTags();
     }
   }, [initialData, handleSetLocation]);
 
@@ -182,6 +196,27 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       }
 
       if (error) throw error;
+
+      // Handle tag assignments for both new and updated events
+      const eventId = initialData?.id || newEventId;
+      if (eventId) {
+        // Delete existing tag assignments
+        await supabase
+          .from('event_tag_assignments')
+          .delete()
+          .eq('event_id', eventId);
+
+        // Insert new tag assignments
+        if (selectedTagIds.length > 0) {
+          const tagAssignments = selectedTagIds.map(tagId => ({
+            event_id: eventId,
+            tag_id: tagId
+          }));
+          await supabase
+            .from('event_tag_assignments')
+            .insert(tagAssignments);
+        }
+      }
 
       // Handle new event creation tasks
       if (!initialData?.id && newEventId) {
@@ -288,6 +323,10 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               storageFolder="events"
             />
 
+            <EventTagSelector
+              selectedTagIds={selectedTagIds}
+              onChange={setSelectedTagIds}
+            />
 
             <div className="flex items-center space-x-2">
               <Checkbox
