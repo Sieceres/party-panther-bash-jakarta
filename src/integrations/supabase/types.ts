@@ -111,6 +111,38 @@ export type Database = {
           },
         ]
       }
+      event_check_ins: {
+        Row: {
+          checked_in_at: string
+          checked_in_by: string
+          event_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          checked_in_at?: string
+          checked_in_by: string
+          event_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          checked_in_at?: string
+          checked_in_by?: string
+          event_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_check_ins_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_comments: {
         Row: {
           comment: string
@@ -189,6 +221,120 @@ export type Database = {
           },
         ]
       }
+      event_invite_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          event_id: string
+          expires_at: string | null
+          id: string
+          invited_user_email: string | null
+          is_revoked: boolean
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          event_id: string
+          expires_at?: string | null
+          id?: string
+          invited_user_email?: string | null
+          is_revoked?: boolean
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          event_id?: string
+          expires_at?: string | null
+          id?: string
+          invited_user_email?: string | null
+          is_revoked?: boolean
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_invite_codes_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_photo_reports: {
+        Row: {
+          id: string
+          photo_id: string
+          reason: string
+          reported_at: string
+          reported_by: string
+        }
+        Insert: {
+          id?: string
+          photo_id: string
+          reason: string
+          reported_at?: string
+          reported_by: string
+        }
+        Update: {
+          id?: string
+          photo_id?: string
+          reason?: string
+          reported_at?: string
+          reported_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_photo_reports_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "event_photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_photos: {
+        Row: {
+          event_id: string
+          id: string
+          is_hidden: boolean
+          photo_url: string
+          uploaded_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          is_hidden?: boolean
+          photo_url: string
+          uploaded_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          is_hidden?: boolean
+          photo_url?: string
+          uploaded_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_photos_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_tag_assignments: {
         Row: {
           event_id: string
@@ -224,34 +370,44 @@ export type Database = {
       }
       event_tags: {
         Row: {
+          category: string
           created_at: string
           created_by: string | null
           id: string
           name: string
+          sort_order: number
         }
         Insert: {
+          category?: string
           created_at?: string
           created_by?: string | null
           id?: string
           name: string
+          sort_order?: number
         }
         Update: {
+          category?: string
           created_at?: string
           created_by?: string | null
           id?: string
           name?: string
+          sort_order?: number
         }
         Relationships: []
       }
       events: {
         Row: {
+          access_level: Database["public"]["Enums"]["event_access_level"]
           created_at: string
           created_by: string
           date: string
           description: string | null
+          enable_check_in: boolean
+          enable_photos: boolean
           id: string
           image_url: string | null
           is_recurrent: boolean | null
+          max_attendees: number | null
           organizer_name: string | null
           organizer_whatsapp: string | null
           price_currency: string | null
@@ -266,13 +422,17 @@ export type Database = {
           venue_name: string | null
         }
         Insert: {
+          access_level?: Database["public"]["Enums"]["event_access_level"]
           created_at?: string
           created_by: string
           date: string
           description?: string | null
+          enable_check_in?: boolean
+          enable_photos?: boolean
           id?: string
           image_url?: string | null
           is_recurrent?: boolean | null
+          max_attendees?: number | null
           organizer_name?: string | null
           organizer_whatsapp?: string | null
           price_currency?: string | null
@@ -287,13 +447,17 @@ export type Database = {
           venue_name?: string | null
         }
         Update: {
+          access_level?: Database["public"]["Enums"]["event_access_level"]
           created_at?: string
           created_by?: string
           date?: string
           description?: string | null
+          enable_check_in?: boolean
+          enable_photos?: boolean
           id?: string
           image_url?: string | null
           is_recurrent?: boolean | null
+          max_attendees?: number | null
           organizer_name?: string | null
           organizer_whatsapp?: string | null
           price_currency?: string | null
@@ -710,6 +874,15 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_event_tags_by_category: {
+        Args: never
+        Returns: {
+          category: string
+          id: string
+          name: string
+          sort_order: number
+        }[]
+      }
       get_events_safe: {
         Args: never
         Returns: {
@@ -1015,6 +1188,7 @@ export type Database = {
       should_show_organizer_contact: { Args: never; Returns: boolean }
     }
     Enums: {
+      event_access_level: "public" | "private" | "invite_only" | "secret"
       user_role: "user" | "admin" | "superadmin"
     }
     CompositeTypes: {
@@ -1143,6 +1317,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      event_access_level: ["public", "private", "invite_only", "secret"],
       user_role: ["user", "admin", "superadmin"],
     },
   },
