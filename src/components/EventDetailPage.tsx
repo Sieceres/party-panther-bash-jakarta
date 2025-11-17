@@ -247,16 +247,25 @@ export const EventDetailPage = () => {
   // Load Instagram embed script when event has instagram_post_url
   useEffect(() => {
     if (event?.instagram_post_url) {
-      // Load Instagram embed script if not already loaded
-      if (!(window as any).instgrm) {
-        const script = document.createElement('script');
-        script.src = '//www.instagram.com/embed.js';
-        script.async = true;
-        document.body.appendChild(script);
-      } else {
-        // Process embeds if script already loaded
-        (window as any).instgrm.Embeds.process();
-      }
+      const loadInstagramEmbed = () => {
+        if ((window as any).instgrm) {
+          (window as any).instgrm.Embeds.process();
+        } else {
+          const script = document.createElement('script');
+          script.src = 'https://www.instagram.com/embed.js';
+          script.async = true;
+          script.onload = () => {
+            if ((window as any).instgrm) {
+              (window as any).instgrm.Embeds.process();
+            }
+          };
+          document.body.appendChild(script);
+        }
+      };
+
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(loadInstagramEmbed, 100);
+      return () => clearTimeout(timer);
     }
   }, [event?.instagram_post_url]);
 
