@@ -13,12 +13,14 @@ interface EventPrivacySettingsProps {
   enablePhotos: boolean;
   isRecurrent: boolean;
   trackPayments: boolean;
+  instagramPostUrl: string;
   onAccessLevelChange: (value: string) => void;
   onMaxAttendeesChange: (value: number | null) => void;
   onEnableCheckInChange: (value: boolean) => void;
   onEnablePhotosChange: (value: boolean) => void;
   onIsRecurrentChange: (value: boolean) => void;
   onTrackPaymentsChange: (value: boolean) => void;
+  onInstagramPostUrlChange: (value: string) => void;
 }
 
 export const EventPrivacySettings = ({
@@ -28,12 +30,14 @@ export const EventPrivacySettings = ({
   enablePhotos,
   isRecurrent,
   trackPayments,
+  instagramPostUrl,
   onAccessLevelChange,
   onMaxAttendeesChange,
   onEnableCheckInChange,
   onEnablePhotosChange,
   onIsRecurrentChange,
-  onTrackPaymentsChange
+  onTrackPaymentsChange,
+  onInstagramPostUrlChange
 }: EventPrivacySettingsProps) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -138,6 +142,20 @@ export const EventPrivacySettings = ({
               checked={trackPayments}
               onCheckedChange={onTrackPaymentsChange}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="instagramPostUrl">Instagram Post</Label>
+            <Input
+              id="instagramPostUrl"
+              type="url"
+              value={instagramPostUrl}
+              onChange={(e) => onInstagramPostUrlChange(e.target.value)}
+              placeholder="https://www.instagram.com/p/POST_ID/"
+            />
+            <p className="text-sm text-muted-foreground">
+              Paste the link to an Instagram post to embed it on the event page
+            </p>
           </div>
         </CollapsibleContent>
       </Collapsible>

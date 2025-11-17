@@ -406,6 +406,7 @@ export type Database = {
           enable_photos: boolean
           id: string
           image_url: string | null
+          instagram_post_url: string | null
           is_recurrent: boolean | null
           max_attendees: number | null
           organizer_name: string | null
@@ -431,6 +432,7 @@ export type Database = {
           enable_photos?: boolean
           id?: string
           image_url?: string | null
+          instagram_post_url?: string | null
           is_recurrent?: boolean | null
           max_attendees?: number | null
           organizer_name?: string | null
@@ -456,6 +458,7 @@ export type Database = {
           enable_photos?: boolean
           id?: string
           image_url?: string | null
+          instagram_post_url?: string | null
           is_recurrent?: boolean | null
           max_attendees?: number | null
           organizer_name?: string | null

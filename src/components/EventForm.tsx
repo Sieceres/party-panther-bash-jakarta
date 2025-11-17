@@ -45,6 +45,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [maxAttendees, setMaxAttendees] = useState<number | null>(initialData?.max_attendees || null);
   const [enableCheckIn, setEnableCheckIn] = useState(initialData?.enable_check_in || false);
   const [enablePhotos, setEnablePhotos] = useState(initialData?.enable_photos || false);
+  const [instagramPostUrl, setInstagramPostUrl] = useState(initialData?.instagram_post_url || "");
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
@@ -180,6 +181,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         image_url: formData.image,
         is_recurrent: isRecurrent,
         track_payments: trackPayments,
+        instagram_post_url: instagramPostUrl || null,
         created_by: user.id
       };
 
@@ -344,12 +346,14 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               enablePhotos={enablePhotos}
               isRecurrent={isRecurrent}
               trackPayments={trackPayments}
+              instagramPostUrl={instagramPostUrl}
               onAccessLevelChange={setAccessLevel}
               onMaxAttendeesChange={setMaxAttendees}
               onEnableCheckInChange={setEnableCheckIn}
               onEnablePhotosChange={setEnablePhotos}
               onIsRecurrentChange={setIsRecurrent}
               onTrackPaymentsChange={setTrackPayments}
+              onInstagramPostUrlChange={setInstagramPostUrl}
             />
 
             <Button

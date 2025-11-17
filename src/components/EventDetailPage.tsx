@@ -28,6 +28,7 @@ import { EventTags } from "./EventTags";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEventBySlugOrId, getEditEventUrl } from "@/lib/slug-utils";
+import { extractInstagramPostId } from "@/lib/instagram-utils";
 import Linkify from "linkify-react";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import defaultAvatar from "@/assets/default-avatar.png";
@@ -54,6 +55,7 @@ interface Event {
   created_by: string;
   created_at: string;
   updated_at: string;
+  instagram_post_url?: string;
   slug?: string;
   attendee_count?: number;
   comment_count?: number;
@@ -833,6 +835,28 @@ export const EventDetailPage = () => {
                       {event.description}
                     </Linkify>
                   </div>
+                  
+                  {event.instagram_post_url && (() => {
+                    const postId = extractInstagramPostId(event.instagram_post_url);
+                    return postId ? (
+                      <>
+                        <Separator />
+                        <div className="flex flex-col items-center space-y-2">
+                          <h4 className="text-base sm:text-lg font-semibold self-start">Featured Post</h4>
+                          <div className="w-full max-w-md mx-auto">
+                            <iframe
+                              src={`https://www.instagram.com/p/${postId}/embed/`}
+                              className="w-full rounded-lg border-0"
+                              style={{ minHeight: '500px', maxHeight: '700px' }}
+                              frameBorder="0"
+                              scrolling="no"
+                              allowTransparency
+                            />
+                          </div>
+                        </div>
+                      </>
+                    ) : null;
+                  })()}
                   
                   {eventTags.length > 0 && (
                     <>
