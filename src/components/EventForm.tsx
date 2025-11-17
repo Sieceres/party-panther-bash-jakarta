@@ -280,7 +280,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
 
       toast({
         title: initialData?.id ? "Event Updated! 🎉" : "Event Created! 🎉",
-        description: initialData?.id ? "Your event has been updated successfully." : "Your event has been submitted for review and will be live soon.",
+        description: initialData?.id ? "Your event has been updated successfully." : "Your event has been created. Time to share it and get participants!",
       });
 
       if (!initialData?.id) {
