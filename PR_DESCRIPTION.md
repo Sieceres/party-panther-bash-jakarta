@@ -35,8 +35,8 @@ This PR implements a robust, production-ready Instagram embed system using Faceb
 - Better error handling
 
 ### 5. Testing
-- **File**: `src/components/__tests__/InstagramEmbed.test.tsx`
-- Unit tests for all scenarios:
+- **Manual testing recommended** (automated tests require test infrastructure setup)
+- Test all scenarios:
   - Successful embed rendering
   - Fallback link on API failure
   - Loading state
