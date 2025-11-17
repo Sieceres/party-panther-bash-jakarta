@@ -861,6 +861,10 @@ export const EventDetailPage = () => {
                     </Linkify>
                   </div>
                   
+                  <p className="text-2xl font-bold text-red-500 bg-yellow-200 p-4 text-center">
+                    ⬇️ START OF EMBED LOCATION 1 (RED BORDER) ⬇️
+                  </p>
+                  
                   {/* TEST LOCATION 1: Right after description */}
                   {event.instagram_post_url && (() => {
                     const postId = extractInstagramPostId(event.instagram_post_url);
@@ -901,6 +905,10 @@ export const EventDetailPage = () => {
                     ) : null;
                   })()}
                   
+                  <p className="text-2xl font-bold text-red-500 bg-yellow-200 p-4 text-center">
+                    ⬆️ END OF EMBED LOCATION 1 (RED BORDER) ⬆️
+                  </p>
+                  
                   {eventTags.length > 0 && (
                     <>
                       <Separator />
@@ -909,6 +917,10 @@ export const EventDetailPage = () => {
                   )}
                   
                   <Separator />
+                  
+                  <p className="text-2xl font-bold text-blue-500 bg-yellow-200 p-4 text-center">
+                    ⬇️ START OF EMBED LOCATION 2 (BLUE BORDER) ⬇️
+                  </p>
                   
                   {/* TEST LOCATION 2: Before venue section */}
                   {event.instagram_post_url && (() => {
@@ -946,6 +958,10 @@ export const EventDetailPage = () => {
                       </div>
                     ) : null;
                   })()}
+                  
+                  <p className="text-2xl font-bold text-blue-500 bg-yellow-200 p-4 text-center">
+                    ⬆️ END OF EMBED LOCATION 2 (BLUE BORDER) ⬆️
+                  </p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -1017,6 +1033,10 @@ export const EventDetailPage = () => {
                 />
               )}
 
+              <p className="text-2xl font-bold text-green-500 bg-yellow-200 p-4 text-center">
+                ⬇️ START OF EMBED LOCATION 3 (GREEN BORDER) ⬇️
+              </p>
+
               {/* TEST LOCATION 3: Before Attendees section */}
               {event.instagram_post_url && (() => {
                 const postId = extractInstagramPostId(event.instagram_post_url);
@@ -1055,6 +1075,10 @@ export const EventDetailPage = () => {
                   </Card>
                 ) : null;
               })()}
+
+              <p className="text-2xl font-bold text-green-500 bg-yellow-200 p-4 text-center">
+                ⬆️ END OF EMBED LOCATION 3 (GREEN BORDER) ⬆️
+              </p>
 
               {/* Attendees Section */}
               <Card>
