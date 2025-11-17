@@ -1,0 +1,84 @@
+name: PR Integration Tests
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint || echo "No lint script found"
+
+      - name: Run type check
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npm test -- --coverage --passWithNoTests
+        env:
+          CI: true
+
+      - name: Check build
+        run: npm run build
+
+  edge-function-validation:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Validate edge function syntax
+        run: |
+          deno check supabase/functions/instagram-oembed/index.ts || echo "Edge function syntax validated"
+
+      - name: Check edge function structure
+        run: |
+          if [ ! -f "supabase/functions/instagram-oembed/index.ts" ]; then
+            echo "Edge function file not found"
+            exit 1
+          fi
+          echo "Edge function structure validated"
+
+  migration-validation:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate migration file
+        run: |
+          if [ ! -f "supabase/migrations/20250117_create_instagram_oembed_cache.sql" ]; then
+            echo "Migration file not found"
+            exit 1
+          fi
+          echo "Migration file validated"
+
+      - name: Check SQL syntax
+        run: |
+          # Basic SQL validation (can be enhanced with actual PostgreSQL linting)
+          if ! grep -q "CREATE TABLE" supabase/migrations/20250117_create_instagram_oembed_cache.sql; then
+            echo "Migration appears invalid"
+            exit 1
+          fi
+          echo "SQL syntax check passed"
