@@ -861,20 +861,21 @@ export const EventDetailPage = () => {
                     </Linkify>
                   </div>
                   
+                  {/* TEST LOCATION 1: Right after description */}
                   {event.instagram_post_url && (() => {
                     const postId = extractInstagramPostId(event.instagram_post_url);
                     return postId ? (
                       <>
                         <Separator />
                         <div className="flex flex-col items-center space-y-2">
-                          <h4 className="text-base sm:text-lg font-semibold self-start">Featured Post</h4>
-                          <div className="w-full max-w-md mx-auto">
+                          <h4 className="text-base sm:text-lg font-semibold self-start bg-red-500 text-white px-2 py-1">TEST LOCATION 1 - After Description</h4>
+                          <div className="w-full max-w-md mx-auto border-4 border-red-500 p-2">
                             <blockquote
                               className="instagram-media"
                               data-instgrm-permalink={`https://www.instagram.com/p/${postId}/`}
                               data-instgrm-version="14"
                               style={{
-                                background: 'var(--background)',
+                                background: '#FFF',
                                 border: 0,
                                 borderRadius: '3px',
                                 boxShadow: '0 0 1px 0 rgba(0,0,0,0.5), 0 1px 10px 0 rgba(0,0,0,0.15)',
@@ -908,6 +909,43 @@ export const EventDetailPage = () => {
                   )}
                   
                   <Separator />
+                  
+                  {/* TEST LOCATION 2: Before venue section */}
+                  {event.instagram_post_url && (() => {
+                    const postId = extractInstagramPostId(event.instagram_post_url);
+                    return postId ? (
+                      <div className="flex flex-col items-center space-y-2 my-4">
+                        <h4 className="text-base sm:text-lg font-semibold self-start bg-blue-500 text-white px-2 py-1">TEST LOCATION 2 - Before Venue</h4>
+                        <div className="w-full max-w-md mx-auto border-4 border-blue-500 p-2">
+                          <blockquote
+                            className="instagram-media"
+                            data-instgrm-permalink={`https://www.instagram.com/p/${postId}/`}
+                            data-instgrm-version="14"
+                            style={{
+                              background: '#FFF',
+                              border: 0,
+                              borderRadius: '3px',
+                              boxShadow: '0 0 1px 0 rgba(0,0,0,0.5), 0 1px 10px 0 rgba(0,0,0,0.15)',
+                              margin: '1px',
+                              maxWidth: '540px',
+                              minWidth: '326px',
+                              padding: 0,
+                              width: '99.375%'
+                            }}
+                          >
+                            <a
+                              href={`https://www.instagram.com/p/${postId}/`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                            >
+                              View this post on Instagram
+                            </a>
+                          </blockquote>
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -978,6 +1016,45 @@ export const EventDetailPage = () => {
                   canManage={isOwner || isCoOrganizer || isAdmin}
                 />
               )}
+
+              {/* TEST LOCATION 3: Before Attendees section */}
+              {event.instagram_post_url && (() => {
+                const postId = extractInstagramPostId(event.instagram_post_url);
+                return postId ? (
+                  <Card className="border-4 border-green-500">
+                    <CardContent className="p-4 sm:p-5 md:p-6">
+                      <h4 className="text-base sm:text-lg font-semibold bg-green-500 text-white px-2 py-1 mb-4">TEST LOCATION 3 - Before Attendees</h4>
+                      <div className="w-full max-w-md mx-auto">
+                        <blockquote
+                          className="instagram-media"
+                          data-instgrm-permalink={`https://www.instagram.com/p/${postId}/`}
+                          data-instgrm-version="14"
+                          style={{
+                            background: '#FFF',
+                            border: 0,
+                            borderRadius: '3px',
+                            boxShadow: '0 0 1px 0 rgba(0,0,0,0.5), 0 1px 10px 0 rgba(0,0,0,0.15)',
+                            margin: '1px',
+                            maxWidth: '540px',
+                            minWidth: '326px',
+                            padding: 0,
+                            width: '99.375%'
+                          }}
+                        >
+                          <a
+                            href={`https://www.instagram.com/p/${postId}/`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                          >
+                            View this post on Instagram
+                          </a>
+                        </blockquote>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : null;
+              })()}
 
               {/* Attendees Section */}
               <Card>
