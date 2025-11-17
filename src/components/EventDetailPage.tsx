@@ -28,7 +28,6 @@ import { EventTags } from "./EventTags";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEventBySlugOrId, getEditEventUrl } from "@/lib/slug-utils";
-import { extractInstagramPostId } from "@/lib/instagram-utils";
 import Linkify from "linkify-react";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import defaultAvatar from "@/assets/default-avatar.png";
@@ -246,27 +245,33 @@ export const EventDetailPage = () => {
 
   // Load Instagram embed script when event has instagram_post_url
   useEffect(() => {
-    if (event?.instagram_post_url) {
-      const loadInstagramEmbed = () => {
-        if ((window as any).instgrm) {
-          (window as any).instgrm.Embeds.process();
-        } else {
-          const script = document.createElement('script');
-          script.src = 'https://www.instagram.com/embed.js';
-          script.async = true;
-          script.onload = () => {
-            if ((window as any).instgrm) {
-              (window as any).instgrm.Embeds.process();
-            }
-          };
-          document.body.appendChild(script);
-        }
-      };
+    if (!event?.instagram_post_url) return;
 
-      // Small delay to ensure DOM is ready
-      const timer = setTimeout(loadInstagramEmbed, 100);
-      return () => clearTimeout(timer);
+    // Load Instagram embed.js once
+    if (!document.querySelector('script[src="https://www.instagram.com/embed.js"]')) {
+      const script = document.createElement('script');
+      script.src = 'https://www.instagram.com/embed.js';
+      script.async = true;
+      document.body.appendChild(script);
     }
+
+    // Re-process embeds whenever the DOM changes or every 500ms until successful
+    const process = () => {
+      if ((window as any).instgrm?.Embeds?.process) {
+        (window as any).instgrm.Embeds.process();
+      }
+    };
+
+    process();
+    const interval = setInterval(process, 500);
+
+    const observer = new MutationObserver(process);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      clearInterval(interval);
+      observer.disconnect();
+    };
   }, [event?.instagram_post_url]);
 
   const handleJoinEvent = async () => {
@@ -860,54 +865,19 @@ export const EventDetailPage = () => {
                       {event.description}
                     </Linkify>
                   </div>
-                  
-                  <p className="text-2xl font-bold text-red-500 bg-yellow-200 p-4 text-center">
-                    ⬇️ START OF EMBED LOCATION 1 (RED BORDER) ⬇️
-                  </p>
-                  
-                  {/* TEST LOCATION 1: Right after description */}
-                  {event.instagram_post_url && (() => {
-                    const postId = extractInstagramPostId(event.instagram_post_url);
-                    return postId ? (
-                      <>
-                        <Separator />
-                        <div className="flex flex-col items-center space-y-2">
-                          <h4 className="text-base sm:text-lg font-semibold self-start bg-red-500 text-white px-2 py-1">TEST LOCATION 1 - After Description</h4>
-                          <div className="w-full max-w-md mx-auto border-4 border-red-500 p-2">
-                            <blockquote
-                              className="instagram-media"
-                              data-instgrm-permalink={`https://www.instagram.com/p/${postId}/`}
-                              data-instgrm-version="14"
-                              style={{
-                                background: '#FFF',
-                                border: 0,
-                                borderRadius: '3px',
-                                boxShadow: '0 0 1px 0 rgba(0,0,0,0.5), 0 1px 10px 0 rgba(0,0,0,0.15)',
-                                margin: '1px',
-                                maxWidth: '540px',
-                                minWidth: '326px',
-                                padding: 0,
-                                width: '99.375%'
-                              }}
-                            >
-                              <a
-                                href={`https://www.instagram.com/p/${postId}/`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary hover:underline"
-                              >
-                                View this post on Instagram
-                              </a>
-                            </blockquote>
-                          </div>
-                        </div>
-                      </>
-                    ) : null;
-                  })()}
-                  
-                  <p className="text-2xl font-bold text-red-500 bg-yellow-200 p-4 text-center">
-                    ⬆️ END OF EMBED LOCATION 1 (RED BORDER) ⬆️
-                  </p>
+
+                  {event.instagram_post_url && (
+                    <div className="my-8 flex justify-center">
+                      <blockquote
+                        className="instagram-media"
+                        data-instgrm-permalink={`${event.instagram_post_url}/`}
+                        data-instgrm-version="14"
+                        style={{ maxWidth: '540px', width: '100%' }}
+                      >
+                        <a href={event.instagram_post_url}>View on Instagram</a>
+                      </blockquote>
+                    </div>
+                  )}
                   
                   {eventTags.length > 0 && (
                     <>
@@ -917,51 +887,6 @@ export const EventDetailPage = () => {
                   )}
                   
                   <Separator />
-                  
-                  <p className="text-2xl font-bold text-blue-500 bg-yellow-200 p-4 text-center">
-                    ⬇️ START OF EMBED LOCATION 2 (BLUE BORDER) ⬇️
-                  </p>
-                  
-                  {/* TEST LOCATION 2: Before venue section */}
-                  {event.instagram_post_url && (() => {
-                    const postId = extractInstagramPostId(event.instagram_post_url);
-                    return postId ? (
-                      <div className="flex flex-col items-center space-y-2 my-4">
-                        <h4 className="text-base sm:text-lg font-semibold self-start bg-blue-500 text-white px-2 py-1">TEST LOCATION 2 - Before Venue</h4>
-                        <div className="w-full max-w-md mx-auto border-4 border-blue-500 p-2">
-                          <blockquote
-                            className="instagram-media"
-                            data-instgrm-permalink={`https://www.instagram.com/p/${postId}/`}
-                            data-instgrm-version="14"
-                            style={{
-                              background: '#FFF',
-                              border: 0,
-                              borderRadius: '3px',
-                              boxShadow: '0 0 1px 0 rgba(0,0,0,0.5), 0 1px 10px 0 rgba(0,0,0,0.15)',
-                              margin: '1px',
-                              maxWidth: '540px',
-                              minWidth: '326px',
-                              padding: 0,
-                              width: '99.375%'
-                            }}
-                          >
-                            <a
-                              href={`https://www.instagram.com/p/${postId}/`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:underline"
-                            >
-                              View this post on Instagram
-                            </a>
-                          </blockquote>
-                        </div>
-                      </div>
-                    ) : null;
-                  })()}
-                  
-                  <p className="text-2xl font-bold text-blue-500 bg-yellow-200 p-4 text-center">
-                    ⬆️ END OF EMBED LOCATION 2 (BLUE BORDER) ⬆️
-                  </p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -1032,53 +957,6 @@ export const EventDetailPage = () => {
                   canManage={isOwner || isCoOrganizer || isAdmin}
                 />
               )}
-
-              <p className="text-2xl font-bold text-green-500 bg-yellow-200 p-4 text-center">
-                ⬇️ START OF EMBED LOCATION 3 (GREEN BORDER) ⬇️
-              </p>
-
-              {/* TEST LOCATION 3: Before Attendees section */}
-              {event.instagram_post_url && (() => {
-                const postId = extractInstagramPostId(event.instagram_post_url);
-                return postId ? (
-                  <Card className="border-4 border-green-500">
-                    <CardContent className="p-4 sm:p-5 md:p-6">
-                      <h4 className="text-base sm:text-lg font-semibold bg-green-500 text-white px-2 py-1 mb-4">TEST LOCATION 3 - Before Attendees</h4>
-                      <div className="w-full max-w-md mx-auto">
-                        <blockquote
-                          className="instagram-media"
-                          data-instgrm-permalink={`https://www.instagram.com/p/${postId}/`}
-                          data-instgrm-version="14"
-                          style={{
-                            background: '#FFF',
-                            border: 0,
-                            borderRadius: '3px',
-                            boxShadow: '0 0 1px 0 rgba(0,0,0,0.5), 0 1px 10px 0 rgba(0,0,0,0.15)',
-                            margin: '1px',
-                            maxWidth: '540px',
-                            minWidth: '326px',
-                            padding: 0,
-                            width: '99.375%'
-                          }}
-                        >
-                          <a
-                            href={`https://www.instagram.com/p/${postId}/`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            View this post on Instagram
-                          </a>
-                        </blockquote>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : null;
-              })()}
-
-              <p className="text-2xl font-bold text-green-500 bg-yellow-200 p-4 text-center">
-                ⬆️ END OF EMBED LOCATION 3 (GREEN BORDER) ⬆️
-              </p>
 
               {/* Attendees Section */}
               <Card>
