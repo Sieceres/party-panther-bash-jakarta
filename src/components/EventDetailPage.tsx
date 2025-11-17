@@ -244,6 +244,22 @@ export const EventDetailPage = () => {
     fetchData();
   }, [id, toast]);
 
+  // Load Instagram embed script when event has instagram_post_url
+  useEffect(() => {
+    if (event?.instagram_post_url) {
+      // Load Instagram embed script if not already loaded
+      if (!(window as any).instgrm) {
+        const script = document.createElement('script');
+        script.src = '//www.instagram.com/embed.js';
+        script.async = true;
+        document.body.appendChild(script);
+      } else {
+        // Process embeds if script already loaded
+        (window as any).instgrm.Embeds.process();
+      }
+    }
+  }, [event?.instagram_post_url]);
+
   const handleJoinEvent = async () => {
     if (!user) {
       toast({
@@ -844,14 +860,31 @@ export const EventDetailPage = () => {
                         <div className="flex flex-col items-center space-y-2">
                           <h4 className="text-base sm:text-lg font-semibold self-start">Featured Post</h4>
                           <div className="w-full max-w-md mx-auto">
-                            <iframe
-                              src={`https://www.instagram.com/p/${postId}/embed/`}
-                              className="w-full rounded-lg border-0"
-                              style={{ minHeight: '500px', maxHeight: '700px' }}
-                              frameBorder="0"
-                              scrolling="no"
-                              allowTransparency
-                            />
+                            <blockquote
+                              className="instagram-media"
+                              data-instgrm-permalink={`https://www.instagram.com/p/${postId}/`}
+                              data-instgrm-version="14"
+                              style={{
+                                background: 'var(--background)',
+                                border: 0,
+                                borderRadius: '3px',
+                                boxShadow: '0 0 1px 0 rgba(0,0,0,0.5), 0 1px 10px 0 rgba(0,0,0,0.15)',
+                                margin: '1px',
+                                maxWidth: '540px',
+                                minWidth: '326px',
+                                padding: 0,
+                                width: '99.375%'
+                              }}
+                            >
+                              <a
+                                href={`https://www.instagram.com/p/${postId}/`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline"
+                              >
+                                View this post on Instagram
+                              </a>
+                            </blockquote>
                           </div>
                         </div>
                       </>
