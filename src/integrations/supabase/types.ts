@@ -932,68 +932,39 @@ export type Database = {
           venue_name: string
         }[]
       }
-      get_events_with_details:
-        | {
-            Args: {
-              p_after_date?: string
-              p_after_time?: string
-              p_limit?: number
-              user_id_param?: string
-            }
-            Returns: {
-              attendee_count: number
-              created_at: string
-              created_by: string
-              creator_avatar: string
-              creator_name: string
-              creator_verified: boolean
-              date: string
-              description: string
-              id: string
-              image_url: string
-              is_joined: boolean
-              is_recurrent: boolean
-              organizer_name: string
-              organizer_whatsapp: string
-              price_currency: string
-              slug: string
-              time: string
-              title: string
-              updated_at: string
-              venue_address: string
-              venue_latitude: number
-              venue_longitude: number
-              venue_name: string
-            }[]
-          }
-        | {
-            Args: { user_id_param?: string }
-            Returns: {
-              attendee_count: number
-              created_at: string
-              created_by: string
-              creator_avatar: string
-              creator_name: string
-              creator_verified: boolean
-              date: string
-              description: string
-              id: string
-              image_url: string
-              is_joined: boolean
-              is_recurrent: boolean
-              organizer_name: string
-              organizer_whatsapp: string
-              price_currency: string
-              slug: string
-              time: string
-              title: string
-              updated_at: string
-              venue_address: string
-              venue_latitude: number
-              venue_longitude: number
-              venue_name: string
-            }[]
-          }
+      get_events_with_details: {
+        Args: {
+          p_after_date?: string
+          p_after_time?: string
+          p_limit?: number
+          user_id_param?: string
+        }
+        Returns: {
+          attendee_count: number
+          created_at: string
+          created_by: string
+          creator_avatar: string
+          creator_name: string
+          creator_verified: boolean
+          date: string
+          description: string
+          id: string
+          image_url: string
+          is_joined: boolean
+          is_recurrent: boolean
+          organizer_name: string
+          organizer_whatsapp: string
+          price_currency: string
+          slug: string
+          time: string
+          title: string
+          updated_at: string
+          venue_address: string
+          venue_latitude: number
+          venue_longitude: number
+          venue_name: string
+        }[]
+      }
       get_full_profile_info: {
         Args: { profile_user_id: string }
         Returns: {

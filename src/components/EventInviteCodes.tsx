@@ -95,8 +95,9 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime }: EventInviteC
         variant: "destructive"
       });
     } else {
+      handleCopyCode(code);
       toast({
-        title: "Invite code generated!",
+        title: "Invite code generated and copied!",
         description: `Code: ${code}`
       });
       setNewEmail("");
