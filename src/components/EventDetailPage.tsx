@@ -244,35 +244,6 @@ export const EventDetailPage = () => {
   }, [id, toast]);
 
   // Load Instagram embed script when event has instagram_post_url
-  useEffect(() => {
-    if (!event?.instagram_post_url) return;
-
-    // Load Instagram embed.js once
-    if (!document.querySelector('script[src="https://www.instagram.com/embed.js"]')) {
-      const script = document.createElement('script');
-      script.src = 'https://www.instagram.com/embed.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-
-    // Re-process embeds whenever the DOM changes or every 500ms until successful
-    const process = () => {
-      if ((window as any).instgrm?.Embeds?.process) {
-        (window as any).instgrm.Embeds.process();
-      }
-    };
-
-    process();
-    const interval = setInterval(process, 500);
-
-    const observer = new MutationObserver(process);
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    return () => {
-      clearInterval(interval);
-      observer.disconnect();
-    };
-  }, [event?.instagram_post_url]);
 
   const handleJoinEvent = async () => {
     if (!user) {
