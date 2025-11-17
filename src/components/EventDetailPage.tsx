@@ -247,19 +247,34 @@ export const EventDetailPage = () => {
   // Load Instagram embed script when event has instagram_post_url
   useEffect(() => {
     if (event?.instagram_post_url) {
+      console.log('🔍 Event has Instagram URL:', event.instagram_post_url);
+      const postId = extractInstagramPostId(event.instagram_post_url);
+      console.log('🔍 Extracted Post ID:', postId);
+      
       const loadInstagramEmbed = () => {
+        console.log('🔍 Loading Instagram embed script...');
         if ((window as any).instgrm) {
+          console.log('✅ Instagram script already loaded, processing embeds...');
           (window as any).instgrm.Embeds.process();
         } else {
+          console.log('📥 Creating new Instagram script tag...');
           const script = document.createElement('script');
           script.src = 'https://www.instagram.com/embed.js';
           script.async = true;
           script.onload = () => {
+            console.log('✅ Instagram script loaded successfully!');
             if ((window as any).instgrm) {
+              console.log('✅ Processing Instagram embeds...');
               (window as any).instgrm.Embeds.process();
+            } else {
+              console.error('❌ Instagram script loaded but instgrm object not found');
             }
           };
+          script.onerror = () => {
+            console.error('❌ Failed to load Instagram embed script');
+          };
           document.body.appendChild(script);
+          console.log('📌 Instagram script tag appended to body');
         }
       };
 
@@ -868,6 +883,7 @@ export const EventDetailPage = () => {
                   {/* TEST LOCATION 1: Right after description */}
                   {event.instagram_post_url && (() => {
                     const postId = extractInstagramPostId(event.instagram_post_url);
+                    console.log('🎯 Location 1 - Post ID:', postId);
                     return postId ? (
                       <>
                         <Separator />
@@ -925,6 +941,7 @@ export const EventDetailPage = () => {
                   {/* TEST LOCATION 2: Before venue section */}
                   {event.instagram_post_url && (() => {
                     const postId = extractInstagramPostId(event.instagram_post_url);
+                    console.log('🎯 Location 2 - Post ID:', postId);
                     return postId ? (
                       <div className="flex flex-col items-center space-y-2 my-4">
                         <h4 className="text-base sm:text-lg font-semibold self-start bg-blue-500 text-white px-2 py-1">TEST LOCATION 2 - Before Venue</h4>
