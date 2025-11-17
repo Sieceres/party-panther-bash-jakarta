@@ -1057,6 +1057,7 @@ export const EventDetailPage = () => {
               {/* TEST LOCATION 3: Before Attendees section */}
               {event.instagram_post_url && (() => {
                 const postId = extractInstagramPostId(event.instagram_post_url);
+                console.log('🎯 Location 3 - Post ID:', postId);
                 return postId ? (
                   <Card className="border-4 border-green-500">
                     <CardContent className="p-4 sm:p-5 md:p-6">
