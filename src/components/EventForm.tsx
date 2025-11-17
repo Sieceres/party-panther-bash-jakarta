@@ -136,9 +136,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
     setIsSubmitting(true);
 
     try {
-      console.log('=== EVENT FORM SUBMISSION STARTED ===');
       const { data: { user } } = await supabase.auth.getUser();
-      console.log('User authenticated:', user?.id);
       
       if (!user) {
         toast({
@@ -150,8 +148,39 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         return;
       }
 
+      // Validate required fields
+      if (!eventDate) {
+        toast({
+          title: "Date required",
+          description: "Please select a date for your event.",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!formData.time) {
+        toast({
+          title: "Time required",
+          description: "Please select a time for your event.",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!formData.title.trim()) {
+        toast({
+          title: "Title required",
+          description: "Please enter a title for your event.",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       // Validate event date is not in the past (only for new events)
-      if (!initialData && eventDate && formData.time) {
+      if (!initialData) {
         const year = eventDate.getFullYear();
         const month = String(eventDate.getMonth() + 1).padStart(2, '0');
         const day = String(eventDate.getDate()).padStart(2, '0');
@@ -160,10 +189,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         const eventDateTime = new Date(`${dateString}T${formData.time}`);
         const now = new Date();
         
-        console.log('Date validation - Event time:', eventDateTime, 'Now:', now);
-        
         if (eventDateTime < now) {
-          console.log('Date validation FAILED - event is in the past');
           toast({
             title: "Invalid date",
             description: "Cannot create an event in the past. Please select a future date and time.",
@@ -177,7 +203,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       const eventData = {
         title: formData.title,
         description: formData.description,
-        date: eventDate ? `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}` : undefined,
+        date: `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}`,
         time: formData.time,
         venue_name: formData.venue,
         venue_address: formData.address,
@@ -191,24 +217,19 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         instagram_post_url: instagramPostUrl || null,
         created_by: user.id
       };
-      
-      console.log('Event data to submit:', eventData);
 
       let error;
       let newEventId = null;
       
       if (initialData?.id) {
         // Update existing event
-        console.log('Updating event:', initialData.id);
         const { error: updateError } = await supabase
           .from('events')
           .update(eventData)
           .eq('id', initialData.id);
         error = updateError;
-        console.log('Update result - error:', updateError);
       } else {
         // Insert new event
-        console.log('Inserting new event...');
         const { data: insertData, error: insertError } = await supabase
           .from('events')
           .insert(eventData)
@@ -216,13 +237,9 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
           .single();
         error = insertError;
         newEventId = insertData?.id;
-        console.log('Insert result - newEventId:', newEventId, 'error:', insertError);
       }
 
-      if (error) {
-        console.error('Database operation failed:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       // Handle tag assignments for both new and updated events
       const eventId = initialData?.id || newEventId;
@@ -284,13 +301,6 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       }
 
     } catch (error: any) {
-      console.error('=== EVENT FORM SUBMISSION ERROR ===');
-      console.error('Error type:', typeof error);
-      console.error('Error object:', error);
-      console.error('Error message:', error?.message);
-      console.error('Error details:', error?.details);
-      console.error('Error hint:', error?.hint);
-      console.error('Error code:', error?.code);
       console.error(initialData?.id ? 'Error updating event:' : 'Error creating event:', error);
       toast({
         title: "Error",
