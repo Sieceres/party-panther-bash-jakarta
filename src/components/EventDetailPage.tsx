@@ -35,6 +35,8 @@ import { AttendeeNoteDialog } from "./AttendeeNoteDialog";
 import { EventCheckIn } from "./EventCheckIn";
 import { EventPhotoGallery } from "./EventPhotoGallery";
 import { EventInviteCodes } from "./EventInviteCodes";
+import { LoginDialog } from "./LoginDialog";
+import { InstagramEmbed } from "./InstagramEmbed";
 
 interface Event {
   id: string;
@@ -89,6 +91,7 @@ export const EventDetailPage = () => {
   const [currentAttendeeId, setCurrentAttendeeId] = useState<string | null>(null);
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
   const [eventTags, setEventTags] = useState<any[]>([]);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
 
   const memoizedCenter = useMemo(() => {
     if (!event?.venue_latitude || !event?.venue_longitude) {
@@ -247,11 +250,11 @@ export const EventDetailPage = () => {
 
   const handleJoinEvent = async () => {
     if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to join events.",
-        variant: "destructive"
-      });
+      // Store join intent in localStorage
+      if (event) {
+        localStorage.setItem('pendingEventJoin', event.id);
+      }
+      setLoginDialogOpen(true);
       return;
     }
 
@@ -334,6 +337,80 @@ export const EventDetailPage = () => {
       setJoiningEvent(false);
     }
   };
+
+  // Process pending join intent after login
+  useEffect(() => {
+    const processPendingJoin = async () => {
+      const pendingEventId = localStorage.getItem('pendingEventJoin');
+      
+      if (pendingEventId && user && event && pendingEventId === event.id && !hasJoined) {
+        // Clear the pending intent
+        localStorage.removeItem('pendingEventJoin');
+        
+        // Auto-join the event by calling the join logic directly
+        setJoiningEvent(true);
+        try {
+          const { error } = await supabase
+            .from('event_attendees')
+            .insert({
+              event_id: event.id,
+              user_id: user.id
+            });
+
+          if (error) {
+            if (error.code === '23505') {
+              // Already joined - just update state
+              setHasJoined(true);
+            } else {
+              throw error;
+            }
+            return;
+          }
+
+          setHasJoined(true);
+          setTotalAttendees(prev => prev + 1);
+          
+          toast({
+            title: "Successfully joined event! 🎉",
+            description: `You're now registered for "${event.title}". See you there!`,
+            duration: 5000,
+          });
+
+          // Refresh attendees list
+          const { data: attendeesData } = await supabase
+            .from('event_attendees')
+            .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note')
+            .eq('event_id', event.id)
+            .order('joined_at', { ascending: false });
+
+          if (attendeesData) {
+            const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
+            const { data: profilesData } = await supabase
+              .from('profiles')
+              .select('user_id, display_name, avatar_url, is_verified')
+              .in('user_id', userIds);
+
+            const attendeesWithProfiles = attendeesData.map(attendee => ({
+              ...attendee,
+              profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
+            }));
+            setAttendees(attendeesWithProfiles);
+          }
+        } catch (error) {
+          console.error('Error auto-joining event:', error);
+          toast({
+            title: "Error",
+            description: "Failed to join event automatically. Please try again.",
+            variant: "destructive"
+          });
+        } finally {
+          setJoiningEvent(false);
+        }
+      }
+    };
+
+    processPendingJoin();
+  }, [user, event?.id, hasJoined]);
 
   const handleUnjoinEvent = async () => {
     if (!user || !event) return;
@@ -1353,6 +1430,15 @@ export const EventDetailPage = () => {
         userId={user?.id || ""}
         initialNote={attendees.find(a => a.user_id === user?.id)?.note || ""}
         onNoteSaved={handleNoteSaved}
+      />
+      
+      <LoginDialog
+        open={loginDialogOpen}
+        onOpenChange={setLoginDialogOpen}
+        onSuccess={() => {
+          // The auto-join will be handled by the useEffect above
+          setLoginDialogOpen(false);
+        }}
       />
     </>
   );
