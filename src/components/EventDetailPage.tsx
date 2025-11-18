@@ -36,7 +36,7 @@ import { EventCheckIn } from "./EventCheckIn";
 import { EventPhotoGallery } from "./EventPhotoGallery";
 import { EventInviteCodes } from "./EventInviteCodes";
 import { LoginDialog } from "./LoginDialog";
-import { InstagramEmbed } from "./InstagramEmbed";
+import InstagramEmbed from "./InstagramEmbed";
 
 interface Event {
   id: string;
@@ -915,16 +915,7 @@ export const EventDetailPage = () => {
                   </div>
 
                   {event.instagram_post_url && (
-                    <div className="my-8 flex justify-center">
-                      <blockquote
-                        className="instagram-media"
-                        data-instgrm-permalink={`${event.instagram_post_url}/`}
-                        data-instgrm-version="14"
-                        style={{ maxWidth: '540px', width: '100%' }}
-                      >
-                        <a href={event.instagram_post_url}>View on Instagram</a>
-                      </blockquote>
-                    </div>
+                    <InstagramEmbed postUrl={event.instagram_post_url} maxWidth={540} />
                   )}
                   
                   {eventTags.length > 0 && (
