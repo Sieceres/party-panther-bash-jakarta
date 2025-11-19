@@ -82,24 +82,28 @@ export const EventPhotoGallery = ({ eventId, isJoined, canManage }: EventPhotoGa
   }, [eventId]);
 
   const loadPhotos = async () => {
-    const { data, error } = await supabase
+    const { data: photosData, error } = await supabase
       .from('event_photos')
-      .select(`
-        id,
-        photo_url,
-        uploaded_by,
-        uploaded_at,
-        profiles:uploaded_by (
-          display_name,
-          avatar_url
-        )
-      `)
+      .select('id, photo_url, uploaded_by, uploaded_at')
       .eq('event_id', eventId)
       .eq('is_hidden', false)
       .order('uploaded_at', { ascending: false });
 
-    if (!error && data) {
-      setPhotos(data as any);
+    if (!error && photosData) {
+      // Fetch profiles for photo uploaders
+      const userIds = [...new Set(photosData.map(photo => photo.uploaded_by))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, avatar_url')
+        .in('user_id', userIds);
+
+      // Join photos with profiles
+      const photosWithProfiles = photosData.map(photo => ({
+        ...photo,
+        profiles: profilesData?.find(profile => profile.user_id === photo.uploaded_by) || null
+      }));
+      
+      setPhotos(photosWithProfiles as any);
     }
   };
 
