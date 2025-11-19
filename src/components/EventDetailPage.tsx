@@ -99,17 +99,19 @@ export const EventDetailPage = () => {
     }
     return {
       lat: Number(event.venue_latitude),
-      lng: Number(event.venue_longitude)
+      lng: Number(event.venue_longitude),
     };
   }, [event?.venue_latitude, event?.venue_longitude]);
 
   const markers = useMemo(() => {
     if (!event?.venue_latitude || !event?.venue_longitude) return [];
-    return [{
-      lat: Number(event.venue_latitude),
-      lng: Number(event.venue_longitude),
-      title: event.venue_name
-    }];
+    return [
+      {
+        lat: Number(event.venue_latitude),
+        lng: Number(event.venue_longitude),
+        title: event.venue_name,
+      },
+    ];
   }, [event?.venue_latitude, event?.venue_longitude, event?.venue_name]);
 
   useEffect(() => {
@@ -119,36 +121,40 @@ export const EventDetailPage = () => {
       try {
         const { data: eventData, error: eventError } = await getEventBySlugOrId(id);
         if (eventError || !eventData) {
-          throw new Error('Event not found');
+          throw new Error("Event not found");
         }
-        
+
         setEvent(eventData);
-        
+
+        console.log("fetched event instagram_post_url:", eventData.instagram_post_url);
+
         // Get current user and check admin status
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         setCurrentUser(user);
         setUser(user);
-        
+
         if (user) {
           // Check if user is admin using the new user_roles table
           const { data: roles } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', user.id)
-            .in('role', ['admin', 'superadmin']);
-          
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", user.id)
+            .in("role", ["admin", "superadmin"]);
+
           setIsAdmin(roles && roles.length > 0);
         }
 
         // Check if user has joined this event
         if (user) {
           const { data: attendeeData } = await supabase
-            .from('event_attendees')
-            .select('id')
-            .eq('event_id', eventData.id)
-            .eq('user_id', user.id)
+            .from("event_attendees")
+            .select("id")
+            .eq("event_id", eventData.id)
+            .eq("user_id", user.id)
             .single();
-          
+
           setHasJoined(!!attendeeData);
         }
 
@@ -157,63 +163,66 @@ export const EventDetailPage = () => {
 
         // Fetch creator profile
         const { data: creatorProfileData } = await supabase
-          .from('profiles')
-          .select('user_id, display_name, avatar_url, is_verified, venue_status, business_name')
-          .eq('user_id', eventData.created_by)
+          .from("profiles")
+          .select("user_id, display_name, avatar_url, is_verified, venue_status, business_name")
+          .eq("user_id", eventData.created_by)
           .single();
-        
+
         setCreatorProfile(creatorProfileData);
 
         // Fetch comments for display - using separate queries to avoid foreign key issues
         const { data: commentsData, error: commentsError } = await supabase
-          .from('event_comments')
-          .select('id, comment, created_at, updated_at, user_id')
-          .eq('event_id', eventData.id)
-          .order('created_at', { ascending: false });
+          .from("event_comments")
+          .select("id, comment, created_at, updated_at, user_id")
+          .eq("event_id", eventData.id)
+          .order("created_at", { ascending: false });
 
         if (commentsData && !commentsError) {
           // Fetch profiles for comment authors
-          const userIds = [...new Set(commentsData.map(comment => comment.user_id))];
+          const userIds = [...new Set(commentsData.map((comment) => comment.user_id))];
           const { data: profilesData } = await supabase
-            .from('profiles')
-            .select('user_id, display_name, avatar_url, is_verified')
-            .in('user_id', userIds);
+            .from("profiles")
+            .select("user_id, display_name, avatar_url, is_verified")
+            .in("user_id", userIds);
 
           // Join comments with profiles
-          const commentsWithProfiles = commentsData.map(comment => ({
+          const commentsWithProfiles = commentsData.map((comment) => ({
             ...comment,
-            profiles: profilesData?.find(profile => profile.user_id === comment.user_id) || null
+            profiles: profilesData?.find((profile) => profile.user_id === comment.user_id) || null,
           }));
           setComments(commentsWithProfiles);
         }
 
         // Fetch attendees with profiles for display - using separate queries
-          const { data: attendeesData, error: attendeesError } = await supabase
-            .from('event_attendees')
-            .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note')
-            .eq('event_id', eventData.id)
-            .order('joined_at', { ascending: false });
+        const { data: attendeesData, error: attendeesError } = await supabase
+          .from("event_attendees")
+          .select(
+            "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+          )
+          .eq("event_id", eventData.id)
+          .order("joined_at", { ascending: false });
 
         if (attendeesData && !attendeesError) {
           // Fetch profiles for attendees
-          const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
+          const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
           const { data: profilesData } = await supabase
-            .from('profiles')
-            .select('user_id, display_name, avatar_url, is_verified')
-            .in('user_id', userIds);
+            .from("profiles")
+            .select("user_id, display_name, avatar_url, is_verified")
+            .in("user_id", userIds);
 
           // Join attendees with profiles
-          const attendeesWithProfiles = attendeesData.map(attendee => ({
+          const attendeesWithProfiles = attendeesData.map((attendee) => ({
             ...attendee,
-            profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
+            profiles: profilesData?.find((profile) => profile.user_id === attendee.user_id) || null,
           }));
           setAttendees(attendeesWithProfiles);
         }
 
         // Fetch event tags
         const { data: tagsData } = await supabase
-          .from('event_tag_assignments')
-          .select(`
+          .from("event_tag_assignments")
+          .select(
+            `
             tag_id,
             event_tags:tag_id (
               id,
@@ -221,22 +230,23 @@ export const EventDetailPage = () => {
               category,
               sort_order
             )
-          `)
-          .eq('event_id', eventData.id);
+          `,
+          )
+          .eq("event_id", eventData.id);
 
         if (tagsData) {
           const tags = tagsData
-            .map(t => t.event_tags)
+            .map((t) => t.event_tags)
             .filter(Boolean)
             .sort((a: any, b: any) => a.sort_order - b.sort_order);
           setEventTags(tags);
         }
       } catch (error) {
-        console.error('Error fetching event:', error);
+        console.error("Error fetching event:", error);
         toast({
           title: "Error",
           description: "Failed to load event details",
-          variant: "destructive"
+          variant: "destructive",
         });
       } finally {
         setLoading(false);
@@ -252,7 +262,7 @@ export const EventDetailPage = () => {
     if (!user) {
       // Store join intent in localStorage
       if (event) {
-        localStorage.setItem('pendingEventJoin', event.id);
+        localStorage.setItem("pendingEventJoin", event.id);
       }
       setLoginDialogOpen(true);
       return;
@@ -262,19 +272,17 @@ export const EventDetailPage = () => {
 
     setJoiningEvent(true);
     try {
-      const { error } = await supabase
-        .from('event_attendees')
-        .insert({
-          event_id: event.id,
-          user_id: user.id
-        });
+      const { error } = await supabase.from("event_attendees").insert({
+        event_id: event.id,
+        user_id: user.id,
+      });
 
       if (error) {
-        if (error.code === '23505') {
+        if (error.code === "23505") {
           toast({
             title: "Already joined",
             description: "You're already registered for this event.",
-            variant: "destructive"
+            variant: "destructive",
           });
         } else {
           throw error;
@@ -283,20 +291,15 @@ export const EventDetailPage = () => {
       }
 
       setHasJoined(true);
-      setTotalAttendees(prev => prev + 1);
-      
+      setTotalAttendees((prev) => prev + 1);
+
       // Show success toast with action to add note
       toast({
         title: "Successfully joined event! 🎉",
         description: (
           <div className="flex flex-col gap-2">
             <p>You're now registered for "{event.title}". See you there!</p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowNoteDialog(true)}
-              className="w-fit"
-            >
+            <Button variant="outline" size="sm" onClick={() => setShowNoteDialog(true)} className="w-fit">
               Add note?
             </Button>
           </div>
@@ -305,33 +308,35 @@ export const EventDetailPage = () => {
       });
 
       // Refresh attendees list
-        const { data: attendeesData } = await supabase
-          .from('event_attendees')
-          .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note')
-          .eq('event_id', event.id)
-          .order('joined_at', { ascending: false });
+      const { data: attendeesData } = await supabase
+        .from("event_attendees")
+        .select(
+          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+        )
+        .eq("event_id", event.id)
+        .order("joined_at", { ascending: false });
 
-        if (attendeesData) {
-          // Fetch profiles for attendees
-          const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
-          const { data: profilesData } = await supabase
-            .from('profiles')
-            .select('user_id, display_name, avatar_url, is_verified')
-            .in('user_id', userIds);
+      if (attendeesData) {
+        // Fetch profiles for attendees
+        const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("user_id, display_name, avatar_url, is_verified")
+          .in("user_id", userIds);
 
-          // Join attendees with profiles
-          const attendeesWithProfiles = attendeesData.map(attendee => ({
-            ...attendee,
-            profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
-          }));
-          setAttendees(attendeesWithProfiles);
-        }
+        // Join attendees with profiles
+        const attendeesWithProfiles = attendeesData.map((attendee) => ({
+          ...attendee,
+          profiles: profilesData?.find((profile) => profile.user_id === attendee.user_id) || null,
+        }));
+        setAttendees(attendeesWithProfiles);
+      }
     } catch (error) {
-      console.error('Error joining event:', error);
+      console.error("Error joining event:", error);
       toast({
         title: "Error",
         description: "Failed to join event. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setJoiningEvent(false);
@@ -341,24 +346,22 @@ export const EventDetailPage = () => {
   // Process pending join intent after login
   useEffect(() => {
     const processPendingJoin = async () => {
-      const pendingEventId = localStorage.getItem('pendingEventJoin');
-      
+      const pendingEventId = localStorage.getItem("pendingEventJoin");
+
       if (pendingEventId && user && event && pendingEventId === event.id && !hasJoined) {
         // Clear the pending intent
-        localStorage.removeItem('pendingEventJoin');
-        
+        localStorage.removeItem("pendingEventJoin");
+
         // Auto-join the event by calling the join logic directly
         setJoiningEvent(true);
         try {
-          const { error } = await supabase
-            .from('event_attendees')
-            .insert({
-              event_id: event.id,
-              user_id: user.id
-            });
+          const { error } = await supabase.from("event_attendees").insert({
+            event_id: event.id,
+            user_id: user.id,
+          });
 
           if (error) {
-            if (error.code === '23505') {
+            if (error.code === "23505") {
               // Already joined - just update state
               setHasJoined(true);
             } else {
@@ -368,8 +371,8 @@ export const EventDetailPage = () => {
           }
 
           setHasJoined(true);
-          setTotalAttendees(prev => prev + 1);
-          
+          setTotalAttendees((prev) => prev + 1);
+
           toast({
             title: "Successfully joined event! 🎉",
             description: `You're now registered for "${event.title}". See you there!`,
@@ -378,30 +381,32 @@ export const EventDetailPage = () => {
 
           // Refresh attendees list
           const { data: attendeesData } = await supabase
-            .from('event_attendees')
-            .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note')
-            .eq('event_id', event.id)
-            .order('joined_at', { ascending: false });
+            .from("event_attendees")
+            .select(
+              "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+            )
+            .eq("event_id", event.id)
+            .order("joined_at", { ascending: false });
 
           if (attendeesData) {
-            const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
+            const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
             const { data: profilesData } = await supabase
-              .from('profiles')
-              .select('user_id, display_name, avatar_url, is_verified')
-              .in('user_id', userIds);
+              .from("profiles")
+              .select("user_id, display_name, avatar_url, is_verified")
+              .in("user_id", userIds);
 
-            const attendeesWithProfiles = attendeesData.map(attendee => ({
+            const attendeesWithProfiles = attendeesData.map((attendee) => ({
               ...attendee,
-              profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
+              profiles: profilesData?.find((profile) => profile.user_id === attendee.user_id) || null,
             }));
             setAttendees(attendeesWithProfiles);
           }
         } catch (error) {
-          console.error('Error auto-joining event:', error);
+          console.error("Error auto-joining event:", error);
           toast({
             title: "Error",
             description: "Failed to join event automatically. Please try again.",
-            variant: "destructive"
+            variant: "destructive",
           });
         } finally {
           setJoiningEvent(false);
@@ -417,49 +422,47 @@ export const EventDetailPage = () => {
 
     setLeavingEvent(true);
     try {
-      const { error } = await supabase
-        .from('event_attendees')
-        .delete()
-        .eq('event_id', event.id)
-        .eq('user_id', user.id);
+      const { error } = await supabase.from("event_attendees").delete().eq("event_id", event.id).eq("user_id", user.id);
 
       if (error) throw error;
 
       setHasJoined(false);
-      setTotalAttendees(prev => Math.max(0, prev - 1));
+      setTotalAttendees((prev) => Math.max(0, prev - 1));
       toast({
         title: "Left event",
         description: "You have left this event.",
       });
 
       // Refresh attendees list
-        const { data: attendeesData } = await supabase
-          .from('event_attendees')
-          .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note')
-          .eq('event_id', event.id)
-          .order('joined_at', { ascending: false });
+      const { data: attendeesData } = await supabase
+        .from("event_attendees")
+        .select(
+          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+        )
+        .eq("event_id", event.id)
+        .order("joined_at", { ascending: false });
 
       if (attendeesData) {
         // Fetch profiles for attendees
-        const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
+        const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
         const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('user_id, display_name, avatar_url, is_verified')
-          .in('user_id', userIds);
+          .from("profiles")
+          .select("user_id, display_name, avatar_url, is_verified")
+          .in("user_id", userIds);
 
         // Join attendees with profiles
-        const attendeesWithProfiles = attendeesData.map(attendee => ({
+        const attendeesWithProfiles = attendeesData.map((attendee) => ({
           ...attendee,
-          profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
+          profiles: profilesData?.find((profile) => profile.user_id === attendee.user_id) || null,
         }));
         setAttendees(attendeesWithProfiles);
       }
     } catch (error) {
-      console.error('Error leaving event:', error);
+      console.error("Error leaving event:", error);
       toast({
         title: "Error",
         description: "Failed to leave event. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLeavingEvent(false);
@@ -468,9 +471,9 @@ export const EventDetailPage = () => {
 
   const handleContactOrganizer = () => {
     if (event?.organizer_whatsapp) {
-      const message = `Hi! I'm interested in attending "${event.title}" on ${format(new Date(event.date + 'T00:00:00'), 'MMMM do, yyyy')} at ${event.time}.`;
-      const whatsappUrl = `https://wa.me/${event.organizer_whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
+      const message = `Hi! I'm interested in attending "${event.title}" on ${format(new Date(event.date + "T00:00:00"), "MMMM do, yyyy")} at ${event.time}.`;
+      const whatsappUrl = `https://wa.me/${event.organizer_whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, "_blank");
     }
   };
 
@@ -482,7 +485,7 @@ export const EventDetailPage = () => {
       toast({
         title: "Comment too short",
         description: "Comments must be at least 3 characters long.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -491,7 +494,7 @@ export const EventDetailPage = () => {
       toast({
         title: "Comment too long",
         description: "Comments must be less than 500 characters.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -503,7 +506,7 @@ export const EventDetailPage = () => {
       toast({
         title: "Please wait",
         description: `You can comment again in ${remainingTime} seconds.`,
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -512,7 +515,7 @@ export const EventDetailPage = () => {
       toast({
         title: "Authentication required",
         description: "Please log in to comment.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -520,26 +523,26 @@ export const EventDetailPage = () => {
     setCommentsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('event_comments')
+        .from("event_comments")
         .insert({
           event_id: event.id,
           user_id: user.id,
-          comment: newComment.trim()
+          comment: newComment.trim(),
         })
-        .select('id, comment, created_at, updated_at, user_id')
+        .select("id, comment, created_at, updated_at, user_id")
         .single();
 
       if (data && !error) {
         // Fetch profile for the new comment
         const { data: profileData } = await supabase
-          .from('profiles')
-          .select('user_id, display_name, avatar_url')
-          .eq('user_id', user.id)
+          .from("profiles")
+          .select("user_id, display_name, avatar_url")
+          .eq("user_id", user.id)
           .single();
 
         const commentWithProfile = {
           ...data,
-          profiles: profileData || null
+          profiles: profileData || null,
         };
 
         setComments([commentWithProfile, ...comments]);
@@ -561,11 +564,11 @@ export const EventDetailPage = () => {
         description: "Your comment has been posted.",
       });
     } catch (error) {
-      console.error('Error adding comment:', error);
+      console.error("Error adding comment:", error);
       toast({
         title: "Error",
         description: "Failed to add comment. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setCommentsLoading(false);
@@ -573,11 +576,11 @@ export const EventDetailPage = () => {
   };
 
   const handleCommentDeleted = (commentId: string) => {
-    setComments(comments.filter(c => c.id !== commentId));
+    setComments(comments.filter((c) => c.id !== commentId));
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       handleAddComment();
     }
   };
@@ -592,7 +595,7 @@ export const EventDetailPage = () => {
       toast({
         title: "Unauthorized",
         description: "Please log in to delete events.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -603,7 +606,7 @@ export const EventDetailPage = () => {
       toast({
         title: "Unauthorized",
         description: "You can only delete your own events or need admin privileges.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -611,28 +614,28 @@ export const EventDetailPage = () => {
     setIsDeleting(true);
     try {
       // Use secure-delete function with proper authorization checks
-      const { data, error } = await supabase.functions.invoke('secure-delete', {
-        body: { event_id: event?.id }
+      const { data, error } = await supabase.functions.invoke("secure-delete", {
+        body: { event_id: event?.id },
       });
 
       if (error) throw error;
 
       if (!data?.success) {
-        throw new Error(data?.error || 'Failed to delete event');
+        throw new Error(data?.error || "Failed to delete event");
       }
 
       toast({
         title: "Success",
-        description: "Event deleted successfully!"
+        description: "Event deleted successfully!",
       });
 
-      navigate('/?section=events');
+      navigate("/?section=events");
     } catch (error: any) {
-      console.error('Error deleting event:', error);
+      console.error("Error deleting event:", error);
       toast({
-        title: "Error",  
+        title: "Error",
         description: error.message || "Failed to delete event",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsDeleting(false);
@@ -640,13 +643,13 @@ export const EventDetailPage = () => {
   };
 
   const isOwner = user && user.id === event?.created_by;
-  const isCoOrganizer = user && attendees.some(a => a.user_id === user.id && a.is_co_organizer);
+  const isCoOrganizer = user && attendees.some((a) => a.user_id === user.id && a.is_co_organizer);
   const canDelete = isOwner || isAdmin;
 
   // Helper functions for pagination
   const displayedAttendees = showAllAttendees ? attendees : attendees.slice(0, 10);
   const displayedComments = showAllComments ? comments : comments.slice(0, 10);
-  
+
   const handleProfileClick = (userId: string) => {
     navigate(`/profile/${userId}`);
   };
@@ -656,45 +659,47 @@ export const EventDetailPage = () => {
       toast({
         title: "Unauthorized",
         description: "Only admins can mark payment status.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     try {
       const { error } = await supabase
-        .from('event_attendees')
+        .from("event_attendees")
         .update({
           payment_status: !currentStatus,
           payment_date: !currentStatus ? new Date().toISOString() : null,
-          payment_marked_by: !currentStatus ? currentUser?.id : null
+          payment_marked_by: !currentStatus ? currentUser?.id : null,
         })
-        .eq('id', attendeeId);
+        .eq("id", attendeeId);
 
       if (error) throw error;
 
       // Update local state
-      setAttendees(prev => prev.map(attendee => 
-        attendee.id === attendeeId 
-          ? { 
-              ...attendee, 
-              payment_status: !currentStatus,
-              payment_date: !currentStatus ? new Date().toISOString() : null,
-              payment_marked_by: !currentStatus ? currentUser?.id : null
-            }
-          : attendee
-      ));
+      setAttendees((prev) =>
+        prev.map((attendee) =>
+          attendee.id === attendeeId
+            ? {
+                ...attendee,
+                payment_status: !currentStatus,
+                payment_date: !currentStatus ? new Date().toISOString() : null,
+                payment_marked_by: !currentStatus ? currentUser?.id : null,
+              }
+            : attendee,
+        ),
+      );
 
       toast({
         title: "Payment status updated",
-        description: `Attendee marked as ${!currentStatus ? 'paid' : 'unpaid'}.`,
+        description: `Attendee marked as ${!currentStatus ? "paid" : "unpaid"}.`,
       });
     } catch (error) {
-      console.error('Error updating payment status:', error);
+      console.error("Error updating payment status:", error);
       toast({
         title: "Error",
         description: "Failed to update payment status. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -704,70 +709,71 @@ export const EventDetailPage = () => {
       toast({
         title: "Unauthorized",
         description: "Only admins can remove attendees.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     try {
-      const { error } = await supabase
-        .from('event_attendees')
-        .delete()
-        .eq('id', attendeeId);
+      const { error } = await supabase.from("event_attendees").delete().eq("id", attendeeId);
 
       if (error) throw error;
 
       // Update local state
-      setAttendees(prev => prev.filter(attendee => attendee.id !== attendeeId));
-      setTotalAttendees(prev => prev - 1);
+      setAttendees((prev) => prev.filter((attendee) => attendee.id !== attendeeId));
+      setTotalAttendees((prev) => prev - 1);
 
       toast({
         title: "Attendee removed",
         description: `${attendeeName} has been removed from the event.`,
       });
     } catch (error) {
-      console.error('Error removing attendee:', error);
+      console.error("Error removing attendee:", error);
       toast({
         title: "Error",
         description: "Failed to remove attendee. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   const handleReceiptUploaded = (attendeeId: string, receiptUrl: string) => {
     // Update local state to show the uploaded receipt
-    setAttendees(prev => prev.map(attendee => 
-      attendee.id === attendeeId 
-        ? { 
-            ...attendee, 
-            receipt_url: receiptUrl,
-            receipt_uploaded_at: new Date().toISOString()
-          }
-        : attendee
-    ));
+    setAttendees((prev) =>
+      prev.map((attendee) =>
+        attendee.id === attendeeId
+          ? {
+              ...attendee,
+              receipt_url: receiptUrl,
+              receipt_uploaded_at: new Date().toISOString(),
+            }
+          : attendee,
+      ),
+    );
   };
 
   const handleNoteSaved = async () => {
     // Refresh attendees to show the updated note
     if (!event) return;
-    
+
     const { data: attendeesData } = await supabase
-      .from('event_attendees')
-      .select('id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note')
-      .eq('event_id', event.id)
-      .order('joined_at', { ascending: false });
+      .from("event_attendees")
+      .select(
+        "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+      )
+      .eq("event_id", event.id)
+      .order("joined_at", { ascending: false });
 
     if (attendeesData) {
-      const userIds = [...new Set(attendeesData.map(attendee => attendee.user_id))];
+      const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
       const { data: profilesData } = await supabase
-        .from('profiles')
-        .select('user_id, display_name, avatar_url, is_verified')
-        .in('user_id', userIds);
+        .from("profiles")
+        .select("user_id, display_name, avatar_url, is_verified")
+        .in("user_id", userIds);
 
-      const attendeesWithProfiles = attendeesData.map(attendee => ({
+      const attendeesWithProfiles = attendeesData.map((attendee) => ({
         ...attendee,
-        profiles: profilesData?.find(profile => profile.user_id === attendee.user_id) || null
+        profiles: profilesData?.find((profile) => profile.user_id === attendee.user_id) || null,
       }));
       setAttendees(attendeesWithProfiles);
     }
@@ -778,41 +784,43 @@ export const EventDetailPage = () => {
       toast({
         title: "Unauthorized",
         description: "Only event creators and admins can manage co-organizers.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     try {
       const { error } = await supabase
-        .from('event_attendees')
+        .from("event_attendees")
         .update({
-          is_co_organizer: !currentStatus
+          is_co_organizer: !currentStatus,
         })
-        .eq('id', attendeeId);
+        .eq("id", attendeeId);
 
       if (error) throw error;
 
       // Update local state
-      setAttendees(prev => prev.map(attendee => 
-        attendee.id === attendeeId 
-          ? { 
-              ...attendee, 
-              is_co_organizer: !currentStatus
-            }
-          : attendee
-      ));
+      setAttendees((prev) =>
+        prev.map((attendee) =>
+          attendee.id === attendeeId
+            ? {
+                ...attendee,
+                is_co_organizer: !currentStatus,
+              }
+            : attendee,
+        ),
+      );
 
       toast({
         title: currentStatus ? "Co-organizer removed" : "Co-organizer added",
-        description: `${attendeeName} is ${currentStatus ? 'no longer' : 'now'} a co-organizer of this event.`,
+        description: `${attendeeName} is ${currentStatus ? "no longer" : "now"} a co-organizer of this event.`,
       });
     } catch (error) {
-      console.error('Error updating co-organizer status:', error);
+      console.error("Error updating co-organizer status:", error);
       toast({
         title: "Error",
         description: "Failed to update co-organizer status. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -820,12 +828,15 @@ export const EventDetailPage = () => {
   if (loading) {
     return (
       <>
-        <Header activeSection="events" onSectionChange={(section) => {
-          if (section === 'home') navigate('/');
-          else if (section === 'profile') navigate('/profile');
-          else if (section === 'promos') navigate('/?section=promos');
-          else if (section === 'events') navigate('/?section=events');
-        }} />
+        <Header
+          activeSection="events"
+          onSectionChange={(section) => {
+            if (section === "home") navigate("/");
+            else if (section === "profile") navigate("/profile");
+            else if (section === "promos") navigate("/?section=promos");
+            else if (section === "events") navigate("/?section=events");
+          }}
+        />
         <div className="min-h-screen bg-background pt-20 px-4">
           <div className="container mx-auto">
             <div className="text-center space-y-4">
@@ -841,12 +852,15 @@ export const EventDetailPage = () => {
   if (!event) {
     return (
       <>
-        <Header activeSection="events" onSectionChange={(section) => {
-          if (section === 'home') navigate('/');
-          else if (section === 'profile') navigate('/profile');
-          else if (section === 'promos') navigate('/?section=promos');
-          else if (section === 'events') navigate('/?section=events');
-        }} />
+        <Header
+          activeSection="events"
+          onSectionChange={(section) => {
+            if (section === "home") navigate("/");
+            else if (section === "profile") navigate("/profile");
+            else if (section === "promos") navigate("/?section=promos");
+            else if (section === "events") navigate("/?section=events");
+          }}
+        />
         <div className="min-h-screen bg-background pt-20 px-4">
           <div className="container mx-auto">
             <div className="text-center">Event not found</div>
@@ -858,17 +872,20 @@ export const EventDetailPage = () => {
 
   return (
     <>
-      <Header activeSection="events" onSectionChange={(section) => {
-        if (section === 'home') navigate('/');
-        else if (section === 'profile') navigate('/profile');
-        else if (section === 'promos') navigate('/?section=promos');
-        else if (section === 'events') navigate('/?section=events');
-      }} />
+      <Header
+        activeSection="events"
+        onSectionChange={(section) => {
+          if (section === "home") navigate("/");
+          else if (section === "profile") navigate("/profile");
+          else if (section === "promos") navigate("/?section=promos");
+          else if (section === "events") navigate("/?section=events");
+        }}
+      />
       <div className="min-h-screen bg-background pt-20 px-4">
         <div className="container mx-auto max-w-6xl">
           <Button
             variant="ghost"
-            onClick={() => navigate('/?section=events')}
+            onClick={() => navigate("/?section=events")}
             className="mb-6 hover:bg-gradient-to-r hover:from-neon-blue hover:to-neon-cyan hover:text-white transition-all"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -880,15 +897,19 @@ export const EventDetailPage = () => {
             <div className="lg:col-span-2 space-y-6">
               {/* Event Title and Date */}
               <div className="space-y-3">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold gradient-text leading-tight">{event.title}</h1>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold gradient-text leading-tight">
+                  {event.title}
+                </h1>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm sm:text-base text-muted-foreground">
-                  <span>{format(new Date(event.date + 'T00:00:00'), 'EEEE, MMMM do, yyyy')}</span>
+                  <span>{format(new Date(event.date + "T00:00:00"), "EEEE, MMMM do, yyyy")}</span>
                   <span>•</span>
                   <span>{event.time}</span>
                   {event.is_recurrent && (
                     <>
                       <span>•</span>
-                      <Badge variant="secondary" className="text-xs">Recurring</Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        Recurring
+                      </Badge>
                     </>
                   )}
                 </div>
@@ -897,11 +918,7 @@ export const EventDetailPage = () => {
               {/* Event Image */}
               {event.image_url && (
                 <div className="aspect-video rounded-lg overflow-hidden">
-                  <img 
-                    src={event.image_url} 
-                    alt={event.title}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
                 </div>
               )}
 
@@ -909,24 +926,33 @@ export const EventDetailPage = () => {
               <Card>
                 <CardContent className="space-y-4 p-4 sm:p-5 md:p-6 pt-6">
                   <div className="text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    <Linkify options={{ target: "_blank", rel: "noopener noreferrer", className: "text-primary hover:underline" }}>
+                    <Linkify
+                      options={{
+                        target: "_blank",
+                        rel: "noopener noreferrer",
+                        className: "text-primary hover:underline",
+                      }}
+                    >
                       {event.description}
                     </Linkify>
                   </div>
 
-                  {event.instagram_post_url && (
-                    <InstagramEmbed postUrl={event.instagram_post_url} maxWidth={540} />
-                  )}
-                  
+                  {/* TEMP DEBUG: show raw stored Instagram URL on the page */}
+                  <div className="my-4 text-sm text-muted-foreground">
+                    Instagram URL: {event?.instagram_post_url ?? "<missing>"}
+                  </div>
+
+                  {event?.instagram_post_url && <InstagramEmbed postUrl={event.instagram_post_url} maxWidth={540} />}
+
                   {eventTags.length > 0 && (
                     <>
                       <Separator />
                       <EventTags tags={eventTags} variant="full" />
                     </>
                   )}
-                  
+
                   <Separator />
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <h4 className="text-base sm:text-lg font-semibold">Venue</h4>
@@ -938,13 +964,13 @@ export const EventDetailPage = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <h4 className="text-base sm:text-lg font-semibold">Organizer</h4>
                       <div className="flex items-center gap-2 flex-wrap">
                         <UserIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         <span className="text-sm sm:text-base">{event.organizer_name}</span>
-                        {creatorProfile?.venue_status === 'verified' && (
+                        {creatorProfile?.venue_status === "verified" && (
                           <Badge variant="secondary" className="text-xs flex items-center gap-1">
                             <BadgeCheck className="w-3 h-3" />
                             Verified Venue
@@ -967,11 +993,7 @@ export const EventDetailPage = () => {
                   {markers.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="text-base sm:text-lg font-semibold">Location</h4>
-                      <GoogleMap
-                        center={memoizedCenter}
-                        markers={markers}
-                        height="300px"
-                      />
+                      <GoogleMap center={memoizedCenter} markers={markers} height="300px" />
                     </div>
                   )}
                 </CardContent>
@@ -1008,28 +1030,28 @@ export const EventDetailPage = () => {
                 <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
                   <div className="space-y-3">
                     {displayedAttendees.map((attendee) => (
-                      <div 
-                        key={attendee.id} 
+                      <div
+                        key={attendee.id}
                         className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                       >
-                        <div 
+                        <div
                           className="flex items-center gap-3 cursor-pointer min-w-0"
                           onClick={() => handleProfileClick(attendee.user_id)}
                         >
                           <Avatar className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0">
-            <AvatarImage src={attendee.profiles?.avatar_url || defaultAvatar} />
-            <AvatarFallback className="text-xs sm:text-sm">
-              {attendee.profiles?.display_name?.[0]?.toUpperCase() || 'A'}
-            </AvatarFallback>
+                            <AvatarImage src={attendee.profiles?.avatar_url || defaultAvatar} />
+                            <AvatarFallback className="text-xs sm:text-sm">
+                              {attendee.profiles?.display_name?.[0]?.toUpperCase() || "A"}
+                            </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-sm sm:text-base font-medium">
-                                {attendee.profiles?.display_name || 'Anonymous'}
+                                {attendee.profiles?.display_name || "Anonymous"}
                               </span>
-                          {attendee.payment_status && event.track_payments && (
-                            <span className="text-base sm:text-lg">💰</span>
-                          )}
+                              {attendee.payment_status && event.track_payments && (
+                                <span className="text-base sm:text-lg">💰</span>
+                              )}
                             </div>
                             {attendee.profiles?.bio && (
                               <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
@@ -1045,18 +1067,26 @@ export const EventDetailPage = () => {
                         </div>
                         <div className="flex items-center flex-wrap gap-2 w-full md:w-auto md:justify-end">
                           {attendee.profiles?.is_verified && (
-                            <Badge variant="secondary" className="text-xs">Verified</Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              Verified
+                            </Badge>
                           )}
                           {attendee.profiles?.is_admin && (
-                            <Badge variant="destructive" className="text-xs">Admin</Badge>
+                            <Badge variant="destructive" className="text-xs">
+                              Admin
+                            </Badge>
                           )}
                           {attendee.profiles?.is_super_admin && (
-                            <Badge variant="destructive" className="text-xs">Super Admin</Badge>
+                            <Badge variant="destructive" className="text-xs">
+                              Super Admin
+                            </Badge>
                           )}
                           {attendee.is_co_organizer && (
-                            <Badge variant="default" className="text-xs bg-purple-600 hover:bg-purple-700">Co-Organizer</Badge>
+                            <Badge variant="default" className="text-xs bg-purple-600 hover:bg-purple-700">
+                              Co-Organizer
+                            </Badge>
                           )}
-                          
+
                           {/* Receipt Upload - show for the user themselves and only if payment tracking is enabled */}
                           {user && attendee.user_id === user.id && event.track_payments && (
                             <ReceiptUpload
@@ -1066,7 +1096,7 @@ export const EventDetailPage = () => {
                               onReceiptUploaded={(receiptUrl) => handleReceiptUploaded(attendee.id, receiptUrl)}
                             />
                           )}
-                          
+
                           {/* Edit Note - show for the user themselves */}
                           {user && attendee.user_id === user.id && (
                             <Button
@@ -1082,7 +1112,7 @@ export const EventDetailPage = () => {
                               {attendee.note ? "Edit Note" : "Add Note"}
                             </Button>
                           )}
-                          
+
                           {/* Receipt status for admins - only if payment tracking is enabled */}
                           {isAdmin && attendee.receipt_url && event.track_payments && (
                             <Button
@@ -1090,23 +1120,31 @@ export const EventDetailPage = () => {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                window.open(attendee.receipt_url, '_blank');
+                                window.open(attendee.receipt_url, "_blank");
                               }}
                               className="border-blue-500 text-blue-500 hover:bg-blue-50"
                             >
                               View Receipt
                             </Button>
                           )}
-                          
+
                           {(isOwner || isAdmin) && attendee.user_id !== user?.id && (
                             <Button
                               variant={attendee.is_co_organizer ? "outline" : "default"}
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleToggleCoOrganizer(attendee.id, attendee.is_co_organizer, attendee.profiles?.display_name || 'Anonymous');
+                                handleToggleCoOrganizer(
+                                  attendee.id,
+                                  attendee.is_co_organizer,
+                                  attendee.profiles?.display_name || "Anonymous",
+                                );
                               }}
-                              className={attendee.is_co_organizer ? "border-purple-500 text-purple-500" : "bg-purple-500 hover:bg-purple-600"}
+                              className={
+                                attendee.is_co_organizer
+                                  ? "border-purple-500 text-purple-500"
+                                  : "bg-purple-500 hover:bg-purple-600"
+                              }
                             >
                               {attendee.is_co_organizer ? "Remove Co-Organizer" : "Make Co-Organizer"}
                             </Button>
@@ -1123,7 +1161,11 @@ export const EventDetailPage = () => {
                                     e.stopPropagation();
                                     handleTogglePayment(attendee.id, attendee.payment_status);
                                   }}
-                                  className={attendee.payment_status ? "border-green-500 text-green-500" : "bg-green-500 hover:bg-green-600"}
+                                  className={
+                                    attendee.payment_status
+                                      ? "border-green-500 text-green-500"
+                                      : "bg-green-500 hover:bg-green-600"
+                                  }
                                 >
                                   {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
                                 </Button>
@@ -1143,13 +1185,19 @@ export const EventDetailPage = () => {
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Remove Attendee</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      Are you sure you want to remove {attendee.profiles?.display_name || 'this user'} from the event? This action cannot be undone.
+                                      Are you sure you want to remove {attendee.profiles?.display_name || "this user"}{" "}
+                                      from the event? This action cannot be undone.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction 
-                                      onClick={() => handleRemoveAttendee(attendee.id, attendee.profiles?.display_name || 'Anonymous')}
+                                    <AlertDialogAction
+                                      onClick={() =>
+                                        handleRemoveAttendee(
+                                          attendee.id,
+                                          attendee.profiles?.display_name || "Anonymous",
+                                        )
+                                      }
                                       className="bg-red-600 hover:bg-red-700"
                                     >
                                       Remove
@@ -1168,20 +1216,12 @@ export const EventDetailPage = () => {
                       </p>
                     )}
                     {attendees.length > 10 && !showAllAttendees && (
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => setShowAllAttendees(true)}
-                      >
+                      <Button variant="outline" className="w-full" onClick={() => setShowAllAttendees(true)}>
                         See all {attendees.length} attendees
                       </Button>
                     )}
                     {showAllAttendees && attendees.length > 10 && (
-                      <Button
-                        variant="ghost"
-                        className="w-full"
-                        onClick={() => setShowAllAttendees(false)}
-                      >
+                      <Button variant="ghost" className="w-full" onClick={() => setShowAllAttendees(false)}>
                         Show less
                       </Button>
                     )}
@@ -1209,9 +1249,7 @@ export const EventDetailPage = () => {
                         className="text-sm sm:text-base"
                       />
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-muted-foreground">
-                          {newComment.length}/500
-                        </span>
+                        <span className="text-xs text-muted-foreground">{newComment.length}/500</span>
                         <Button
                           onClick={handleAddComment}
                           disabled={!newComment.trim() || commentsLoading}
@@ -1228,32 +1266,36 @@ export const EventDetailPage = () => {
                   <div className="space-y-3">
                     {displayedComments.length === 0 ? (
                       <p className="text-center text-sm sm:text-base text-muted-foreground py-6 sm:py-8">
-                        {!user ? "Please log in to see Comments" : "No comments yet. Be the first to share your thoughts!"}
+                        {!user
+                          ? "Please log in to see Comments"
+                          : "No comments yet. Be the first to share your thoughts!"}
                       </p>
                     ) : (
                       displayedComments.map((comment) => (
                         <div key={comment.id} className="p-3 sm:p-4 bg-muted/50 rounded-lg">
                           <div className="flex gap-3">
-                            <Avatar 
+                            <Avatar
                               className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                               onClick={() => handleProfileClick(comment.user_id)}
                             >
-              <AvatarImage src={comment.profiles?.avatar_url || defaultAvatar} />
-              <AvatarFallback className="text-xs sm:text-sm">
-                {comment.profiles?.display_name?.[0]?.toUpperCase() || 'A'}
-              </AvatarFallback>
+                              <AvatarImage src={comment.profiles?.avatar_url || defaultAvatar} />
+                              <AvatarFallback className="text-xs sm:text-sm">
+                                {comment.profiles?.display_name?.[0]?.toUpperCase() || "A"}
+                              </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex items-center gap-2 flex-wrap min-w-0">
-                                  <span 
+                                  <span
                                     className="text-sm sm:text-base font-medium cursor-pointer hover:text-primary transition-colors"
                                     onClick={() => handleProfileClick(comment.user_id)}
                                   >
-                                    {comment.profiles?.display_name || 'Anonymous'}
+                                    {comment.profiles?.display_name || "Anonymous"}
                                   </span>
                                   {comment.profiles?.is_verified && (
-                                    <Badge variant="secondary" className="text-xs flex-shrink-0">Verified</Badge>
+                                    <Badge variant="secondary" className="text-xs flex-shrink-0">
+                                      Verified
+                                    </Badge>
                                   )}
                                   <span className="text-xs text-muted-foreground">
                                     {new Date(comment.created_at).toLocaleString()}
@@ -1274,20 +1316,12 @@ export const EventDetailPage = () => {
                       ))
                     )}
                     {comments.length > 10 && !showAllComments && (
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => setShowAllComments(true)}
-                      >
+                      <Button variant="outline" className="w-full" onClick={() => setShowAllComments(true)}>
                         See all {comments.length} comments
                       </Button>
                     )}
                     {showAllComments && comments.length > 10 && (
-                      <Button
-                        variant="ghost"
-                        className="w-full"
-                        onClick={() => setShowAllComments(false)}
-                      >
+                      <Button variant="ghost" className="w-full" onClick={() => setShowAllComments(false)}>
                         Show less
                       </Button>
                     )}
@@ -1303,13 +1337,8 @@ export const EventDetailPage = () => {
                   <CardTitle>Event Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                   {user && !hasJoined && (
-                    <Button
-                      variant="cta"
-                      onClick={handleJoinEvent}
-                      disabled={joiningEvent}
-                      className="w-full"
-                    >
+                  {user && !hasJoined && (
+                    <Button variant="cta" onClick={handleJoinEvent} disabled={joiningEvent} className="w-full">
                       {joiningEvent ? "Joining..." : "Join Event"}
                     </Button>
                   )}
@@ -1324,15 +1353,11 @@ export const EventDetailPage = () => {
                     </Button>
                   )}
                   {!user && (
-                    <Button
-                      variant="cta"
-                      onClick={() => navigate('/auth')}
-                      className="w-full"
-                    >
+                    <Button variant="cta" onClick={() => navigate("/auth")} className="w-full">
                       Join Event
                     </Button>
                   )}
-                  
+
                   <Button
                     variant="outline"
                     className="w-full"
@@ -1347,25 +1372,17 @@ export const EventDetailPage = () => {
                     <Share2 className="w-4 h-4 mr-2" />
                     Share Event
                   </Button>
-                  
+
                   {(isOwner || isAdmin) && (
                     <>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={handleEdit}
-                      >
+                      <Button variant="outline" className="w-full" onClick={handleEdit}>
                         <Edit2 className="w-4 h-4 mr-2" />
                         Edit
                       </Button>
-                      
+
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button
-                            variant="destructive"
-                            className="w-full"
-                            disabled={isDeleting}
-                          >
+                          <Button variant="destructive" className="w-full" disabled={isDeleting}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             {isDeleting ? "Deleting..." : "Delete"}
                           </Button>
@@ -1374,7 +1391,8 @@ export const EventDetailPage = () => {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Delete Event</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Are you sure you want to delete this event? This action cannot be undone and will remove all associated data including attendees and comments.
+                              Are you sure you want to delete this event? This action cannot be undone and will remove
+                              all associated data including attendees and comments.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -1391,38 +1409,30 @@ export const EventDetailPage = () => {
                       </AlertDialog>
                     </>
                   )}
-                  
-                   <ReportDialog
-                    type="event"
-                    targetId={event.id}
-                    targetTitle={event.title}
-                  />
+
+                  <ReportDialog type="event" targetId={event.id} targetTitle={event.title} />
                 </CardContent>
               </Card>
 
               {/* Invite Codes Management - only for organizers of private events */}
-              {(isOwner || isCoOrganizer) && event.access_level !== 'public' && (
-                <EventInviteCodes
-                  eventId={event.id}
-                  eventDate={event.date}
-                  eventTime={event.time}
-                />
+              {(isOwner || isCoOrganizer) && event.access_level !== "public" && (
+                <EventInviteCodes eventId={event.id} eventDate={event.date} eventTime={event.time} />
               )}
             </div>
           </div>
         </div>
       </div>
-      
+
       {/* Attendee Note Dialog */}
       <AttendeeNoteDialog
         open={showNoteDialog}
         onOpenChange={setShowNoteDialog}
         eventId={event?.id || ""}
         userId={user?.id || ""}
-        initialNote={attendees.find(a => a.user_id === user?.id)?.note || ""}
+        initialNote={attendees.find((a) => a.user_id === user?.id)?.note || ""}
         onNoteSaved={handleNoteSaved}
       />
-      
+
       <LoginDialog
         open={loginDialogOpen}
         onOpenChange={setLoginDialogOpen}
