@@ -200,7 +200,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         }
       }
 
-      const eventData = {
+      const baseEventData = {
         title: formData.title,
         description: formData.description,
         date: `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}`,
@@ -217,9 +217,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         instagram_post_url: instagramPostUrl || null,
         access_level: accessLevel as "public" | "private" | "invite_only" | "secret",
         max_attendees: maxAttendees,
-        enable_check_in: enableCheckIn,
-        enable_photos: enablePhotos,
-        created_by: user.id
+        enable_check_in: !!enableCheckIn,
+        enable_photos: !!enablePhotos
       };
 
       let error;
@@ -229,14 +228,14 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         // Update existing event
         const { error: updateError } = await supabase
           .from('events')
-          .update(eventData)
+          .update(baseEventData)
           .eq('id', initialData.id);
         error = updateError;
       } else {
         // Insert new event
         const { data: insertData, error: insertError } = await supabase
           .from('events')
-          .insert(eventData)
+          .insert({ ...baseEventData, created_by: user.id })
           .select('id')
           .single();
         error = insertError;
