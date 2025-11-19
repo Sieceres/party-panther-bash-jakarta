@@ -215,6 +215,10 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         is_recurrent: isRecurrent,
         track_payments: trackPayments,
         instagram_post_url: instagramPostUrl || null,
+        access_level: accessLevel as "public" | "private" | "invite_only" | "secret",
+        max_attendees: maxAttendees,
+        enable_check_in: enableCheckIn,
+        enable_photos: enablePhotos,
         created_by: user.id
       };
 
