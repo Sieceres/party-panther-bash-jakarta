@@ -1,38 +1,67 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const getEventBySlugOrId = async (identifier: string) => {
-  // Get current user for personalized data
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  // Use function that includes attendee counts and user-specific data
-  // Pass explicit NULL for optional parameters to avoid function overload ambiguity
-  const { data: allEvents, error } = await supabase.rpc('get_events_with_details', {
-    user_id_param: user?.id || null,
-    p_limit: null,
-    p_after_date: null,
-    p_after_time: null
-  });
-  
-  if (error) {
-    return { data: null, error };
+  // Fetch the event row directly and include instagram_post_url explicitly.
+  // This is simpler and guarantees the field is present in the returned object.
+  const commonFields = `
+    id,
+    title,
+    description,
+    date,
+    time,
+    venue_name,
+    venue_address,
+    venue_latitude,
+    venue_longitude,
+    image_url,
+    is_recurrent,
+    track_payments,
+    organizer_name,
+    organizer_whatsapp,
+    created_by,
+    created_at,
+    updated_at,
+    instagram_post_url,
+    slug,
+    access_level,
+    max_attendees,
+    enable_check_in,
+    enable_photos
+  `;
+
+  // Try slug first
+  const { data: eventBySlug, error: slugError } = await supabase
+    .from("events")
+    .select(commonFields)
+    .eq("slug", identifier)
+    .maybeSingle();
+
+  if (slugError) {
+    return { data: null, error: slugError };
   }
-  
-  // First try to find by slug
-  const eventBySlug = allEvents?.find((event: any) => event.slug === identifier);
   if (eventBySlug) {
     return { data: eventBySlug, error: null };
   }
-  
-  // Then try to find by ID
-  const eventById = allEvents?.find((event: any) => event.id === identifier);
+
+  // Fallback: try by id
+  const { data: eventById, error: idError } = await supabase
+    .from("events")
+    .select(commonFields)
+    .eq("id", identifier)
+    .maybeSingle();
+
+  if (idError) {
+    return { data: null, error: idError };
+  }
+
   return { data: eventById || null, error: null };
 };
 
 export const getPromoBySlugOrId = async (identifier: string) => {
-  const slugResult = await supabase.from('promos').select('*').eq('slug', identifier).maybeSingle();
+  const slugResult = await supabase.from("promos").select("*").eq("slug", identifier).maybeSingle();
   if (slugResult.data) return slugResult;
-  
-  return await supabase.from('promos').select('*').eq('id', identifier).maybeSingle();
+
+  return await supabase.from("promos").select("*").eq("id", identifier).maybeSingle();
 };
 
 export const getEventUrl = (event: any) => `/event/${event?.slug || event?.id}`;
