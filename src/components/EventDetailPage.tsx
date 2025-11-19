@@ -126,7 +126,7 @@ export const EventDetailPage = () => {
 
         setEvent(eventData);
 
-        console.log("fetched event instagram_post_url:", eventData.instagram_post_url);
+        // console.log("fetched event instagram_post_url:", eventData.instagram_post_url);
 
         // Get current user and check admin status
         const {
@@ -935,11 +935,6 @@ export const EventDetailPage = () => {
                     >
                       {event.description}
                     </Linkify>
-                  </div>
-
-                  {/* TEMP DEBUG: show raw stored Instagram URL on the page */}
-                  <div className="my-4 text-sm text-muted-foreground">
-                    Instagram URL: {event?.instagram_post_url ?? "<missing>"}
                   </div>
 
                   {event?.instagram_post_url && <InstagramEmbed postUrl={event.instagram_post_url} maxWidth={540} />}
