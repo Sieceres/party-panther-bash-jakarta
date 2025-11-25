@@ -88,10 +88,17 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
       });
 
       if (error) {
+        console.error('Sign in error:', error);
         if (error.message.includes("Invalid login credentials")) {
           toast({
             title: "Invalid credentials",
             description: "Please check your email and password and try again.",
+            variant: "destructive",
+          });
+        } else if (error.message.includes("fetch")) {
+          toast({
+            title: "Connection Error",
+            description: "Unable to connect to the server. Please check your internet connection and try again.",
             variant: "destructive",
           });
         } else {
@@ -109,10 +116,14 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
         onOpenChange(false);
         onSuccess?.();
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Sign in catch error:', error);
+      const message = error?.message || "An unexpected error occurred";
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: message.includes("fetch") 
+          ? "Unable to connect to the server. Please check your internet connection and try again."
+          : message,
         variant: "destructive",
       });
     } finally {

@@ -89,23 +89,17 @@ export function useOptimizedData() {
       
       try {
         // Use detailed functions to get creator info and attendee counts
-        // Pass explicit NULL for optional parameters to avoid function overload ambiguity
         [eventsResult, promosResult, adminStatusResult] = await Promise.all([
           supabase.rpc('get_events_with_details', { 
-            user_id_param: currentUser?.id || null,
-            p_limit: null,
-            p_after_date: null,
-            p_after_time: null
+            user_id_param: currentUser?.id || undefined
           }),
           supabase.rpc('get_promos_with_details', { 
-            user_id_param: currentUser?.id || null,
-            p_limit: null,
-            p_after_created_at: null
+            user_id_param: currentUser?.id || undefined
           }),
           currentUser ? supabase.rpc('get_user_admin_status', { user_id_param: currentUser.id }) : { data: null, error: null }
         ]);
         
-        console.log('Detailed functions completed successfully');
+        console.log('Data fetched - Events:', eventsResult.data?.length, 'Promos:', promosResult.data?.length);
       } catch (error) {
         console.error('Error with detailed functions:', error);
         throw error;
