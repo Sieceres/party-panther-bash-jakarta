@@ -83,8 +83,11 @@ const Index = () => {
           promo.day_of_week.some((day: string) => dayFilter.includes(day?.toLowerCase() || "")) :
           dayFilter.includes((promo.day_of_week as string)?.toLowerCase() || ""));
       const areaMatch = areaFilter.includes("all") || areaFilter.includes(promo.area?.toLowerCase().replace(' jakarta', '') || "");
-      const promoTypeMatch = drinkTypeFilter.includes("all") || drinkTypeFilter.includes(promo.promo_type || "");
-      return dayMatch && areaMatch && promoTypeMatch;
+      const drinkTypeMatch = drinkTypeFilter.includes("all") || 
+        (Array.isArray(promo.drink_type) ? 
+          promo.drink_type.some((drink: string) => drinkTypeFilter.includes(drink?.toLowerCase() || "")) :
+          drinkTypeFilter.includes((promo.drink_type as string)?.toLowerCase() || ""));
+      return dayMatch && areaMatch && drinkTypeMatch;
     })
     .sort((a, b) => {
       switch (promoSortBy) {

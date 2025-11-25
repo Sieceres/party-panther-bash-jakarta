@@ -325,18 +325,17 @@ export const PromosSection = ({
                 <p className="text-sm sm:text-base text-muted-foreground">
                   Try adjusting your filters to discover amazing drink deals and promotions! 🎊
                 </p>
-                <Button 
-                  onClick={() => {
-                    onDayFilterChange(["all"]);
-                    onAreaFilterChange(["all"]);
-                    onDrinkTypeFilterChange(["all"]);
-                  }}
-                  variant="default"
-                  size="lg"
-                  className="mt-4"
-                >
-                  Reset All Filters
-                </Button>
+                {hasActiveFilters && (
+                  <Button 
+                    onClick={resetAllFilters}
+                    variant="default"
+                    size="lg"
+                    className="mt-4"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Reset All Filters
+                  </Button>
+                )}
               </div>
             </div>
           ) : (
