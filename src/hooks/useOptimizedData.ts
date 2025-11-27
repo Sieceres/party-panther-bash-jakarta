@@ -98,7 +98,9 @@ export function useOptimizedData() {
             p_after_time: '00:00:00'
           }),
           supabase.rpc('get_promos_with_details', { 
-            user_id_param: currentUser?.id ?? null
+            user_id_param: currentUser?.id ?? null,
+            p_limit: null,
+            p_after_created_at: null
           }),
           currentUser ? supabase.rpc('get_user_admin_status', { user_id_param: currentUser.id }) : { data: null, error: null }
         ]);
