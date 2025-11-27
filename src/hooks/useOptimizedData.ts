@@ -89,12 +89,13 @@ export function useOptimizedData() {
       
       try {
         // Use detailed functions to get creator info and attendee counts
+        // Pass a very old date to get ALL events including past ones
         [eventsResult, promosResult, adminStatusResult] = await Promise.all([
           supabase.rpc('get_events_with_details', { 
             user_id_param: currentUser?.id ?? null,
             p_limit: null,
-            p_after_date: null,
-            p_after_time: null
+            p_after_date: '2020-01-01',  // Get all events from 2020 onwards
+            p_after_time: '00:00:00'
           }),
           supabase.rpc('get_promos_with_details', { 
             user_id_param: currentUser?.id ?? null
