@@ -227,27 +227,9 @@ export const EventsSection = ({
             selectedDate={selectedDate}
             searchTerm={searchTerm}
             selectedTagIds={selectedTagIds}
+            sortBy={sortBy}
+            onSortChange={onSortChange}
           />
-
-          <div className="flex justify-end">
-            <div className="flex flex-col space-y-2">
-              <label className="text-sm font-medium">Sort By</label>
-              <Select value={sortBy} onValueChange={onSortChange}>
-                <SelectTrigger className="w-48">
-                  <ArrowUpDown className="w-4 h-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="date-asc">Date: Nearest First</SelectItem>
-                  <SelectItem value="date-desc">Date: Latest First</SelectItem>
-                  <SelectItem value="newest">Newest Posted</SelectItem>
-                  <SelectItem value="oldest">Oldest Posted</SelectItem>
-                  <SelectItem value="title-az">Title: A-Z</SelectItem>
-                  <SelectItem value="title-za">Title: Z-A</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
         </div>
 
         {/* Upcoming Events Grid */}
