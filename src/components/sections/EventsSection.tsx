@@ -47,6 +47,7 @@ export const EventsSection = ({
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [eventTagAssignments, setEventTagAssignments] = useState<Record<string, string[]>>({});
   // States for past events section
+  const [showPastEvents, setShowPastEvents] = useState(false);
   const [pastEventsSearchTerm, setPastEventsSearchTerm] = useState("");
   const [pastEventsSelectedDate, setPastEventsSelectedDate] = useState<Date | undefined>();
   const [pastEventsSelectedTagIds, setPastEventsSelectedTagIds] = useState<string[]>([]);
@@ -306,8 +307,22 @@ export const EventsSection = ({
           </div>
         )}
 
-        {/* Past Events Section */}
+        {/* Toggle Past Events Button */}
         {pastEvents.length > 0 && (
+          <div className="flex justify-center mt-12">
+            <Button
+              onClick={() => setShowPastEvents(!showPastEvents)}
+              size="lg"
+              variant="outline"
+              className="min-h-[44px]"
+            >
+              {showPastEvents ? "Hide Past Events" : "Show Past Events"}
+            </Button>
+          </div>
+        )}
+
+        {/* Past Events Section */}
+        {showPastEvents && pastEvents.length > 0 && (
           <div className="mt-16 pt-8 border-t border-border">
             <div className="mb-4">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#00CFFF] to-[#4F8EFF] bg-clip-text text-transparent mb-2">
