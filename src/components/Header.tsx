@@ -47,15 +47,21 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     }
 
     try {
-      const { data, error } = await supabase
+      const { data: roles, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .in('role', ['admin', 'superadmin'])
-        .single();
+        .in('role', ['admin', 'superadmin']);
 
-      setIsAdmin(!!data && !error);
+      if (error) {
+        console.error('Error checking roles:', error);
+        setIsAdmin(false);
+        return;
+      }
+
+      setIsAdmin(roles && roles.length > 0);
     } catch (error) {
+      console.error('Error in checkAdminStatus:', error);
       setIsAdmin(false);
     }
   };
