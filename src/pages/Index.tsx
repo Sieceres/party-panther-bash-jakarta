@@ -44,6 +44,12 @@ const Index = () => {
     }
     setActiveSection(section);
     
+    // Don't update URL for sections with their own routes (admin, profile)
+    // These are handled by the Header's navigation
+    if (section === 'admin' || section === 'profile') {
+      return;
+    }
+    
     // Update URL to reflect section change using React Router
     if (section === 'home') {
       setSearchParams({});
