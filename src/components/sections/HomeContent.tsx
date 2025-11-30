@@ -14,6 +14,7 @@ import { EventCard } from "../EventCard";
 import { PromoCard } from "../PromoCard";
 import { EventCardSkeleton, PromoCardSkeleton } from "../ui/skeleton-card";
 import { ArrowRight, Zap, TrendingUp, Calendar } from "lucide-react";
+import { parseISO, isBefore } from "date-fns";
 
 interface HomeContentProps {
   loading: boolean;
@@ -34,6 +35,12 @@ export const HomeContent = ({
   userAdminStatus,
   onFavoriteToggle,
 }: HomeContentProps) => {
+  // Filter to show only upcoming events
+  const upcomingEvents = events.filter((event) => {
+    const eventDateTime = parseISO(`${event.date}T${event.time}`);
+    return !isBefore(eventDateTime, new Date());
+  });
+
   return (
     <div className="relative">
       {/* Continuous Starfield - behind everything */}
@@ -171,17 +178,17 @@ export const HomeContent = ({
                     <EventCardSkeleton />
                   </div>
                 ))
-              ) : events.length === 0 ? (
+              ) : upcomingEvents.length === 0 ? (
                 <div className="col-span-full text-center py-12 px-4">
                   <div className="max-w-md mx-auto space-y-3">
                     <div className="text-5xl mb-3">🎉</div>
                     <p className="text-base sm:text-lg text-muted-foreground">
-                      No events yet — create one and start the party! 🎊
+                      No upcoming events — create one and start the party! 🎊
                     </p>
                   </div>
                 </div>
               ) : (
-                events.slice(0, 3).map((event, index) => (
+                upcomingEvents.slice(0, 3).map((event, index) => (
                   <div
                     key={event.id}
                     className="animate-stagger-in opacity-0"
