@@ -20,6 +20,7 @@ import {
 import { MapPin, ArrowLeft, User as UserIcon, Star, Share2, Edit2, Trash2, BadgeCheck } from "lucide-react";
 import { format } from "date-fns";
 import { GoogleMap } from "./GoogleMap";
+import { CommentItem, Comment } from "./CommentItem";
 import { CommentActions } from "./CommentActions";
 import { ReportDialog } from "./ReportDialog";
 import { ReceiptUpload } from "./ReceiptUpload";
@@ -170,12 +171,12 @@ export const EventDetailPage = () => {
 
         setCreatorProfile(creatorProfileData);
 
-        // Fetch comments for display - using separate queries to avoid foreign key issues
+        // Fetch comments for display - including parent_id for replies
         const { data: commentsData, error: commentsError } = await supabase
           .from("event_comments")
-          .select("id, comment, created_at, updated_at, user_id")
+          .select("id, comment, created_at, updated_at, user_id, parent_id")
           .eq("event_id", eventData.id)
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: true });
 
         if (commentsData && !commentsError) {
           // Fetch profiles for comment authors
@@ -576,7 +577,75 @@ export const EventDetailPage = () => {
   };
 
   const handleCommentDeleted = (commentId: string) => {
-    setComments(comments.filter((c) => c.id !== commentId));
+    // Remove comment and all its replies
+    const idsToRemove = new Set<string>([commentId]);
+    const findReplies = (parentId: string) => {
+      comments.forEach(c => {
+        if (c.parent_id === parentId) {
+          idsToRemove.add(c.id);
+          findReplies(c.id);
+        }
+      });
+    };
+    findReplies(commentId);
+    setComments(comments.filter((c) => !idsToRemove.has(c.id)));
+  };
+
+  const handleReply = async (parentId: string, content: string) => {
+    if (!content.trim() || !event || !user) return;
+
+    // Rate limiting
+    const now = Date.now();
+    if (now - lastCommentTime < 30000) {
+      const remainingTime = Math.ceil((30000 - (now - lastCommentTime)) / 1000);
+      toast({
+        title: "Please wait",
+        description: `You can comment again in ${remainingTime} seconds.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("event_comments")
+        .insert({
+          event_id: event.id,
+          user_id: user.id,
+          comment: content.trim(),
+          parent_id: parentId,
+        })
+        .select("id, comment, created_at, updated_at, user_id, parent_id")
+        .single();
+
+      if (error) throw error;
+
+      // Fetch profile for the new comment
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url, is_verified")
+        .eq("user_id", user.id)
+        .single();
+
+      const replyWithProfile = {
+        ...data,
+        profiles: profileData || null,
+      };
+
+      setComments([...comments, replyWithProfile]);
+      setLastCommentTime(now);
+      toast({
+        title: "Reply added!",
+        description: "Your reply has been posted.",
+      });
+    } catch (error) {
+      console.error("Error adding reply:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add reply. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -648,7 +717,35 @@ export const EventDetailPage = () => {
 
   // Helper functions for pagination
   const displayedAttendees = showAllAttendees ? attendees : attendees.slice(0, 10);
-  const displayedComments = showAllComments ? comments : comments.slice(0, 10);
+  
+  // Organize comments into a tree structure
+  const organizedComments = useMemo(() => {
+    const commentMap = new Map<string, Comment & { replies: Comment[] }>();
+    const rootComments: (Comment & { replies: Comment[] })[] = [];
+
+    // First pass: create all comment objects with empty replies
+    comments.forEach((comment) => {
+      commentMap.set(comment.id, { ...comment, replies: [] });
+    });
+
+    // Second pass: organize into tree
+    comments.forEach((comment) => {
+      const commentWithReplies = commentMap.get(comment.id)!;
+      if (comment.parent_id && commentMap.has(comment.parent_id)) {
+        commentMap.get(comment.parent_id)!.replies.push(commentWithReplies);
+      } else if (!comment.parent_id) {
+        rootComments.push(commentWithReplies);
+      }
+    });
+
+    // Sort root comments by created_at (newest first for display)
+    return rootComments.sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  }, [comments]);
+
+  const displayedComments = showAllComments ? organizedComments : organizedComments.slice(0, 10);
+  const totalRootComments = organizedComments.length;
 
   const handleProfileClick = (userId: string) => {
     navigate(`/profile/${userId}`);
@@ -1267,55 +1364,25 @@ export const EventDetailPage = () => {
                       </p>
                     ) : (
                       displayedComments.map((comment) => (
-                        <div key={comment.id} className="p-3 sm:p-4 bg-muted/50 rounded-lg">
-                          <div className="flex gap-3">
-                            <Avatar
-                              className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                              onClick={() => handleProfileClick(comment.user_id)}
-                            >
-                              <AvatarImage src={comment.profiles?.avatar_url || defaultAvatar} />
-                              <AvatarFallback className="text-xs sm:text-sm">
-                                {comment.profiles?.display_name?.[0]?.toUpperCase() || "A"}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex items-center gap-2 flex-wrap min-w-0">
-                                  <span
-                                    className="text-sm sm:text-base font-medium cursor-pointer hover:text-primary transition-colors"
-                                    onClick={() => handleProfileClick(comment.user_id)}
-                                  >
-                                    {comment.profiles?.display_name || "Anonymous"}
-                                  </span>
-                                  {comment.profiles?.is_verified && (
-                                    <Badge variant="secondary" className="text-xs flex-shrink-0">
-                                      Verified
-                                    </Badge>
-                                  )}
-                                  <span className="text-xs text-muted-foreground">
-                                    {new Date(comment.created_at).toLocaleString()}
-                                  </span>
-                                </div>
-                                <CommentActions
-                                  comment={comment}
-                                  currentUserId={currentUser?.id}
-                                  isAdmin={isAdmin}
-                                  onCommentDeleted={handleCommentDeleted}
-                                  commentType="event"
-                                />
-                              </div>
-                              <p className="text-sm leading-relaxed font-light mt-2">{comment.comment}</p>
-                            </div>
-                          </div>
-                        </div>
+                        <CommentItem
+                          key={comment.id}
+                          comment={comment}
+                          currentUserId={currentUser?.id}
+                          isAdmin={isAdmin}
+                          onCommentDeleted={handleCommentDeleted}
+                          onReply={handleReply}
+                          onProfileClick={handleProfileClick}
+                          commentType="event"
+                          isLoggedIn={!!user}
+                        />
                       ))
                     )}
-                    {comments.length > 10 && !showAllComments && (
+                    {totalRootComments > 10 && !showAllComments && (
                       <Button variant="outline" className="w-full" onClick={() => setShowAllComments(true)}>
-                        See all {comments.length} comments
+                        See all {totalRootComments} comments
                       </Button>
                     )}
-                    {showAllComments && comments.length > 10 && (
+                    {showAllComments && totalRootComments > 10 && (
                       <Button variant="ghost" className="w-full" onClick={() => setShowAllComments(false)}>
                         Show less
                       </Button>
