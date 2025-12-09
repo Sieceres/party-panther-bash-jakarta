@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw } from "lucide-react";
+import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw, Instagram } from "lucide-react";
 import { Header } from "./Header";
 import { AdminReceiptManagement } from "./AdminReceiptManagement";
 import { AdminAnalytics } from "./AdminAnalytics";
@@ -513,13 +513,24 @@ export const AdminDashboard = () => {
               <h1 className="text-4xl font-bold gradient-text mb-2">Admin Dashboard</h1>
               <p className="text-muted-foreground">Manage events, promos, and users</p>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/profile')}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Profile
-            </Button>
+            <div className="flex gap-2">
+              {isSuperAdmin && (
+                <Button
+                  variant="default"
+                  onClick={() => navigate('/admin/instagram-generator')}
+                >
+                  <Instagram className="w-4 h-4 mr-2" />
+                  Instagram Generator
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                onClick={() => navigate('/profile')}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Profile
+              </Button>
+            </div>
           </div>
 
         {/* Stats Cards */}

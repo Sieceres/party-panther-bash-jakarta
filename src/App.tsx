@@ -8,13 +8,14 @@ import { useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import InstagramPostGenerator from "./pages/InstagramPostGenerator";
 import { EventDetailPage } from "./components/EventDetailPage";
 import { PromoDetailPage } from "./components/PromoDetailPage";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { Contact } from "./pages/Contact";
 import { EditEventPage } from "./pages/EditEventPage";
 import { EditPromoPage } from "./pages/EditPromoPage";
-import { UserProfile } from "./components/UserProfile"; // Import UserProfile
+import { UserProfile } from "./components/UserProfile";
 import TermsConditions from "./pages/TermsConditions";
 import About from "./pages/About";
 import ResetPassword from "./pages/ResetPassword";
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/event/:id" element={<EventDetailPage />} />
           <Route path="/promo/:id" element={<PromoDetailPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/instagram-generator" element={<InstagramPostGenerator />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/edit-event/:id" element={<EditEventPage />} />
           <Route path="/edit-promo/:id" element={<EditPromoPage />} />
