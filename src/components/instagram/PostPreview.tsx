@@ -5,36 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Download, Loader2, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { PostContent } from "@/types/instagram-post";
+import partyPantherLogo from "@/assets/party-panther-logo.png";
 
 interface PostPreviewProps {
   content: PostContent;
 }
-
-// Simple solid background colors for reliable export
-const getBackgroundColor = (style: PostContent["backgroundStyle"]) => {
-  switch (style) {
-    case "dark-gradient":
-      return "#0a1628";
-    case "neon-accent":
-      return "#0c1a2e";
-    case "party-vibe":
-      return "#1a0f2e";
-    default:
-      return "#0a1628";
-  }
-};
-
-// Accent color based on style
-const getAccentColor = (style: PostContent["backgroundStyle"]) => {
-  switch (style) {
-    case "neon-accent":
-      return "rgba(0, 200, 255, 0.1)";
-    case "party-vibe":
-      return "rgba(180, 100, 255, 0.1)";
-    default:
-      return "transparent";
-  }
-};
 
 export const PostPreview = ({ content }: PostPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
@@ -47,10 +22,6 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
 
   // Generate the HTML content for the post
   const generatePostHTML = () => {
-    const bgColor = getBackgroundColor(content.backgroundStyle);
-    const accentColor = getAccentColor(content.backgroundStyle);
-    
-    // Use publicly accessible logo URL from public folder
     const logoUrl = `${window.location.origin}/logo-partypanyther.jpeg`;
     
     return `
@@ -64,97 +35,131 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { 
               font-family: 'Poppins', sans-serif;
-              background: ${bgColor};
               width: ${dimensions.width}px;
               height: ${dimensions.height}px;
               overflow: hidden;
-            }
-            .container {
-              width: 100%;
-              height: 100%;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              padding: 64px;
               position: relative;
-              text-align: center;
             }
-            .accent-overlay {
+            .background {
               position: absolute;
               top: 0;
               left: 0;
-              right: 0;
-              bottom: 0;
-              background: ${accentColor};
-              pointer-events: none;
+              width: 100%;
+              height: 100%;
+              background: linear-gradient(135deg, #0d1b3e 0%, #1a1a2e 50%, #0d1b3e 100%);
+            }
+            .overlay {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%);
+            }
+            .glow-1 {
+              position: absolute;
+              top: 15%;
+              left: 10%;
+              width: 300px;
+              height: 300px;
+              background: radial-gradient(circle, rgba(0, 207, 255, 0.15) 0%, transparent 70%);
+              border-radius: 50%;
+            }
+            .glow-2 {
+              position: absolute;
+              bottom: 20%;
+              right: 15%;
+              width: 400px;
+              height: 400px;
+              background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+              border-radius: 50%;
             }
             .logo-section {
               position: absolute;
               top: 48px;
               left: 48px;
-              display: flex;
-              align-items: center;
-              gap: 16px;
+              display: block;
+            }
+            .logo-row {
+              display: block;
             }
             .logo-img {
               width: 80px;
               height: 80px;
               border-radius: 50%;
+              display: inline-block;
+              vertical-align: middle;
             }
             .logo-text {
               font-size: 32px;
               font-weight: 700;
               color: #00d4ff;
+              display: inline-block;
+              vertical-align: middle;
+              margin-left: 16px;
+              text-shadow: 0 0 20px rgba(0, 207, 255, 0.5);
+            }
+            .content-wrapper {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              display: table;
             }
             .content {
-              position: relative;
-              z-index: 10;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              gap: 24px;
-              max-width: 900px;
+              display: table-cell;
+              vertical-align: middle;
+              text-align: center;
+              padding: 64px;
             }
             .headline {
               font-size: 72px;
               font-weight: 700;
-              line-height: 1.1;
+              line-height: 1.2;
               color: #b366ff;
+              margin-bottom: 32px;
+              text-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+            }
+            .section {
+              margin-bottom: 24px;
             }
             .subheadline {
               font-size: 48px;
               font-weight: 600;
               color: #00d4ff;
+              line-height: 1.3;
+              margin-bottom: 12px;
+              text-shadow: 0 0 20px rgba(0, 207, 255, 0.4);
             }
             .body-text {
               font-size: 32px;
               line-height: 1.5;
               color: #e6e6e6;
-            }
-            .section {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              gap: 12px;
+              text-shadow: 0 2px 4px rgba(0,0,0,0.5);
             }
           </style>
         </head>
         <body>
-          <div class="container">
-            <div class="accent-overlay"></div>
-            ${content.showLogo ? `
-              <div class="logo-section">
+          <div class="background"></div>
+          <div class="overlay"></div>
+          <div class="glow-1"></div>
+          <div class="glow-2"></div>
+          ${content.showLogo ? `
+            <div class="logo-section">
+              <div class="logo-row">
                 <img src="${logoUrl}" alt="Party Panther" class="logo-img" crossorigin="anonymous">
                 <span class="logo-text">Party Panther</span>
               </div>
-            ` : ''}
+            </div>
+          ` : ''}
+          <div class="content-wrapper">
             <div class="content">
-              ${content.headline ? `<h1 class="headline">${escapeHtml(content.headline)}</h1>` : ''}
+              ${content.headline ? `<div class="headline">${escapeHtml(content.headline)}</div>` : ''}
               ${content.sections.map(section => `
                 <div class="section">
-                  ${section.subheadline ? `<h2 class="subheadline">${escapeHtml(section.subheadline)}</h2>` : ''}
-                  ${section.body ? `<p class="body-text">${escapeHtml(section.body)}</p>` : ''}
+                  ${section.subheadline ? `<div class="subheadline">${escapeHtml(section.subheadline)}</div>` : ''}
+                  ${section.body ? `<div class="body-text">${escapeHtml(section.body)}</div>` : ''}
                 </div>
               `).join('')}
             </div>
@@ -193,7 +198,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: getBackgroundColor(content.backgroundStyle),
+        backgroundColor: "#0d1b3e",
         width: dimensions.width,
         height: dimensions.height,
         foreignObjectRendering: false,
@@ -252,77 +257,176 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
               marginBottom: -(dimensions.height * (1 - previewScale)),
             }}
           >
-            {/* Actual render target - simplified for reliable export */}
+            {/* Actual render target - using inline styles for html2canvas compatibility */}
             <div
               ref={previewRef}
               style={{
                 width: dimensions.width,
                 height: dimensions.height,
-                backgroundColor: getBackgroundColor(content.backgroundStyle),
+                position: "relative",
+                overflow: "hidden",
                 fontFamily: "'Poppins', sans-serif",
               }}
-              className="relative flex flex-col items-center justify-center p-16 text-center overflow-hidden"
             >
-              {/* Simple accent overlay */}
-              <div 
-                className="absolute inset-0 pointer-events-none"
-                style={{ backgroundColor: getAccentColor(content.backgroundStyle) }}
+              {/* Hero-like gradient background */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  background: "linear-gradient(135deg, #0d1b3e 0%, #1a1a2e 50%, #0d1b3e 100%)",
+                }}
+              />
+              
+              {/* Overlay for depth */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  background: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%)",
+                }}
+              />
+              
+              {/* Cyan glow */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "15%",
+                  left: "10%",
+                  width: 300,
+                  height: 300,
+                  background: "radial-gradient(circle, rgba(0, 207, 255, 0.15) 0%, transparent 70%)",
+                  borderRadius: "50%",
+                }}
+              />
+              
+              {/* Purple glow */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "20%",
+                  right: "15%",
+                  width: 400,
+                  height: 400,
+                  background: "radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)",
+                  borderRadius: "50%",
+                }}
               />
 
-              {/* Logo & Brand */}
+              {/* Logo & Brand - using table layout for compatibility */}
               {content.showLogo && (
-                <div className="absolute top-12 left-12 flex items-center gap-4">
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 48,
+                    left: 48,
+                    zIndex: 10,
+                  }}
+                >
                   <img
-                    src="/logo-partypanyther.jpeg"
+                    src={partyPantherLogo}
                     alt="Party Panther"
-                    className="w-20 h-20 rounded-full"
+                    style={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: "50%",
+                      display: "inline-block",
+                      verticalAlign: "middle",
+                    }}
                     crossOrigin="anonymous"
                   />
                   <span
-                    className="text-4xl font-bold"
-                    style={{ color: "#00d4ff" }}
+                    style={{
+                      fontSize: 32,
+                      fontWeight: 700,
+                      color: "#00d4ff",
+                      display: "inline-block",
+                      verticalAlign: "middle",
+                      marginLeft: 16,
+                      textShadow: "0 0 20px rgba(0, 207, 255, 0.5)",
+                    }}
                   >
                     Party Panther
                   </span>
                 </div>
               )}
 
-              {/* Content */}
-              <div className="relative z-10 flex flex-col items-center gap-6 max-w-[900px]">
-                {/* Headline */}
-                {content.headline && (
-                  <h1
-                    className="text-7xl font-bold leading-tight text-center"
-                    style={{ color: "#b366ff" }}
-                  >
-                    {content.headline}
-                  </h1>
-                )}
+              {/* Content using table layout for reliable vertical centering */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  display: "table",
+                  zIndex: 5,
+                }}
+              >
+                <div
+                  style={{
+                    display: "table-cell",
+                    verticalAlign: "middle",
+                    textAlign: "center",
+                    padding: 64,
+                  }}
+                >
+                  {/* Headline */}
+                  {content.headline && (
+                    <div
+                      style={{
+                        fontSize: 72,
+                        fontWeight: 700,
+                        lineHeight: 1.2,
+                        color: "#b366ff",
+                        marginBottom: 32,
+                        textShadow: "0 0 30px rgba(139, 92, 246, 0.4)",
+                      }}
+                    >
+                      {content.headline}
+                    </div>
+                  )}
 
-                {/* Content Sections */}
-                {content.sections.map((section, index) => (
-                  <div key={index} className="flex flex-col items-center gap-3">
-                    {/* Sub-headline */}
-                    {section.subheadline && (
-                      <h2
-                        className="text-5xl font-semibold text-center"
-                        style={{ color: "#00d4ff" }}
-                      >
-                        {section.subheadline}
-                      </h2>
-                    )}
+                  {/* Content Sections */}
+                  {content.sections.map((section, index) => (
+                    <div key={index} style={{ marginBottom: 24 }}>
+                      {/* Sub-headline */}
+                      {section.subheadline && (
+                        <div
+                          style={{
+                            fontSize: 48,
+                            fontWeight: 600,
+                            color: "#00d4ff",
+                            lineHeight: 1.3,
+                            marginBottom: 12,
+                            textShadow: "0 0 20px rgba(0, 207, 255, 0.4)",
+                          }}
+                        >
+                          {section.subheadline}
+                        </div>
+                      )}
 
-                    {/* Body */}
-                    {section.body && (
-                      <p
-                        className="text-3xl leading-relaxed text-center"
-                        style={{ color: "#e6e6e6" }}
-                      >
-                        {section.body}
-                      </p>
-                    )}
-                  </div>
-                ))}
+                      {/* Body */}
+                      {section.body && (
+                        <div
+                          style={{
+                            fontSize: 32,
+                            lineHeight: 1.5,
+                            color: "#e6e6e6",
+                            textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                          }}
+                        >
+                          {section.body}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
