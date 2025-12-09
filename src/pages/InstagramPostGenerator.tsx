@@ -21,6 +21,11 @@ const InstagramPostGenerator = () => {
     format: "square",
     backgroundStyle: "dark-gradient",
     showLogo: true,
+    fonts: {
+      headline: "Poppins",
+      subheadline: "Poppins",
+      body: "Poppins",
+    },
   });
 
   useEffect(() => {

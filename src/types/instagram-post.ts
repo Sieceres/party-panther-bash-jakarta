@@ -1,9 +1,16 @@
 export type PostFormat = "square" | "story";
-export type BackgroundStyle = "dark-gradient" | "neon-accent" | "party-vibe";
+export type BackgroundStyle = "dark-gradient" | "hero-style" | "neon-accent";
+export type FontFamily = "Poppins" | "Inter" | "Montserrat" | "Playfair Display" | "Bebas Neue" | "Oswald";
 
 export interface ContentSection {
   subheadline: string;
   body: string;
+}
+
+export interface FontSettings {
+  headline: FontFamily;
+  subheadline: FontFamily;
+  body: FontFamily;
 }
 
 export interface PostContent {
@@ -12,4 +19,5 @@ export interface PostContent {
   format: PostFormat;
   backgroundStyle: BackgroundStyle;
   showLogo: boolean;
+  fonts: FontSettings;
 }

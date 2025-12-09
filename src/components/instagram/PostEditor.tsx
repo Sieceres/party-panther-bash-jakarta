@@ -6,16 +6,32 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
-import type { PostContent, PostFormat, BackgroundStyle, ContentSection } from "@/types/instagram-post";
+import type { PostContent, PostFormat, BackgroundStyle, ContentSection, FontFamily } from "@/types/instagram-post";
 
 interface PostEditorProps {
   content: PostContent;
   onChange: (content: PostContent) => void;
 }
 
+const FONT_OPTIONS: { value: FontFamily; label: string }[] = [
+  { value: "Poppins", label: "Poppins" },
+  { value: "Inter", label: "Inter" },
+  { value: "Montserrat", label: "Montserrat" },
+  { value: "Playfair Display", label: "Playfair Display" },
+  { value: "Bebas Neue", label: "Bebas Neue" },
+  { value: "Oswald", label: "Oswald" },
+];
+
 export const PostEditor = ({ content, onChange }: PostEditorProps) => {
   const updateField = <K extends keyof PostContent>(field: K, value: PostContent[K]) => {
     onChange({ ...content, [field]: value });
+  };
+
+  const updateFont = (field: keyof PostContent["fonts"], value: FontFamily) => {
+    onChange({
+      ...content,
+      fonts: { ...content.fonts, [field]: value },
+    });
   };
 
   const updateSection = (index: number, field: keyof ContentSection, value: string) => {
@@ -71,10 +87,74 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="dark-gradient">Dark Gradient</SelectItem>
+              <SelectItem value="hero-style">Hero Style (Floating Glows)</SelectItem>
               <SelectItem value="neon-accent">Neon Accent</SelectItem>
-              <SelectItem value="party-vibe">Party Vibe</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Font Settings */}
+        <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+          <Label className="text-sm font-medium">Font Settings</Label>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="font-headline" className="text-xs text-muted-foreground">Headline Font</Label>
+              <Select
+                value={content.fonts.headline}
+                onValueChange={(value: FontFamily) => updateFont("headline", value)}
+              >
+                <SelectTrigger id="font-headline" className="text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FONT_OPTIONS.map((font) => (
+                    <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                      {font.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="font-subheadline" className="text-xs text-muted-foreground">Sub-headline Font</Label>
+              <Select
+                value={content.fonts.subheadline}
+                onValueChange={(value: FontFamily) => updateFont("subheadline", value)}
+              >
+                <SelectTrigger id="font-subheadline" className="text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FONT_OPTIONS.map((font) => (
+                    <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                      {font.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="font-body" className="text-xs text-muted-foreground">Body Font</Label>
+              <Select
+                value={content.fonts.body}
+                onValueChange={(value: FontFamily) => updateFont("body", value)}
+              >
+                <SelectTrigger id="font-body" className="text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FONT_OPTIONS.map((font) => (
+                    <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                      {font.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
 
         {/* Headline */}
