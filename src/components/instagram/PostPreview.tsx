@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import html2canvas from "html2canvas";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,178 +14,207 @@ interface PostPreviewProps {
 export const PostPreview = ({ content }: PostPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const { toast } = useToast();
 
   const isSquare = content.format === "square";
   const dimensions = isSquare ? { width: 1080, height: 1080 } : { width: 1080, height: 1920 };
   const previewScale = isSquare ? 0.4 : 0.25;
 
-  // Generate the HTML content for the post
-  const generatePostHTML = () => {
-    const logoUrl = `${window.location.origin}/logo-partypanyther.jpeg`;
-    
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>Party Panther Instagram Post</title>
-          <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-              font-family: 'Poppins', sans-serif;
-              width: ${dimensions.width}px;
-              height: ${dimensions.height}px;
-              overflow: hidden;
-              position: relative;
-            }
-            .background {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              background: linear-gradient(135deg, #0d1b3e 0%, #1a1a2e 50%, #0d1b3e 100%);
-            }
-            .overlay {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%);
-            }
-            .glow-1 {
-              position: absolute;
-              top: 15%;
-              left: 10%;
-              width: 300px;
-              height: 300px;
-              background: radial-gradient(circle, rgba(0, 207, 255, 0.15) 0%, transparent 70%);
-              border-radius: 50%;
-            }
-            .glow-2 {
-              position: absolute;
-              bottom: 20%;
-              right: 15%;
-              width: 400px;
-              height: 400px;
-              background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
-              border-radius: 50%;
-            }
-            .logo-section {
-              position: absolute;
-              top: 48px;
-              left: 48px;
-              display: block;
-            }
-            .logo-row {
-              display: block;
-            }
-            .logo-img {
-              width: 80px;
-              height: 80px;
-              border-radius: 50%;
-              display: inline-block;
-              vertical-align: middle;
-            }
-            .logo-text {
-              font-size: 32px;
-              font-weight: 700;
-              color: #00d4ff;
-              display: inline-block;
-              vertical-align: middle;
-              margin-left: 16px;
-              text-shadow: 0 0 20px rgba(0, 207, 255, 0.5);
-            }
-            .content-wrapper {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              display: table;
-            }
-            .content {
-              display: table-cell;
-              vertical-align: middle;
-              text-align: center;
-              padding: 64px;
-            }
-            .headline {
-              font-size: 72px;
-              font-weight: 700;
-              line-height: 1.2;
-              color: #b366ff;
-              margin-bottom: 32px;
-              text-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
-            }
-            .section {
-              margin-bottom: 24px;
-            }
-            .subheadline {
-              font-size: 48px;
-              font-weight: 600;
-              color: #00d4ff;
-              line-height: 1.3;
-              margin-bottom: 12px;
-              text-shadow: 0 0 20px rgba(0, 207, 255, 0.4);
-            }
-            .body-text {
-              font-size: 32px;
-              line-height: 1.5;
-              color: #e6e6e6;
-              text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            }
-          </style>
-        </head>
-        <body>
-          <div class="background"></div>
-          <div class="overlay"></div>
-          <div class="glow-1"></div>
-          <div class="glow-2"></div>
-          ${content.showLogo ? `
-            <div class="logo-section">
-              <div class="logo-row">
-                <img src="${logoUrl}" alt="Party Panther" class="logo-img" crossorigin="anonymous">
-                <span class="logo-text">Party Panther</span>
-              </div>
-            </div>
-          ` : ''}
-          <div class="content-wrapper">
-            <div class="content">
-              ${content.headline ? `<div class="headline">${escapeHtml(content.headline)}</div>` : ''}
-              ${content.sections.map(section => `
-                <div class="section">
-                  ${section.subheadline ? `<div class="subheadline">${escapeHtml(section.subheadline)}</div>` : ''}
-                  ${section.body ? `<div class="body-text">${escapeHtml(section.body)}</div>` : ''}
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-  };
+  // Render post to canvas using Canvas API
+  const renderToCanvas = useCallback(async (): Promise<HTMLCanvasElement> => {
+    const canvas = document.createElement("canvas");
+    canvas.width = dimensions.width;
+    canvas.height = dimensions.height;
+    const ctx = canvas.getContext("2d")!;
 
-  // Open full scale preview in new window
-  const handleOpenFullScale = () => {
-    const newWindow = window.open('', '_blank', `width=${dimensions.width},height=${dimensions.height},scrollbars=no,resizable=yes`);
-    if (newWindow) {
-      newWindow.document.write(generatePostHTML());
-      newWindow.document.close();
-      
-      toast({
-        title: "Full Scale Preview Opened",
-        description: "Take a screenshot of the new window (Cmd/Ctrl + Shift + S or use your screenshot tool)",
+    // Load font first
+    await document.fonts.load("700 72px Poppins");
+    await document.fonts.load("600 48px Poppins");
+    await document.fonts.load("400 32px Poppins");
+
+    // Draw background gradient
+    const bgGradient = ctx.createLinearGradient(0, 0, dimensions.width, dimensions.height);
+    bgGradient.addColorStop(0, "#0d1b3e");
+    bgGradient.addColorStop(0.5, "#1a1a2e");
+    bgGradient.addColorStop(1, "#0d1b3e");
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+
+    // Draw overlay gradient
+    const overlayGradient = ctx.createLinearGradient(0, 0, 0, dimensions.height);
+    overlayGradient.addColorStop(0, "rgba(0,0,0,0.3)");
+    overlayGradient.addColorStop(0.3, "rgba(0,0,0,0)");
+    overlayGradient.addColorStop(0.7, "rgba(0,0,0,0)");
+    overlayGradient.addColorStop(1, "rgba(0,0,0,0.4)");
+    ctx.fillStyle = overlayGradient;
+    ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+
+    // Draw cyan glow
+    const cyanGlow = ctx.createRadialGradient(
+      dimensions.width * 0.1 + 150, dimensions.height * 0.15 + 150, 0,
+      dimensions.width * 0.1 + 150, dimensions.height * 0.15 + 150, 150
+    );
+    cyanGlow.addColorStop(0, "rgba(0, 207, 255, 0.15)");
+    cyanGlow.addColorStop(1, "rgba(0, 207, 255, 0)");
+    ctx.fillStyle = cyanGlow;
+    ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+
+    // Draw purple glow
+    const purpleGlow = ctx.createRadialGradient(
+      dimensions.width * 0.85, dimensions.height * 0.8, 0,
+      dimensions.width * 0.85, dimensions.height * 0.8, 200
+    );
+    purpleGlow.addColorStop(0, "rgba(139, 92, 246, 0.15)");
+    purpleGlow.addColorStop(1, "rgba(139, 92, 246, 0)");
+    ctx.fillStyle = purpleGlow;
+    ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+
+    // Draw logo if enabled
+    if (content.showLogo) {
+      const logoImg = new Image();
+      logoImg.crossOrigin = "anonymous";
+      await new Promise<void>((resolve, reject) => {
+        logoImg.onload = () => resolve();
+        logoImg.onerror = reject;
+        logoImg.src = partyPantherLogo;
       });
-    } else {
+
+      // Draw circular logo
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(48 + 40, 48 + 40, 40, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(logoImg, 48, 48, 80, 80);
+      ctx.restore();
+
+      // Draw "Party Panther" text
+      ctx.font = "700 32px Poppins";
+      ctx.fillStyle = "#00d4ff";
+      ctx.shadowColor = "rgba(0, 207, 255, 0.5)";
+      ctx.shadowBlur = 20;
+      ctx.textBaseline = "middle";
+      ctx.fillText("Party Panther", 48 + 96, 48 + 40);
+      ctx.shadowBlur = 0;
+    }
+
+    // Calculate content positioning
+    let currentY = dimensions.height / 2;
+    const contentWidth = dimensions.width - 128;
+
+    // Measure total content height to center it
+    let totalHeight = 0;
+    if (content.headline) totalHeight += 86 + 32; // headline + margin
+    content.sections.forEach(section => {
+      if (section.subheadline) totalHeight += 62 + 12;
+      if (section.body) totalHeight += 48;
+      totalHeight += 24; // section margin
+    });
+    currentY = (dimensions.height - totalHeight) / 2;
+
+    // Draw headline
+    if (content.headline) {
+      ctx.font = "700 72px Poppins";
+      ctx.fillStyle = "#b366ff";
+      ctx.shadowColor = "rgba(139, 92, 246, 0.4)";
+      ctx.shadowBlur = 30;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      
+      // Wrap text if needed
+      const lines = wrapText(ctx, content.headline, contentWidth);
+      lines.forEach(line => {
+        ctx.fillText(line, dimensions.width / 2, currentY);
+        currentY += 86;
+      });
+      currentY += 32;
+      ctx.shadowBlur = 0;
+    }
+
+    // Draw sections
+    content.sections.forEach(section => {
+      if (section.subheadline) {
+        ctx.font = "600 48px Poppins";
+        ctx.fillStyle = "#00d4ff";
+        ctx.shadowColor = "rgba(0, 207, 255, 0.4)";
+        ctx.shadowBlur = 20;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        
+        const lines = wrapText(ctx, section.subheadline, contentWidth);
+        lines.forEach(line => {
+          ctx.fillText(line, dimensions.width / 2, currentY);
+          currentY += 62;
+        });
+        currentY += 12;
+        ctx.shadowBlur = 0;
+      }
+
+      if (section.body) {
+        ctx.font = "400 32px Poppins";
+        ctx.fillStyle = "#e6e6e6";
+        ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetY = 2;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        
+        const lines = wrapText(ctx, section.body, contentWidth);
+        lines.forEach(line => {
+          ctx.fillText(line, dimensions.width / 2, currentY);
+          currentY += 48;
+        });
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+      }
+
+      currentY += 24;
+    });
+
+    return canvas;
+  }, [content, dimensions]);
+
+  // Open full scale preview as image in new window
+  const handleOpenFullScale = async () => {
+    setPreviewLoading(true);
+    try {
+      const canvas = await renderToCanvas();
+      const dataUrl = canvas.toDataURL("image/png", 1.0);
+      
+      const newWindow = window.open("", "_blank");
+      if (newWindow) {
+        newWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Party Panther Instagram Post</title>
+              <style>
+                body { margin: 0; padding: 20px; background: #1a1a2e; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+                img { max-width: 100%; height: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+              </style>
+            </head>
+            <body>
+              <img src="${dataUrl}" alt="Instagram Post" />
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+        
+        toast({
+          title: "Preview Opened",
+          description: "Right-click the image to save it",
+        });
+      }
+    } catch (error) {
+      console.error("Preview error:", error);
       toast({
-        title: "Popup Blocked",
-        description: "Please allow popups for this site and try again",
+        title: "Preview Failed",
+        description: "Could not generate preview image",
         variant: "destructive",
       });
+    } finally {
+      setPreviewLoading(false);
     }
   };
 
@@ -440,4 +469,29 @@ function escapeHtml(text: string): string {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// Helper to wrap text for canvas rendering
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(' ');
+  const lines: string[] = [];
+  let currentLine = '';
+
+  for (const word of words) {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    const metrics = ctx.measureText(testLine);
+    
+    if (metrics.width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+  }
+  
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+  
+  return lines;
 }
