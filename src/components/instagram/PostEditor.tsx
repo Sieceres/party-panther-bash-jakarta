@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { Plus, Trash2 } from "lucide-react";
 import type { PostContent, PostFormat, BackgroundStyle, ContentSection, FontFamily } from "@/types/instagram-post";
 
@@ -31,6 +32,13 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
     onChange({
       ...content,
       fonts: { ...content.fonts, [field]: value },
+    });
+  };
+
+  const updateFontSize = (field: keyof PostContent["fontSizes"], value: number) => {
+    onChange({
+      ...content,
+      fontSizes: { ...content.fontSizes, [field]: value },
     });
   };
 
@@ -97,6 +105,7 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
         <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
           <Label className="text-sm font-medium">Font Settings</Label>
           
+          {/* Font Family Selection */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="font-headline" className="text-xs text-muted-foreground">Headline Font</Label>
@@ -153,6 +162,55 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          {/* Font Size Controls */}
+          <div className="space-y-4 pt-2 border-t border-border/50">
+            <Label className="text-xs text-muted-foreground">Font Sizes</Label>
+            
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label className="text-xs">Headline: {content.fontSizes.headline}px</Label>
+                </div>
+                <Slider
+                  value={[content.fontSizes.headline]}
+                  onValueChange={([value]) => updateFontSize("headline", value)}
+                  min={32}
+                  max={120}
+                  step={2}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label className="text-xs">Sub-headline: {content.fontSizes.subheadline}px</Label>
+                </div>
+                <Slider
+                  value={[content.fontSizes.subheadline]}
+                  onValueChange={([value]) => updateFontSize("subheadline", value)}
+                  min={20}
+                  max={80}
+                  step={2}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label className="text-xs">Body: {content.fontSizes.body}px</Label>
+                </div>
+                <Slider
+                  value={[content.fontSizes.body]}
+                  onValueChange={([value]) => updateFontSize("body", value)}
+                  min={16}
+                  max={56}
+                  step={2}
+                  className="w-full"
+                />
+              </div>
             </div>
           </div>
         </div>

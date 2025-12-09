@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEventUrl, getEditEventUrl, getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 interface Event {
   id: string;
@@ -48,6 +49,7 @@ interface User {
 }
 
 export const AdminDashboard = () => {
+  usePageTitle("Admin Dashboard");
   const { toast } = useToast();
   const navigate = useNavigate();
   const [events, setEvents] = useState<Event[]>([]);

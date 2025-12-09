@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getPromoBySlugOrId } from "@/lib/slug-utils";
 import Linkify from "linkify-react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 interface Promo {
   id: string;
@@ -47,6 +48,8 @@ export const PromoDetailPage = () => {
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
+
+  usePageTitle(promo?.title ? `${promo.title}` : "Promo");
 
   useEffect(() => {
     const fetchPromo = async () => {

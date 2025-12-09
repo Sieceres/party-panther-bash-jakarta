@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { useOptimizedData } from "@/hooks/useOptimizedData";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const Index = () => {
   const { toast } = useToast();
@@ -16,6 +17,15 @@ const Index = () => {
   const [activeSection, setActiveSection] = useState("home");
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showCreatePromo, setShowCreatePromo] = useState(false);
+
+  // Set page title based on active section
+  const pageTitleMap: Record<string, string> = {
+    home: "Home",
+    events: "Events",
+    promos: "Promos",
+    profile: "Profile",
+  };
+  usePageTitle(pageTitleMap[activeSection] || "Home");
 
   // Use optimized data hook for better performance
   const { 

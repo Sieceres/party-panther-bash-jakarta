@@ -38,6 +38,7 @@ import { EventPhotoGallery } from "./EventPhotoGallery";
 import { EventInviteCodes } from "./EventInviteCodes";
 import { LoginDialog } from "./LoginDialog";
 import InstagramEmbed from "./InstagramEmbed";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 interface Event {
   id: string;
@@ -94,6 +95,7 @@ export const EventDetailPage = () => {
   const [eventTags, setEventTags] = useState<any[]>([]);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
 
+  usePageTitle(event?.title ? `${event.title}` : "Event");
   const memoizedCenter = useMemo(() => {
     if (!event?.venue_latitude || !event?.venue_longitude) {
       return { lat: -6.2088, lng: 106.8456 }; // Jakarta default

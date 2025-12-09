@@ -40,8 +40,7 @@ import { ImageUpload } from "./form-components/ImageUpload";
 import { EventWithSlug, PromoWithSlug } from "@/types/extended-types";
 import { getEventUrl, getPromoUrl, getEditEventUrl, getEditPromoUrl } from "@/lib/slug-utils";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
-
-// ... (interface Profile remains the same)
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 interface Profile {
   id: string;
@@ -70,6 +69,7 @@ interface Profile {
 }
 
 export const UserProfile = () => {
+  usePageTitle("Profile");
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [activeSection, setActiveSection] = useState('profile');
   const [profile, setProfile] = useState<Profile | null>(null);

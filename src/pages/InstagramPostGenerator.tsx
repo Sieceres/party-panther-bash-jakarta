@@ -8,9 +8,11 @@ import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import type { PostContent } from "@/types/instagram-post";
 
 const InstagramPostGenerator = () => {
+  usePageTitle("Instagram Generator");
   const navigate = useNavigate();
   const { toast } = useToast();
   const [authLoading, setAuthLoading] = useState(true);
@@ -25,6 +27,11 @@ const InstagramPostGenerator = () => {
       headline: "Poppins",
       subheadline: "Poppins",
       body: "Poppins",
+    },
+    fontSizes: {
+      headline: 72,
+      subheadline: 48,
+      body: 32,
     },
   });
 

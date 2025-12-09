@@ -1,12 +1,29 @@
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, MapPin, Calendar, Star } from "lucide-react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const About = () => {
+  usePageTitle("About");
+  const navigate = useNavigate();
+
+  const handleSectionChange = (section: string) => {
+    if (section === 'home') {
+      navigate('/');
+    } else if (section === 'admin') {
+      navigate('/admin');
+    } else if (section === 'profile') {
+      navigate('/profile');
+    } else {
+      navigate(`/?section=${section}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <Header activeSection="" onSectionChange={() => {}} />
+      <Header activeSection="" onSectionChange={handleSectionChange} />
       <div className="pt-20 px-4">
         <div className="container mx-auto max-w-6xl py-12">
           <div className="text-center mb-16">
@@ -120,7 +137,7 @@ const About = () => {
           </div>
         </div>
       </div>
-      <Footer onSectionChange={() => {}} />
+      <Footer onSectionChange={handleSectionChange} />
     </div>
   );
 };

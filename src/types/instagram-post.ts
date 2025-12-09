@@ -13,6 +13,12 @@ export interface FontSettings {
   body: FontFamily;
 }
 
+export interface FontSizeSettings {
+  headline: number;
+  subheadline: number;
+  body: number;
+}
+
 export interface PostContent {
   headline: string;
   sections: ContentSection[];
@@ -20,4 +26,5 @@ export interface PostContent {
   backgroundStyle: BackgroundStyle;
   showLogo: boolean;
   fonts: FontSettings;
+  fontSizes: FontSizeSettings;
 }

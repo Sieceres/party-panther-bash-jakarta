@@ -200,19 +200,24 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
     let currentY = dimensions.height / 2;
     const contentWidth = dimensions.width - 128;
 
+    // Get font sizes from content
+    const headlineFontSize = content.fontSizes?.headline || 72;
+    const subheadlineFontSize = content.fontSizes?.subheadline || 48;
+    const bodyFontSize = content.fontSizes?.body || 32;
+
     // Measure total content height to center it
     let totalHeight = 0;
-    if (content.headline) totalHeight += 86 + 32;
+    if (content.headline) totalHeight += (headlineFontSize * 1.2) + 32;
     content.sections.forEach(section => {
-      if (section.subheadline) totalHeight += 62 + 12;
-      if (section.body) totalHeight += 48;
+      if (section.subheadline) totalHeight += (subheadlineFontSize * 1.3) + 12;
+      if (section.body) totalHeight += (bodyFontSize * 1.5);
       totalHeight += 24;
     });
     currentY = (dimensions.height - totalHeight) / 2;
 
     // Draw headline
     if (content.headline) {
-      ctx.font = `700 72px ${content.fonts.headline}`;
+      ctx.font = `700 ${headlineFontSize}px ${content.fonts.headline}`;
       ctx.fillStyle = "#00d4ff";
       ctx.shadowColor = "rgba(0, 212, 255, 0.4)";
       ctx.shadowBlur = 30;
@@ -222,7 +227,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
       const lines = wrapText(ctx, content.headline, contentWidth);
       lines.forEach(line => {
         ctx.fillText(line, dimensions.width / 2, currentY);
-        currentY += 86;
+        currentY += headlineFontSize * 1.2;
       });
       currentY += 32;
       ctx.shadowBlur = 0;
@@ -231,7 +236,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
     // Draw sections
     content.sections.forEach(section => {
       if (section.subheadline) {
-        ctx.font = `600 48px ${content.fonts.subheadline}`;
+        ctx.font = `600 ${subheadlineFontSize}px ${content.fonts.subheadline}`;
         ctx.fillStyle = "#6366f1";
         ctx.shadowColor = "rgba(99, 102, 241, 0.4)";
         ctx.shadowBlur = 20;
@@ -241,14 +246,14 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
         const lines = wrapText(ctx, section.subheadline, contentWidth);
         lines.forEach(line => {
           ctx.fillText(line, dimensions.width / 2, currentY);
-          currentY += 62;
+          currentY += subheadlineFontSize * 1.3;
         });
         currentY += 12;
         ctx.shadowBlur = 0;
       }
 
       if (section.body) {
-        ctx.font = `400 32px ${content.fonts.body}`;
+        ctx.font = `400 ${bodyFontSize}px ${content.fonts.body}`;
         ctx.fillStyle = "#e6e6e6";
         ctx.shadowColor = "rgba(0,0,0,0.5)";
         ctx.shadowBlur = 4;
@@ -259,7 +264,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
         const lines = wrapText(ctx, section.body, contentWidth);
         lines.forEach(line => {
           ctx.fillText(line, dimensions.width / 2, currentY);
-          currentY += 48;
+          currentY += bodyFontSize * 1.5;
         });
         ctx.shadowBlur = 0;
         ctx.shadowOffsetY = 0;
@@ -596,10 +601,10 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                 {content.headline && (
                   <div
                     style={{
-                      fontSize: 72,
+                      fontSize: content.fontSizes?.headline || 72,
                       fontWeight: 700,
                       fontFamily: `'${content.fonts.headline}', sans-serif`,
-                      lineHeight: "86px",
+                      lineHeight: `${(content.fontSizes?.headline || 72) * 1.2}px`,
                       color: "#00d4ff",
                       marginBottom: 32,
                       textShadow: "0 0 30px rgba(0, 212, 255, 0.4)",
@@ -616,11 +621,11 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                     {section.subheadline && (
                       <div
                         style={{
-                          fontSize: 48,
+                          fontSize: content.fontSizes?.subheadline || 48,
                           fontWeight: 600,
                           fontFamily: `'${content.fonts.subheadline}', sans-serif`,
                           color: "#6366f1",
-                          lineHeight: "62px",
+                          lineHeight: `${(content.fontSizes?.subheadline || 48) * 1.3}px`,
                           marginBottom: 12,
                           textShadow: "0 0 20px rgba(99, 102, 241, 0.4)",
                         }}
@@ -633,9 +638,9 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                     {section.body && (
                       <div
                         style={{
-                          fontSize: 32,
+                          fontSize: content.fontSizes?.body || 32,
                           fontFamily: `'${content.fonts.body}', sans-serif`,
-                          lineHeight: "48px",
+                          lineHeight: `${(content.fontSizes?.body || 32) * 1.5}px`,
                           color: "#e6e6e6",
                           textShadow: "0 2px 4px rgba(0,0,0,0.5)",
                         }}
