@@ -318,7 +318,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                 }}
               />
 
-              {/* Logo & Brand - using table layout for compatibility */}
+              {/* Logo & Brand */}
               {content.showLogo && (
                 <div
                   style={{
@@ -326,6 +326,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                     top: 48,
                     left: 48,
                     zIndex: 10,
+                    height: 80,
                   }}
                 >
                   <img
@@ -335,8 +336,9 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                       width: 80,
                       height: 80,
                       borderRadius: "50%",
-                      display: "inline-block",
-                      verticalAlign: "middle",
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
                     }}
                     crossOrigin="anonymous"
                   />
@@ -345,9 +347,10 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                       fontSize: 32,
                       fontWeight: 700,
                       color: "#00d4ff",
-                      display: "inline-block",
-                      verticalAlign: "middle",
-                      marginLeft: 16,
+                      position: "absolute",
+                      top: 20,
+                      left: 96,
+                      whiteSpace: "nowrap",
                       textShadow: "0 0 20px rgba(0, 207, 255, 0.5)",
                     }}
                   >
@@ -356,77 +359,68 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                 </div>
               )}
 
-              {/* Content using table layout for reliable vertical centering */}
+              {/* Content - using absolute positioning for html2canvas compatibility */}
               <div
                 style={{
                   position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  display: "table",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: dimensions.width - 128,
+                  textAlign: "center",
                   zIndex: 5,
                 }}
               >
-                <div
-                  style={{
-                    display: "table-cell",
-                    verticalAlign: "middle",
-                    textAlign: "center",
-                    padding: 64,
-                  }}
-                >
-                  {/* Headline */}
-                  {content.headline && (
-                    <div
-                      style={{
-                        fontSize: 72,
-                        fontWeight: 700,
-                        lineHeight: 1.2,
-                        color: "#b366ff",
-                        marginBottom: 32,
-                        textShadow: "0 0 30px rgba(139, 92, 246, 0.4)",
-                      }}
-                    >
-                      {content.headline}
-                    </div>
-                  )}
+                {/* Headline */}
+                {content.headline && (
+                  <div
+                    style={{
+                      fontSize: 72,
+                      fontWeight: 700,
+                      lineHeight: "86px",
+                      color: "#b366ff",
+                      marginBottom: 32,
+                      textShadow: "0 0 30px rgba(139, 92, 246, 0.4)",
+                    }}
+                  >
+                    {content.headline}
+                  </div>
+                )}
 
-                  {/* Content Sections */}
-                  {content.sections.map((section, index) => (
-                    <div key={index} style={{ marginBottom: 24 }}>
-                      {/* Sub-headline */}
-                      {section.subheadline && (
-                        <div
-                          style={{
-                            fontSize: 48,
-                            fontWeight: 600,
-                            color: "#00d4ff",
-                            lineHeight: 1.3,
-                            marginBottom: 12,
-                            textShadow: "0 0 20px rgba(0, 207, 255, 0.4)",
-                          }}
-                        >
-                          {section.subheadline}
-                        </div>
-                      )}
+                {/* Content Sections */}
+                {content.sections.map((section, index) => (
+                  <div key={index} style={{ marginBottom: 24 }}>
+                    {/* Sub-headline */}
+                    {section.subheadline && (
+                      <div
+                        style={{
+                          fontSize: 48,
+                          fontWeight: 600,
+                          color: "#00d4ff",
+                          lineHeight: "62px",
+                          marginBottom: 12,
+                          textShadow: "0 0 20px rgba(0, 207, 255, 0.4)",
+                        }}
+                      >
+                        {section.subheadline}
+                      </div>
+                    )}
 
-                      {/* Body */}
-                      {section.body && (
-                        <div
-                          style={{
-                            fontSize: 32,
-                            lineHeight: 1.5,
-                            color: "#e6e6e6",
-                            textShadow: "0 2px 4px rgba(0,0,0,0.5)",
-                          }}
-                        >
-                          {section.body}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                    {/* Body */}
+                    {section.body && (
+                      <div
+                        style={{
+                          fontSize: 32,
+                          lineHeight: "48px",
+                          color: "#e6e6e6",
+                          textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                        }}
+                      >
+                        {section.body}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
