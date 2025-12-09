@@ -136,8 +136,8 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
     content.sections.forEach(section => {
       if (section.subheadline) {
         ctx.font = "600 48px Poppins";
-        ctx.fillStyle = "#00d4ff";
-        ctx.shadowColor = "rgba(0, 207, 255, 0.4)";
+        ctx.fillStyle = "#6366f1";
+        ctx.shadowColor = "rgba(99, 102, 241, 0.4)";
         ctx.shadowBlur = 20;
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
@@ -426,10 +426,10 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                         style={{
                           fontSize: 48,
                           fontWeight: 600,
-                          color: "#00d4ff",
+                          color: "#6366f1",
                           lineHeight: "62px",
                           marginBottom: 12,
-                          textShadow: "0 0 20px rgba(0, 207, 255, 0.4)",
+                          textShadow: "0 0 20px rgba(99, 102, 241, 0.4)",
                         }}
                       >
                         {section.subheadline}
