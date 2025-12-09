@@ -10,8 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import { User, Session } from '@supabase/supabase-js';
 import { Header } from "@/components/Header";
 import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const Auth = () => {
+  usePageTitle("Sign In");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");

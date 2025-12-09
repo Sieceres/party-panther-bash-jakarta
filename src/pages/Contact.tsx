@@ -3,8 +3,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export const Contact = () => {
+  usePageTitle("Contact");
   return (
     <div className="pt-20 px-4 min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-2xl bg-card border-border shadow-lg">
