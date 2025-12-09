@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { PostContent, PostFormat, BackgroundStyle } from "@/types/instagram-post";
+import { Button } from "@/components/ui/button";
+import { Plus, Trash2 } from "lucide-react";
+import type { PostContent, PostFormat, BackgroundStyle, ContentSection } from "@/types/instagram-post";
 
 interface PostEditorProps {
   content: PostContent;
@@ -14,6 +16,24 @@ interface PostEditorProps {
 export const PostEditor = ({ content, onChange }: PostEditorProps) => {
   const updateField = <K extends keyof PostContent>(field: K, value: PostContent[K]) => {
     onChange({ ...content, [field]: value });
+  };
+
+  const updateSection = (index: number, field: keyof ContentSection, value: string) => {
+    const newSections = [...content.sections];
+    newSections[index] = { ...newSections[index], [field]: value };
+    onChange({ ...content, sections: newSections });
+  };
+
+  const addSection = () => {
+    onChange({
+      ...content,
+      sections: [...content.sections, { subheadline: "", body: "" }],
+    });
+  };
+
+  const removeSection = (index: number) => {
+    const newSections = content.sections.filter((_, i) => i !== index);
+    onChange({ ...content, sections: newSections });
   };
 
   return (
@@ -70,31 +90,62 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
           <p className="text-xs text-muted-foreground">{content.headline.length}/100</p>
         </div>
 
-        {/* Sub-headline */}
-        <div className="space-y-2">
-          <Label htmlFor="subheadline">Sub-headline</Label>
-          <Input
-            id="subheadline"
-            value={content.subheadline}
-            onChange={(e) => updateField("subheadline", e.target.value)}
-            placeholder="Secondary text..."
-            maxLength={150}
-          />
-          <p className="text-xs text-muted-foreground">{content.subheadline.length}/150</p>
-        </div>
+        {/* Content Sections */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label>Content Sections</Label>
+            <Button variant="outline" size="sm" onClick={addSection}>
+              <Plus className="w-4 h-4 mr-1" />
+              Add Section
+            </Button>
+          </div>
 
-        {/* Body Text */}
-        <div className="space-y-2">
-          <Label htmlFor="body">Body Text</Label>
-          <Textarea
-            id="body"
-            value={content.body}
-            onChange={(e) => updateField("body", e.target.value)}
-            placeholder="Additional details..."
-            maxLength={300}
-            rows={4}
-          />
-          <p className="text-xs text-muted-foreground">{content.body.length}/300</p>
+          {content.sections.map((section, index) => (
+            <div key={index} className="p-4 border rounded-lg space-y-4 bg-muted/30">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Section {index + 1}
+                </span>
+                {content.sections.length > 1 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeSection(index)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+
+              {/* Sub-headline */}
+              <div className="space-y-2">
+                <Label htmlFor={`subheadline-${index}`}>Sub-headline</Label>
+                <Input
+                  id={`subheadline-${index}`}
+                  value={section.subheadline}
+                  onChange={(e) => updateSection(index, "subheadline", e.target.value)}
+                  placeholder="Secondary text..."
+                  maxLength={150}
+                />
+                <p className="text-xs text-muted-foreground">{section.subheadline.length}/150</p>
+              </div>
+
+              {/* Body Text */}
+              <div className="space-y-2">
+                <Label htmlFor={`body-${index}`}>Body Text</Label>
+                <Textarea
+                  id={`body-${index}`}
+                  value={section.body}
+                  onChange={(e) => updateSection(index, "body", e.target.value)}
+                  placeholder="Additional details..."
+                  maxLength={300}
+                  rows={3}
+                />
+                <p className="text-xs text-muted-foreground">{section.body.length}/300</p>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Show Logo Toggle */}

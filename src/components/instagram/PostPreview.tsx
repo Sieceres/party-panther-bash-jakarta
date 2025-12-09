@@ -150,7 +150,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
               )}
 
               {/* Content */}
-              <div className="relative z-10 flex flex-col items-center gap-8 max-w-[900px]">
+              <div className="relative z-10 flex flex-col items-center gap-6 max-w-[900px]">
                 {/* Headline */}
                 {content.headline && (
                   <h1
@@ -166,25 +166,30 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                   </h1>
                 )}
 
-                {/* Sub-headline */}
-                {content.subheadline && (
-                  <h2
-                    className="text-5xl font-semibold"
-                    style={{ color: "hsl(190 100% 50%)" }}
-                  >
-                    {content.subheadline}
-                  </h2>
-                )}
+                {/* Content Sections */}
+                {content.sections.map((section, index) => (
+                  <div key={index} className="flex flex-col items-center gap-3">
+                    {/* Sub-headline */}
+                    {section.subheadline && (
+                      <h2
+                        className="text-5xl font-semibold"
+                        style={{ color: "hsl(190 100% 50%)" }}
+                      >
+                        {section.subheadline}
+                      </h2>
+                    )}
 
-                {/* Body */}
-                {content.body && (
-                  <p
-                    className="text-3xl leading-relaxed"
-                    style={{ color: "hsl(0 0% 90%)" }}
-                  >
-                    {content.body}
-                  </p>
-                )}
+                    {/* Body */}
+                    {section.body && (
+                      <p
+                        className="text-3xl leading-relaxed"
+                        style={{ color: "hsl(0 0% 90%)" }}
+                      >
+                        {section.body}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
