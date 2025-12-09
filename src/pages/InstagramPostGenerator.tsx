@@ -17,8 +17,7 @@ const InstagramPostGenerator = () => {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [content, setContent] = useState<PostContent>({
     headline: "",
-    subheadline: "",
-    body: "",
+    sections: [{ subheadline: "", body: "" }],
     format: "square",
     backgroundStyle: "dark-gradient",
     showLogo: true,
