@@ -368,8 +368,9 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                       position: "absolute",
                       top: 0,
                       left: 0,
+                      objectFit: "cover",
+                      display: "block",
                     }}
-                    crossOrigin="anonymous"
                   />
                   <span
                     style={{
