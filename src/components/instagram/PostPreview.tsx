@@ -137,12 +137,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                   />
                   <span
                     className="text-4xl font-bold"
-                    style={{
-                      background: "linear-gradient(135deg, hsl(190 100% 50%) 0%, hsl(220 100% 60%) 50%, hsl(280 100% 60%) 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                    }}
+                    style={{ color: "hsl(190, 100%, 50%)" }}
                   >
                     Party Panther
                   </span>
@@ -154,13 +149,8 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                 {/* Headline */}
                 {content.headline && (
                   <h1
-                    className="text-7xl font-bold leading-tight"
-                    style={{
-                      background: "linear-gradient(135deg, hsl(190 100% 50%) 0%, hsl(220 100% 60%) 50%, hsl(280 100% 60%) 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                    }}
+                    className="text-7xl font-bold leading-tight text-center"
+                    style={{ color: "hsl(280, 100%, 60%)" }}
                   >
                     {content.headline}
                   </h1>
@@ -172,8 +162,8 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                     {/* Sub-headline */}
                     {section.subheadline && (
                       <h2
-                        className="text-5xl font-semibold"
-                        style={{ color: "hsl(190 100% 50%)" }}
+                        className="text-5xl font-semibold text-center"
+                        style={{ color: "hsl(190, 100%, 50%)" }}
                       >
                         {section.subheadline}
                       </h2>
@@ -182,8 +172,8 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                     {/* Body */}
                     {section.body && (
                       <p
-                        className="text-3xl leading-relaxed"
-                        style={{ color: "hsl(0 0% 90%)" }}
+                        className="text-3xl leading-relaxed text-center"
+                        style={{ color: "hsl(0, 0%, 90%)" }}
                       >
                         {section.body}
                       </p>
