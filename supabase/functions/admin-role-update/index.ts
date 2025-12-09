@@ -33,14 +33,15 @@ serve(async (req) => {
       )
     }
 
-    // Check if the current user is an admin or super admin
-    const { data: currentUserProfile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('is_admin, is_super_admin')
+    // Check if the current user is an admin or superadmin using user_roles table
+    const { data: currentUserRole, error: roleError } = await supabaseClient
+      .from('user_roles')
+      .select('role')
       .eq('user_id', user.id)
       .single()
 
-    if (profileError || !currentUserProfile) {
+    if (roleError || !currentUserRole) {
+      console.error('Error fetching user role:', roleError)
       return new Response(
         JSON.stringify({ error: 'Unable to verify user permissions' }),
         { 
@@ -50,7 +51,10 @@ serve(async (req) => {
       )
     }
 
-    if (!currentUserProfile.is_admin && !currentUserProfile.is_super_admin) {
+    const isAdmin = currentUserRole.role === 'admin'
+    const isSuperAdmin = currentUserRole.role === 'superadmin'
+
+    if (!isAdmin && !isSuperAdmin) {
       return new Response(
         JSON.stringify({ error: 'Insufficient permissions. Admin or Super Admin access required.' }),
         { 
@@ -61,7 +65,7 @@ serve(async (req) => {
     }
 
     // Parse the request body
-    const { target_user_id, is_admin, is_super_admin } = await req.json()
+    const { target_user_id, new_role } = await req.json()
 
     if (!target_user_id) {
       return new Response(
@@ -73,10 +77,39 @@ serve(async (req) => {
       )
     }
 
-    // Only super admins can modify super admin status
-    if (is_super_admin !== undefined && !currentUserProfile.is_super_admin) {
+    // Validate the new role
+    const validRoles = ['user', 'admin', 'superadmin']
+    if (!new_role || !validRoles.includes(new_role)) {
       return new Response(
-        JSON.stringify({ error: 'Only Super Admins can modify Super Admin status' }),
+        JSON.stringify({ error: 'Invalid role. Must be one of: user, admin, superadmin' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+          status: 400 
+        }
+      )
+    }
+
+    // Only superadmins can assign/remove superadmin role
+    if (new_role === 'superadmin' && !isSuperAdmin) {
+      return new Response(
+        JSON.stringify({ error: 'Only Super Admins can assign Super Admin role' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+          status: 403 
+        }
+      )
+    }
+
+    // Check if target user currently has superadmin role (only superadmins can demote superadmins)
+    const { data: targetUserRole } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', target_user_id)
+      .single()
+
+    if (targetUserRole?.role === 'superadmin' && !isSuperAdmin) {
+      return new Response(
+        JSON.stringify({ error: 'Only Super Admins can modify Super Admin users' }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
           status: 403 
@@ -90,22 +123,33 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Prepare the update object
-    const updateData: { is_admin?: boolean; is_super_admin?: boolean } = {}
-    if (is_admin !== undefined) updateData.is_admin = is_admin
-    if (is_super_admin !== undefined) updateData.is_super_admin = is_super_admin
+    // Check if user already has a role entry
+    const { data: existingRole } = await supabaseServiceClient
+      .from('user_roles')
+      .select('id')
+      .eq('user_id', target_user_id)
+      .single()
 
-    // Update the target user's admin status using service role
-    const { data, error } = await supabaseServiceClient
-      .from('profiles')
-      .update(updateData)
-      .eq('id', target_user_id)
-      .select()
+    let result
+    if (existingRole) {
+      // Update existing role
+      result = await supabaseServiceClient
+        .from('user_roles')
+        .update({ role: new_role, updated_at: new Date().toISOString() })
+        .eq('user_id', target_user_id)
+        .select()
+    } else {
+      // Insert new role
+      result = await supabaseServiceClient
+        .from('user_roles')
+        .insert({ user_id: target_user_id, role: new_role })
+        .select()
+    }
 
-    if (error) {
-      console.error('Error updating admin status:', error)
+    if (result.error) {
+      console.error('Error updating user role:', result.error)
       return new Response(
-        JSON.stringify({ error: 'Failed to update admin status', details: error.message }),
+        JSON.stringify({ error: 'Failed to update user role', details: result.error.message }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
           status: 500 
@@ -113,7 +157,7 @@ serve(async (req) => {
       )
     }
 
-    if (!data || data.length === 0) {
+    if (!result.data || result.data.length === 0) {
       return new Response(
         JSON.stringify({ error: 'User not found or no changes made' }),
         { 
@@ -123,11 +167,13 @@ serve(async (req) => {
       )
     }
 
+    console.log(`User role updated: ${target_user_id} -> ${new_role} by ${user.id}`)
+
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Admin status updated successfully',
-        updatedUser: data[0]
+        message: 'User role updated successfully',
+        updatedRole: result.data[0]
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
