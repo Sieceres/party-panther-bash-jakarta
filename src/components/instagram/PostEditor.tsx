@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, RotateCcw } from "lucide-react";
 import type { PostContent, PostFormat, BackgroundStyle, ContentSection, FontFamily } from "@/types/instagram-post";
 
 interface PostEditorProps {
@@ -103,7 +103,24 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
 
         {/* Font Settings */}
         <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
-          <Label className="text-sm font-medium">Font Settings</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium">Font Settings</Label>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                onChange({
+                  ...content,
+                  fonts: { headline: "Poppins", subheadline: "Poppins", body: "Poppins" },
+                  fontSizes: { headline: 72, subheadline: 48, body: 32 },
+                });
+              }}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="w-3 h-3 mr-1" />
+              Reset
+            </Button>
+          </div>
           
           {/* Font Family Selection */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
