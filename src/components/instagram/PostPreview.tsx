@@ -288,20 +288,14 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
         <CardTitle>Preview</CardTitle>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleOpenFullScale}>
+        <Button onClick={handleOpenFullScale} disabled={previewLoading}>
+          {previewLoading ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
             <ExternalLink className="w-4 h-4 mr-2" />
-            Full Scale Preview
-          </Button>
-          <Button onClick={handleExport} disabled={exporting}>
-            {exporting ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4 mr-2" />
-            )}
-            Download PNG
-          </Button>
-        </div>
+          )}
+          Preview & Download
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="overflow-auto max-h-[600px] flex justify-center">
