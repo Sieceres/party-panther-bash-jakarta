@@ -116,8 +116,8 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
     // Draw headline
     if (content.headline) {
       ctx.font = "700 72px Poppins";
-      ctx.fillStyle = "#b366ff";
-      ctx.shadowColor = "rgba(139, 92, 246, 0.4)";
+      ctx.fillStyle = "#00d4ff";
+      ctx.shadowColor = "rgba(0, 212, 255, 0.4)";
       ctx.shadowBlur = 30;
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
@@ -408,9 +408,9 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                       fontSize: 72,
                       fontWeight: 700,
                       lineHeight: "86px",
-                      color: "#b366ff",
+                      color: "#00d4ff",
                       marginBottom: 32,
-                      textShadow: "0 0 30px rgba(139, 92, 246, 0.4)",
+                      textShadow: "0 0 30px rgba(0, 212, 255, 0.4)",
                     }}
                   >
                     {content.headline}
