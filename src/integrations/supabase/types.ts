@@ -1054,11 +1054,7 @@ export type Database = {
             }[]
           }
         | {
-            Args: {
-              p_after_created_at?: string
-              p_limit?: number
-              user_id_param?: string
-            }
+            Args: { user_id_param?: string }
             Returns: {
               area: string
               average_rating: number
@@ -1091,7 +1087,11 @@ export type Database = {
             }[]
           }
         | {
-            Args: { user_id_param?: string }
+            Args: {
+              p_after_created_at?: string
+              p_limit?: number
+              user_id_param?: string
+            }
             Returns: {
               area: string
               average_rating: number
@@ -1167,8 +1167,8 @@ export type Database = {
         }[]
       }
       get_user_role:
-        | { Args: { _user_id: string }; Returns: string }
         | { Args: never; Returns: string }
+        | { Args: { _user_id: string }; Returns: string }
       has_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_superadmin_role: { Args: { _user_id: string }; Returns: boolean }
       is_admin_or_superadmin: { Args: { _user_id: string }; Returns: boolean }
