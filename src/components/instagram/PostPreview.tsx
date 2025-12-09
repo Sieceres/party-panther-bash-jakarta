@@ -184,18 +184,46 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
       
       const newWindow = window.open("", "_blank");
       if (newWindow) {
+        const filename = `party-panther-${content.format}-${Date.now()}.png`;
         newWindow.document.write(`
           <!DOCTYPE html>
           <html>
             <head>
               <title>Party Panther Instagram Post</title>
               <style>
-                body { margin: 0; padding: 20px; background: #1a1a2e; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+                body { margin: 0; padding: 20px; background: #1a1a2e; display: flex; flex-direction: column; align-items: center; min-height: 100vh; gap: 20px; }
+                .download-btn { 
+                  background: #6366f1; 
+                  color: white; 
+                  border: none; 
+                  padding: 12px 24px; 
+                  font-size: 16px; 
+                  font-weight: 600; 
+                  border-radius: 8px; 
+                  cursor: pointer; 
+                  display: flex; 
+                  align-items: center; 
+                  gap: 8px;
+                  transition: background 0.2s;
+                }
+                .download-btn:hover { background: #4f46e5; }
                 img { max-width: 100%; height: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
               </style>
             </head>
             <body>
+              <button class="download-btn" onclick="downloadImage()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                Download PNG
+              </button>
               <img src="${dataUrl}" alt="Instagram Post" />
+              <script>
+                function downloadImage() {
+                  const link = document.createElement('a');
+                  link.download = '${filename}';
+                  link.href = '${dataUrl}';
+                  link.click();
+                }
+              </script>
             </body>
           </html>
         `);
@@ -203,7 +231,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
         
         toast({
           title: "Preview Opened",
-          description: "Right-click the image to save it",
+          description: "Click Download or right-click the image to save",
         });
       }
     } catch (error) {
