@@ -4,12 +4,51 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { PostContent } from "@/types/instagram-post";
+import type { PostContent, BackgroundStyle, FontFamily } from "@/types/instagram-post";
 import partyPantherLogo from "@/assets/party-panther-logo.png";
 
 interface PostPreviewProps {
   content: PostContent;
 }
+
+// Background style configurations
+const getBackgroundConfig = (style: BackgroundStyle) => {
+  switch (style) {
+    case "hero-style":
+      return {
+        mainGradient: "linear-gradient(135deg, #0d1b3e 0%, #1a1a2e 50%, #0d1b3e 100%)",
+        overlay: "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.6) 100%)",
+        glows: [
+          { top: "5%", left: "5%", size: 350, color: "rgba(0, 207, 255, 0.25)" },
+          { top: "60%", right: "5%", size: 300, color: "rgba(79, 142, 255, 0.2)" },
+          { bottom: "10%", left: "20%", size: 250, color: "rgba(139, 92, 246, 0.15)" },
+          { top: "30%", right: "20%", size: 200, color: "rgba(0, 207, 255, 0.1)" },
+        ],
+        hasFloatingElements: true,
+      };
+    case "neon-accent":
+      return {
+        mainGradient: "linear-gradient(180deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%)",
+        overlay: "linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 50%, rgba(0,0,0,0.3) 100%)",
+        glows: [
+          { top: "10%", left: "50%", size: 600, color: "rgba(236, 72, 153, 0.15)" },
+          { bottom: "10%", left: "50%", size: 500, color: "rgba(34, 211, 238, 0.12)" },
+        ],
+        hasFloatingElements: false,
+      };
+    case "dark-gradient":
+    default:
+      return {
+        mainGradient: "linear-gradient(180deg, #1a1a2e 0%, #0d1b3e 50%, #1a1a2e 100%)",
+        overlay: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%)",
+        glows: [
+          { top: "15%", left: "10%", size: 300, color: "rgba(0, 207, 255, 0.15)" },
+          { bottom: "20%", right: "15%", size: 400, color: "rgba(139, 92, 246, 0.15)" },
+        ],
+        hasFloatingElements: false,
+      };
+  }
+};
 
 export const PostPreview = ({ content }: PostPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
@@ -20,6 +59,17 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
   const isSquare = content.format === "square";
   const dimensions = isSquare ? { width: 1080, height: 1080 } : { width: 1080, height: 1920 };
   const previewScale = isSquare ? 0.4 : 0.25;
+  const bgConfig = getBackgroundConfig(content.backgroundStyle);
+
+  // Load fonts for canvas rendering
+  const loadFonts = async (fonts: PostContent["fonts"]) => {
+    const uniqueFonts = [...new Set([fonts.headline, fonts.subheadline, fonts.body])];
+    for (const font of uniqueFonts) {
+      await document.fonts.load(`700 72px ${font}`);
+      await document.fonts.load(`600 48px ${font}`);
+      await document.fonts.load(`400 32px ${font}`);
+    }
+  };
 
   // Render post to canvas using Canvas API
   const renderToCanvas = useCallback(async (): Promise<HTMLCanvasElement> => {
@@ -28,16 +78,27 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
     canvas.height = dimensions.height;
     const ctx = canvas.getContext("2d")!;
 
-    // Load font first
-    await document.fonts.load("700 72px Poppins");
-    await document.fonts.load("600 48px Poppins");
-    await document.fonts.load("400 32px Poppins");
+    // Load fonts
+    await loadFonts(content.fonts);
 
-    // Draw background gradient
+    // Draw background based on style
+    const bgConfig = getBackgroundConfig(content.backgroundStyle);
+    
+    // Main gradient
     const bgGradient = ctx.createLinearGradient(0, 0, dimensions.width, dimensions.height);
-    bgGradient.addColorStop(0, "#0d1b3e");
-    bgGradient.addColorStop(0.5, "#1a1a2e");
-    bgGradient.addColorStop(1, "#0d1b3e");
+    if (content.backgroundStyle === "hero-style") {
+      bgGradient.addColorStop(0, "#0d1b3e");
+      bgGradient.addColorStop(0.5, "#1a1a2e");
+      bgGradient.addColorStop(1, "#0d1b3e");
+    } else if (content.backgroundStyle === "neon-accent") {
+      bgGradient.addColorStop(0, "#0a0a0f");
+      bgGradient.addColorStop(0.5, "#1a1a2e");
+      bgGradient.addColorStop(1, "#0a0a0f");
+    } else {
+      bgGradient.addColorStop(0, "#1a1a2e");
+      bgGradient.addColorStop(0.5, "#0d1b3e");
+      bgGradient.addColorStop(1, "#1a1a2e");
+    }
     ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, dimensions.width, dimensions.height);
 
@@ -50,25 +111,61 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
     ctx.fillStyle = overlayGradient;
     ctx.fillRect(0, 0, dimensions.width, dimensions.height);
 
-    // Draw cyan glow
-    const cyanGlow = ctx.createRadialGradient(
-      dimensions.width * 0.1 + 150, dimensions.height * 0.15 + 150, 0,
-      dimensions.width * 0.1 + 150, dimensions.height * 0.15 + 150, 150
-    );
-    cyanGlow.addColorStop(0, "rgba(0, 207, 255, 0.15)");
-    cyanGlow.addColorStop(1, "rgba(0, 207, 255, 0)");
-    ctx.fillStyle = cyanGlow;
-    ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+    // Draw glows based on style
+    if (content.backgroundStyle === "hero-style") {
+      // Multiple glows for hero style
+      const glows = [
+        { x: dimensions.width * 0.1, y: dimensions.height * 0.1, r: 175, color: "rgba(0, 207, 255, 0.25)" },
+        { x: dimensions.width * 0.85, y: dimensions.height * 0.65, r: 150, color: "rgba(79, 142, 255, 0.2)" },
+        { x: dimensions.width * 0.3, y: dimensions.height * 0.85, r: 125, color: "rgba(139, 92, 246, 0.15)" },
+        { x: dimensions.width * 0.75, y: dimensions.height * 0.35, r: 100, color: "rgba(0, 207, 255, 0.1)" },
+      ];
+      glows.forEach(glow => {
+        const gradient = ctx.createRadialGradient(glow.x, glow.y, 0, glow.x, glow.y, glow.r);
+        gradient.addColorStop(0, glow.color);
+        gradient.addColorStop(1, "transparent");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+      });
+    } else if (content.backgroundStyle === "neon-accent") {
+      // Pink and cyan glows for neon
+      const pinkGlow = ctx.createRadialGradient(
+        dimensions.width / 2, dimensions.height * 0.15, 0,
+        dimensions.width / 2, dimensions.height * 0.15, 300
+      );
+      pinkGlow.addColorStop(0, "rgba(236, 72, 153, 0.15)");
+      pinkGlow.addColorStop(1, "transparent");
+      ctx.fillStyle = pinkGlow;
+      ctx.fillRect(0, 0, dimensions.width, dimensions.height);
 
-    // Draw purple glow
-    const purpleGlow = ctx.createRadialGradient(
-      dimensions.width * 0.85, dimensions.height * 0.8, 0,
-      dimensions.width * 0.85, dimensions.height * 0.8, 200
-    );
-    purpleGlow.addColorStop(0, "rgba(139, 92, 246, 0.15)");
-    purpleGlow.addColorStop(1, "rgba(139, 92, 246, 0)");
-    ctx.fillStyle = purpleGlow;
-    ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+      const cyanGlow = ctx.createRadialGradient(
+        dimensions.width / 2, dimensions.height * 0.85, 0,
+        dimensions.width / 2, dimensions.height * 0.85, 250
+      );
+      cyanGlow.addColorStop(0, "rgba(34, 211, 238, 0.12)");
+      cyanGlow.addColorStop(1, "transparent");
+      ctx.fillStyle = cyanGlow;
+      ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+    } else {
+      // Default glows
+      const cyanGlow = ctx.createRadialGradient(
+        dimensions.width * 0.15, dimensions.height * 0.2, 0,
+        dimensions.width * 0.15, dimensions.height * 0.2, 150
+      );
+      cyanGlow.addColorStop(0, "rgba(0, 207, 255, 0.15)");
+      cyanGlow.addColorStop(1, "transparent");
+      ctx.fillStyle = cyanGlow;
+      ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+
+      const purpleGlow = ctx.createRadialGradient(
+        dimensions.width * 0.85, dimensions.height * 0.8, 0,
+        dimensions.width * 0.85, dimensions.height * 0.8, 200
+      );
+      purpleGlow.addColorStop(0, "rgba(139, 92, 246, 0.15)");
+      purpleGlow.addColorStop(1, "transparent");
+      ctx.fillStyle = purpleGlow;
+      ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+    }
 
     // Draw logo if enabled
     if (content.showLogo) {
@@ -105,24 +202,23 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
 
     // Measure total content height to center it
     let totalHeight = 0;
-    if (content.headline) totalHeight += 86 + 32; // headline + margin
+    if (content.headline) totalHeight += 86 + 32;
     content.sections.forEach(section => {
       if (section.subheadline) totalHeight += 62 + 12;
       if (section.body) totalHeight += 48;
-      totalHeight += 24; // section margin
+      totalHeight += 24;
     });
     currentY = (dimensions.height - totalHeight) / 2;
 
     // Draw headline
     if (content.headline) {
-      ctx.font = "700 72px Poppins";
+      ctx.font = `700 72px ${content.fonts.headline}`;
       ctx.fillStyle = "#00d4ff";
       ctx.shadowColor = "rgba(0, 212, 255, 0.4)";
       ctx.shadowBlur = 30;
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       
-      // Wrap text if needed
       const lines = wrapText(ctx, content.headline, contentWidth);
       lines.forEach(line => {
         ctx.fillText(line, dimensions.width / 2, currentY);
@@ -135,7 +231,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
     // Draw sections
     content.sections.forEach(section => {
       if (section.subheadline) {
-        ctx.font = "600 48px Poppins";
+        ctx.font = `600 48px ${content.fonts.subheadline}`;
         ctx.fillStyle = "#6366f1";
         ctx.shadowColor = "rgba(99, 102, 241, 0.4)";
         ctx.shadowBlur = 20;
@@ -152,7 +248,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
       }
 
       if (section.body) {
-        ctx.font = "400 32px Poppins";
+        ctx.font = `400 32px ${content.fonts.body}`;
         ctx.fillStyle = "#e6e6e6";
         ctx.shadowColor = "rgba(0,0,0,0.5)";
         ctx.shadowBlur = 4;
@@ -246,42 +342,136 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
     }
   };
 
-  const handleExport = async () => {
-    if (!previewRef.current) return;
+  // Render floating elements for hero style
+  const renderFloatingElements = () => {
+    if (content.backgroundStyle !== "hero-style") return null;
+    
+    return (
+      <>
+        {/* Large cyan glow top-left */}
+        <div
+          style={{
+            position: "absolute",
+            top: "5%",
+            left: "5%",
+            width: 350,
+            height: 350,
+            background: "radial-gradient(circle, rgba(0, 207, 255, 0.25) 0%, transparent 70%)",
+            borderRadius: "50%",
+            filter: "blur(40px)",
+          }}
+        />
+        {/* Blue glow bottom-right */}
+        <div
+          style={{
+            position: "absolute",
+            top: "60%",
+            right: "5%",
+            width: 300,
+            height: 300,
+            background: "radial-gradient(circle, rgba(79, 142, 255, 0.2) 0%, transparent 70%)",
+            borderRadius: "50%",
+            filter: "blur(30px)",
+          }}
+        />
+        {/* Purple glow bottom-left */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "10%",
+            left: "20%",
+            width: 250,
+            height: 250,
+            background: "radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)",
+            borderRadius: "50%",
+            filter: "blur(35px)",
+          }}
+        />
+        {/* Small cyan accent */}
+        <div
+          style={{
+            position: "absolute",
+            top: "30%",
+            right: "20%",
+            width: 200,
+            height: 200,
+            background: "radial-gradient(circle, rgba(0, 207, 255, 0.1) 0%, transparent 70%)",
+            borderRadius: "50%",
+            filter: "blur(25px)",
+          }}
+        />
+      </>
+    );
+  };
 
-    setExporting(true);
-    try {
-      const canvas = await html2canvas(previewRef.current, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#0d1b3e",
-        width: dimensions.width,
-        height: dimensions.height,
-        foreignObjectRendering: false,
-        windowWidth: dimensions.width,
-        windowHeight: dimensions.height,
-      });
+  // Render neon accent glows
+  const renderNeonGlows = () => {
+    if (content.backgroundStyle !== "neon-accent") return null;
+    
+    return (
+      <>
+        {/* Pink glow top center */}
+        <div
+          style={{
+            position: "absolute",
+            top: "10%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 600,
+            height: 300,
+            background: "radial-gradient(ellipse, rgba(236, 72, 153, 0.15) 0%, transparent 70%)",
+            filter: "blur(50px)",
+          }}
+        />
+        {/* Cyan glow bottom center */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "10%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 500,
+            height: 250,
+            background: "radial-gradient(ellipse, rgba(34, 211, 238, 0.12) 0%, transparent 70%)",
+            filter: "blur(40px)",
+          }}
+        />
+      </>
+    );
+  };
 
-      const link = document.createElement("a");
-      link.download = `party-panther-${content.format}-${Date.now()}.png`;
-      link.href = canvas.toDataURL("image/png", 1.0);
-      link.click();
-
-      toast({
-        title: "Success",
-        description: "Image downloaded successfully!",
-      });
-    } catch (error) {
-      console.error("Export error:", error);
-      toast({
-        title: "Export Failed",
-        description: "Try using the 'Full Scale Preview' button and take a screenshot instead",
-        variant: "destructive",
-      });
-    } finally {
-      setExporting(false);
-    }
+  // Render default glows
+  const renderDefaultGlows = () => {
+    if (content.backgroundStyle !== "dark-gradient") return null;
+    
+    return (
+      <>
+        {/* Cyan glow */}
+        <div
+          style={{
+            position: "absolute",
+            top: "15%",
+            left: "10%",
+            width: 300,
+            height: 300,
+            background: "radial-gradient(circle, rgba(0, 207, 255, 0.15) 0%, transparent 70%)",
+            borderRadius: "50%",
+          }}
+        />
+        {/* Purple glow */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "20%",
+            right: "15%",
+            width: 400,
+            height: 400,
+            background: "radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)",
+            borderRadius: "50%",
+          }}
+        />
+      </>
+    );
   };
 
   return (
@@ -308,7 +498,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
               marginBottom: -(dimensions.height * (1 - previewScale)),
             }}
           >
-            {/* Actual render target - using inline styles for html2canvas compatibility */}
+            {/* Actual render target */}
             <div
               ref={previewRef}
               style={{
@@ -319,7 +509,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                 fontFamily: "'Poppins', sans-serif",
               }}
             >
-              {/* Hero-like gradient background */}
+              {/* Background gradient */}
               <div
                 style={{
                   position: "absolute",
@@ -327,7 +517,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                   left: 0,
                   width: "100%",
                   height: "100%",
-                  background: "linear-gradient(135deg, #0d1b3e 0%, #1a1a2e 50%, #0d1b3e 100%)",
+                  background: bgConfig.mainGradient,
                 }}
               />
               
@@ -339,35 +529,14 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                   left: 0,
                   width: "100%",
                   height: "100%",
-                  background: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%)",
+                  background: bgConfig.overlay,
                 }}
               />
               
-              {/* Cyan glow */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: "15%",
-                  left: "10%",
-                  width: 300,
-                  height: 300,
-                  background: "radial-gradient(circle, rgba(0, 207, 255, 0.15) 0%, transparent 70%)",
-                  borderRadius: "50%",
-                }}
-              />
-              
-              {/* Purple glow */}
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "20%",
-                  right: "15%",
-                  width: 400,
-                  height: 400,
-                  background: "radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)",
-                  borderRadius: "50%",
-                }}
-              />
+              {/* Style-specific glows */}
+              {renderFloatingElements()}
+              {renderNeonGlows()}
+              {renderDefaultGlows()}
 
               {/* Logo & Brand */}
               {content.showLogo && (
@@ -411,7 +580,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                 </div>
               )}
 
-              {/* Content - using absolute positioning for html2canvas compatibility */}
+              {/* Content */}
               <div
                 style={{
                   position: "absolute",
@@ -429,6 +598,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                     style={{
                       fontSize: 72,
                       fontWeight: 700,
+                      fontFamily: `'${content.fonts.headline}', sans-serif`,
                       lineHeight: "86px",
                       color: "#00d4ff",
                       marginBottom: 32,
@@ -448,6 +618,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                         style={{
                           fontSize: 48,
                           fontWeight: 600,
+                          fontFamily: `'${content.fonts.subheadline}', sans-serif`,
                           color: "#6366f1",
                           lineHeight: "62px",
                           marginBottom: 12,
@@ -463,6 +634,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                       <div
                         style={{
                           fontSize: 32,
+                          fontFamily: `'${content.fonts.body}', sans-serif`,
                           lineHeight: "48px",
                           color: "#e6e6e6",
                           textShadow: "0 2px 4px rgba(0,0,0,0.5)",
@@ -480,19 +652,12 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
         <p className="text-sm text-muted-foreground text-center mt-4">
           Preview scaled to {Math.round(previewScale * 100)}% • Actual size: {dimensions.width}×{dimensions.height}px
           <br />
-          <span className="text-xs">Tip: Use "Full Scale Preview" for best screenshot quality</span>
+          <span className="text-xs">Tip: Use "Preview & Download" for best quality</span>
         </p>
       </CardContent>
     </Card>
   );
 };
-
-// Helper to escape HTML for safe rendering
-function escapeHtml(text: string): string {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
 
 // Helper to wrap text for canvas rendering
 function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
