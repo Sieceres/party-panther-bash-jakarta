@@ -505,7 +505,17 @@ export const AdminDashboard = () => {
 
   return (
     <>
-      <Header activeSection="profile" onSectionChange={() => navigate('/profile')} />
+      <Header activeSection="admin" onSectionChange={(section) => {
+        if (section === 'home') {
+          navigate('/');
+        } else if (section === 'profile') {
+          navigate('/profile');
+        } else if (section === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate(`/?section=${section}`);
+        }
+      }} />
       <div className="min-h-screen bg-background pt-20 px-4">
         <div className="container mx-auto space-y-8">
           <div className="flex justify-between items-center">
