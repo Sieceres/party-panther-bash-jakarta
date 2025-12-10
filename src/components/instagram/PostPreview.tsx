@@ -56,9 +56,16 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
   const [previewLoading, setPreviewLoading] = useState(false);
   const { toast } = useToast();
 
-  const isSquare = content.format === "square";
-  const dimensions = isSquare ? { width: 1080, height: 1080 } : { width: 1080, height: 1920 };
-  const previewScale = isSquare ? 0.4 : 0.25;
+  const getDimensions = () => {
+    switch (content.format) {
+      case "square": return { width: 1080, height: 1080 };
+      case "portrait": return { width: 1080, height: 1350 };
+      case "story": return { width: 1080, height: 1920 };
+      default: return { width: 1080, height: 1080 };
+    }
+  };
+  const dimensions = getDimensions();
+  const previewScale = content.format === "story" ? 0.25 : content.format === "portrait" ? 0.35 : 0.4;
   const bgConfig = getBackgroundConfig(content.backgroundStyle);
 
   // Load fonts for canvas rendering
