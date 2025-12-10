@@ -1,4 +1,4 @@
-export type PostFormat = "square" | "story";
+export type PostFormat = "square" | "portrait" | "story";
 export type BackgroundStyle = "dark-gradient" | "hero-style" | "neon-accent";
 export type FontFamily = "Poppins" | "Inter" | "Montserrat" | "Playfair Display" | "Bebas Neue" | "Oswald";
 

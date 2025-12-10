@@ -78,6 +78,7 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="square">Square (1:1) - Feed Post</SelectItem>
+              <SelectItem value="portrait">Portrait (4:5) - Feed Post</SelectItem>
               <SelectItem value="story">Story (9:16) - Stories/Reels</SelectItem>
             </SelectContent>
           </Select>
