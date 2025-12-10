@@ -28,3 +28,32 @@ export interface PostContent {
   fonts: FontSettings;
   fontSizes: FontSizeSettings;
 }
+
+export interface SavedPost {
+  id: string;
+  created_by: string;
+  title: string;
+  status: 'draft' | 'published';
+  content_url: string;
+  thumbnail_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const DEFAULT_POST_CONTENT: PostContent = {
+  headline: "",
+  sections: [{ subheadline: "", body: "" }],
+  format: "square",
+  backgroundStyle: "dark-gradient",
+  showLogo: true,
+  fonts: {
+    headline: "Poppins",
+    subheadline: "Poppins",
+    body: "Poppins",
+  },
+  fontSizes: {
+    headline: 72,
+    subheadline: 48,
+    body: 32,
+  },
+};

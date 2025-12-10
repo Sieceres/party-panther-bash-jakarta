@@ -103,6 +103,98 @@ export const deleteFromCloudinary = async (publicId: string): Promise<void> => {
   console.warn('Cloudinary deletion requires server-side implementation');
 };
 
+// Upload JSON content as a raw file to Cloudinary
+export const uploadJsonToCloudinary = async (
+  content: object,
+  folder: string = 'instagram-posts'
+): Promise<string> => {
+  const jsonString = JSON.stringify(content);
+  const blob = new Blob([jsonString], { type: 'application/json' });
+  const file = new File([blob], 'content.json', { type: 'application/json' });
+  
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
+  formData.append('folder', folder);
+  formData.append('resource_type', 'raw');
+  
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substring(2, 8);
+  formData.append('public_id', `content_${timestamp}_${randomString}`);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/raw/upload`,
+    {
+      method: 'POST',
+      body: formData
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('Cloudinary JSON upload failed:', errorData);
+    throw new Error(`Failed to upload JSON: ${errorData?.error?.message || response.statusText}`);
+  }
+
+  const result = await response.json();
+  return result.secure_url;
+};
+
+// Upload a canvas element as an image to Cloudinary
+export const uploadCanvasToCloudinary = async (
+  canvas: HTMLCanvasElement,
+  folder: string = 'instagram-posts'
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        reject(new Error('Failed to create blob from canvas'));
+        return;
+      }
+      
+      const timestamp = Date.now();
+      const randomString = Math.random().toString(36).substring(2, 8);
+      const file = new File([blob], `thumb_${timestamp}_${randomString}.png`, { type: 'image/png' });
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
+      formData.append('folder', folder);
+      
+      try {
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/image/upload`,
+          {
+            method: 'POST',
+            body: formData
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Cloudinary thumbnail upload failed:', errorData);
+          reject(new Error(`Failed to upload thumbnail: ${errorData?.error?.message || response.statusText}`));
+          return;
+        }
+
+        const result = await response.json();
+        resolve(result.secure_url);
+      } catch (error) {
+        reject(error);
+      }
+    }, 'image/png', 0.9);
+  });
+};
+
+// Fetch JSON content from Cloudinary URL
+export const fetchJsonFromCloudinary = async <T>(url: string): Promise<T> => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch JSON from Cloudinary: ${response.statusText}`);
+  }
+  return response.json();
+};
+
 export const getOptimizedImageUrl = (
   url: string,
   options: {
