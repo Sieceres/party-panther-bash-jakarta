@@ -738,7 +738,7 @@ export const AdminDashboard = () => {
                           size="sm"
                           onClick={() => setPendingAction({ 
                             type: 'makeAdmin', 
-                            id: user.id, 
+                            id: user.user_id, 
                             userName: user.display_name || 'Unnamed User',
                             isCurrentlyAdmin: user.roles?.some(r => r.role === 'admin' || r.role === 'superadmin') || false
                           })}
@@ -751,7 +751,7 @@ export const AdminDashboard = () => {
                             size="sm"
                             onClick={() => setPendingAction({ 
                               type: 'makeSuperAdmin', 
-                              id: user.id, 
+                              id: user.user_id, 
                               userName: user.display_name || 'Unnamed User',
                               isCurrentlySuperAdmin: user.roles?.some(r => r.role === 'superadmin') || false
                             })}
