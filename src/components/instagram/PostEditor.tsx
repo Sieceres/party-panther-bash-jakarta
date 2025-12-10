@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Plus, Trash2, RotateCcw } from "lucide-react";
+import { Plus, Trash2, RotateCcw, Upload, X } from "lucide-react";
 import type { PostContent, PostFormat, BackgroundStyle, ContentSection, FontFamily } from "@/types/instagram-post";
 
 interface PostEditorProps {
@@ -24,6 +25,8 @@ const FONT_OPTIONS: { value: FontFamily; label: string }[] = [
 ];
 
 export const PostEditor = ({ content, onChange }: PostEditorProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const updateField = <K extends keyof PostContent>(field: K, value: PostContent[K]) => {
     onChange({ ...content, [field]: value });
   };
@@ -60,6 +63,39 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
     onChange({ ...content, sections: newSections });
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onChange({
+          ...content,
+          backgroundImage: reader.result as string,
+          backgroundStyle: "custom-image",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearBackgroundImage = () => {
+    onChange({
+      ...content,
+      backgroundImage: undefined,
+      backgroundStyle: "dark-gradient",
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const updateTextPosition = (axis: "x" | "y", value: number) => {
+    onChange({
+      ...content,
+      textPosition: { ...content.textPosition, [axis]: value },
+    });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -89,7 +125,12 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
           <Label htmlFor="background">Background Style</Label>
           <Select
             value={content.backgroundStyle}
-            onValueChange={(value: BackgroundStyle) => updateField("backgroundStyle", value)}
+            onValueChange={(value: BackgroundStyle) => {
+              if (value !== "custom-image") {
+                onChange({ ...content, backgroundStyle: value, backgroundImage: undefined });
+                if (fileInputRef.current) fileInputRef.current.value = "";
+              }
+            }}
           >
             <SelectTrigger id="background">
               <SelectValue />
@@ -98,8 +139,75 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
               <SelectItem value="dark-gradient">Dark Gradient</SelectItem>
               <SelectItem value="hero-style">Hero Style (Floating Glows)</SelectItem>
               <SelectItem value="neon-accent">Neon Accent</SelectItem>
+              {content.backgroundImage && <SelectItem value="custom-image">Custom Image</SelectItem>}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Background Image Upload */}
+        <div className="space-y-2">
+          <Label>Background Image</Label>
+          <div className="flex gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            <Button
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex-1"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              {content.backgroundImage ? "Change Image" : "Upload Image"}
+            </Button>
+            {content.backgroundImage && (
+              <Button variant="outline" size="icon" onClick={clearBackgroundImage}>
+                <X className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+          {content.backgroundImage && (
+            <p className="text-xs text-muted-foreground">Custom background image active</p>
+          )}
+        </div>
+
+        {/* Text Position Controls */}
+        <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+          <Label className="text-sm font-medium">Text Position</Label>
+          <p className="text-xs text-muted-foreground">Drag text in preview or use sliders below</p>
+          
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label className="text-xs">Horizontal: {content.textPosition.x}%</Label>
+              </div>
+              <Slider
+                value={[content.textPosition.x]}
+                onValueChange={([value]) => updateTextPosition("x", value)}
+                min={10}
+                max={90}
+                step={1}
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label className="text-xs">Vertical: {content.textPosition.y}%</Label>
+              </div>
+              <Slider
+                value={[content.textPosition.y]}
+                onValueChange={([value]) => updateTextPosition("y", value)}
+                min={10}
+                max={90}
+                step={1}
+                className="w-full"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Font Settings */}

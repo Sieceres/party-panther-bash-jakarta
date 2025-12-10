@@ -30,6 +30,10 @@ const defaultContent: PostContent = {
     subheadline: 48,
     body: 32,
   },
+  textPosition: {
+    x: 50,
+    y: 50,
+  },
 };
 
 const InstagramPostGenerator = () => {
@@ -409,7 +413,10 @@ const InstagramPostGenerator = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             <PostEditor content={content} onChange={setContent} />
             <div className="lg:sticky lg:top-24 lg:self-start">
-              <PostPreview content={content} />
+              <PostPreview 
+                content={content} 
+                onPositionChange={(pos) => setContent(prev => ({ ...prev, textPosition: pos }))}
+              />
             </div>
           </div>
         </div>

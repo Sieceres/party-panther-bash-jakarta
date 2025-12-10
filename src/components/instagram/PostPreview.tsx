@@ -2,13 +2,14 @@ import { useRef, useState, useCallback } from "react";
 import html2canvas from "html2canvas";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, ExternalLink } from "lucide-react";
+import { Download, Loader2, ExternalLink, Move } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { PostContent, BackgroundStyle, FontFamily } from "@/types/instagram-post";
+import type { PostContent, BackgroundStyle, FontFamily, TextPosition } from "@/types/instagram-post";
 import partyPantherLogo from "@/assets/party-panther-logo.png";
 
 interface PostPreviewProps {
   content: PostContent;
+  onPositionChange?: (position: TextPosition) => void;
 }
 
 // Background style configurations
@@ -36,6 +37,13 @@ const getBackgroundConfig = (style: BackgroundStyle) => {
         ],
         hasFloatingElements: false,
       };
+    case "custom-image":
+      return {
+        mainGradient: "transparent",
+        overlay: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%)",
+        glows: [],
+        hasFloatingElements: false,
+      };
     case "dark-gradient":
     default:
       return {
@@ -50,10 +58,12 @@ const getBackgroundConfig = (style: BackgroundStyle) => {
   }
 };
 
-export const PostPreview = ({ content }: PostPreviewProps) => {
+export const PostPreview = ({ content, onPositionChange }: PostPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
 
   const getDimensions = () => {
@@ -91,23 +101,52 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
     // Draw background based on style
     const bgConfig = getBackgroundConfig(content.backgroundStyle);
     
-    // Main gradient
-    const bgGradient = ctx.createLinearGradient(0, 0, dimensions.width, dimensions.height);
-    if (content.backgroundStyle === "hero-style") {
-      bgGradient.addColorStop(0, "#0d1b3e");
-      bgGradient.addColorStop(0.5, "#1a1a2e");
-      bgGradient.addColorStop(1, "#0d1b3e");
-    } else if (content.backgroundStyle === "neon-accent") {
-      bgGradient.addColorStop(0, "#0a0a0f");
-      bgGradient.addColorStop(0.5, "#1a1a2e");
-      bgGradient.addColorStop(1, "#0a0a0f");
+    // If custom background image, draw it first
+    if (content.backgroundStyle === "custom-image" && content.backgroundImage) {
+      const bgImg = new Image();
+      bgImg.crossOrigin = "anonymous";
+      await new Promise<void>((resolve, reject) => {
+        bgImg.onload = () => resolve();
+        bgImg.onerror = reject;
+        bgImg.src = content.backgroundImage!;
+      });
+      
+      // Draw image covering the canvas
+      const imgRatio = bgImg.width / bgImg.height;
+      const canvasRatio = dimensions.width / dimensions.height;
+      let drawWidth, drawHeight, drawX, drawY;
+      
+      if (imgRatio > canvasRatio) {
+        drawHeight = dimensions.height;
+        drawWidth = bgImg.width * (dimensions.height / bgImg.height);
+        drawX = (dimensions.width - drawWidth) / 2;
+        drawY = 0;
+      } else {
+        drawWidth = dimensions.width;
+        drawHeight = bgImg.height * (dimensions.width / bgImg.width);
+        drawX = 0;
+        drawY = (dimensions.height - drawHeight) / 2;
+      }
+      ctx.drawImage(bgImg, drawX, drawY, drawWidth, drawHeight);
     } else {
-      bgGradient.addColorStop(0, "#1a1a2e");
-      bgGradient.addColorStop(0.5, "#0d1b3e");
-      bgGradient.addColorStop(1, "#1a1a2e");
+      // Main gradient
+      const bgGradient = ctx.createLinearGradient(0, 0, dimensions.width, dimensions.height);
+      if (content.backgroundStyle === "hero-style") {
+        bgGradient.addColorStop(0, "#0d1b3e");
+        bgGradient.addColorStop(0.5, "#1a1a2e");
+        bgGradient.addColorStop(1, "#0d1b3e");
+      } else if (content.backgroundStyle === "neon-accent") {
+        bgGradient.addColorStop(0, "#0a0a0f");
+        bgGradient.addColorStop(0.5, "#1a1a2e");
+        bgGradient.addColorStop(1, "#0a0a0f");
+      } else {
+        bgGradient.addColorStop(0, "#1a1a2e");
+        bgGradient.addColorStop(0.5, "#0d1b3e");
+        bgGradient.addColorStop(1, "#1a1a2e");
+      }
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, dimensions.width, dimensions.height);
     }
-    ctx.fillStyle = bgGradient;
-    ctx.fillRect(0, 0, dimensions.width, dimensions.height);
 
     // Draw overlay gradient
     const overlayGradient = ctx.createLinearGradient(0, 0, 0, dimensions.height);
@@ -203,8 +242,9 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
       ctx.shadowBlur = 0;
     }
 
-    // Calculate content positioning
-    let currentY = dimensions.height / 2;
+    // Calculate content positioning using textPosition
+    const textX = (content.textPosition?.x ?? 50) / 100 * dimensions.width;
+    const textY = (content.textPosition?.y ?? 50) / 100 * dimensions.height;
     const contentWidth = dimensions.width - 128;
 
     // Get font sizes from content
@@ -212,7 +252,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
     const subheadlineFontSize = content.fontSizes?.subheadline || 48;
     const bodyFontSize = content.fontSizes?.body || 32;
 
-    // Measure total content height to center it
+    // Measure total content height
     let totalHeight = 0;
     if (content.headline) totalHeight += (headlineFontSize * 1.2) + 32;
     content.sections.forEach(section => {
@@ -220,7 +260,9 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
       if (section.body) totalHeight += (bodyFontSize * 1.5);
       totalHeight += 24;
     });
-    currentY = (dimensions.height - totalHeight) / 2;
+    
+    // Position from center of content block
+    let currentY = textY - totalHeight / 2;
 
     // Draw headline
     if (content.headline) {
@@ -233,7 +275,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
       
       const lines = wrapText(ctx, content.headline, contentWidth);
       lines.forEach(line => {
-        ctx.fillText(line, dimensions.width / 2, currentY);
+        ctx.fillText(line, textX, currentY);
         currentY += headlineFontSize * 1.2;
       });
       currentY += 32;
@@ -252,7 +294,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
         
         const lines = wrapText(ctx, section.subheadline, contentWidth);
         lines.forEach(line => {
-          ctx.fillText(line, dimensions.width / 2, currentY);
+          ctx.fillText(line, textX, currentY);
           currentY += subheadlineFontSize * 1.3;
         });
         currentY += 12;
@@ -270,7 +312,7 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
         
         const lines = wrapText(ctx, section.body, contentWidth);
         lines.forEach(line => {
-          ctx.fillText(line, dimensions.width / 2, currentY);
+          ctx.fillText(line, textX, currentY);
           currentY += bodyFontSize * 1.5;
         });
         ctx.shadowBlur = 0;
@@ -521,17 +563,35 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                 fontFamily: "'Poppins', sans-serif",
               }}
             >
-              {/* Background gradient */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  background: bgConfig.mainGradient,
-                }}
-              />
+              {/* Custom Background Image */}
+              {content.backgroundStyle === "custom-image" && content.backgroundImage && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    backgroundImage: `url(${content.backgroundImage})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
+                />
+              )}
+              
+              {/* Background gradient (only if not custom image) */}
+              {content.backgroundStyle !== "custom-image" && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    background: bgConfig.mainGradient,
+                  }}
+                />
+              )}
               
               {/* Overlay for depth */}
               <div
@@ -592,18 +652,66 @@ export const PostPreview = ({ content }: PostPreviewProps) => {
                 </div>
               )}
 
-              {/* Content */}
+              {/* Content - Draggable */}
               <div
+                ref={contentRef}
                 style={{
                   position: "absolute",
-                  top: "50%",
-                  left: "50%",
+                  top: `${content.textPosition?.y ?? 50}%`,
+                  left: `${content.textPosition?.x ?? 50}%`,
                   transform: "translate(-50%, -50%)",
                   width: dimensions.width - 128,
                   textAlign: "center",
                   zIndex: 5,
+                  cursor: onPositionChange ? (isDragging ? "grabbing" : "grab") : "default",
+                  userSelect: "none",
+                }}
+                onMouseDown={(e) => {
+                  if (!onPositionChange || !previewRef.current) return;
+                  e.preventDefault();
+                  setIsDragging(true);
+                  
+                  const handleMouseMove = (moveEvent: MouseEvent) => {
+                    const rect = previewRef.current!.getBoundingClientRect();
+                    const x = Math.max(10, Math.min(90, ((moveEvent.clientX - rect.left) / rect.width) * 100));
+                    const y = Math.max(10, Math.min(90, ((moveEvent.clientY - rect.top) / rect.height) * 100));
+                    onPositionChange({ x, y });
+                  };
+                  
+                  const handleMouseUp = () => {
+                    setIsDragging(false);
+                    document.removeEventListener("mousemove", handleMouseMove);
+                    document.removeEventListener("mouseup", handleMouseUp);
+                  };
+                  
+                  document.addEventListener("mousemove", handleMouseMove);
+                  document.addEventListener("mouseup", handleMouseUp);
                 }}
               >
+                {/* Drag indicator */}
+                {onPositionChange && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: -30,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      background: "rgba(0,0,0,0.6)",
+                      padding: "4px 12px",
+                      borderRadius: 4,
+                      fontSize: 14,
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      opacity: isDragging ? 1 : 0.6,
+                    }}
+                  >
+                    <Move size={14} />
+                    Drag to move
+                  </div>
+                )}
+                
                 {/* Headline */}
                 {content.headline && (
                   <div

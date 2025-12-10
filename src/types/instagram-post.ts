@@ -1,5 +1,5 @@
 export type PostFormat = "square" | "portrait" | "story";
-export type BackgroundStyle = "dark-gradient" | "hero-style" | "neon-accent";
+export type BackgroundStyle = "dark-gradient" | "hero-style" | "neon-accent" | "custom-image";
 export type FontFamily = "Poppins" | "Inter" | "Montserrat" | "Playfair Display" | "Bebas Neue" | "Oswald";
 
 export interface ContentSection {
@@ -19,14 +19,21 @@ export interface FontSizeSettings {
   body: number;
 }
 
+export interface TextPosition {
+  x: number; // percentage 0-100
+  y: number; // percentage 0-100
+}
+
 export interface PostContent {
   headline: string;
   sections: ContentSection[];
   format: PostFormat;
   backgroundStyle: BackgroundStyle;
+  backgroundImage?: string; // base64 or URL for custom background
   showLogo: boolean;
   fonts: FontSettings;
   fontSizes: FontSizeSettings;
+  textPosition: TextPosition;
 }
 
 export interface SavedPost {
@@ -55,5 +62,9 @@ export const DEFAULT_POST_CONTENT: PostContent = {
     headline: 72,
     subheadline: 48,
     body: 32,
+  },
+  textPosition: {
+    x: 50,
+    y: 50,
   },
 };
