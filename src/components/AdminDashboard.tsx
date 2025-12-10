@@ -723,19 +723,18 @@ export const AdminDashboard = () => {
                           <span>Joined: {new Date(user.created_at).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Badge variant={user.roles?.some(r => r.role === 'user') ? 'secondary' : 'default'}>
-                            {user.roles?.find(r => r.role === 'superadmin') ? 'Super Admin' : 
-                             user.roles?.find(r => r.role === 'admin') ? 'Admin' : 
-                             user.profile_type}
-                          </Badge>
+                          {user.roles?.some(r => r.role === 'admin' || r.role === 'superadmin') ? (
+                            <Badge variant="destructive">
+                              {user.roles.find(r => r.role === 'superadmin') ? 'Super Admin' : 'Admin'}
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              {user.profile_type}
+                            </Badge>
+                          )}
                           {user.is_verified && (
                             <Badge variant="outline" className="text-green-600 border-green-600">
                               Verified
-                            </Badge>
-                          )}
-                          {user.roles?.some(r => r.role === 'admin' || r.role === 'superadmin') && (
-                            <Badge variant="destructive">
-                              {user.roles.find(r => r.role === 'superadmin') ? 'Super Admin' : 'Admin'}
                             </Badge>
                           )}
                         </div>
