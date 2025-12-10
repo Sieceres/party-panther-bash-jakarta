@@ -1778,10 +1778,6 @@ export const UserProfile = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Email</span>
-              <span className="text-sm font-medium text-primary">{user.email}</span>
-            </div>
-            <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Member Since</span>
               <span className="text-sm font-medium text-primary">
                 {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : 'Recently'}
