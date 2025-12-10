@@ -323,7 +323,7 @@ export const AdminDashboard = () => {
         },
         body: JSON.stringify({ 
           target_user_id: userId,
-          is_admin: isAdmin 
+          new_role: isAdmin ? 'admin' : 'user'
         })
       });
       
@@ -367,7 +367,7 @@ export const AdminDashboard = () => {
         },
         body: JSON.stringify({ 
           target_user_id: userId,
-          is_super_admin: isSuperAdmin 
+          new_role: isSuperAdmin ? 'superadmin' : 'user'
         })
       });
       
