@@ -161,9 +161,26 @@ export const AdminDashboard = () => {
       if (promosData.error) throw promosData.error;
       if (usersData.error) throw usersData.error;
 
+      // Fetch user roles for all users
+      const userIds = usersData.data?.map(u => u.user_id).filter(Boolean) || [];
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('user_id', userIds);
+
+      if (rolesError) {
+        console.error('Error fetching roles:', rolesError);
+      }
+
+      // Merge roles with user profiles
+      const usersWithRoles = (usersData.data || []).map(user => ({
+        ...user,
+        roles: rolesData?.filter(r => r.user_id === user.user_id).map(r => ({ role: r.role })) || []
+      }));
+
       setEvents(eventsData.data || []);
       setPromos(promosData.data || []);
-      setUsers(usersData.data || []);
+      setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({
