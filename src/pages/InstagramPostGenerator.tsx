@@ -1,41 +1,22 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { PostEditor } from "@/components/instagram/PostEditor";
 import { PostPreview } from "@/components/instagram/PostPreview";
 import { SavePostDialog } from "@/components/instagram/SavePostDialog";
 import { SavedPostsList } from "@/components/instagram/SavedPostsList";
+import { CarouselNavigation } from "@/components/instagram/CarouselNavigation";
+import { AnimationPreview } from "@/components/instagram/AnimationPreview";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, FolderOpen, FilePlus } from "lucide-react";
+import { ArrowLeft, Save, FolderOpen, FilePlus, Layers, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import { useToast } from "@/hooks/use-toast";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { uploadJsonToCloudinary, uploadCanvasToCloudinary, fetchJsonFromCloudinary } from "@/lib/cloudinary";
-import type { PostContent, SavedPost, DEFAULT_POST_CONTENT } from "@/types/instagram-post";
-
-const defaultContent: PostContent = {
-  headline: "",
-  sections: [{ subheadline: "", body: "" }],
-  format: "square",
-  backgroundStyle: "dark-gradient",
-  showLogo: true,
-  fonts: {
-    headline: "Poppins",
-    subheadline: "Poppins",
-    body: "Poppins",
-  },
-  fontSizes: {
-    headline: 72,
-    subheadline: 48,
-    body: 32,
-  },
-  textPosition: {
-    x: 50,
-    y: 50,
-  },
-};
+import type { PostContent, SavedPost, ElementPosition } from "@/types/instagram-post";
+import { DEFAULT_POST_CONTENT, migratePostContent } from "@/types/instagram-post";
 
 const InstagramPostGenerator = () => {
   usePageTitle("Instagram Generator");
@@ -44,7 +25,17 @@ const InstagramPostGenerator = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [content, setContent] = useState<PostContent>(defaultContent);
+  
+  // Carousel mode
+  const [carouselMode, setCarouselMode] = useState(false);
+  const [slides, setSlides] = useState<PostContent[]>([{ ...DEFAULT_POST_CONTENT }]);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  
+  // Current content (single mode or current slide)
+  const content = carouselMode ? slides[currentSlideIndex] : slides[0];
+  
+  // Animation preview
+  const [showAnimationPreview, setShowAnimationPreview] = useState(false);
   
   // Save/Load state
   const [savedPosts, setSavedPosts] = useState<SavedPost[]>([]);
@@ -54,9 +45,15 @@ const InstagramPostGenerator = () => {
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showPostsList, setShowPostsList] = useState(false);
-  
-  // Ref to access PostPreview's renderToCanvas
-  const previewRef = useRef<{ renderToCanvas: () => Promise<HTMLCanvasElement> } | null>(null);
+
+  const setContent = useCallback((updater: PostContent | ((prev: PostContent) => PostContent)) => {
+    setSlides(prev => {
+      const newSlides = [...prev];
+      const newContent = typeof updater === 'function' ? updater(prev[currentSlideIndex]) : updater;
+      newSlides[currentSlideIndex] = newContent;
+      return newSlides;
+    });
+  }, [currentSlideIndex]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -73,7 +70,6 @@ const InstagramPostGenerator = () => {
           return;
         }
 
-        // Check for admin or superadmin role
         const { is_admin } = await checkUserAdminStatus(user.id);
 
         if (!is_admin) {
@@ -131,21 +127,19 @@ const InstagramPostGenerator = () => {
     }
   }, [isAuthorized, userId, loadSavedPosts]);
 
-  // Generate thumbnail from current content
+  // Generate thumbnail
   const generateThumbnail = async (): Promise<string | null> => {
     try {
-      // Create a simple canvas-based thumbnail
       const canvas = document.createElement('canvas');
       canvas.width = 400;
       canvas.height = 400;
       const ctx = canvas.getContext('2d')!;
       
-      // Draw background
       const gradient = ctx.createLinearGradient(0, 0, 400, 400);
-      if (content.backgroundStyle === "hero-style") {
+      if (content.background.style === "hero-style") {
         gradient.addColorStop(0, "#0d1b3e");
         gradient.addColorStop(1, "#1a1a2e");
-      } else if (content.backgroundStyle === "neon-accent") {
+      } else if (content.background.style === "neon-accent") {
         gradient.addColorStop(0, "#0a0a0f");
         gradient.addColorStop(1, "#1a1a2e");
       } else {
@@ -155,9 +149,8 @@ const InstagramPostGenerator = () => {
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 400, 400);
       
-      // Draw simplified text
       ctx.font = "bold 24px Poppins, sans-serif";
-      ctx.fillStyle = "#00d4ff";
+      ctx.fillStyle = content.textStyles.colors.headline;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       
@@ -165,7 +158,12 @@ const InstagramPostGenerator = () => {
       const truncated = headline.length > 30 ? headline.substring(0, 30) + "..." : headline;
       ctx.fillText(truncated, 200, 200);
       
-      // Upload thumbnail to Cloudinary
+      if (carouselMode && slides.length > 1) {
+        ctx.fillStyle = "rgba(255,255,255,0.8)";
+        ctx.font = "bold 16px sans-serif";
+        ctx.fillText(`${slides.length} slides`, 200, 360);
+      }
+      
       const thumbnailUrl = await uploadCanvasToCloudinary(canvas, `instagram-posts/${userId}`);
       return thumbnailUrl;
     } catch (error) {
@@ -179,14 +177,11 @@ const InstagramPostGenerator = () => {
     if (!userId) return;
 
     try {
-      // Upload content JSON to Cloudinary
-      const contentUrl = await uploadJsonToCloudinary(content, `instagram-posts/${userId}`);
-      
-      // Generate and upload thumbnail
+      const saveData = carouselMode ? { slides, carouselMode: true } : content;
+      const contentUrl = await uploadJsonToCloudinary(saveData, `instagram-posts/${userId}`);
       const thumbnailUrl = await generateThumbnail();
 
       if (currentPostId) {
-        // Update existing post
         const { error } = await supabase
           .from('instagram_posts')
           .update({
@@ -208,7 +203,6 @@ const InstagramPostGenerator = () => {
           description: `"${title}" has been saved`,
         });
       } else {
-        // Create new post
         const { data, error } = await supabase
           .from('instagram_posts')
           .insert({
@@ -233,7 +227,6 @@ const InstagramPostGenerator = () => {
         });
       }
       
-      // Refresh the list
       await loadSavedPosts();
     } catch (error) {
       console.error('Error saving post:', error);
@@ -249,8 +242,18 @@ const InstagramPostGenerator = () => {
   // Load post
   const handleLoadPost = async (post: SavedPost) => {
     try {
-      const loadedContent = await fetchJsonFromCloudinary<PostContent>(post.content_url);
-      setContent(loadedContent);
+      const loadedData = await fetchJsonFromCloudinary<any>(post.content_url);
+      
+      if (loadedData.carouselMode && loadedData.slides) {
+        setCarouselMode(true);
+        setSlides(loadedData.slides.map(migratePostContent));
+        setCurrentSlideIndex(0);
+      } else {
+        setCarouselMode(false);
+        setSlides([migratePostContent(loadedData)]);
+        setCurrentSlideIndex(0);
+      }
+      
       setCurrentPostId(post.id);
       setCurrentPostTitle(post.title);
       setCurrentPostStatus(post.status);
@@ -272,8 +275,17 @@ const InstagramPostGenerator = () => {
   // Duplicate post
   const handleDuplicatePost = async (post: SavedPost) => {
     try {
-      const loadedContent = await fetchJsonFromCloudinary<PostContent>(post.content_url);
-      setContent(loadedContent);
+      const loadedData = await fetchJsonFromCloudinary<any>(post.content_url);
+      
+      if (loadedData.carouselMode && loadedData.slides) {
+        setCarouselMode(true);
+        setSlides(loadedData.slides.map(migratePostContent));
+      } else {
+        setCarouselMode(false);
+        setSlides([migratePostContent(loadedData)]);
+      }
+      
+      setCurrentSlideIndex(0);
       setCurrentPostId(null);
       setCurrentPostTitle("");
       setCurrentPostStatus('draft');
@@ -302,7 +314,6 @@ const InstagramPostGenerator = () => {
 
       if (error) throw error;
       
-      // If we deleted the current post, reset
       if (postId === currentPostId) {
         setCurrentPostId(null);
         setCurrentPostTitle("");
@@ -328,7 +339,9 @@ const InstagramPostGenerator = () => {
 
   // New post
   const handleNewPost = () => {
-    setContent(defaultContent);
+    setSlides([{ ...DEFAULT_POST_CONTENT }]);
+    setCurrentSlideIndex(0);
+    setCarouselMode(false);
     setCurrentPostId(null);
     setCurrentPostTitle("");
     setCurrentPostStatus('draft');
@@ -336,6 +349,43 @@ const InstagramPostGenerator = () => {
     toast({
       title: "New Post",
       description: "Started a fresh post",
+    });
+  };
+
+  // Carousel functions
+  const handleAddSlide = () => {
+    setSlides(prev => [...prev, { ...DEFAULT_POST_CONTENT }]);
+    setCurrentSlideIndex(slides.length);
+  };
+
+  const handleDuplicateSlide = (index: number) => {
+    const newSlide = JSON.parse(JSON.stringify(slides[index]));
+    setSlides(prev => [...prev.slice(0, index + 1), newSlide, ...prev.slice(index + 1)]);
+    setCurrentSlideIndex(index + 1);
+  };
+
+  const handleDeleteSlide = (index: number) => {
+    if (slides.length <= 1) return;
+    setSlides(prev => prev.filter((_, i) => i !== index));
+    setCurrentSlideIndex(Math.min(index, slides.length - 2));
+  };
+
+  // Position change handlers for individual elements
+  const handleHeadlinePositionChange = (pos: ElementPosition) => {
+    setContent(prev => ({
+      ...prev,
+      positions: { ...prev.positions, headline: pos }
+    }));
+  };
+
+  const handleSectionPositionChange = (index: number, pos: ElementPosition) => {
+    setContent(prev => {
+      const newSections = [...prev.positions.sections];
+      newSections[index] = pos;
+      return {
+        ...prev,
+        positions: { ...prev.positions, sections: newSections }
+      };
     });
   };
 
@@ -370,6 +420,7 @@ const InstagramPostGenerator = () => {
                 ) : (
                   'Create branded posts for social media'
                 )}
+                {carouselMode && ` • Slide ${currentSlideIndex + 1}/${slides.length}`}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -380,6 +431,22 @@ const InstagramPostGenerator = () => {
               >
                 <FilePlus className="w-4 h-4 mr-2" />
                 New
+              </Button>
+              <Button
+                variant={carouselMode ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCarouselMode(!carouselMode)}
+              >
+                <Layers className="w-4 h-4 mr-2" />
+                Carousel
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAnimationPreview(true)}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Animate
               </Button>
               <Button
                 variant="outline"
@@ -407,12 +474,24 @@ const InstagramPostGenerator = () => {
             </div>
           </div>
 
+          {carouselMode && (
+            <CarouselNavigation
+              slides={slides}
+              currentSlide={currentSlideIndex}
+              onSlideChange={setCurrentSlideIndex}
+              onAddSlide={handleAddSlide}
+              onDuplicateSlide={handleDuplicateSlide}
+              onDeleteSlide={handleDeleteSlide}
+            />
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             <PostEditor content={content} onChange={setContent} />
             <div className="lg:sticky lg:top-24 lg:self-start">
               <PostPreview 
                 content={content} 
-                onPositionChange={(pos) => setContent(prev => ({ ...prev, textPosition: pos }))}
+                onHeadlinePositionChange={handleHeadlinePositionChange}
+                onSectionPositionChange={handleSectionPositionChange}
               />
             </div>
           </div>
@@ -436,6 +515,12 @@ const InstagramPostGenerator = () => {
         onLoad={handleLoadPost}
         onDuplicate={handleDuplicatePost}
         onDelete={handleDeletePost}
+      />
+
+      <AnimationPreview
+        open={showAnimationPreview}
+        onOpenChange={setShowAnimationPreview}
+        content={content}
       />
     </>
   );
