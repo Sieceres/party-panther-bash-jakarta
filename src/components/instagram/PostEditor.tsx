@@ -19,6 +19,7 @@ import type {
   PostContent, 
   PostFormat, 
   BackgroundStyle, 
+  BackgroundCoverage,
   ContentSection, 
   FontFamily,
   ColorSettings,
@@ -329,7 +330,7 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
             )}
           </div>
           {content.background.image && (
-            <div className="space-y-2">
+            <div className="space-y-4">
               <p className="text-xs text-muted-foreground">Custom background image active</p>
               <div className="space-y-1">
                 <Label className="text-xs">Overlay Darkness: {content.background.opacity}%</Label>
@@ -344,6 +345,42 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                   step={5}
                 />
               </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Image Coverage</Label>
+                <Select
+                  value={content.background.coverage || "full"}
+                  onValueChange={(value: BackgroundCoverage) => onChange({
+                    ...content,
+                    background: { ...content.background, coverage: value },
+                  })}
+                >
+                  <SelectTrigger className="text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full">Full Cover</SelectItem>
+                    <SelectItem value="top">Top Half</SelectItem>
+                    <SelectItem value="bottom">Bottom Half</SelectItem>
+                    <SelectItem value="left">Left Half</SelectItem>
+                    <SelectItem value="right">Right Half</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {content.background.coverage && content.background.coverage !== "full" && (
+                <div className="space-y-1">
+                  <Label className="text-xs">Coverage Amount: {content.background.coveragePercent || 50}%</Label>
+                  <Slider
+                    value={[content.background.coveragePercent || 50]}
+                    onValueChange={([coveragePercent]) => onChange({
+                      ...content,
+                      background: { ...content.background, coveragePercent },
+                    })}
+                    min={10}
+                    max={90}
+                    step={5}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>

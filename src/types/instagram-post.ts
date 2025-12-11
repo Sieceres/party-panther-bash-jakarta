@@ -73,10 +73,14 @@ export interface TextStyleSettings {
   };
 }
 
+export type BackgroundCoverage = "full" | "top" | "bottom" | "left" | "right";
+
 export interface BackgroundSettings {
   style: BackgroundStyle;
   image?: string;
   opacity: number; // 0-100 for overlay darkness
+  coverage?: BackgroundCoverage; // defaults to "full"
+  coveragePercent?: number; // 10-100, defaults to 50
 }
 
 export interface QRCodeSettings {
