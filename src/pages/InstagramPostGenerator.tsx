@@ -7,8 +7,10 @@ import { SavePostDialog } from "@/components/instagram/SavePostDialog";
 import { SavedPostsList } from "@/components/instagram/SavedPostsList";
 import { CarouselNavigation } from "@/components/instagram/CarouselNavigation";
 import { AnimationPreview } from "@/components/instagram/AnimationPreview";
+import { TemplatePicker } from "@/components/instagram/TemplatePicker";
+import { SaveTemplateDialog } from "@/components/instagram/SaveTemplateDialog";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, FolderOpen, FilePlus, Layers, Play } from "lucide-react";
+import { ArrowLeft, Save, FolderOpen, FilePlus, Layers, Play, LayoutTemplate, Bookmark } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +19,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { uploadJsonToCloudinary, uploadCanvasToCloudinary, fetchJsonFromCloudinary } from "@/lib/cloudinary";
 import type { PostContent, SavedPost, ElementPosition } from "@/types/instagram-post";
 import { DEFAULT_POST_CONTENT, migratePostContent } from "@/types/instagram-post";
+import { STARTER_TEMPLATES } from "@/lib/starter-templates";
 
 const InstagramPostGenerator = () => {
   usePageTitle("Instagram Generator");
@@ -45,6 +48,9 @@ const InstagramPostGenerator = () => {
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showPostsList, setShowPostsList] = useState(false);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
 
   const setContent = useCallback((updater: PostContent | ((prev: PostContent) => PostContent)) => {
     setSlides(prev => {
@@ -389,6 +395,55 @@ const InstagramPostGenerator = () => {
     });
   };
 
+  // Apply template settings
+  const handleApplyTemplate = (settings: PostContent) => {
+    setSlides([{ ...settings }]);
+    setCurrentSlideIndex(0);
+    setCarouselMode(false);
+    setCurrentPostId(null);
+    setCurrentPostTitle("");
+    setCurrentPostStatus('draft');
+  };
+
+  // Save current settings as template
+  const handleSaveTemplate = async (name: string, description: string, isPublic: boolean) => {
+    if (!userId) return;
+    
+    setIsSavingTemplate(true);
+    try {
+      const settingsUrl = await uploadJsonToCloudinary(content, `instagram-templates/${userId}`);
+      const thumbnailUrl = await generateThumbnail();
+
+      const { error } = await supabase
+        .from('instagram_templates')
+        .insert({
+          created_by: userId,
+          name,
+          description: description || null,
+          thumbnail_url: thumbnailUrl,
+          settings_url: settingsUrl,
+          is_public: isPublic,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Template Saved",
+        description: `"${name}" is now available in your templates`,
+      });
+      setShowSaveTemplateDialog(false);
+    } catch (error) {
+      console.error('Error saving template:', error);
+      toast({
+        title: "Save Failed",
+        description: "Could not save the template",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background pt-20 px-4">
@@ -457,6 +512,22 @@ const InstagramPostGenerator = () => {
                 My Posts
               </Button>
               <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowTemplatePicker(true)}
+              >
+                <LayoutTemplate className="w-4 h-4 mr-2" />
+                Templates
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSaveTemplateDialog(true)}
+              >
+                <Bookmark className="w-4 h-4 mr-2" />
+                Save Template
+              </Button>
+              <Button
                 size="sm"
                 onClick={() => setShowSaveDialog(true)}
               >
@@ -521,6 +592,20 @@ const InstagramPostGenerator = () => {
         open={showAnimationPreview}
         onOpenChange={setShowAnimationPreview}
         content={content}
+      />
+
+      <TemplatePicker
+        open={showTemplatePicker}
+        onOpenChange={setShowTemplatePicker}
+        onSelectTemplate={handleApplyTemplate}
+        currentUserId={userId || undefined}
+      />
+
+      <SaveTemplateDialog
+        open={showSaveTemplateDialog}
+        onOpenChange={setShowSaveTemplateDialog}
+        onSave={handleSaveTemplate}
+        isSaving={isSavingTemplate}
       />
     </>
   );
