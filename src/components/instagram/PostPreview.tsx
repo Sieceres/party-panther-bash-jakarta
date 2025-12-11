@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2, ExternalLink, Move } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { PostContent, BackgroundStyle, ElementPosition } from "@/types/instagram-post";
+import type { PostContent, BackgroundStyle, ElementPosition, BackgroundCoverage } from "@/types/instagram-post";
 import partyPantherLogo from "@/assets/party-panther-logo.png";
 
 interface PostPreviewProps {
@@ -126,6 +126,28 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
   const bgImage = content.background?.image || content.backgroundImage;
   const bgOpacity = content.background?.opacity || 30;
+  const bgCoverage = content.background?.coverage || "full";
+  const bgCoveragePercent = content.background?.coveragePercent || 50;
+
+  const getBackgroundImageStyle = (): React.CSSProperties => {
+    if (bgCoverage === "full") {
+      return { inset: 0 };
+    }
+    
+    const percent = `${bgCoveragePercent}%`;
+    switch (bgCoverage) {
+      case "top":
+        return { top: 0, left: 0, right: 0, height: percent };
+      case "bottom":
+        return { bottom: 0, left: 0, right: 0, height: percent };
+      case "left":
+        return { top: 0, bottom: 0, left: 0, width: percent };
+      case "right":
+        return { top: 0, bottom: 0, right: 0, width: percent };
+      default:
+        return { inset: 0 };
+    }
+  };
 
   return (
     <Card>
@@ -167,7 +189,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                   <div
                     style={{
                       position: "absolute",
-                      inset: 0,
+                      ...getBackgroundImageStyle(),
                       backgroundImage: `url(${bgImage})`,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
@@ -176,7 +198,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                   <div
                     style={{
                       position: "absolute",
-                      inset: 0,
+                      ...getBackgroundImageStyle(),
                       backgroundColor: `rgba(0,0,0,${bgOpacity / 100})`,
                     }}
                   />
