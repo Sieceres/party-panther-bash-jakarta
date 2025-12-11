@@ -8,6 +8,7 @@ import { SavedPostsList } from "@/components/instagram/SavedPostsList";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, FolderOpen, FilePlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import { useToast } from "@/hooks/use-toast";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -72,20 +73,16 @@ const InstagramPostGenerator = () => {
           return;
         }
 
-        // Check for superadmin role only
-        const { data: roles, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'superadmin');
+        // Check for admin or superadmin role
+        const { is_admin } = await checkUserAdminStatus(user.id);
 
-        if (error || !roles || roles.length === 0) {
+        if (!is_admin) {
           toast({
             title: "Access Denied",
-            description: "This feature is only available to super admins",
+            description: "This feature is only available to admins",
             variant: "destructive"
           });
-          navigate('/admin');
+          navigate('/');
           return;
         }
 
