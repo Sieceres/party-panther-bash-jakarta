@@ -202,7 +202,7 @@ export const DEFAULT_QR_CODE: QRCodeSettings = {
 export const DEFAULT_POST_CONTENT: PostContent = {
   headline: "",
   sections: [{ subheadline: "", body: "" }],
-  format: "square",
+  format: "portrait",
   background: {
     style: "dark-gradient",
     opacity: 30,

@@ -184,6 +184,8 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
   };
 
   const removeSection = (index: number) => {
+    if (content.sections.length <= 1) return; // Prevent removing last section
+    
     const newSections = content.sections.filter((_, i) => i !== index);
     const newSectionPositions = content.positions.sections.filter((_, i) => i !== index);
     const newSectionRotations = content.textStyles.rotations.sections.filter((_, i) => i !== index);
