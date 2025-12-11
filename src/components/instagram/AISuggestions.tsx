@@ -13,18 +13,14 @@ interface AISuggestionsProps {
   onApplyBody: (body: string) => void;
 }
 
-interface Suggestion {
-  headline: string;
-  body: string;
-}
-
 export const AISuggestions = ({ onApplyHeadline, onApplyBody }: AISuggestionsProps) => {
   const { toast } = useToast();
   const [eventType, setEventType] = useState("");
   const [mood, setMood] = useState("");
   const [details, setDetails] = useState("");
   const [loading, setLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [headlineSuggestions, setHeadlineSuggestions] = useState<string[]>([]);
+  const [bodySuggestions, setBodySuggestions] = useState<string[]>([]);
 
   const generateSuggestions = async () => {
     if (!eventType) {
@@ -38,52 +34,67 @@ export const AISuggestions = ({ onApplyHeadline, onApplyBody }: AISuggestionsPro
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("instagram-ai-suggestions", {
-        body: {
-          eventType,
-          mood,
-          details,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.suggestions) {
-        setSuggestions(data.suggestions);
-      } else {
-        // Fallback suggestions if AI fails
-        setSuggestions([
-          {
-            headline: `🎉 ${eventType.toUpperCase()}`,
-            body: `Join us for an amazing ${eventType.toLowerCase()}! ${mood ? `Vibes: ${mood}` : ""} ${details ? `• ${details}` : ""}`,
-          },
-          {
-            headline: `Don't Miss This ${eventType}!`,
-            body: `The ultimate ${eventType.toLowerCase()} experience awaits. ${details || "Be there or be square!"}`,
-          },
-          {
-            headline: `✨ ${eventType} Alert ✨`,
-            body: `Get ready for something special! ${mood ? `It's going to be ${mood.toLowerCase()}.` : ""} Mark your calendars!`,
-          },
-        ]);
-      }
-    } catch (error) {
-      console.error("Error generating suggestions:", error);
-      // Use fallback suggestions
-      setSuggestions([
-        {
-          headline: `🎉 ${eventType.toUpperCase()}`,
-          body: `Join us for an unforgettable ${eventType.toLowerCase()}!`,
-        },
-        {
-          headline: `${eventType} You Won't Want to Miss`,
-          body: `Something amazing is happening. ${details || "Stay tuned for details!"}`,
-        },
+      // Fetch headlines and body text in parallel
+      const [headlineRes, bodyRes] = await Promise.all([
+        supabase.functions.invoke("instagram-ai-suggestions", {
+          body: { eventType, mood, details, suggestionType: "headline" },
+        }),
+        supabase.functions.invoke("instagram-ai-suggestions", {
+          body: { eventType, mood, details, suggestionType: "body" },
+        }),
       ]);
+
+      if (headlineRes.error) {
+        console.error("Headline error:", headlineRes.error);
+        throw headlineRes.error;
+      }
+      if (bodyRes.error) {
+        console.error("Body error:", bodyRes.error);
+        throw bodyRes.error;
+      }
+
+      setHeadlineSuggestions(headlineRes.data?.suggestions || []);
+      setBodySuggestions(bodyRes.data?.suggestions || []);
+
+      toast({ title: "Suggestions generated!" });
+    } catch (error: any) {
+      console.error("Error generating suggestions:", error);
+      
+      // Check for rate limit or payment errors
+      if (error?.message?.includes("429") || error?.message?.includes("Rate limit")) {
+        toast({
+          title: "Rate Limited",
+          description: "Too many requests. Please wait a moment and try again.",
+          variant: "destructive",
+        });
+      } else if (error?.message?.includes("402") || error?.message?.includes("credits")) {
+        toast({
+          title: "Credits Exhausted",
+          description: "AI credits exhausted. Please add credits to continue.",
+          variant: "destructive",
+        });
+      } else {
+        // Use fallback suggestions
+        setHeadlineSuggestions([
+          `🎉 ${eventType.toUpperCase()}`,
+          `Don't Miss This ${eventType}!`,
+          `✨ ${eventType} Alert ✨`,
+        ]);
+        setBodySuggestions([
+          `Join us for an unforgettable ${eventType.toLowerCase()}! ${mood ? `Vibes: ${mood}` : ""}`,
+          `Something amazing is happening. ${details || "Stay tuned for details!"}`,
+        ]);
+        toast({
+          title: "Using fallback suggestions",
+          description: "AI unavailable, showing sample suggestions",
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  const hasSuggestions = headlineSuggestions.length > 0 || bodySuggestions.length > 0;
 
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
@@ -136,10 +147,10 @@ export const AISuggestions = ({ onApplyHeadline, onApplyBody }: AISuggestionsPro
         </Button>
       </div>
 
-      {suggestions.length > 0 && (
-        <div className="space-y-2">
+      {hasSuggestions && (
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label className="text-xs text-muted-foreground">Suggestions</Label>
+            <Label className="text-xs text-muted-foreground">Results</Label>
             <Button
               variant="ghost"
               size="sm"
@@ -151,40 +162,53 @@ export const AISuggestions = ({ onApplyHeadline, onApplyBody }: AISuggestionsPro
             </Button>
           </div>
 
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {suggestions.map((suggestion, idx) => (
-              <Card key={idx} className="p-3 space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-semibold text-sm text-primary">{suggestion.headline}</p>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2"
-                    onClick={() => {
-                      onApplyHeadline(suggestion.headline);
-                      toast({ title: "Headline applied!" });
-                    }}
-                  >
-                    <Check className="w-3 h-3" />
-                  </Button>
-                </div>
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-xs text-muted-foreground">{suggestion.body}</p>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2"
-                    onClick={() => {
-                      onApplyBody(suggestion.body);
-                      toast({ title: "Body text applied!" });
-                    }}
-                  >
-                    <Check className="w-3 h-3" />
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
+          {headlineSuggestions.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-xs font-medium">Headlines</Label>
+              <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                {headlineSuggestions.map((headline, idx) => (
+                  <Card key={idx} className="p-2 flex items-center justify-between gap-2">
+                    <p className="text-sm font-medium truncate">{headline}</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 shrink-0"
+                      onClick={() => {
+                        onApplyHeadline(headline);
+                        toast({ title: "Headline applied!" });
+                      }}
+                    >
+                      <Check className="w-3 h-3" />
+                    </Button>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {bodySuggestions.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-xs font-medium">Body Text</Label>
+              <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                {bodySuggestions.map((body, idx) => (
+                  <Card key={idx} className="p-2 flex items-start justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">{body}</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 shrink-0"
+                      onClick={() => {
+                        onApplyBody(body);
+                        toast({ title: "Body text applied!" });
+                      }}
+                    >
+                      <Check className="w-3 h-3" />
+                    </Button>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
