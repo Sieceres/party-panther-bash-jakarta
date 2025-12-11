@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -6,7 +7,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -19,12 +19,87 @@ serve(async (req) => {
 
     console.log('Analytics request:', { startdate, enddate, granularity });
 
-    // For now, return mock data since we don't have real analytics integration
-    // In production, you would integrate with Lovable's analytics API or your own analytics service
-    const mockData = generateMockAnalytics(startdate, enddate, granularity);
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const start = startdate ? new Date(startdate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const end = enddate ? new Date(enddate) : new Date();
+    end.setHours(23, 59, 59, 999);
+
+    // Fetch all data within date range
+    const [eventsRes, attendeesRes, promosRes, profilesRes, reviewsRes] = await Promise.all([
+      supabase.from('events').select('created_at').gte('created_at', start.toISOString()).lte('created_at', end.toISOString()),
+      supabase.from('event_attendees').select('joined_at').gte('joined_at', start.toISOString()).lte('joined_at', end.toISOString()),
+      supabase.from('promos').select('created_at').gte('created_at', start.toISOString()).lte('created_at', end.toISOString()),
+      supabase.from('profiles').select('created_at').gte('created_at', start.toISOString()).lte('created_at', end.toISOString()),
+      supabase.from('promo_reviews').select('created_at').gte('created_at', start.toISOString()).lte('created_at', end.toISOString()),
+    ]);
+
+    // Group data by day
+    const dailyData: Record<string, { events: number; attendees: number; promos: number; users: number; reviews: number }> = {};
+    
+    const currentDate = new Date(start);
+    while (currentDate <= end) {
+      const dateKey = currentDate.toISOString().split('T')[0];
+      dailyData[dateKey] = { events: 0, attendees: 0, promos: 0, users: 0, reviews: 0 };
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Count events per day
+    eventsRes.data?.forEach(item => {
+      const dateKey = new Date(item.created_at).toISOString().split('T')[0];
+      if (dailyData[dateKey]) dailyData[dateKey].events++;
+    });
+
+    // Count attendees per day
+    attendeesRes.data?.forEach(item => {
+      if (item.joined_at) {
+        const dateKey = new Date(item.joined_at).toISOString().split('T')[0];
+        if (dailyData[dateKey]) dailyData[dateKey].attendees++;
+      }
+    });
+
+    // Count promos per day
+    promosRes.data?.forEach(item => {
+      const dateKey = new Date(item.created_at).toISOString().split('T')[0];
+      if (dailyData[dateKey]) dailyData[dateKey].promos++;
+    });
+
+    // Count users per day
+    profilesRes.data?.forEach(item => {
+      const dateKey = new Date(item.created_at).toISOString().split('T')[0];
+      if (dailyData[dateKey]) dailyData[dateKey].users++;
+    });
+
+    // Count reviews per day
+    reviewsRes.data?.forEach(item => {
+      const dateKey = new Date(item.created_at).toISOString().split('T')[0];
+      if (dailyData[dateKey]) dailyData[dateKey].reviews++;
+    });
+
+    // Convert to array format
+    const data = Object.entries(dailyData).map(([date, counts]) => ({
+      periodStart: new Date(date).toISOString(),
+      periodEnd: new Date(date + 'T23:59:59.999Z').toISOString(),
+      events: counts.events,
+      attendees: counts.attendees,
+      promos: counts.promos,
+      users: counts.users,
+      reviews: counts.reviews,
+    })).sort((a, b) => new Date(a.periodStart).getTime() - new Date(b.periodStart).getTime());
+
+    // Calculate totals
+    const totals = {
+      totalEvents: eventsRes.data?.length || 0,
+      totalAttendees: attendeesRes.data?.length || 0,
+      totalPromos: promosRes.data?.length || 0,
+      totalUsers: profilesRes.data?.length || 0,
+      totalReviews: reviewsRes.data?.length || 0,
+    };
 
     return new Response(
-      JSON.stringify({ data: mockData }),
+      JSON.stringify({ data, totals }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -41,28 +116,3 @@ serve(async (req) => {
     );
   }
 });
-
-function generateMockAnalytics(startDate: string | null, endDate: string | null, granularity: string) {
-  const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const end = endDate ? new Date(endDate) : new Date();
-  
-  const data = [];
-  const currentDate = new Date(start);
-  
-  while (currentDate <= end) {
-    const periodStart = new Date(currentDate);
-    const periodEnd = new Date(currentDate);
-    periodEnd.setHours(23, 59, 59, 999);
-    
-    data.push({
-      periodStart: periodStart.toISOString(),
-      periodEnd: periodEnd.toISOString(),
-      visits: Math.floor(Math.random() * 100) + 50,
-      pageviews: Math.floor(Math.random() * 300) + 150,
-    });
-    
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-  
-  return data;
-}

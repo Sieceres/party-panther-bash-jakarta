@@ -1,20 +1,32 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { TrendingUp, Users, Eye, BarChart3 } from "lucide-react";
+import { Calendar, Users, Star, Megaphone, UserPlus } from "lucide-react";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { format, subDays } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 
-interface AnalyticsData {
-  data: Array<{
-    periodStart: string;
-    periodEnd: string;
-    visits: number;
-    pageviews: number;
-  }>;
+interface DailyData {
+  periodStart: string;
+  periodEnd: string;
+  events: number;
+  attendees: number;
+  promos: number;
+  users: number;
+  reviews: number;
+}
+
+interface AnalyticsResponse {
+  data: DailyData[];
+  totals: {
+    totalEvents: number;
+    totalAttendees: number;
+    totalPromos: number;
+    totalUsers: number;
+    totalReviews: number;
+  };
 }
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
@@ -22,7 +34,7 @@ const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3
 export const AdminAnalytics = () => {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState("30");
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fetchAnalytics = async (days: number) => {
@@ -33,21 +45,25 @@ export const AdminAnalytics = () => {
       const endDate = new Date();
       const startDate = subDays(endDate, days);
       
-      const response = await fetch(
-        `https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/analytics?startdate=${format(startDate, 'yyyy-MM-dd')}&enddate=${format(endDate, 'yyyy-MM-dd')}&granularity=daily`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFndHRiYWliaG16Ym1rbmpsZ2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MzAyODAsImV4cCI6MjA2NTUwNjI4MH0.jChcXNsowGgb4dz1WTnoTWrBPTK8HeZsUjQA1Mhe5gc'
-          },
-        }
-      );
+      const { data, error: fnError } = await supabase.functions.invoke('analytics', {
+        body: {},
+        headers: {},
+      }).then(async () => {
+        // Use fetch directly for query params
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL || 'https://qgttbaibhmzbmknjlghj.supabase.co'}/functions/v1/analytics?startdate=${format(startDate, 'yyyy-MM-dd')}&enddate=${format(endDate, 'yyyy-MM-dd')}&granularity=daily`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFndHRiYWliaG16Ym1rbmpsZ2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MzAyODAsImV4cCI6MjA2NTUwNjI4MH0.jChcXNsowGgb4dz1WTnoTWrBPTK8HeZsUjQA1Mhe5gc'
+            },
+          }
+        );
+        if (!response.ok) throw new Error('Failed to fetch analytics');
+        return { data: await response.json(), error: null };
+      });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch analytics');
-      }
-
-      const data = await response.json();
+      if (fnError) throw fnError;
       setAnalyticsData(data);
     } catch (err) {
       console.error('Error fetching analytics:', err);
@@ -79,20 +95,24 @@ export const AdminAnalytics = () => {
     );
   }
 
-  const totalVisits = analyticsData?.data?.reduce((sum, item) => sum + item.visits, 0) || 0;
-  const totalPageviews = analyticsData?.data?.reduce((sum, item) => sum + item.pageviews, 0) || 0;
-  const avgPageviewsPerVisit = totalVisits > 0 ? (totalPageviews / totalVisits).toFixed(2) : 0;
+  const totals = analyticsData?.totals || { totalEvents: 0, totalAttendees: 0, totalPromos: 0, totalUsers: 0, totalReviews: 0 };
 
   const chartData = analyticsData?.data?.map(item => ({
     date: format(new Date(item.periodStart), 'MMM dd'),
-    visitors: item.visits,
-    pageviews: item.pageviews
+    events: item.events,
+    attendees: item.attendees,
+    promos: item.promos,
+    users: item.users,
+    reviews: item.reviews,
   })) || [];
 
-  const trafficDistribution = [
-    { name: 'Unique Visitors', value: totalVisits },
-    { name: 'Page Views', value: totalPageviews }
-  ];
+  const activityDistribution = [
+    { name: 'Events', value: totals.totalEvents },
+    { name: 'Attendees', value: totals.totalAttendees },
+    { name: 'Promos', value: totals.totalPromos },
+    { name: 'Users', value: totals.totalUsers },
+    { name: 'Reviews', value: totals.totalReviews },
+  ].filter(item => item.value > 0);
 
   return (
     <div className="space-y-6">
@@ -100,7 +120,7 @@ export const AdminAnalytics = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold">Analytics Overview</h2>
-          <p className="text-muted-foreground">Track your app's visitor statistics and engagement</p>
+          <p className="text-muted-foreground">Track your app's activity and engagement</p>
         </div>
         <Select value={dateRange} onValueChange={setDateRange}>
           <SelectTrigger className="w-[180px]">
@@ -115,123 +135,115 @@ export const AdminAnalytics = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Visitors</CardTitle>
+            <CardTitle className="text-sm font-medium">Events</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totals.totalEvents}</div>
+            <p className="text-xs text-muted-foreground mt-1">Created</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Attendees</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalVisits.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Unique visits in the last {dateRange} days
-            </p>
+            <div className="text-2xl font-bold">{totals.totalAttendees}</div>
+            <p className="text-xs text-muted-foreground mt-1">Joined events</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Pageviews</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Promos</CardTitle>
+            <Megaphone className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalPageviews.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Total pages viewed
-            </p>
+            <div className="text-2xl font-bold">{totals.totalPromos}</div>
+            <p className="text-xs text-muted-foreground mt-1">Created</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Pages/Visit</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">New Users</CardTitle>
+            <UserPlus className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{avgPageviewsPerVisit}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Engagement metric
-            </p>
+            <div className="text-2xl font-bold">{totals.totalUsers}</div>
+            <p className="text-xs text-muted-foreground mt-1">Registered</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Reviews</CardTitle>
+            <Star className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totals.totalReviews}</div>
+            <p className="text-xs text-muted-foreground mt-1">Submitted</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Line Chart */}
+        {/* Line Chart - Activity Over Time */}
         <Card>
           <CardHeader>
-            <CardTitle>Visitors Over Time</CardTitle>
+            <CardTitle>Activity Over Time</CardTitle>
           </CardHeader>
           <CardContent>
             <ChartContainer
               config={{
-                visitors: {
-                  label: "Visitors",
-                  color: "hsl(var(--chart-1))",
-                },
+                events: { label: "Events", color: "hsl(var(--chart-1))" },
+                attendees: { label: "Attendees", color: "hsl(var(--chart-2))" },
+                users: { label: "Users", color: "hsl(var(--chart-3))" },
               }}
               className="h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis 
-                    dataKey="date" 
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                  />
-                  <YAxis 
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                  />
+                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="visitors" 
-                    stroke="hsl(var(--chart-1))" 
-                    strokeWidth={2}
-                    dot={{ fill: "hsl(var(--chart-1))" }}
-                  />
+                  <Line type="monotone" dataKey="events" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={{ fill: "hsl(var(--chart-1))" }} />
+                  <Line type="monotone" dataKey="attendees" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ fill: "hsl(var(--chart-2))" }} />
+                  <Line type="monotone" dataKey="users" stroke="hsl(var(--chart-3))" strokeWidth={2} dot={{ fill: "hsl(var(--chart-3))" }} />
                 </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
         </Card>
 
-        {/* Bar Chart */}
+        {/* Bar Chart - Promos & Reviews */}
         <Card>
           <CardHeader>
-            <CardTitle>Pageviews Over Time</CardTitle>
+            <CardTitle>Promos & Reviews Over Time</CardTitle>
           </CardHeader>
           <CardContent>
             <ChartContainer
               config={{
-                pageviews: {
-                  label: "Pageviews",
-                  color: "hsl(var(--chart-2))",
-                },
+                promos: { label: "Promos", color: "hsl(var(--chart-4))" },
+                reviews: { label: "Reviews", color: "hsl(var(--chart-5))" },
               }}
               className="h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis 
-                    dataKey="date" 
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                  />
-                  <YAxis 
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                  />
+                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar 
-                    dataKey="pageviews" 
-                    fill="hsl(var(--chart-2))" 
-                    radius={[4, 4, 0, 0]}
-                  />
+                  <Bar dataKey="promos" fill="hsl(var(--chart-4))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="reviews" fill="hsl(var(--chart-5))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -239,42 +251,37 @@ export const AdminAnalytics = () => {
         </Card>
       </div>
 
-      {/* Traffic Distribution */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Traffic Distribution</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={{
-              value: {
-                label: "Count",
-              },
-            }}
-            className="h-[300px]"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={trafficDistribution}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {trafficDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <ChartTooltip content={<ChartTooltipContent />} />
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+      {/* Activity Distribution */}
+      {activityDistribution.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Activity Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={{ value: { label: "Count" } }} className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={activityDistribution}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {activityDistribution.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
