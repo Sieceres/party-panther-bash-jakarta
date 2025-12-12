@@ -19,6 +19,7 @@ import { UserProfile } from "./components/UserProfile";
 import TermsConditions from "./pages/TermsConditions";
 import About from "./pages/About";
 import ResetPassword from "./pages/ResetPassword";
+import WorldCupExplorer from "./pages/WorldCupExplorer";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
           <Route path="/admin/user/:userId" element={<UserProfile />} />
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/about" element={<About />} />
+          <Route path="/wce" element={<WorldCupExplorer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
