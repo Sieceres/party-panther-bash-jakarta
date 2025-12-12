@@ -556,7 +556,7 @@ const InstagramPostGenerator = () => {
             />
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-6 items-start">
             <PostEditor content={content} onChange={setContent} />
             <div className="lg:sticky lg:top-24 lg:self-start">
               <PostPreview 
