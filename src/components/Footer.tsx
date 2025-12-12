@@ -59,7 +59,6 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
           {/* Links */}
           <div className="flex flex-col items-center md:items-start space-y-2">
             <h3 className="font-semibold text-base sm:text-lg mb-2">Links</h3>
-            <Link to="/about" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors">About Us</Link>
             <Link to="/terms-conditions" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors">Terms and Conditions</Link>
           </div>
 
