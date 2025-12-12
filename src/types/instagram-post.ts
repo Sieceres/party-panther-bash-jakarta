@@ -73,7 +73,7 @@ export interface TextStyleSettings {
   };
 }
 
-export type BackgroundCoverage = "full" | "top" | "bottom" | "left" | "right";
+export type BackgroundCoverage = "full" | "top" | "bottom" | "left" | "right" | "middle";
 
 export interface BackgroundSettings {
   style: BackgroundStyle;
