@@ -20,6 +20,7 @@ import TermsConditions from "./pages/TermsConditions";
 import About from "./pages/About";
 import ResetPassword from "./pages/ResetPassword";
 import WorldCupExplorer from "./pages/WorldCupExplorer";
+import Proofing from "./pages/Proofing";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/about" element={<About />} />
           <Route path="/wce" element={<WorldCupExplorer />} />
+          <Route path="/proofing" element={<Proofing />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
