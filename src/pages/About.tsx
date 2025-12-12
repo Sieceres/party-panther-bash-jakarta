@@ -28,10 +28,6 @@ const About = () => {
         <div className="container mx-auto max-w-6xl py-12">
           <div className="text-center mb-16">
             <h1 className="text-5xl font-bold gradient-text mb-6">About Party Panther</h1>
-            <div className="flex items-baseline justify-center gap-2 mb-6">
-              <span className="text-2xl font-bold gradient-text">PARTY PANTHER</span>
-              <span className="text-sm font-serif text-red-500 transform -rotate-12 font-bold">BETA</span>
-            </div>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Jakarta's ultimate nightlife platform, letting you discover promos that make you purr, events that make you roar, and connect with other Party Panthers in the city.
             </p>
