@@ -144,10 +144,33 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
         return { top: 0, bottom: 0, left: 0, width: percent };
       case "right":
         return { top: 0, bottom: 0, right: 0, width: percent };
+      case "middle": {
+        const gap = (100 - bgCoveragePercent) / 2;
+        return { top: `${gap}%`, left: 0, right: 0, height: percent };
+      }
       default:
         return { inset: 0 };
     }
   };
+
+  // Generate scattered stars for the starfield background
+  const generateStars = (count: number) => {
+    const stars = [];
+    for (let i = 0; i < count; i++) {
+      const size = Math.random() * 2 + 1;
+      const opacity = Math.random() * 0.7 + 0.3;
+      stars.push({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size,
+        opacity,
+      });
+    }
+    return stars;
+  };
+
+  const stars = bgCoverage === "middle" ? generateStars(80) : [];
 
   return (
     <Card>
@@ -183,6 +206,34 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                 fontFamily: "'Poppins', sans-serif",
               }}
             >
+              {/* Starfield background for middle coverage */}
+              {bgStyle === "custom-image" && bgImage && bgCoverage === "middle" && (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "linear-gradient(180deg, #0d1b3e 0%, #1a1a2e 50%, #0d1b3e 100%)",
+                  }}
+                >
+                  {stars.map((star) => (
+                    <div
+                      key={star.id}
+                      style={{
+                        position: "absolute",
+                        left: `${star.x}%`,
+                        top: `${star.y}%`,
+                        width: star.size,
+                        height: star.size,
+                        borderRadius: "50%",
+                        backgroundColor: "#ffffff",
+                        opacity: star.opacity,
+                        boxShadow: `0 0 ${star.size * 2}px rgba(255, 255, 255, 0.5)`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
               {/* Custom Background Image */}
               {bgStyle === "custom-image" && bgImage && (
                 <>

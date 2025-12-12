@@ -357,12 +357,13 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                   <SelectTrigger className="text-sm">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                <SelectContent>
                     <SelectItem value="full">Full Cover</SelectItem>
                     <SelectItem value="top">Top Half</SelectItem>
                     <SelectItem value="bottom">Bottom Half</SelectItem>
                     <SelectItem value="left">Left Half</SelectItem>
                     <SelectItem value="right">Right Half</SelectItem>
+                    <SelectItem value="middle">Middle (Stars Top & Bottom)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
