@@ -1,5 +1,5 @@
 const Proofing = () => {
-  const iframeSrc = `https://norwegian-editor-veo-studio-409722247898.us-west1.run.app/?v=${Date.now()}`;
+  const iframeSrc = `https://norwegian-editor-409722247898.us-west1.run.app/?v=${Date.now()}`;
   
   return (
     <iframe
