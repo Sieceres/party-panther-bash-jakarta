@@ -242,12 +242,12 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
     <Card>
       <CardContent className="p-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full grid grid-cols-5 mb-4">
-            <TabsTrigger value="layout" className="text-xs px-2">Layout</TabsTrigger>
-            <TabsTrigger value="content" className="text-xs px-2">Content</TabsTrigger>
-            <TabsTrigger value="styling" className="text-xs px-2">Styling</TabsTrigger>
-            <TabsTrigger value="effects" className="text-xs px-2">Effects</TabsTrigger>
-            <TabsTrigger value="extras" className="text-xs px-2">Extras</TabsTrigger>
+          <TabsList className="w-full flex flex-wrap gap-1 h-auto p-1 mb-4">
+            <TabsTrigger value="layout" className="text-xs px-3 py-1.5 flex-1 min-w-[60px]">Layout</TabsTrigger>
+            <TabsTrigger value="content" className="text-xs px-3 py-1.5 flex-1 min-w-[60px]">Content</TabsTrigger>
+            <TabsTrigger value="styling" className="text-xs px-3 py-1.5 flex-1 min-w-[60px]">Styling</TabsTrigger>
+            <TabsTrigger value="effects" className="text-xs px-3 py-1.5 flex-1 min-w-[60px]">Effects</TabsTrigger>
+            <TabsTrigger value="extras" className="text-xs px-3 py-1.5 flex-1 min-w-[60px]">Extras</TabsTrigger>
           </TabsList>
 
           {/* LAYOUT TAB */}
