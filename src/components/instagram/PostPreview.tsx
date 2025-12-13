@@ -209,6 +209,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       toast({
         title: "Preview Ready",
         description: "Download window opened",
+        duration: 3000,
       });
     } catch (error) {
       console.error("Preview error:", error);
