@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Zap, ChevronDown } from "lucide-react";
+import { Calendar, Zap, ChevronDown, Instagram } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface HeroProps {
   onSectionChange: (section: string) => void;
@@ -10,11 +11,22 @@ interface HeroProps {
 
 export const Hero = ({ onSectionChange }: HeroProps) => {
   const navigate = useNavigate();
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [stats, setStats] = useState({
     events: 0,
     promos: 0,
     partyGoers: 0
   });
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -176,6 +188,17 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
               <span className="truncate">Explore Events</span>
             </Button>
           </div>
+          {user && (
+            <Button
+              size="lg"
+              onClick={() => navigate('/instagram-generator')}
+              className="cta-button group w-full sm:w-auto min-h-[48px] max-w-md sm:max-w-none"
+              style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
+            >
+              <Instagram className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0 group-hover:rotate-12 transition-transform" />
+              <span className="truncate">IG Creator</span>
+            </Button>
+          )}
         </div>
 
       </div>
