@@ -114,14 +114,14 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
     
     setPreviewLoading(true);
     try {
-      // Capture the preview at full resolution
+      // The preview element is rendered at full size (e.g., 1080x1080) but displayed scaled down via CSS transform
+      // html2canvas captures it at its actual rendered size, so we use scale: 1
       const canvas = await html2canvas(previewRef.current, {
         scale: 1,
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
-        width: dimensions.width,
-        height: dimensions.height,
+        logging: false,
       });
       
       // Convert to PNG data URL
