@@ -76,23 +76,11 @@ const InstagramPostGenerator = () => {
           return;
         }
 
-        const { is_admin } = await checkUserAdminStatus(user.id);
-
-        if (!is_admin) {
-          toast({
-            title: "Access Denied",
-            description: "This feature is only available to admins",
-            variant: "destructive"
-          });
-          navigate('/');
-          return;
-        }
-
         setUserId(user.id);
         setIsAuthorized(true);
       } catch (error) {
         console.error('Error checking authentication:', error);
-        navigate('/');
+        navigate('/auth');
       } finally {
         setAuthLoading(false);
       }

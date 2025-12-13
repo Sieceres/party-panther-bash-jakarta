@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield } from "lucide-react";
+import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Instagram } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
@@ -95,6 +95,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     { id: 'home', label: 'Home', icon: Home, hidden: false },
     { id: 'promos', label: 'Promos', icon: Zap, hidden: false },
     { id: 'events', label: 'Events', icon: Calendar, hidden: false },
+    { id: 'instagram', label: 'IG Creator', icon: Instagram, hidden: !user },
     { id: 'profile', label: 'Profile', icon: User, hidden: false },
     { id: 'admin', label: 'Admin', icon: Shield, hidden: !isAdmin }
   ];
@@ -134,18 +135,20 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                            return;
                          }
                          
-                         // Use proper navigation based on item type
-                         if (item.id === 'admin') {
-                           navigate('/admin');
-                         } else if (item.id === 'profile') {
-                           navigate('/profile');
-                         } else if (item.id === 'events') {
-                           navigate('/events');
-                         } else if (item.id === 'promos') {
-                           navigate('/promos');
-                         } else {
-                           navigate('/');
-                         }
+                          // Use proper navigation based on item type
+                          if (item.id === 'admin') {
+                            navigate('/admin');
+                          } else if (item.id === 'profile') {
+                            navigate('/profile');
+                          } else if (item.id === 'events') {
+                            navigate('/events');
+                          } else if (item.id === 'promos') {
+                            navigate('/promos');
+                          } else if (item.id === 'instagram') {
+                            navigate('/admin/instagram-generator');
+                          } else {
+                            navigate('/');
+                          }
                          onSectionChange(item.id);
                        }}
                      className={`flex items-center gap-2 transition-all text-sm ${
@@ -215,18 +218,20 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                            return;
                          }
                          
-                         // Use proper navigation based on item type
-                         if (item.id === 'admin') {
-                           navigate('/admin');
-                         } else if (item.id === 'profile') {
-                           navigate('/profile');
-                         } else if (item.id === 'events') {
-                           navigate('/events');
-                         } else if (item.id === 'promos') {
-                           navigate('/promos');
-                         } else {
-                           navigate('/');
-                         }
+                          // Use proper navigation based on item type
+                          if (item.id === 'admin') {
+                            navigate('/admin');
+                          } else if (item.id === 'profile') {
+                            navigate('/profile');
+                          } else if (item.id === 'events') {
+                            navigate('/events');
+                          } else if (item.id === 'promos') {
+                            navigate('/promos');
+                          } else if (item.id === 'instagram') {
+                            navigate('/admin/instagram-generator');
+                          } else {
+                            navigate('/');
+                          }
                          onSectionChange(item.id);
                           setIsMenuOpen(false);
                         }}
