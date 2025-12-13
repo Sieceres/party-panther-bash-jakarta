@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { HomeContent } from "@/components/sections/HomeContent";
 import { EventsSection } from "@/components/sections/EventsSection";
@@ -11,10 +11,14 @@ import { Footer } from "@/components/Footer";
 import { useOptimizedData } from "@/hooks/useOptimizedData";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
-const Index = () => {
+interface IndexProps {
+  initialSection?: string;
+}
+
+const Index = ({ initialSection = "home" }: IndexProps) => {
   const { toast } = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [activeSection, setActiveSection] = useState("home");
+  const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState(initialSection);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showCreatePromo, setShowCreatePromo] = useState(false);
 
@@ -54,17 +58,19 @@ const Index = () => {
     }
     setActiveSection(section);
     
-    // Don't update URL for sections with their own routes (admin, profile)
-    // These are handled by the Header's navigation
-    if (section === 'admin' || section === 'profile') {
+    // Navigate to proper routes
+    if (section === 'admin') {
+      navigate('/admin');
       return;
-    }
-    
-    // Update URL to reflect section change using React Router
-    if (section === 'home') {
-      setSearchParams({});
+    } else if (section === 'profile') {
+      navigate('/profile');
+      return;
+    } else if (section === 'events') {
+      navigate('/events');
+    } else if (section === 'promos') {
+      navigate('/promos');
     } else {
-      setSearchParams({ section });
+      navigate('/');
     }
     
     // Scroll to top when changing sections
@@ -82,15 +88,6 @@ const Index = () => {
   const [promoSortBy, setPromoSortBy] = useState("newest");
   const [eventSortBy, setEventSortBy] = useState("date-asc");
 
-  useEffect(() => {
-    // Handle URL section parameter using React Router
-    const section = searchParams.get('section');
-    if (section && ['home', 'events', 'promos', 'profile', 'contact'].includes(section)) {
-      setActiveSection(section);
-    } else {
-      setActiveSection('home');
-    }
-  }, [searchParams]);
 
   const filteredAndSortedPromos = promos
     .filter((promo) => {

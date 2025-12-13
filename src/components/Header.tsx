@@ -127,25 +127,27 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                      key={item.id}
                      variant={activeSection === item.id ? "default" : "ghost"}
                      size="default"
-                      onClick={() => {
-                        // Check if user is trying to access profile without being authenticated
-                        if (item.id === 'profile' && !user) {
-                          navigate('/auth');
-                          return;
-                        }
-                        
-                        // Use proper navigation based on item type
-                        if (item.id === 'admin') {
-                          navigate('/admin');
-                        } else if (item.id === 'profile') {
-                          navigate('/profile');
-                        } else if (item.id === 'home') {
-                          navigate('/');
-                        } else {
-                          navigate(`/?section=${item.id}`);
-                        }
-                        onSectionChange(item.id);
-                      }}
+                       onClick={() => {
+                         // Check if user is trying to access profile without being authenticated
+                         if (item.id === 'profile' && !user) {
+                           navigate('/auth');
+                           return;
+                         }
+                         
+                         // Use proper navigation based on item type
+                         if (item.id === 'admin') {
+                           navigate('/admin');
+                         } else if (item.id === 'profile') {
+                           navigate('/profile');
+                         } else if (item.id === 'events') {
+                           navigate('/events');
+                         } else if (item.id === 'promos') {
+                           navigate('/promos');
+                         } else {
+                           navigate('/');
+                         }
+                         onSectionChange(item.id);
+                       }}
                      className={`flex items-center gap-2 transition-all text-sm ${
                        activeSection === item.id 
                          ? "bg-primary text-primary-foreground" 
@@ -206,26 +208,28 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                      variant={activeSection === item.id ? "default" : "ghost"}
                      size="lg"
                      onClick={() => {
-                        // Check if user is trying to access profile without being authenticated
-                        if (item.id === 'profile' && !user) {
-                          navigate('/auth');
+                         // Check if user is trying to access profile without being authenticated
+                         if (item.id === 'profile' && !user) {
+                           navigate('/auth');
+                           setIsMenuOpen(false);
+                           return;
+                         }
+                         
+                         // Use proper navigation based on item type
+                         if (item.id === 'admin') {
+                           navigate('/admin');
+                         } else if (item.id === 'profile') {
+                           navigate('/profile');
+                         } else if (item.id === 'events') {
+                           navigate('/events');
+                         } else if (item.id === 'promos') {
+                           navigate('/promos');
+                         } else {
+                           navigate('/');
+                         }
+                         onSectionChange(item.id);
                           setIsMenuOpen(false);
-                          return;
-                        }
-                        
-                        // Use proper navigation based on item type
-                        if (item.id === 'admin') {
-                          navigate('/admin');
-                        } else if (item.id === 'profile') {
-                          navigate('/profile');
-                        } else if (item.id === 'home') {
-                          navigate('/');
-                        } else {
-                          navigate(`/?section=${item.id}`);
-                        }
-                        onSectionChange(item.id);
-                         setIsMenuOpen(false);
-                       }}
+                        }}
                      className="justify-start min-h-[44px] text-base"
                    >
                      <Icon className="w-5 h-5 mr-3" />
