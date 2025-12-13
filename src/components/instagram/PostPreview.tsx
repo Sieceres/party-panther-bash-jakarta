@@ -172,20 +172,22 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
   const stars = bgCoverage === "middle" ? generateStars(80) : [];
 
+  const scaledWidth = dimensions.width * previewScale;
+
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
-        <CardTitle>Preview</CardTitle>
-        <Button onClick={handleOpenFullScale} disabled={previewLoading}>
+    <Card style={{ width: scaledWidth + 48, maxWidth: '100%' }}>
+      <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap p-3">
+        <CardTitle className="text-base">Preview</CardTitle>
+        <Button size="sm" onClick={handleOpenFullScale} disabled={previewLoading}>
           {previewLoading ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           ) : (
             <ExternalLink className="w-4 h-4 mr-2" />
           )}
-          Preview & Download
+          Download
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-3">
         <div className="overflow-auto max-h-[600px] flex justify-center">
           <div
             style={{
