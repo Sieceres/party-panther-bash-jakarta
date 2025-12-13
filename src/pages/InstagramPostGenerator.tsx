@@ -466,7 +466,7 @@ const InstagramPostGenerator = () => {
       <Header activeSection="profile" onSectionChange={() => navigate('/profile')} />
       <div className="min-h-screen bg-background pt-20 px-4 pb-8">
         <div className="container mx-auto space-y-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="space-y-4">
             <div>
               <h1 className="text-4xl font-bold gradient-text mb-2">Instagram Post Generator</h1>
               <p className="text-muted-foreground">
@@ -556,9 +556,9 @@ const InstagramPostGenerator = () => {
             />
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-6 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-start">
             <PostEditor content={content} onChange={setContent} />
-            <div className="lg:sticky lg:top-24 lg:self-start">
+            <div className="lg:sticky lg:top-24 lg:self-start w-fit">
               <PostPreview 
                 content={content} 
                 onHeadlinePositionChange={handleHeadlinePositionChange}
