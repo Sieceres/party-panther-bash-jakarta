@@ -243,14 +243,22 @@ export const EventsSection = ({
               <div className="max-w-md mx-auto space-y-4">
                 <div className="text-6xl mb-4">🎉</div>
                 <h3 className="text-xl sm:text-2xl font-bold text-white">
-                  {events.length === 0
-                    ? "No events yet — create one and start the party!"
-                    : "No events match your filters"}
+                  {events.length === 0 ? (
+                    "No events yet — create one and start the party!"
+                  ) : (selectedDate || searchTerm || selectedTagIds.length > 0) ? (
+                    "No events match your filters"
+                  ) : (
+                    "No events are currently listed"
+                  )}
                 </h3>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  {events.length === 0
-                    ? "Be the first to create an amazing event and get the party started! 🎊"
-                    : "Try adjusting your search or filters to discover more events."}
+                  {events.length === 0 ? (
+                    "Be the first to create an amazing event and get the party started! 🎊"
+                  ) : (selectedDate || searchTerm || selectedTagIds.length > 0) ? (
+                    "Try adjusting your search or filters to discover more events."
+                  ) : (
+                    "Maybe you can go ahead and create one?"
+                  )}
                 </p>
                 {(selectedDate || searchTerm || selectedTagIds.length > 0) && (
                   <Button onClick={handleResetFilters} variant="default" size="lg" className="mt-4">
