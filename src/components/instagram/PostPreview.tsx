@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"; 
+import { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, ExternalLink, Move } from "lucide-react";
@@ -114,15 +114,31 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
     
     setPreviewLoading(true);
     try {
-      // The preview element is rendered at full size (e.g., 1080x1080) but displayed scaled down via CSS transform
-      // html2canvas captures it at its actual rendered size, so we use scale: 1
-      const canvas = await html2canvas(previewRef.current, {
+      // Clone the preview element and render it off-screen at full size (no CSS transform)
+      const clone = previewRef.current.cloneNode(true) as HTMLElement;
+      clone.style.position = "fixed";
+      clone.style.left = "-9999px";
+      clone.style.top = "0";
+      clone.style.transform = "none";
+      clone.style.width = `${dimensions.width}px`;
+      clone.style.height = `${dimensions.height}px`;
+      document.body.appendChild(clone);
+      
+      // Wait for images to load in the clone
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const canvas = await html2canvas(clone, {
+        width: dimensions.width,
+        height: dimensions.height,
         scale: 1,
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
         logging: false,
       });
+      
+      // Remove the clone
+      document.body.removeChild(clone);
       
       // Convert to PNG data URL
       const dataUrl = canvas.toDataURL("image/png");
