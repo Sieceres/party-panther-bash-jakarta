@@ -44,6 +44,8 @@ const App = () => (
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/events" element={<Index initialSection="events" />} />
+          <Route path="/promos" element={<Index initialSection="promos" />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/event/:id" element={<EventDetailPage />} />
