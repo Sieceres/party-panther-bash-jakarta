@@ -1,9 +1,10 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, ExternalLink, Move } from "lucide-react";
+import { Loader2, ExternalLink, Move } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { PostContent, BackgroundStyle, ElementPosition, BackgroundCoverage } from "@/types/instagram-post";
+import html2canvas from "html2canvas";
+import type { PostContent, BackgroundStyle, ElementPosition } from "@/types/instagram-post";
 import partyPantherLogo from "@/assets/party-panther-logo.png";
 
 interface PostPreviewProps {
@@ -109,16 +110,97 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
   };
 
   const handleOpenFullScale = async () => {
+    if (!previewRef.current) return;
+    
     setPreviewLoading(true);
     try {
-      // Simple screenshot approach - opens preview in new tab
-      const filename = `party-panther-${content.format}-${Date.now()}.png`;
+      // Capture the preview at full resolution
+      const canvas = await html2canvas(previewRef.current, {
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        width: dimensions.width,
+        height: dimensions.height,
+      });
+      
+      // Convert to PNG data URL
+      const dataUrl = canvas.toDataURL("image/png");
+      
+      // Open in new popup window with download option
+      const popup = window.open("", "_blank", `width=${Math.min(dimensions.width + 60, 1200)},height=${Math.min(dimensions.height + 120, 900)}`);
+      if (popup) {
+        popup.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Download Instagram Post</title>
+              <style>
+                body {
+                  margin: 0;
+                  padding: 20px;
+                  background: #1a1a2e;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  font-family: system-ui, sans-serif;
+                }
+                img {
+                  max-width: 100%;
+                  height: auto;
+                  border-radius: 8px;
+                  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+                }
+                .actions {
+                  margin-top: 16px;
+                  display: flex;
+                  gap: 12px;
+                }
+                a {
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 8px;
+                  padding: 12px 24px;
+                  background: #6366f1;
+                  color: white;
+                  text-decoration: none;
+                  border-radius: 8px;
+                  font-weight: 600;
+                  transition: background 0.2s;
+                }
+                a:hover { background: #4f46e5; }
+                .info {
+                  color: #888;
+                  font-size: 14px;
+                  margin-top: 12px;
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${dataUrl}" alt="Instagram Post" />
+              <div class="actions">
+                <a href="${dataUrl}" download="party-panther-${content.format}-${Date.now()}.png">
+                  ⬇️ Download PNG
+                </a>
+              </div>
+              <p class="info">${dimensions.width} × ${dimensions.height}px</p>
+            </body>
+          </html>
+        `);
+        popup.document.close();
+      }
+      
       toast({
         title: "Preview Ready",
-        description: "Use your browser's screenshot or print feature to save",
+        description: "Download window opened",
       });
     } catch (error) {
       console.error("Preview error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate preview",
+        variant: "destructive",
+      });
     } finally {
       setPreviewLoading(false);
     }

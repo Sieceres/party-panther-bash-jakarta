@@ -103,24 +103,23 @@ export const deleteFromCloudinary = async (publicId: string): Promise<void> => {
   console.warn('Cloudinary deletion requires server-side implementation');
 };
 
-// Upload JSON content as a raw file to Cloudinary
+// Upload JSON content as a text file to Cloudinary (avoids raw file format restrictions)
 export const uploadJsonToCloudinary = async (
   content: object,
   folder: string = 'instagram-posts'
 ): Promise<string> => {
   const jsonString = JSON.stringify(content);
-  const blob = new Blob([jsonString], { type: 'application/json' });
-  const file = new File([blob], 'content.json', { type: 'application/json' });
+  // Use .txt extension to bypass raw file format restrictions
+  const blob = new Blob([jsonString], { type: 'text/plain' });
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substring(2, 8);
+  const file = new File([blob], `content_${timestamp}_${randomString}.txt`, { type: 'text/plain' });
   
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
   formData.append('folder', folder);
   formData.append('resource_type', 'raw');
-  
-  const timestamp = Date.now();
-  const randomString = Math.random().toString(36).substring(2, 8);
-  formData.append('public_id', `content_${timestamp}_${randomString}`);
 
   const response = await fetch(
     `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/raw/upload`,
