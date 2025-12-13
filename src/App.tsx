@@ -52,6 +52,7 @@ const App = () => (
           <Route path="/promo/:id" element={<PromoDetailPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/instagram-generator" element={<InstagramPostGenerator />} />
+          <Route path="/instagram-generator" element={<InstagramPostGenerator />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/edit-event/:id" element={<EditEventPage />} />
           <Route path="/edit-promo/:id" element={<EditPromoPage />} />

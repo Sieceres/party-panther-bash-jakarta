@@ -145,7 +145,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                           } else if (item.id === 'promos') {
                             navigate('/promos');
                           } else if (item.id === 'instagram') {
-                            navigate('/admin/instagram-generator');
+                            navigate('/instagram-generator');
                           } else {
                             navigate('/');
                           }
@@ -228,7 +228,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                           } else if (item.id === 'promos') {
                             navigate('/promos');
                           } else if (item.id === 'instagram') {
-                            navigate('/admin/instagram-generator');
+                            navigate('/instagram-generator');
                           } else {
                             navigate('/');
                           }
