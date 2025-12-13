@@ -144,7 +144,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       const dataUrl = canvas.toDataURL("image/png");
       
       // Open in new popup window with download option
-      const popup = window.open("", "_blank", `width=${Math.min(dimensions.width + 60, 1200)},height=${Math.min(dimensions.height + 120, 900)}`);
+      const popup = window.open("", "_blank", `width=500,height=600`);
       if (popup) {
         popup.document.write(`
           <!DOCTYPE html>
