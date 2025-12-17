@@ -160,7 +160,7 @@ export const PromosSection = ({
             </label>
             <Select>
               <SelectTrigger className="glass-control">
-                <SelectValue>{getFilterDisplayText(dayFilter, "All days")}</SelectValue>
+                <SelectValue placeholder={getFilterDisplayText(dayFilter, "All days")} />
               </SelectTrigger>
               <SelectContent>
                 <div className="p-2 space-y-2">
@@ -206,7 +206,7 @@ export const PromosSection = ({
             </label>
             <Select>
               <SelectTrigger className="glass-control">
-                <SelectValue>{getFilterDisplayText(areaFilter, "All areas")}</SelectValue>
+                <SelectValue placeholder={getFilterDisplayText(areaFilter, "All areas")} />
               </SelectTrigger>
               <SelectContent>
                 <div className="p-2 space-y-2">
@@ -252,7 +252,7 @@ export const PromosSection = ({
             </label>
             <Select>
               <SelectTrigger className="glass-control">
-                <SelectValue>{getFilterDisplayText(drinkTypeFilter, "All types")}</SelectValue>
+                <SelectValue placeholder={getFilterDisplayText(drinkTypeFilter, "All types")} />
               </SelectTrigger>
               <SelectContent>
                 <div className="p-2 space-y-2">
