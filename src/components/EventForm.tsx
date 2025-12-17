@@ -44,7 +44,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [accessLevel, setAccessLevel] = useState<string>(initialData?.access_level || 'public');
   const [maxAttendees, setMaxAttendees] = useState<number | null>(initialData?.max_attendees || null);
   const [enableCheckIn, setEnableCheckIn] = useState(initialData?.enable_check_in || false);
-  const [enablePhotos, setEnablePhotos] = useState(initialData?.enable_photos || false);
+  const [enablePhotos, setEnablePhotos] = useState(initialData?.enable_photos ?? true);
   const [instagramPostUrl, setInstagramPostUrl] = useState(initialData?.instagram_post_url || "");
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
@@ -91,7 +91,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       setAccessLevel(initialData.access_level || 'public');
       setMaxAttendees(initialData.max_attendees || null);
       setEnableCheckIn(initialData.enable_check_in || false);
-      setEnablePhotos(initialData.enable_photos || false);
+      setEnablePhotos(initialData.enable_photos ?? true);
       handleSetLocation(
         initialData.venue_latitude && initialData.venue_longitude
           ? { lat: initialData.venue_latitude, lng: initialData.venue_longitude, address: initialData.venue_address || "" }
