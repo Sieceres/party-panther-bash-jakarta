@@ -1148,13 +1148,14 @@ export const UserProfile = () => {
                               <p className="text-sm text-muted-foreground mb-4">
                                 Register as venue to create promos, manage events, and connect with Jakarta's party community!
                               </p>
-                            <Dialog open={showVenueDialog} onOpenChange={setShowVenueDialog}>
-                              <DialogTrigger asChild>
-                                <Button className="bg-purple-600 hover:bg-purple-700">
-                                  <Building2 className="w-4 h-4 mr-2" />
-                                  Register as Venue
-                                </Button>
-                              </DialogTrigger>
+                            <div className="flex flex-wrap gap-2">
+                              <Dialog open={showVenueDialog} onOpenChange={setShowVenueDialog}>
+                                <DialogTrigger asChild>
+                                  <Button className="bg-purple-600 hover:bg-purple-700">
+                                    <Building2 className="w-4 h-4 mr-2" />
+                                    Register as Venue
+                                  </Button>
+                                </DialogTrigger>
                               <DialogContent className="sm:max-w-[500px]">
                                 <DialogHeader>
                                   <DialogTitle>Register as Venue</DialogTitle>
@@ -1216,7 +1217,24 @@ export const UserProfile = () => {
                                   </Button>
                                 </DialogFooter>
                               </DialogContent>
-                            </Dialog>
+                              </Dialog>
+                              <Button 
+                                variant="ghost" 
+                                className="text-muted-foreground hover:text-foreground"
+                                onClick={() => {
+                                  setVenueCtaDismissed(true);
+                                  if (user?.id) {
+                                    localStorage.setItem(`venueCtaDismissed_v2_${user.id}`, 'true');
+                                  }
+                                  toast({
+                                    title: "Contact us to register as a venue!",
+                                    description: "Reach out through our contact page if you change your mind.",
+                                  });
+                                }}
+                              >
+                                I'm not a Venue
+                              </Button>
+                            </div>
                           </div>
                             </div>
                         </div>
