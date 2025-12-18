@@ -5,7 +5,9 @@ import { Loader2, ExternalLink, Move } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import type { PostContent, BackgroundStyle, ElementPosition } from "@/types/instagram-post";
-import partyPantherLogo from "@/assets/party-panther-logo.png";
+
+// Use absolute URL for html2canvas compatibility
+const partyPantherLogo = "/logo-partypanyther.jpeg";
 
 interface PostPreviewProps {
   content: PostContent;
