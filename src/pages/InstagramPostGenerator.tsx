@@ -399,8 +399,26 @@ const InstagramPostGenerator = () => {
     
     setIsSavingTemplate(true);
     try {
-      const settingsUrl = await uploadJsonToCloudinary(content, `instagram-templates/${userId}`);
-      const thumbnailUrl = await generateThumbnail();
+      let settingsUrl: string;
+      let thumbnailUrl: string | null = null;
+      
+      // Try to upload settings to cloudinary
+      try {
+        settingsUrl = await uploadJsonToCloudinary(content, `instagram-templates/${userId}`);
+      } catch (uploadError) {
+        console.error('Cloudinary upload failed, using data URL fallback:', uploadError);
+        // Fallback: encode settings as data URL (less ideal but works)
+        const jsonString = JSON.stringify(content);
+        const base64 = btoa(unescape(encodeURIComponent(jsonString)));
+        settingsUrl = `data:application/json;base64,${base64}`;
+      }
+      
+      // Try to generate thumbnail (non-critical)
+      try {
+        thumbnailUrl = await generateThumbnail();
+      } catch (thumbError) {
+        console.warn('Thumbnail generation failed:', thumbError);
+      }
 
       const { error } = await supabase
         .from('instagram_templates')
@@ -413,7 +431,10 @@ const InstagramPostGenerator = () => {
           is_public: isPublic,
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database insert error:', error);
+        throw error;
+      }
 
       toast({
         title: "Template Saved",
@@ -424,7 +445,7 @@ const InstagramPostGenerator = () => {
       console.error('Error saving template:', error);
       toast({
         title: "Save Failed",
-        description: "Could not save the template",
+        description: error instanceof Error ? error.message : "Could not save the template",
         variant: "destructive",
       });
     } finally {
