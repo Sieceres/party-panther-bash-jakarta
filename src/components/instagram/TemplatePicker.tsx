@@ -70,8 +70,18 @@ export const TemplatePicker = ({ open, onOpenChange, onSelectTemplate, currentUs
       
       // Otherwise fetch from URL
       if (template.settings_url) {
-        const response = await fetch(template.settings_url);
-        const settings = await response.json();
+        let settings: PostContent;
+        
+        // Handle data URL fallback
+        if (template.settings_url.startsWith('data:application/json;base64,')) {
+          const base64 = template.settings_url.replace('data:application/json;base64,', '');
+          const jsonString = decodeURIComponent(escape(atob(base64)));
+          settings = JSON.parse(jsonString);
+        } else {
+          const response = await fetch(template.settings_url);
+          settings = await response.json();
+        }
+        
         onSelectTemplate(settings);
         onOpenChange(false);
         toast.success(`Template "${template.name}" applied`);

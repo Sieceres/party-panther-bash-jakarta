@@ -6,8 +6,14 @@ import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import type { PostContent, BackgroundStyle, ElementPosition } from "@/types/instagram-post";
 
-// Use absolute URL for html2canvas compatibility
-const partyPantherLogo = "/logo-partypanyther.jpeg";
+// Use full URL for html2canvas compatibility
+const getLogoUrl = () => {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/logo-partypanyther.jpeg`;
+  }
+  return "/logo-partypanyther.jpeg";
+};
+const partyPantherLogo = getLogoUrl();
 
 interface PostPreviewProps {
   content: PostContent;
