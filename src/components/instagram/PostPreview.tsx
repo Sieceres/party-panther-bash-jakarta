@@ -5,13 +5,14 @@ import { Loader2, ExternalLink, Move } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import type { PostContent, BackgroundStyle, ElementPosition } from "@/types/instagram-post";
+import partyPantherLogo from "@/assets/party-panther-logo.png";
 
-const LOGO_PATH = "/logo-partypanyther.jpeg";
 interface PostPreviewProps {
   content: PostContent;
   onHeadlinePositionChange?: (position: ElementPosition) => void;
   onSectionPositionChange?: (index: number, position: ElementPosition) => void;
 }
+
 
 const getBackgroundConfig = (style: BackgroundStyle) => {
   switch (style) {
@@ -44,7 +45,6 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
   const [draggingElement, setDraggingElement] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const logoUrl = typeof window !== "undefined" ? `${window.location.origin}${LOGO_PATH}` : LOGO_PATH;
 
   const getDimensions = () => {
     switch (content.format) {
@@ -383,9 +383,15 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
               {content.showLogo && (
                 <div style={{ position: "absolute", top: 48, left: 48, zIndex: 10, height: 80 }}>
                   <img
-                    src={logoUrl}
+                    src={partyPantherLogo}
                     alt="Party Panther logo"
-                    crossOrigin="anonymous"
+                    loading="eager"
+                    decoding="async"
+                    onError={(e) => {
+                      console.error("Logo failed to load in IG preview", {
+                        src: e.currentTarget.currentSrc || e.currentTarget.src,
+                      });
+                    }}
                     style={{ width: 80, height: 80, borderRadius: "50%", position: "absolute", objectFit: "cover" }}
                   />
                   <span
