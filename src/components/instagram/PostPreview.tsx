@@ -6,14 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import type { PostContent, BackgroundStyle, ElementPosition } from "@/types/instagram-post";
 
-// Use full URL for html2canvas compatibility
-const getLogoUrl = () => {
-  if (typeof window !== 'undefined') {
-    return `${window.location.origin}/logo-partypanyther.jpeg`;
-  }
-  return "/logo-partypanyther.jpeg";
-};
-const partyPantherLogo = getLogoUrl();
+// Import logo as ES6 module - this gets properly bundled and works with html2canvas
+import partyPantherLogo from "/logo-partypanyther.jpeg?url";
 
 interface PostPreviewProps {
   content: PostContent;
