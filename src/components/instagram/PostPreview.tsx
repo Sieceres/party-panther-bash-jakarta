@@ -380,16 +380,18 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
               <div style={{ position: "absolute", inset: 0, background: bgConfig.overlay }} />
 
               {/* Logo & Brand */}
-              {content.showLogo && (
+              {(content.showLogo ?? true) && (
                 <div style={{ position: "absolute", top: 48, left: 48, zIndex: 10, height: 80 }}>
                   <img
                     src={partyPantherLogo}
                     alt="Party Panther logo"
                     loading="eager"
                     decoding="async"
-                    onError={(e) => {
-                      console.error("Logo failed to load in IG preview", {
-                        src: e.currentTarget.currentSrc || e.currentTarget.src,
+                    onError={() => {
+                      toast({
+                        title: "Logo not loading",
+                        description: "The logo asset failed to load in the preview.",
+                        variant: "destructive",
                       });
                     }}
                     style={{ width: 80, height: 80, borderRadius: "50%", position: "absolute", objectFit: "cover" }}

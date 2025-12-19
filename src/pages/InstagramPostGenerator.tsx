@@ -385,7 +385,7 @@ const InstagramPostGenerator = () => {
 
   // Apply template settings
   const handleApplyTemplate = (settings: PostContent) => {
-    setSlides([{ ...settings }]);
+    setSlides([{ ...migratePostContent(settings) }]);
     setCurrentSlideIndex(0);
     setCarouselMode(false);
     setCurrentPostId(null);
