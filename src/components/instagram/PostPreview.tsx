@@ -6,9 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import type { PostContent, BackgroundStyle, ElementPosition } from "@/types/instagram-post";
 
-// Import logo as ES6 module - this gets properly bundled and works with html2canvas
-import partyPantherLogo from "/logo-partypanyther.jpeg?url";
-
+const LOGO_PATH = "/logo-partypanyther.jpeg";
 interface PostPreviewProps {
   content: PostContent;
   onHeadlinePositionChange?: (position: ElementPosition) => void;
@@ -45,6 +43,8 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
   const [previewLoading, setPreviewLoading] = useState(false);
   const [draggingElement, setDraggingElement] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const logoUrl = typeof window !== "undefined" ? `${window.location.origin}${LOGO_PATH}` : LOGO_PATH;
 
   const getDimensions = () => {
     switch (content.format) {
@@ -126,8 +126,20 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       clone.style.height = `${dimensions.height}px`;
       document.body.appendChild(clone);
       
-      // Wait for images to load in the clone
-      await new Promise(resolve => setTimeout(resolve, 100));
+       // Wait for images to load in the clone (important for html2canvas)
+       const images = Array.from(clone.querySelectorAll("img")) as HTMLImageElement[];
+       await Promise.race([
+         Promise.all(images.map((img) => (
+           img.complete
+             ? Promise.resolve()
+             : new Promise<void>((resolve) => {
+                 const done = () => resolve();
+                 img.addEventListener("load", done, { once: true });
+                 img.addEventListener("error", done, { once: true });
+               })
+         ))),
+         new Promise((resolve) => setTimeout(resolve, 1500)),
+       ]);
       
       const canvas = await html2canvas(clone, {
         width: dimensions.width,
@@ -371,8 +383,9 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
               {content.showLogo && (
                 <div style={{ position: "absolute", top: 48, left: 48, zIndex: 10, height: 80 }}>
                   <img
-                    src={partyPantherLogo}
-                    alt="Party Panther"
+                    src={logoUrl}
+                    alt="Party Panther logo"
+                    crossOrigin="anonymous"
                     style={{ width: 80, height: 80, borderRadius: "50%", position: "absolute", objectFit: "cover" }}
                   />
                   <span
