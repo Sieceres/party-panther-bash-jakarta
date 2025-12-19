@@ -384,7 +384,7 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
               <Label htmlFor="showLogo">Show Logo & Brand Name</Label>
               <Switch
                 id="showLogo"
-                checked={content.showLogo}
+                checked={content.showLogo ?? true}
                 onCheckedChange={(checked) => updateField("showLogo", checked)}
               />
             </div>
