@@ -111,11 +111,28 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
     document.addEventListener("mouseup", handleMouseUp);
   };
 
+  // Helper to prepare clone for export (fixes gradient text for html2canvas)
+  const prepareCloneForExport = (clone: HTMLElement) => {
+    // Fix gradient text - html2canvas can't render background-clip: text
+    const brandText = clone.querySelector('[data-brand-text]') as HTMLElement;
+    if (brandText) {
+      brandText.style.background = "none";
+      brandText.style.webkitBackgroundClip = "unset";
+      brandText.style.backgroundClip = "unset";
+      brandText.style.webkitTextFillColor = "#00CFFF";
+      brandText.style.color = "#00CFFF";
+      brandText.style.textShadow = "0 0 20px rgba(0, 207, 255, 0.6)";
+    }
+  };
+
   const handleOpenFullScale = async () => {
     if (!previewRef.current) return;
     
     setPreviewLoading(true);
     try {
+      // Wait for fonts to be ready
+      await document.fonts.ready;
+      
       // Clone the preview element and render it off-screen at full size (no CSS transform)
       const clone = previewRef.current.cloneNode(true) as HTMLElement;
       clone.style.position = "fixed";
@@ -126,20 +143,23 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       clone.style.height = `${dimensions.height}px`;
       document.body.appendChild(clone);
       
-       // Wait for images to load in the clone (important for html2canvas)
-       const images = Array.from(clone.querySelectorAll("img")) as HTMLImageElement[];
-       await Promise.race([
-         Promise.all(images.map((img) => (
-           img.complete
-             ? Promise.resolve()
-             : new Promise<void>((resolve) => {
-                 const done = () => resolve();
-                 img.addEventListener("load", done, { once: true });
-                 img.addEventListener("error", done, { once: true });
-               })
-         ))),
-         new Promise((resolve) => setTimeout(resolve, 1500)),
-       ]);
+      // Prepare clone for export (fix gradient text)
+      prepareCloneForExport(clone);
+      
+      // Wait for images to load in the clone (important for html2canvas)
+      const images = Array.from(clone.querySelectorAll("img")) as HTMLImageElement[];
+      await Promise.race([
+        Promise.all(images.map((img) => (
+          img.complete
+            ? Promise.resolve()
+            : new Promise<void>((resolve) => {
+                const done = () => resolve();
+                img.addEventListener("load", done, { once: true });
+                img.addEventListener("error", done, { once: true });
+              })
+        ))),
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+      ]);
       
       const canvas = await html2canvas(clone, {
         width: dimensions.width,
@@ -292,6 +312,9 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
     
     setPreviewLoading(true);
     try {
+      // Wait for fonts to be ready
+      await document.fonts.ready;
+      
       const clone = previewRef.current.cloneNode(true) as HTMLElement;
       clone.style.position = "fixed";
       clone.style.left = "-9999px";
@@ -300,6 +323,9 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       clone.style.width = `${dimensions.width}px`;
       clone.style.height = `${dimensions.height}px`;
       document.body.appendChild(clone);
+      
+      // Prepare clone for export (fix gradient text)
+      prepareCloneForExport(clone);
       
       const images = Array.from(clone.querySelectorAll("img")) as HTMLImageElement[];
       await Promise.race([
@@ -482,6 +508,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     }}
                   />
                   <span
+                    data-brand-text
                     style={{
                       fontSize: 28,
                       fontWeight: 800,
