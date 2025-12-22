@@ -111,17 +111,46 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // Helper to prepare clone for export (fixes gradient text for html2canvas)
+  // Helper to prepare clone for export (fixes html2canvas rendering differences)
   const prepareCloneForExport = (clone: HTMLElement) => {
-    // Fix gradient text - html2canvas can't render background-clip: text
-    const brandText = clone.querySelector('[data-brand-text]') as HTMLElement;
+    const brandContainer = clone.querySelector('[data-brand-container]') as HTMLElement | null;
+    const brandLogo = clone.querySelector('[data-brand-logo]') as HTMLImageElement | null;
+    const brandText = clone.querySelector('[data-brand-text]') as HTMLElement | null;
+
+    // Filters + gradient text can render inconsistently in html2canvas; make export layout deterministic.
+    if (brandContainer) {
+      brandContainer.style.gap = "0px";
+      brandContainer.style.alignItems = "center";
+    }
+
+    if (brandLogo) {
+      // Avoid filter affecting rasterization/layout in some browsers
+      brandLogo.style.filter = "none";
+    }
+
     if (brandText) {
+      // Replace gradient text with a solid color + shadow (gradient via background-clip isn't reliable)
       brandText.style.background = "none";
-      brandText.style.webkitBackgroundClip = "unset";
+      (brandText.style as any).webkitBackgroundClip = "unset";
       brandText.style.backgroundClip = "unset";
-      brandText.style.webkitTextFillColor = "#00CFFF";
+      (brandText.style as any).webkitTextFillColor = "#00CFFF";
       brandText.style.color = "#00CFFF";
       brandText.style.textShadow = "0 0 20px rgba(0, 207, 255, 0.6)";
+
+      // Match header-like spacing between logo and text
+      brandText.style.marginLeft = "6px";
+
+      // Force consistent vertical centering with the 56px logo
+      brandText.style.display = "flex";
+      (brandText.style as any).alignItems = "center";
+      brandText.style.height = "56px";
+      brandText.style.lineHeight = "56px";
+
+      // Avoid filter impacting rendering
+      brandText.style.filter = "none";
+
+      // Nudge for font-metric differences in canvas capture
+      brandText.style.transform = "translateY(1px)";
     }
   };
 
@@ -477,6 +506,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
               {/* Logo & Brand */}
               {(content.showLogo ?? true) && (
                 <div
+                  data-brand-container
                   style={{
                     position: "absolute",
                     top: 48,
@@ -489,6 +519,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                   }}
                 >
                   <img
+                    data-brand-logo
                     src={partyPantherLogo}
                     alt="Party Panther logo"
                     width={56}
@@ -512,6 +543,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     style={{
                       fontSize: 28,
                       fontWeight: 800,
+                      marginLeft: 6,
                       background: "linear-gradient(to right, #00CFFF, #4F8EFF)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
