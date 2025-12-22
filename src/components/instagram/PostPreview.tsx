@@ -453,47 +453,45 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                 <div
                   style={{
                     position: "absolute",
-                    top: 60,
-                    left: 60,
+                    top: 48,
+                    left: 48,
                     zIndex: 10,
                     display: "flex",
                     flexDirection: "row",
                     alignItems: "center",
-                    gap: 12,
-                    height: 80,
+                    gap: 0,
                   }}
                 >
                   <img
                     src={partyPantherLogo}
                     alt="Party Panther logo"
-                    width={80}
-                    height={80}
+                    width={56}
+                    height={56}
                     crossOrigin="anonymous"
                     loading="eager"
                     decoding="async"
                     style={{
-                      width: 80,
-                      height: 80,
-                      minWidth: 80,
-                      minHeight: 80,
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                      boxShadow: "0 12px 28px rgba(0,0,0,0.35)",
+                      width: 56,
+                      height: 56,
+                      minWidth: 56,
+                      minHeight: 56,
+                      objectFit: "contain",
+                      filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
                       display: "block",
                       flexShrink: 0,
                     }}
                   />
                   <span
                     style={{
-                      fontSize: 32,
-                      fontWeight: 700,
-                      color: "#00d4ff",
+                      fontSize: 28,
+                      fontWeight: 800,
+                      background: "linear-gradient(to right, #00CFFF, #4F8EFF)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
                       whiteSpace: "nowrap",
                       lineHeight: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      height: 80,
-                      textShadow: "0 0 20px rgba(0, 207, 255, 0.5)",
+                      filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
                     }}
                   >
                     Party Panther
