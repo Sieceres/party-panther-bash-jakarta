@@ -382,19 +382,20 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
               {/* Logo & Brand */}
               {(content.showLogo ?? true) && (
                 <div style={{ position: "absolute", top: 48, left: 48, zIndex: 10, height: 80 }}>
-                  <img
-                    src={partyPantherLogo}
-                    alt="Party Panther logo"
-                    loading="eager"
-                    decoding="async"
-                    onError={() => {
-                      toast({
-                        title: "Logo not loading",
-                        description: "The logo asset failed to load in the preview.",
-                        variant: "destructive",
-                      });
+                  <div
+                    role="img"
+                    aria-label="Party Panther logo"
+                    style={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: "50%",
+                      position: "absolute",
+                      backgroundImage: `url(${partyPantherLogo})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                      boxShadow: "0 12px 28px rgba(0,0,0,0.35)",
                     }}
-                    style={{ width: 80, height: 80, borderRadius: "50%", position: "absolute", objectFit: "cover" }}
                   />
                   <span
                     style={{
