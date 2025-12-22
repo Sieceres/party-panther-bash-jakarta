@@ -453,13 +453,14 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                 <div
                   style={{
                     position: "absolute",
-                    top: 56,
-                    left: 56,
+                    top: 60,
+                    left: 60,
                     zIndex: 10,
                     display: "flex",
                     flexDirection: "row",
                     alignItems: "center",
-                    gap: 16,
+                    gap: 12,
+                    height: 80,
                   }}
                 >
                   <img
@@ -488,7 +489,10 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       fontWeight: 700,
                       color: "#00d4ff",
                       whiteSpace: "nowrap",
-                      lineHeight: "80px",
+                      lineHeight: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      height: 80,
                       textShadow: "0 0 20px rgba(0, 207, 255, 0.5)",
                     }}
                   >
