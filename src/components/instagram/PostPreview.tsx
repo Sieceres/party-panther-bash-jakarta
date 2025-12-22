@@ -1,11 +1,21 @@
 import { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, ExternalLink, Move } from "lucide-react";
+import { Loader2, ExternalLink, Move, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import type { PostContent, BackgroundStyle, ElementPosition } from "@/types/instagram-post";
 import partyPantherLogo from "@/assets/party-panther-logo.png";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface PostPreviewProps {
   content: PostContent;
@@ -43,6 +53,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
   const previewRef = useRef<HTMLDivElement>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [draggingElement, setDraggingElement] = useState<string | null>(null);
+  const [showDownloadConfirm, setShowDownloadConfirm] = useState(false);
   const { toast } = useToast();
 
 
@@ -158,7 +169,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       const dataUrl = canvas.toDataURL("image/png");
       
       // Open in new popup window with download option
-      const popup = window.open("", "_blank", `width=500,height=600`);
+      const popup = window.open("", "_blank", `width=500,height=700`);
       if (popup) {
         popup.document.write(`
           <!DOCTYPE html>
@@ -182,7 +193,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
                 }
                 .actions {
-                  margin-bottom: 16px;
+                  margin-top: 16px;
                   display: flex;
                   gap: 12px;
                 }
@@ -207,12 +218,12 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
               </style>
             </head>
             <body>
+              <img src="${dataUrl}" alt="Instagram Post" />
               <div class="actions">
                 <a href="${dataUrl}" download="party-panther-${content.format}-${Date.now()}.png">
                   ⬇️ Download PNG
                 </a>
               </div>
-              <img src="${dataUrl}" alt="Instagram Post" />
               <p class="info">${dimensions.width} × ${dimensions.height}px</p>
             </body>
           </html>
@@ -288,18 +299,37 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
   const scaledWidth = dimensions.width * previewScale;
 
   return (
-    <Card style={{ width: scaledWidth + 48, maxWidth: '100%' }}>
-      <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap p-3">
-        <CardTitle className="text-base">Preview</CardTitle>
-        <Button size="sm" onClick={handleOpenFullScale} disabled={previewLoading}>
-          {previewLoading ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
-            <ExternalLink className="w-4 h-4 mr-2" />
-          )}
-          Download
-        </Button>
-      </CardHeader>
+    <>
+      <AlertDialog open={showDownloadConfirm} onOpenChange={setShowDownloadConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Download now?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You can download later by clicking the Download button.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleOpenFullScale}>
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      <Card style={{ width: scaledWidth + 48, maxWidth: '100%' }}>
+        <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap p-3">
+          <CardTitle className="text-base">Preview</CardTitle>
+          <Button size="sm" onClick={() => setShowDownloadConfirm(true)} disabled={previewLoading}>
+            {previewLoading ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
+            Download
+          </Button>
+        </CardHeader>
       <CardContent className="p-3">
         <div className="overflow-auto max-h-[600px] flex justify-center">
           <div
@@ -388,9 +418,9 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     left: 48,
                     zIndex: 10,
                     display: "flex",
+                    flexDirection: "row",
                     alignItems: "center",
-                    gap: 12,
-                    height: 80,
+                    gap: 16,
                   }}
                 >
                   <img
@@ -404,10 +434,13 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     style={{
                       width: 80,
                       height: 80,
+                      minWidth: 80,
+                      minHeight: 80,
                       borderRadius: "50%",
                       objectFit: "cover",
                       boxShadow: "0 12px 28px rgba(0,0,0,0.35)",
                       display: "block",
+                      flexShrink: 0,
                     }}
                   />
                   <span
@@ -416,9 +449,8 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       fontWeight: 700,
                       color: "#00d4ff",
                       whiteSpace: "nowrap",
-                      lineHeight: 1,
+                      lineHeight: "80px",
                       textShadow: "0 0 20px rgba(0, 207, 255, 0.5)",
-                      paddingTop: 2,
                     }}
                   >
                     Party Panther
@@ -549,7 +581,8 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
         <p className="text-sm text-muted-foreground text-center mt-4">
           Preview scaled to {Math.round(previewScale * 100)}% • Actual size: {dimensions.width}×{dimensions.height}px
         </p>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </>
   );
 };
