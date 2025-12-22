@@ -6,16 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import type { PostContent, BackgroundStyle, ElementPosition } from "@/types/instagram-post";
 import partyPantherLogo from "@/assets/party-panther-logo.png";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 interface PostPreviewProps {
   content: PostContent;
@@ -53,7 +43,6 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
   const previewRef = useRef<HTMLDivElement>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [draggingElement, setDraggingElement] = useState<string | null>(null);
-  const [showDownloadConfirm, setShowDownloadConfirm] = useState(false);
   const { toast } = useToast();
 
 
@@ -298,30 +287,79 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
   const scaledWidth = dimensions.width * previewScale;
 
-  return (
-    <>
-      <AlertDialog open={showDownloadConfirm} onOpenChange={setShowDownloadConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Download now?</AlertDialogTitle>
-            <AlertDialogDescription>
-              You can download later by clicking the Download button.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleOpenFullScale}>
-              <Download className="w-4 h-4 mr-2" />
-              Download
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+  const handleDirectDownload = async () => {
+    if (!previewRef.current) return;
+    
+    setPreviewLoading(true);
+    try {
+      const clone = previewRef.current.cloneNode(true) as HTMLElement;
+      clone.style.position = "fixed";
+      clone.style.left = "-9999px";
+      clone.style.top = "0";
+      clone.style.transform = "none";
+      clone.style.width = `${dimensions.width}px`;
+      clone.style.height = `${dimensions.height}px`;
+      document.body.appendChild(clone);
       
-      <Card style={{ width: scaledWidth + 48, maxWidth: '100%' }}>
-        <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap p-3">
-          <CardTitle className="text-base">Preview</CardTitle>
-          <Button size="sm" onClick={() => setShowDownloadConfirm(true)} disabled={previewLoading}>
+      const images = Array.from(clone.querySelectorAll("img")) as HTMLImageElement[];
+      await Promise.race([
+        Promise.all(images.map((img) => (
+          img.complete
+            ? Promise.resolve()
+            : new Promise<void>((resolve) => {
+                const done = () => resolve();
+                img.addEventListener("load", done, { once: true });
+                img.addEventListener("error", done, { once: true });
+              })
+        ))),
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+      ]);
+      
+      const canvas = await html2canvas(clone, {
+        width: dimensions.width,
+        height: dimensions.height,
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        logging: false,
+      });
+      
+      document.body.removeChild(clone);
+      
+      const dataUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `party-panther-${content.format}-${Date.now()}.png`;
+      link.click();
+      
+      toast({
+        title: "Downloaded",
+        description: "Image saved successfully",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Download error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to download",
+        variant: "destructive",
+      });
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  return (
+    <Card style={{ width: scaledWidth + 48, maxWidth: '100%' }}>
+      <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap p-3">
+        <CardTitle className="text-base">Preview</CardTitle>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={handleOpenFullScale} disabled={previewLoading}>
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Open Window
+          </Button>
+          <Button size="sm" onClick={handleDirectDownload} disabled={previewLoading}>
             {previewLoading ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             ) : (
@@ -329,7 +367,8 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
             )}
             Download
           </Button>
-        </CardHeader>
+        </div>
+      </CardHeader>
       <CardContent className="p-3">
         <div className="overflow-auto max-h-[600px] flex justify-center">
           <div
@@ -414,8 +453,8 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                 <div
                   style={{
                     position: "absolute",
-                    top: 48,
-                    left: 48,
+                    top: 56,
+                    left: 56,
                     zIndex: 10,
                     display: "flex",
                     flexDirection: "row",
@@ -581,8 +620,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
         <p className="text-sm text-muted-foreground text-center mt-4">
           Preview scaled to {Math.round(previewScale * 100)}% • Actual size: {dimensions.width}×{dimensions.height}px
         </p>
-        </CardContent>
-      </Card>
-    </>
+      </CardContent>
+    </Card>
   );
 };
