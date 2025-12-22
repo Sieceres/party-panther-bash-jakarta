@@ -182,7 +182,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
                 }
                 .actions {
-                  margin-top: 16px;
+                  margin-bottom: 16px;
                   display: flex;
                   gap: 12px;
                 }
@@ -207,12 +207,12 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
               </style>
             </head>
             <body>
-              <img src="${dataUrl}" alt="Instagram Post" />
               <div class="actions">
                 <a href="${dataUrl}" download="party-panther-${content.format}-${Date.now()}.png">
                   ⬇️ Download PNG
                 </a>
               </div>
+              <img src="${dataUrl}" alt="Instagram Post" />
               <p class="info">${dimensions.width} × ${dimensions.height}px</p>
             </body>
           </html>
@@ -381,20 +381,33 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
               {/* Logo & Brand */}
               {(content.showLogo ?? true) && (
-                <div style={{ position: "absolute", top: 48, left: 48, zIndex: 10, height: 80 }}>
-                  <div
-                    role="img"
-                    aria-label="Party Panther logo"
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 48,
+                    left: 48,
+                    zIndex: 10,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    height: 80,
+                  }}
+                >
+                  <img
+                    src={partyPantherLogo}
+                    alt="Party Panther logo"
+                    width={80}
+                    height={80}
+                    crossOrigin="anonymous"
+                    loading="eager"
+                    decoding="async"
                     style={{
                       width: 80,
                       height: 80,
                       borderRadius: "50%",
-                      position: "absolute",
-                      backgroundImage: `url(${partyPantherLogo})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      backgroundRepeat: "no-repeat",
+                      objectFit: "cover",
                       boxShadow: "0 12px 28px rgba(0,0,0,0.35)",
+                      display: "block",
                     }}
                   />
                   <span
@@ -402,11 +415,10 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       fontSize: 32,
                       fontWeight: 700,
                       color: "#00d4ff",
-                      position: "absolute",
-                      top: 20,
-                      left: 96,
                       whiteSpace: "nowrap",
+                      lineHeight: 1,
                       textShadow: "0 0 20px rgba(0, 207, 255, 0.5)",
+                      paddingTop: 2,
                     }}
                   >
                     Party Panther
