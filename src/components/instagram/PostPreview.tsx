@@ -119,16 +119,15 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
     // Filters + gradient text can render inconsistently in html2canvas; make export layout deterministic.
     if (brandContainer) {
-      brandContainer.style.display = "inline-flex";
+      brandContainer.style.display = "flex";
       brandContainer.style.flexDirection = "row";
       brandContainer.style.alignItems = "center";
-      brandContainer.style.gap = "6px";
+      brandContainer.style.gap = "8px";
     }
 
     if (brandLogo) {
-      // Avoid filter affecting rasterization/layout in some browsers
       brandLogo.style.filter = "none";
-      brandLogo.style.display = "block";
+      brandLogo.style.verticalAlign = "middle";
     }
 
     if (brandText) {
@@ -139,16 +138,9 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       (brandText.style as any).webkitTextFillColor = "#00CFFF";
       brandText.style.color = "#00CFFF";
       brandText.style.textShadow = "0 0 20px rgba(0, 207, 255, 0.6)";
-
-      // Use container gap for spacing (avoid margin calculations differing in canvas capture)
       brandText.style.marginLeft = "0px";
-
-      // Keep a normal line box and apply a tiny baseline nudge for canvas capture
-      brandText.style.lineHeight = "1";
-      brandText.style.display = "inline-flex";
-      (brandText.style as any).alignItems = "center";
       brandText.style.filter = "none";
-      brandText.style.transform = "translateY(-2px)";
+      brandText.style.verticalAlign = "middle";
     }
   };
 
@@ -483,13 +475,15 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       backgroundPosition: "center",
                     }}
                   />
-                  <div
-                    style={{
-                      position: "absolute",
-                      ...getBackgroundImageStyle(),
-                      backgroundColor: `rgba(0,0,0,${bgOpacity / 100})`,
-                    }}
-                  />
+                  {bgOpacity > 0 && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        ...getBackgroundImageStyle(),
+                        backgroundColor: `rgba(0,0,0,${bgOpacity / 100})`,
+                      }}
+                    />
+                  )}
                 </>
               )}
               
@@ -515,7 +509,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     display: "flex",
                     flexDirection: "row",
                     alignItems: "center",
-                    gap: 0,
+                    gap: 8,
                   }}
                 >
                   <img
@@ -536,6 +530,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
                       display: "block",
                       flexShrink: 0,
+                      verticalAlign: "middle",
                     }}
                   />
                   <span
@@ -543,14 +538,14 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     style={{
                       fontSize: 28,
                       fontWeight: 800,
-                      marginLeft: 6,
                       background: "linear-gradient(to right, #00CFFF, #4F8EFF)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
                       whiteSpace: "nowrap",
-                      lineHeight: 1,
+                      lineHeight: "56px",
                       filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
+                      verticalAlign: "middle",
                     }}
                   >
                     Party Panther
