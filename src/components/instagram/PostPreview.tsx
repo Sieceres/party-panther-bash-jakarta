@@ -127,7 +127,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
     if (brandLogo) {
       brandLogo.style.filter = "none";
-      brandLogo.style.verticalAlign = "middle";
+      brandLogo.style.display = "block";
     }
 
     if (brandText) {
@@ -138,9 +138,109 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       (brandText.style as any).webkitTextFillColor = "#00CFFF";
       brandText.style.color = "#00CFFF";
       brandText.style.textShadow = "0 0 20px rgba(0, 207, 255, 0.6)";
-      brandText.style.marginLeft = "0px";
       brandText.style.filter = "none";
-      brandText.style.verticalAlign = "middle";
+
+      // Make baseline deterministic across browsers/canvas:
+      brandText.style.display = "flex";
+      (brandText.style as any).alignItems = "center";
+      brandText.style.height = "56px";
+      brandText.style.lineHeight = "1";
+      brandText.style.transform = "translateY(-1px)";
+    }
+  };
+
+  const handleOpenLivePreview = async () => {
+    if (!previewRef.current) return;
+
+    setPreviewLoading(true);
+    try {
+      await document.fonts.ready;
+
+      const popup = window.open("", "_blank");
+      if (!popup) {
+        toast({
+          title: "Popup blocked",
+          description: "Please allow popups to open the 100% preview.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      popup.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>Preview (100%)</title>
+            <style>
+              body {
+                margin: 0;
+                padding: 24px;
+                background: #0b0b10;
+                font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+              }
+              .wrap {
+                display: grid;
+                place-items: start center;
+              }
+              .frame {
+                width: ${dimensions.width}px;
+                height: ${dimensions.height}px;
+                box-shadow: 0 18px 60px rgba(0,0,0,0.55);
+                border-radius: 12px;
+                overflow: hidden;
+              }
+              .hint {
+                margin-top: 12px;
+                color: rgba(255,255,255,0.6);
+                font-size: 12px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="wrap">
+              <div id="mount" class="frame"></div>
+              <div class="hint">${dimensions.width} × ${dimensions.height}px • Live DOM preview at 100%</div>
+            </div>
+          </body>
+        </html>
+      `);
+      popup.document.close();
+
+      // Clone the preview element and mount it into the popup at 100% scale.
+      const clone = previewRef.current.cloneNode(true) as HTMLElement;
+      clone.style.transform = "none";
+      clone.style.width = `${dimensions.width}px`;
+      clone.style.height = `${dimensions.height}px`;
+
+      // Ensure brand block is aligned the same way in the popup.
+      const brandText = clone.querySelector('[data-brand-text]') as HTMLElement | null;
+      if (brandText) {
+        brandText.style.display = "flex";
+        (brandText.style as any).alignItems = "center";
+        brandText.style.height = "56px";
+        brandText.style.lineHeight = "1";
+        brandText.style.transform = "translateY(-1px)";
+      }
+
+      const mount = popup.document.getElementById("mount");
+      mount?.appendChild(clone);
+
+      toast({
+        title: "100% Preview Opened",
+        description: "Opened a live 1:1 preview in a new window",
+        duration: 2500,
+      });
+    } catch (error) {
+      console.error("Open live preview error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to open the 100% preview",
+        variant: "destructive",
+      });
+    } finally {
+      setPreviewLoading(false);
     }
   };
 
@@ -277,7 +377,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
   };
 
   const bgImage = content.background?.image || content.backgroundImage;
-  const bgOpacity = content.background?.opacity || 30;
+  const bgOpacity = content.background?.opacity ?? 30;
   const bgCoverage = content.background?.coverage || "full";
   const bgCoveragePercent = content.background?.coveragePercent || 50;
 
@@ -397,23 +497,27 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
   return (
     <Card style={{ width: scaledWidth + 48, maxWidth: '100%' }}>
-      <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap p-3">
-        <CardTitle className="text-base">Preview</CardTitle>
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={handleOpenFullScale} disabled={previewLoading}>
-            <ExternalLink className="w-4 h-4 mr-2" />
-            Open Window
-          </Button>
-          <Button size="sm" onClick={handleDirectDownload} disabled={previewLoading}>
-            {previewLoading ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4 mr-2" />
-            )}
-            Download
-          </Button>
-        </div>
-      </CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap p-3">
+          <CardTitle className="text-base">Preview</CardTitle>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={handleOpenLivePreview} disabled={previewLoading}>
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Open 100%
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleOpenFullScale} disabled={previewLoading}>
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Open Window
+            </Button>
+            <Button size="sm" onClick={handleDirectDownload} disabled={previewLoading}>
+              {previewLoading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              Download
+            </Button>
+          </div>
+        </CardHeader>
       <CardContent className="p-3">
         <div className="overflow-auto max-h-[600px] flex justify-center">
           <div
@@ -530,7 +634,6 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
                       display: "block",
                       flexShrink: 0,
-                      verticalAlign: "middle",
                     }}
                   />
                   <span
@@ -543,9 +646,14 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
                       whiteSpace: "nowrap",
-                      lineHeight: "56px",
                       filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
-                      verticalAlign: "middle",
+
+                      // Critical for vertical alignment: keep a normal line box and center via flex.
+                      display: "flex",
+                      alignItems: "center",
+                      height: 56,
+                      lineHeight: 1,
+                      transform: "translateY(-1px)",
                     }}
                   >
                     Party Panther
