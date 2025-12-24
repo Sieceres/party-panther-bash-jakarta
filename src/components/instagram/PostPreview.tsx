@@ -119,13 +119,16 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
     // Filters + gradient text can render inconsistently in html2canvas; make export layout deterministic.
     if (brandContainer) {
-      brandContainer.style.gap = "0px";
+      brandContainer.style.display = "inline-flex";
+      brandContainer.style.flexDirection = "row";
       brandContainer.style.alignItems = "center";
+      brandContainer.style.gap = "6px";
     }
 
     if (brandLogo) {
       // Avoid filter affecting rasterization/layout in some browsers
       brandLogo.style.filter = "none";
+      brandLogo.style.display = "block";
     }
 
     if (brandText) {
@@ -137,20 +140,15 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       brandText.style.color = "#00CFFF";
       brandText.style.textShadow = "0 0 20px rgba(0, 207, 255, 0.6)";
 
-      // Match header-like spacing between logo and text
-      brandText.style.marginLeft = "6px";
+      // Use container gap for spacing (avoid margin calculations differing in canvas capture)
+      brandText.style.marginLeft = "0px";
 
-      // Force consistent vertical centering with the 56px logo
-      brandText.style.display = "flex";
+      // Keep a normal line box and apply a tiny baseline nudge for canvas capture
+      brandText.style.lineHeight = "1";
+      brandText.style.display = "inline-flex";
       (brandText.style as any).alignItems = "center";
-      brandText.style.height = "56px";
-      brandText.style.lineHeight = "56px";
-
-      // Avoid filter impacting rendering
       brandText.style.filter = "none";
-
-      // Nudge for font-metric differences in canvas capture
-      brandText.style.transform = "translateY(1px)";
+      brandText.style.transform = "translateY(-2px)";
     }
   };
 
@@ -500,8 +498,10 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                 <div style={{ position: "absolute", inset: 0, background: bgConfig.mainGradient }} />
               )}
               
-              {/* Overlay */}
-              <div style={{ position: "absolute", inset: 0, background: bgConfig.overlay }} />
+              {/* Overlay (for custom images, overlay is controlled ONLY by “Overlay Darkness”) */}
+              {bgStyle !== "custom-image" && (
+                <div style={{ position: "absolute", inset: 0, background: bgConfig.overlay }} />
+              )}
 
               {/* Logo & Brand */}
               {(content.showLogo ?? true) && (
