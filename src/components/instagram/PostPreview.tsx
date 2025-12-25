@@ -128,7 +128,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
     if (brandLogo) {
       brandLogo.style.filter = "none";
       brandLogo.style.display = "block";
-      brandLogo.style.transform = "translateY(-14px)";
+      brandLogo.style.transform = "none";
     }
 
     if (brandText) {
@@ -146,7 +146,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       (brandText.style as any).alignItems = "center";
       brandText.style.height = "56px";
       brandText.style.lineHeight = "1";
-      brandText.style.transform = "translateY(-1px)";
+      brandText.style.transform = "translateY(-28px)";
     }
   };
 
@@ -635,7 +635,6 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
                       display: "block",
                       flexShrink: 0,
-                      transform: "translateY(-14px)",
                     }}
                   />
                   <span
@@ -655,7 +654,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       alignItems: "center",
                       height: 56,
                       lineHeight: 1,
-                      transform: "translateY(-1px)",
+                      transform: "translateY(-28px)",
                     }}
                   >
                     Party Panther
