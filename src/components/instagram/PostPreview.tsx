@@ -128,6 +128,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
     if (brandLogo) {
       brandLogo.style.filter = "none";
       brandLogo.style.display = "block";
+      brandLogo.style.transform = "translateY(-14px)";
     }
 
     if (brandText) {
@@ -634,6 +635,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
                       display: "block",
                       flexShrink: 0,
+                      transform: "translateY(-14px)",
                     }}
                   />
                   <span
