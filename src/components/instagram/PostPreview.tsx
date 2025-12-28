@@ -148,7 +148,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       (brandText.style as any).alignItems = "center";
       brandText.style.height = "56px";
       brandText.style.lineHeight = "1";
-      brandText.style.transform = "translateY(-8px)";
+      brandText.style.transform = "translateY(0px)";
     }
   };
 
