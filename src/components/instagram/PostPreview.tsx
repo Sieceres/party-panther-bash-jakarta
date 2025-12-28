@@ -146,7 +146,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       (brandText.style as any).alignItems = "center";
       brandText.style.height = "56px";
       brandText.style.lineHeight = "1";
-      brandText.style.transform = "translateY(-28px)";
+      brandText.style.transform = "translateY(-8px)";
     }
   };
 
@@ -654,7 +654,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       alignItems: "center",
                       height: 56,
                       lineHeight: 1,
-                      transform: "translateY(-28px)",
+                      transform: "translateY(-8px)",
                     }}
                   >
                     Party Panther
