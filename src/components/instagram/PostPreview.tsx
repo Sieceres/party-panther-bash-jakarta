@@ -13,7 +13,6 @@ interface PostPreviewProps {
   onSectionPositionChange?: (index: number, position: ElementPosition) => void;
 }
 
-
 const getBackgroundConfig = (style: BackgroundStyle) => {
   switch (style) {
     case "hero-style":
@@ -45,16 +44,19 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
   const [draggingElement, setDraggingElement] = useState<string | null>(null);
   const { toast } = useToast();
 
-
   const getDimensions = () => {
     switch (content.format) {
-      case "square": return { width: 1080, height: 1080 };
-      case "portrait": return { width: 1080, height: 1350 };
-      case "story": return { width: 1080, height: 1920 };
-      default: return { width: 1080, height: 1080 };
+      case "square":
+        return { width: 1080, height: 1080 };
+      case "portrait":
+        return { width: 1080, height: 1350 };
+      case "story":
+        return { width: 1080, height: 1920 };
+      default:
+        return { width: 1080, height: 1080 };
     }
   };
-  
+
   const dimensions = getDimensions();
   const previewScale = content.format === "story" ? 0.25 : content.format === "portrait" ? 0.35 : 0.4;
   const bgStyle = content.background?.style || content.backgroundStyle || "dark-gradient";
@@ -69,17 +71,17 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
   const getTextStyle = (type: "headline" | "subheadline" | "body") => {
     const shadow = shadows?.[type];
     const stroke = strokes?.[type];
-    
+
     let style: React.CSSProperties = {};
-    
+
     if (shadow?.enabled) {
       style.textShadow = `${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blur}px ${shadow.color}`;
     }
-    
+
     if (stroke?.enabled) {
       style.WebkitTextStroke = `${stroke.width}px ${stroke.color}`;
     }
-    
+
     return style;
   };
 
@@ -87,12 +89,12 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
     if (!previewRef.current) return;
     e.preventDefault();
     setDraggingElement(elementId);
-    
+
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const rect = previewRef.current!.getBoundingClientRect();
       const x = Math.max(10, Math.min(90, ((moveEvent.clientX - rect.left) / rect.width) * 100));
       const y = Math.max(10, Math.min(90, ((moveEvent.clientY - rect.top) / rect.height) * 100));
-      
+
       if (elementId === "headline" && onHeadlinePositionChange) {
         onHeadlinePositionChange({ x, y });
       } else if (elementId.startsWith("section-") && onSectionPositionChange) {
@@ -100,22 +102,22 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
         onSectionPositionChange(index, { x, y });
       }
     };
-    
+
     const handleMouseUp = () => {
       setDraggingElement(null);
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-    
+
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
   };
 
   // Helper to prepare clone for export (fixes html2canvas rendering differences)
   const prepareCloneForExport = (clone: HTMLElement) => {
-    const brandContainer = clone.querySelector('[data-brand-container]') as HTMLElement | null;
-    const brandLogo = clone.querySelector('[data-brand-logo]') as HTMLImageElement | null;
-    const brandText = clone.querySelector('[data-brand-text]') as HTMLElement | null;
+    const brandContainer = clone.querySelector("[data-brand-container]") as HTMLElement | null;
+    const brandLogo = clone.querySelector("[data-brand-logo]") as HTMLImageElement | null;
+    const brandText = clone.querySelector("[data-brand-text]") as HTMLElement | null;
 
     // Filters + gradient text can render inconsistently in html2canvas; make export layout deterministic.
     if (brandContainer) {
@@ -216,7 +218,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       clone.style.height = `${dimensions.height}px`;
 
       // Ensure brand block is aligned the same way in the popup.
-      const brandText = clone.querySelector('[data-brand-text]') as HTMLElement | null;
+      const brandText = clone.querySelector("[data-brand-text]") as HTMLElement | null;
       if (brandText) {
         brandText.style.display = "flex";
         (brandText.style as any).alignItems = "center";
@@ -247,12 +249,12 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
   const handleOpenFullScale = async () => {
     if (!previewRef.current) return;
-    
+
     setPreviewLoading(true);
     try {
       // Wait for fonts to be ready
       await document.fonts.ready;
-      
+
       // Clone the preview element and render it off-screen at full size (no CSS transform)
       const clone = previewRef.current.cloneNode(true) as HTMLElement;
       clone.style.position = "fixed";
@@ -262,25 +264,27 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       clone.style.width = `${dimensions.width}px`;
       clone.style.height = `${dimensions.height}px`;
       document.body.appendChild(clone);
-      
+
       // Prepare clone for export (fix gradient text)
       prepareCloneForExport(clone);
-      
+
       // Wait for images to load in the clone (important for html2canvas)
       const images = Array.from(clone.querySelectorAll("img")) as HTMLImageElement[];
       await Promise.race([
-        Promise.all(images.map((img) => (
-          img.complete
-            ? Promise.resolve()
-            : new Promise<void>((resolve) => {
-                const done = () => resolve();
-                img.addEventListener("load", done, { once: true });
-                img.addEventListener("error", done, { once: true });
-              })
-        ))),
+        Promise.all(
+          images.map((img) =>
+            img.complete
+              ? Promise.resolve()
+              : new Promise<void>((resolve) => {
+                  const done = () => resolve();
+                  img.addEventListener("load", done, { once: true });
+                  img.addEventListener("error", done, { once: true });
+                }),
+          ),
+        ),
         new Promise((resolve) => setTimeout(resolve, 1500)),
       ]);
-      
+
       const canvas = await html2canvas(clone, {
         width: dimensions.width,
         height: dimensions.height,
@@ -290,13 +294,13 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
         backgroundColor: null,
         logging: false,
       });
-      
+
       // Remove the clone
       document.body.removeChild(clone);
-      
+
       // Convert to PNG data URL
       const dataUrl = canvas.toDataURL("image/png");
-      
+
       // Open in new popup window with download option
       const popup = window.open("", "_blank", `width=500,height=700`);
       if (popup) {
@@ -359,7 +363,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
         `);
         popup.document.close();
       }
-      
+
       toast({
         title: "Preview Ready",
         description: "Download window opened",
@@ -386,7 +390,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
     if (bgCoverage === "full") {
       return { inset: 0 };
     }
-    
+
     const percent = `${bgCoveragePercent}%`;
     switch (bgCoverage) {
       case "top":
@@ -429,12 +433,12 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
   const handleDirectDownload = async () => {
     if (!previewRef.current) return;
-    
+
     setPreviewLoading(true);
     try {
       // Wait for fonts to be ready
       await document.fonts.ready;
-      
+
       const clone = previewRef.current.cloneNode(true) as HTMLElement;
       clone.style.position = "fixed";
       clone.style.left = "-9999px";
@@ -443,24 +447,26 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       clone.style.width = `${dimensions.width}px`;
       clone.style.height = `${dimensions.height}px`;
       document.body.appendChild(clone);
-      
+
       // Prepare clone for export (fix gradient text)
       prepareCloneForExport(clone);
-      
+
       const images = Array.from(clone.querySelectorAll("img")) as HTMLImageElement[];
       await Promise.race([
-        Promise.all(images.map((img) => (
-          img.complete
-            ? Promise.resolve()
-            : new Promise<void>((resolve) => {
-                const done = () => resolve();
-                img.addEventListener("load", done, { once: true });
-                img.addEventListener("error", done, { once: true });
-              })
-        ))),
+        Promise.all(
+          images.map((img) =>
+            img.complete
+              ? Promise.resolve()
+              : new Promise<void>((resolve) => {
+                  const done = () => resolve();
+                  img.addEventListener("load", done, { once: true });
+                  img.addEventListener("error", done, { once: true });
+                }),
+          ),
+        ),
         new Promise((resolve) => setTimeout(resolve, 1500)),
       ]);
-      
+
       const canvas = await html2canvas(clone, {
         width: dimensions.width,
         height: dimensions.height,
@@ -470,15 +476,15 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
         backgroundColor: null,
         logging: false,
       });
-      
+
       document.body.removeChild(clone);
-      
+
       const dataUrl = canvas.toDataURL("image/png");
       const link = document.createElement("a");
       link.href = dataUrl;
       link.download = `party-panther-${content.format}-${Date.now()}.png`;
       link.click();
-      
+
       toast({
         title: "Downloaded",
         description: "Image saved successfully",
@@ -497,28 +503,24 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
   };
 
   return (
-    <Card style={{ width: scaledWidth + 48, maxWidth: '100%' }}>
-        <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap p-3">
-          <CardTitle className="text-base">Preview</CardTitle>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={handleOpenLivePreview} disabled={previewLoading}>
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Open 100%
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleOpenFullScale} disabled={previewLoading}>
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Open Window
-            </Button>
-            <Button size="sm" onClick={handleDirectDownload} disabled={previewLoading}>
-              {previewLoading ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Download className="w-4 h-4 mr-2" />
-              )}
-              Download
-            </Button>
-          </div>
-        </CardHeader>
+    <Card style={{ width: scaledWidth + 48, maxWidth: "100%" }}>
+      <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap p-3">
+        <CardTitle className="text-base">Preview</CardTitle>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={handleOpenLivePreview} disabled={previewLoading}>
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Open 100%
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleOpenFullScale} disabled={previewLoading}>
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Open Window
+          </Button>
+          <Button size="sm" onClick={handleDirectDownload} disabled={previewLoading}>
+            {previewLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+            Download
+          </Button>
+        </div>
+      </CardHeader>
       <CardContent className="p-3">
         <div className="overflow-auto max-h-[600px] flex justify-center">
           <div
@@ -591,12 +593,12 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                   )}
                 </>
               )}
-              
+
               {/* Background gradient */}
               {bgStyle !== "custom-image" && (
                 <div style={{ position: "absolute", inset: 0, background: bgConfig.mainGradient }} />
               )}
-              
+
               {/* Overlay (for custom images, overlay is controlled ONLY by “Overlay Darkness”) */}
               {bgStyle !== "custom-image" && (
                 <div style={{ position: "absolute", inset: 0, background: bgConfig.overlay }} />
@@ -654,7 +656,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       alignItems: "center",
                       height: 56,
                       lineHeight: 1,
-                      transform: "translateY(-8px)",
+                      transform: "translateY(0px)",
                     }}
                   >
                     Party Panther
@@ -673,27 +675,33 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     width: dimensions.width - 128,
                     textAlign: alignments.headline,
                     zIndex: content.zIndex?.headline || 5,
-                    cursor: onHeadlinePositionChange ? (draggingElement === "headline" ? "grabbing" : "grab") : "default",
+                    cursor: onHeadlinePositionChange
+                      ? draggingElement === "headline"
+                        ? "grabbing"
+                        : "grab"
+                      : "default",
                     userSelect: "none",
                   }}
                   onMouseDown={(e) => onHeadlinePositionChange && handleDrag("headline", e)}
                 >
                   {onHeadlinePositionChange && (
-                    <div style={{
-                      position: "absolute",
-                      top: -24,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      background: "rgba(0,0,0,0.6)",
-                      padding: "2px 8px",
-                      borderRadius: 4,
-                      fontSize: 12,
-                      color: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                      opacity: draggingElement === "headline" ? 1 : 0.5,
-                    }}>
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: -24,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        background: "rgba(0,0,0,0.6)",
+                        padding: "2px 8px",
+                        borderRadius: 4,
+                        fontSize: 12,
+                        color: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                        opacity: draggingElement === "headline" ? 1 : 0.5,
+                      }}
+                    >
                       <Move size={10} /> Headline
                     </div>
                   )}
@@ -724,27 +732,33 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     width: dimensions.width - 128,
                     textAlign: alignments.subheadline,
                     zIndex: content.zIndex?.sections?.[index] || 3,
-                    cursor: onSectionPositionChange ? (draggingElement === `section-${index}` ? "grabbing" : "grab") : "default",
+                    cursor: onSectionPositionChange
+                      ? draggingElement === `section-${index}`
+                        ? "grabbing"
+                        : "grab"
+                      : "default",
                     userSelect: "none",
                   }}
                   onMouseDown={(e) => onSectionPositionChange && handleDrag(`section-${index}`, e)}
                 >
                   {onSectionPositionChange && (
-                    <div style={{
-                      position: "absolute",
-                      top: -24,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      background: "rgba(0,0,0,0.6)",
-                      padding: "2px 8px",
-                      borderRadius: 4,
-                      fontSize: 12,
-                      color: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                      opacity: draggingElement === `section-${index}` ? 1 : 0.5,
-                    }}>
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: -24,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        background: "rgba(0,0,0,0.6)",
+                        padding: "2px 8px",
+                        borderRadius: 4,
+                        fontSize: 12,
+                        color: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                        opacity: draggingElement === `section-${index}` ? 1 : 0.5,
+                      }}
+                    >
                       <Move size={10} /> Section {index + 1}
                     </div>
                   )}
