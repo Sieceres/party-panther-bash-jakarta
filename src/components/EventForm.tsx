@@ -15,6 +15,8 @@ import { EventOrganizer } from "./form-components/EventOrganizer";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { EventTagSelector } from "./form-components/EventTagSelector";
 import { EventPrivacySettings } from "./form-components/EventPrivacySettings";
+import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
+import { DuplicateWarning } from "./DuplicateWarning";
 
 import { Tables } from "../integrations/supabase/types";
 import { getEventUrl } from "@/lib/slug-utils";
@@ -29,6 +31,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [duplicateConfirmed, setDuplicateConfirmed] = useState(false);
   
   const [eventDate, setEventDate] = useState<Date | undefined>(
     initialData?.date 
@@ -61,6 +64,21 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       ? { lat: initialData.venue_latitude, lng: initialData.venue_longitude, address: initialData.venue_address || "" }
       : null
   );
+
+  // Duplicate detection - only for new events
+  const { duplicates, isChecking, hasChecked } = useDuplicateCheck({
+    type: "event",
+    title: formData.title,
+    venue: formData.venue,
+    description: formData.description,
+    date: eventDate ? `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}` : undefined,
+    enabled: !initialData?.id, // Only check for new events
+  });
+
+  // Reset confirmation when duplicates change
+  useEffect(() => {
+    setDuplicateConfirmed(false);
+  }, [duplicates]);
 
   const handleSetLocation = useCallback((newLocation: { lat: number; lng: number; address: string } | null) => {
     setLocation(newLocation);
@@ -315,6 +333,15 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
     }
   };
 
+  const showDuplicateWarning = !initialData?.id && hasChecked && duplicates.length > 0;
+  
+  // For new events with duplicates, require confirmation
+  const canSubmit = () => {
+    if (isSubmitting || isChecking) return false;
+    if (!initialData?.id && duplicates.length > 0 && !duplicateConfirmed) return false;
+    return true;
+  };
+
   return (
     <div className="max-w-2xl mx-auto">
       <Card className="bg-card border-border">
@@ -392,12 +419,28 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               onInstagramPostUrlChange={setInstagramPostUrl}
             />
 
+            {/* Duplicate Warning - only for new events */}
+            {!initialData?.id && (
+              <DuplicateWarning
+                type="event"
+                duplicates={duplicates}
+                isChecking={isChecking}
+                hasChecked={hasChecked}
+                onConfirm={setDuplicateConfirmed}
+                confirmed={duplicateConfirmed}
+              />
+            )}
+
             <Button
               type="submit"
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 neon-glow"
-              disabled={isSubmitting}
+              disabled={!canSubmit()}
             >
-              {isSubmitting ? (initialData?.id ? "Saving Changes..." : "Creating Event...") : (initialData?.id ? "Save Changes" : "Create Event")}
+              {isSubmitting 
+                ? (initialData?.id ? "Saving Changes..." : "Creating Event...") 
+                : showDuplicateWarning 
+                  ? "Confirm & Create Event" 
+                  : (initialData?.id ? "Save Changes" : "Create Event")}
             </Button>
           </form>
         </CardContent>
