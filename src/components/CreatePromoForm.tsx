@@ -10,6 +10,8 @@ import { PromoDiscount } from "./form-components/PromoDiscount";
 import { LocationAutocomplete } from "./form-components/LocationAutocomplete";
 import { PromoDetails } from "./form-components/PromoDetails";
 import { ImageUpload } from "./form-components/ImageUpload";
+import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
+import { DuplicateWarning } from "./DuplicateWarning";
 
 export const CreatePromoForm = () => {
   const { toast } = useToast();
@@ -18,6 +20,7 @@ export const CreatePromoForm = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [validUntilDate, setValidUntilDate] = useState<Date>();
   const [formErrors, setFormErrors] = useState<string[]>([]);
+  const [duplicateConfirmed, setDuplicateConfirmed] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -30,6 +33,21 @@ export const CreatePromoForm = () => {
     image: ""
   });
   const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+
+  // Duplicate detection
+  const { duplicates, isChecking, hasChecked } = useDuplicateCheck({
+    type: "promo",
+    title: formData.title,
+    venue: formData.venue,
+    description: formData.description,
+    promoType: formData.promoType,
+    area: formData.area,
+  });
+
+  // Reset confirmation when duplicates change
+  useEffect(() => {
+    setDuplicateConfirmed(false);
+  }, [duplicates]);
 
   const handleInputChange = (field: string, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -64,10 +82,17 @@ export const CreatePromoForm = () => {
   };
 
   const isFormValid = () => {
-    return formData.title.trim() && 
+    const baseValid = formData.title.trim() && 
            formData.description.trim() && 
            formData.venue.trim() && 
            formData.promoType;
+    
+    // If duplicates found, require confirmation
+    if (duplicates.length > 0 && !duplicateConfirmed) {
+      return false;
+    }
+    
+    return baseValid;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -139,6 +164,8 @@ export const CreatePromoForm = () => {
       setIsSubmitting(false);
     }
   };
+
+  const showDuplicateWarning = hasChecked && duplicates.length > 0;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -214,12 +241,22 @@ export const CreatePromoForm = () => {
               </div>
             )}
 
+            {/* Duplicate Warning */}
+            <DuplicateWarning
+              type="promo"
+              duplicates={duplicates}
+              isChecking={isChecking}
+              hasChecked={hasChecked}
+              onConfirm={setDuplicateConfirmed}
+              confirmed={duplicateConfirmed}
+            />
+
             <Button
               type="submit"
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 neon-glow disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isSubmitting || !isFormValid()}
+              disabled={isSubmitting || !isFormValid() || isChecking}
             >
-              {isSubmitting ? "Creating Promo..." : "Create Promo"}
+              {isSubmitting ? "Creating Promo..." : showDuplicateWarning ? "Confirm & Create Promo" : "Create Promo"}
             </Button>
           </form>
         </CardContent>
