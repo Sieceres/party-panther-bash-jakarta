@@ -1,0 +1,187 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+const promoTool = {
+  type: "function" as const,
+  function: {
+    name: "extract_promos",
+    description: "Extract all promotional offers found in the image/document. Each promo should be a separate item.",
+    parameters: {
+      type: "object",
+      properties: {
+        items: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              title: { type: "string", description: "Promo title, e.g. 'Happy Hour at Bar X'" },
+              description: { type: "string", description: "Brief description of the promo" },
+              venue_name: { type: "string", description: "Name of the venue/bar/restaurant" },
+              venue_address: { type: "string", description: "Address if visible" },
+              discount_text: { type: "string", description: "The discount/deal text, e.g. '2-for-1 cocktails' or '50% off'" },
+              promo_type: { type: "string", description: "Type: happy_hour, ladies_night, brunch_deal, food_special, drink_special, live_music, other" },
+              day_of_week: { type: "array", items: { type: "string" }, description: "Days this promo is active: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday" },
+              area: { type: "string", description: "Area/neighborhood if visible" },
+              drink_type: { type: "array", items: { type: "string" }, description: "Types of drinks if applicable" },
+              original_price_amount: { type: "number", description: "Original price if visible" },
+              discounted_price_amount: { type: "number", description: "Discounted price if visible" },
+              price_currency: { type: "string", description: "Currency code, default IDR" },
+              category: { type: "string", description: "Category: bar, club, restaurant, cafe, hotel, rooftop, beach_club, other" },
+            },
+            required: ["title", "venue_name", "discount_text"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["items"],
+      additionalProperties: false,
+    },
+  },
+};
+
+const eventTool = {
+  type: "function" as const,
+  function: {
+    name: "extract_events",
+    description: "Extract all events found in the image/document. Each event should be a separate item.",
+    parameters: {
+      type: "object",
+      properties: {
+        items: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              title: { type: "string", description: "Event title" },
+              description: { type: "string", description: "Brief description" },
+              date: { type: "string", description: "Date in YYYY-MM-DD format if visible" },
+              time: { type: "string", description: "Time in HH:MM format if visible" },
+              venue_name: { type: "string", description: "Venue name" },
+              venue_address: { type: "string", description: "Venue address if visible" },
+              organizer_name: { type: "string", description: "Organizer name if visible" },
+              price_currency: { type: "string", description: "Currency code, default IDR" },
+            },
+            required: ["title"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["items"],
+      additionalProperties: false,
+    },
+  },
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { image, type } = await req.json();
+
+    if (!image) {
+      return new Response(JSON.stringify({ error: "No image provided" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY is not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const isPromo = type === "promo";
+    const tool = isPromo ? promoTool : eventTool;
+    const toolName = isPromo ? "extract_promos" : "extract_events";
+
+    const systemPrompt = isPromo
+      ? `You are an expert at extracting promotional offers from images and documents. 
+Extract ALL promos/deals you can find. Each venue+deal combination should be a separate item.
+If a venue has promos on different days, create separate items for each day or group days together.
+If you see a weekly schedule grid, extract every cell that contains a promo.
+Be thorough — extract everything visible. Use "description" to add any extra context.
+For discount_text, be specific (e.g. "Buy 1 Get 1 Free", "50% off all drinks", "IDR 50k cocktails").
+Default currency is IDR unless otherwise specified.`
+      : `You are an expert at extracting event information from images and documents.
+Extract ALL events you can find. Each event should be a separate item.
+Be thorough — extract everything visible. Use ISO date format (YYYY-MM-DD) for dates and 24h format (HH:MM) for times.`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemPrompt },
+          {
+            role: "user",
+            content: [
+              { type: "text", text: `Extract all ${isPromo ? "promos/deals" : "events"} from this image. Be thorough and extract every item you can find.` },
+              { type: "image_url", image_url: { url: image } },
+            ],
+          },
+        ],
+        tools: [tool],
+        tool_choice: { type: "function", function: { name: toolName } },
+      }),
+    });
+
+    if (!response.ok) {
+      const status = response.status;
+      if (status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (status === 402) {
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits to your workspace." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const text = await response.text();
+      console.error("AI gateway error:", status, text);
+      return new Response(JSON.stringify({ error: "AI extraction failed" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const data = await response.json();
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+
+    if (!toolCall) {
+      return new Response(JSON.stringify({ error: "No items extracted", items: [] }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const parsed = JSON.parse(toolCall.function.arguments);
+    console.log(`Extracted ${parsed.items?.length || 0} ${type} items`);
+
+    return new Response(JSON.stringify({ items: parsed.items || [] }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    console.error("extract-from-image error:", e);
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
