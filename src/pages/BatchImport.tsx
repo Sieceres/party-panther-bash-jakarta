@@ -320,7 +320,7 @@ const BatchImport = () => {
         {step === "done" && (
           <Card>
             <CardContent className="py-12 text-center space-y-4">
-              <CheckCircle className="w-16 h-16 mx-auto text-green-500" />
+              <CheckCircle className="w-16 h-16 mx-auto text-primary" />
               <h2 className="text-2xl font-bold">Import Complete!</h2>
               <p className="text-muted-foreground">
                 Successfully imported {insertedCount} {importType === "promo" ? "promos" : "events"}.
