@@ -338,7 +338,7 @@ const BatchImport = () => {
         )}
       </main>
 
-      <Footer />
+      <Footer onSectionChange={setActiveSection} />
     </div>
   );
 };
