@@ -22,6 +22,7 @@ import About from "./pages/About";
 import ResetPassword from "./pages/ResetPassword";
 import WorldCupExplorer from "./pages/WorldCupExplorer";
 import Proofing from "./pages/Proofing";
+import BatchImport from "./pages/BatchImport";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/about" element={<About />} />
           <Route path="/wce" element={<WorldCupExplorer />} />
+          <Route path="/import" element={<BatchImport />} />
           <Route path="/lexium" element={<Proofing />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
