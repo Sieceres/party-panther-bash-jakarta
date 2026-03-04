@@ -137,6 +137,18 @@ If you see a weekly schedule grid, extract every cell that contains a promo.
 Be thorough — extract everything visible. Use "description" to add any extra context.
 For discount_text, be specific (e.g. "Buy 1 Get 1 Free", "50% off all drinks", "IDR 50k cocktails").
 Default currency is IDR unless otherwise specified.
+
+IMPORTANT - Drink categorization:
+For drink_type, categorize drinks specifically:
+- Beer brands (Heineken, Bintang, Corona, Tiger, etc.) → ["Beer"]
+- Spirits (Vodka, Gin, Rum, Whiskey, Tequila, etc.) → ["Spirits"]
+- Wine (Red wine, White wine, Prosecco, Champagne) → ["Wine"]
+- Cocktails (Mojito, Margarita, Martini, etc.) → ["Cocktails"]
+- Coffee/Tea → ["Coffee & Tea"]
+- If multiple types, list all applicable categories.
+- If it's a food deal, use ["Food"].
+- Be specific about brand names in the description but use broad categories for drink_type.
+
 You MUST use the extract_promos tool to return the results.`
       : `You are an expert at extracting event information from images and documents.
 Extract ALL events you can find. Each event should be a separate item.
