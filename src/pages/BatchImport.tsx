@@ -281,10 +281,11 @@ const BatchImport = () => {
                   }}
                 />
                 {isExtracting ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4 py-4">
                     <Loader2 className="w-12 h-12 mx-auto text-primary animate-spin" />
                     <p className="text-lg font-medium">AI is extracting {importType === "promo" ? "promos" : "events"}...</p>
-                    <p className="text-sm text-muted-foreground">This may take a few seconds</p>
+                    <Progress value={extractionProgress} className="max-w-xs mx-auto h-2" />
+                    <p className="text-sm text-muted-foreground">{extractionStatus}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
