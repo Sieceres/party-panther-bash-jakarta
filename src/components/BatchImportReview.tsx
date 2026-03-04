@@ -45,7 +45,7 @@ interface BatchImportReviewProps {
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const PROMO_TYPES = ["happy_hour", "ladies_night", "brunch_deal", "food_special", "drink_special", "live_music", "other"];
+const PROMO_TYPES = ["Free Flow", "Ladies Night", "Bottle Promo", "Other"];
 const CATEGORIES = ["bar", "club", "restaurant", "cafe", "hotel", "rooftop", "beach_club", "other"];
 
 export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportReviewProps) => {

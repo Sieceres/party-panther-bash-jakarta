@@ -123,22 +123,37 @@ const BatchImport = () => {
 
     if (importType === "promo") {
       const promos = selected as ExtractedPromo[];
-      const rows = promos.map(p => ({
-        title: p.title,
-        description: p.description || p.discount_text,
-        discount_text: p.discount_text,
-        venue_name: p.venue_name,
-        venue_address: p.venue_address || null,
-        promo_type: p.promo_type || null,
-        day_of_week: p.day_of_week.length > 0 ? p.day_of_week : null,
-        area: p.area || null,
-        drink_type: p.drink_type?.length > 0 ? p.drink_type : null,
-        original_price_amount: p.original_price_amount,
-        discounted_price_amount: p.discounted_price_amount,
-        price_currency: p.price_currency || "IDR",
-        category: p.category || null,
-        created_by: user.id,
-      }));
+      const validPromoTypes = ["Free Flow", "Ladies Night", "Bottle Promo", "Other"];
+      const promoTypeMap: Record<string, string> = {
+        happy_hour: "Free Flow",
+        free_flow: "Free Flow",
+        ladies_night: "Ladies Night",
+        bottle_promo: "Bottle Promo",
+        drink_special: "Other",
+        food_special: "Other",
+        brunch_deal: "Other",
+        live_music: "Other",
+        other: "Other",
+      };
+      const rows = promos.map(p => {
+        const mappedType = promoTypeMap[p.promo_type] || (validPromoTypes.includes(p.promo_type) ? p.promo_type : null);
+        return {
+          title: p.title,
+          description: p.description || p.discount_text,
+          discount_text: p.discount_text,
+          venue_name: p.venue_name,
+          venue_address: p.venue_address || null,
+          promo_type: mappedType,
+          day_of_week: p.day_of_week.length > 0 ? p.day_of_week : null,
+          area: p.area || null,
+          drink_type: p.drink_type?.length > 0 ? p.drink_type : null,
+          original_price_amount: p.original_price_amount,
+          discounted_price_amount: p.discounted_price_amount,
+          price_currency: p.price_currency || "IDR",
+          category: p.category || null,
+          created_by: user.id,
+        };
+      });
 
       const { data, error } = await supabase.from("promos").insert(rows).select("id");
       if (error) {
