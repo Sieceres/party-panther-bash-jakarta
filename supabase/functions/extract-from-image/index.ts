@@ -76,6 +76,32 @@ const eventTool = {
   },
 };
 
+// Try to extract JSON from text content (fallback when tool_calls not used)
+function extractJsonFromText(text: string): any | null {
+  // Try to find JSON in code blocks
+  const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (codeBlockMatch) {
+    try {
+      return JSON.parse(codeBlockMatch[1].trim());
+    } catch { /* continue */ }
+  }
+
+  // Try to find raw JSON object/array
+  const jsonMatch = text.match(/\{[\s\S]*"items"[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      return JSON.parse(jsonMatch[0]);
+    } catch { /* continue */ }
+  }
+
+  // Try the whole text as JSON
+  try {
+    return JSON.parse(text);
+  } catch { /* continue */ }
+
+  return null;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -110,10 +136,14 @@ If a venue has promos on different days, create separate items for each day or g
 If you see a weekly schedule grid, extract every cell that contains a promo.
 Be thorough — extract everything visible. Use "description" to add any extra context.
 For discount_text, be specific (e.g. "Buy 1 Get 1 Free", "50% off all drinks", "IDR 50k cocktails").
-Default currency is IDR unless otherwise specified.`
+Default currency is IDR unless otherwise specified.
+You MUST use the extract_promos tool to return the results.`
       : `You are an expert at extracting event information from images and documents.
 Extract ALL events you can find. Each event should be a separate item.
-Be thorough — extract everything visible. Use ISO date format (YYYY-MM-DD) for dates and 24h format (HH:MM) for times.`;
+Be thorough — extract everything visible. Use ISO date format (YYYY-MM-DD) for dates and 24h format (HH:MM) for times.
+You MUST use the extract_events tool to return the results.`;
+
+    console.log(`Starting extraction for type: ${type}`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -122,7 +152,7 @@ Be thorough — extract everything visible. Use ISO date format (YYYY-MM-DD) for
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
           {
@@ -140,6 +170,8 @@ Be thorough — extract everything visible. Use ISO date format (YYYY-MM-DD) for
 
     if (!response.ok) {
       const status = response.status;
+      const text = await response.text();
+      console.error("AI gateway error:", status, text);
       if (status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
           status: 429,
@@ -152,28 +184,48 @@ Be thorough — extract everything visible. Use ISO date format (YYYY-MM-DD) for
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const text = await response.text();
-      console.error("AI gateway error:", status, text);
-      return new Response(JSON.stringify({ error: "AI extraction failed" }), {
+      return new Response(JSON.stringify({ error: `AI extraction failed (${status})` }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    console.log("AI response keys:", Object.keys(data));
+    console.log("Choice finish_reason:", data.choices?.[0]?.finish_reason);
+    
+    const message = data.choices?.[0]?.message;
+    let items: any[] = [];
 
-    if (!toolCall) {
+    // Try tool_calls first
+    const toolCall = message?.tool_calls?.[0];
+    if (toolCall) {
+      console.log("Found tool call, parsing arguments");
+      const parsed = JSON.parse(toolCall.function.arguments);
+      items = parsed.items || [];
+    } 
+    // Fallback: try parsing from content text
+    else if (message?.content) {
+      console.log("No tool call found, trying to parse from content text");
+      console.log("Content preview:", message.content.substring(0, 200));
+      const parsed = extractJsonFromText(message.content);
+      if (parsed?.items) {
+        items = parsed.items;
+      } else if (Array.isArray(parsed)) {
+        items = parsed;
+      }
+    }
+
+    console.log(`Extracted ${items.length} ${type} items`);
+
+    if (items.length === 0) {
       return new Response(JSON.stringify({ error: "No items extracted", items: [] }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const parsed = JSON.parse(toolCall.function.arguments);
-    console.log(`Extracted ${parsed.items?.length || 0} ${type} items`);
-
-    return new Response(JSON.stringify({ items: parsed.items || [] }), {
+    return new Response(JSON.stringify({ items }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

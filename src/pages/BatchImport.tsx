@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { Upload, Loader2, FileImage, CheckCircle, ArrowLeft, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +23,9 @@ const BatchImport = () => {
   const [items, setItems] = useState<(ExtractedPromo | ExtractedEvent)[]>([]);
   const [insertedCount, setInsertedCount] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [extractionProgress, setExtractionProgress] = useState(0);
+  const [extractionStatus, setExtractionStatus] = useState("Uploading image...");
+  const progressInterval = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -32,6 +36,25 @@ const BatchImport = () => {
     reader.readAsDataURL(file);
 
     setIsExtracting(true);
+    setExtractionProgress(0);
+    setExtractionStatus("Uploading image...");
+
+    // Simulate progress
+    const statuses = [
+      { at: 15, text: "Analyzing image content..." },
+      { at: 35, text: "Identifying promos and deals..." },
+      { at: 55, text: "Extracting details..." },
+      { at: 75, text: "Parsing extracted data..." },
+      { at: 90, text: "Almost done..." },
+    ];
+    let currentProgress = 0;
+    progressInterval.current = setInterval(() => {
+      currentProgress += Math.random() * 8 + 2;
+      if (currentProgress > 95) currentProgress = 95;
+      setExtractionProgress(Math.round(currentProgress));
+      const status = [...statuses].reverse().find(s => currentProgress >= s.at);
+      if (status) setExtractionStatus(status.text);
+    }, 500);
 
     try {
       // Convert to base64 data URL
@@ -78,8 +101,12 @@ const BatchImport = () => {
         organizer_name: item.organizer_name || "",
       }));
 
+      if (progressInterval.current) clearInterval(progressInterval.current);
+      setExtractionProgress(100);
+      setExtractionStatus(`Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}!`);
+
       setItems(extracted);
-      setStep("review");
+      setTimeout(() => setStep("review"), 500);
 
       toast({
         title: `Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}`,
@@ -93,6 +120,7 @@ const BatchImport = () => {
         variant: "destructive",
       });
     } finally {
+      if (progressInterval.current) clearInterval(progressInterval.current);
       setIsExtracting(false);
     }
   }, [importType, toast]);
@@ -281,10 +309,11 @@ const BatchImport = () => {
                   }}
                 />
                 {isExtracting ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4 py-4">
                     <Loader2 className="w-12 h-12 mx-auto text-primary animate-spin" />
                     <p className="text-lg font-medium">AI is extracting {importType === "promo" ? "promos" : "events"}...</p>
-                    <p className="text-sm text-muted-foreground">This may take a few seconds</p>
+                    <Progress value={extractionProgress} className="max-w-xs mx-auto h-2" />
+                    <p className="text-sm text-muted-foreground">{extractionStatus}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
