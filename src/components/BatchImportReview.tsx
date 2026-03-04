@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trash2, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, Plus, ChevronDown, ChevronUp, Beer, Wine, Coffee, UtensilsCrossed, GlassWater, Martini } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PLACEHOLDER_IMAGES, type DrinkCategory } from "@/lib/drink-categories";
 
 export interface ExtractedPromo {
   id: string;
@@ -145,10 +146,20 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
 
                 {/* Summary when collapsed */}
                 {!isExpanded && isPromo && (
-                  <div className="flex flex-wrap gap-1.5 pl-9">
+                  <div className="flex flex-wrap items-center gap-1.5 pl-9">
+                    {(item as any).image_url && (
+                      <img
+                        src={(item as any).image_url}
+                        alt="category"
+                        className="w-6 h-6 rounded object-cover"
+                      />
+                    )}
                     {(item as ExtractedPromo).discount_text && (
                       <Badge variant="secondary" className="text-xs">{(item as ExtractedPromo).discount_text}</Badge>
                     )}
+                    {(item as ExtractedPromo).drink_type?.map(d => (
+                      <Badge key={d} variant="outline" className="text-xs">{d}</Badge>
+                    ))}
                     {(item as ExtractedPromo).day_of_week?.map(d => (
                       <Badge key={d} variant="outline" className="text-xs">{d.slice(0, 3)}</Badge>
                     ))}
