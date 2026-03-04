@@ -36,6 +36,25 @@ const BatchImport = () => {
     reader.readAsDataURL(file);
 
     setIsExtracting(true);
+    setExtractionProgress(0);
+    setExtractionStatus("Uploading image...");
+
+    // Simulate progress
+    const statuses = [
+      { at: 15, text: "Analyzing image content..." },
+      { at: 35, text: "Identifying promos and deals..." },
+      { at: 55, text: "Extracting details..." },
+      { at: 75, text: "Parsing extracted data..." },
+      { at: 90, text: "Almost done..." },
+    ];
+    let currentProgress = 0;
+    progressInterval.current = setInterval(() => {
+      currentProgress += Math.random() * 8 + 2;
+      if (currentProgress > 95) currentProgress = 95;
+      setExtractionProgress(Math.round(currentProgress));
+      const status = [...statuses].reverse().find(s => currentProgress >= s.at);
+      if (status) setExtractionStatus(status.text);
+    }, 500);
 
     try {
       // Convert to base64 data URL
