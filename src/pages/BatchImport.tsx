@@ -101,8 +101,12 @@ const BatchImport = () => {
         organizer_name: item.organizer_name || "",
       }));
 
+      if (progressInterval.current) clearInterval(progressInterval.current);
+      setExtractionProgress(100);
+      setExtractionStatus(`Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}!`);
+
       setItems(extracted);
-      setStep("review");
+      setTimeout(() => setStep("review"), 500);
 
       toast({
         title: `Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}`,
@@ -116,6 +120,7 @@ const BatchImport = () => {
         variant: "destructive",
       });
     } finally {
+      if (progressInterval.current) clearInterval(progressInterval.current);
       setIsExtracting(false);
     }
   }, [importType, toast]);
