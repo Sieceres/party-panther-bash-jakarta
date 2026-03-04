@@ -144,15 +144,16 @@ const BatchImport = () => {
           venue_name: p.venue_name,
           venue_address: p.venue_address || null,
           promo_type: mappedType,
-        day_of_week: p.day_of_week.length > 0 ? p.day_of_week : null,
-        area: p.area || null,
-        drink_type: p.drink_type?.length > 0 ? p.drink_type : null,
-        original_price_amount: p.original_price_amount,
-        discounted_price_amount: p.discounted_price_amount,
-        price_currency: p.price_currency || "IDR",
-        category: p.category || null,
-        created_by: user.id,
-      }));
+          day_of_week: p.day_of_week.length > 0 ? p.day_of_week : null,
+          area: p.area || null,
+          drink_type: p.drink_type?.length > 0 ? p.drink_type : null,
+          original_price_amount: p.original_price_amount,
+          discounted_price_amount: p.discounted_price_amount,
+          price_currency: p.price_currency || "IDR",
+          category: p.category || null,
+          created_by: user.id,
+        };
+      });
 
       const { data, error } = await supabase.from("promos").insert(rows).select("id");
       if (error) {
