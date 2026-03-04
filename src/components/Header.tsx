@@ -96,7 +96,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     { id: 'promos', label: 'Promos', icon: Zap, hidden: false },
     { id: 'events', label: 'Events', icon: Calendar, hidden: false },
     { id: 'instagram', label: 'IG Creator', icon: Instagram, hidden: !user },
-    { id: 'import', label: 'Import', icon: FileUp, hidden: !user },
+    { id: 'import', label: 'Import', icon: FileUp, hidden: false },
     { id: 'profile', label: 'Profile', icon: User, hidden: false },
     { id: 'admin', label: 'Admin', icon: Shield, hidden: !isAdmin }
   ];
