@@ -10,6 +10,7 @@ import { Upload, Loader2, FileImage, CheckCircle, ArrowLeft, ArrowRight } from "
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { BatchImportReview, ExtractedPromo, ExtractedEvent } from "@/components/BatchImportReview";
+import { detectDrinkCategory, getPlaceholderImage, enrichDrinkTypes } from "@/lib/drink-categories";
 
 type ImportType = "promo" | "event";
 type Step = "upload" | "review" | "done";
@@ -80,26 +81,40 @@ const BatchImport = () => {
         return;
       }
 
-      const extracted = (data?.items || []).map((item: any, idx: number) => ({
-        ...item,
-        id: `item-${idx}-${Date.now()}`,
-        selected: true,
-        description: item.description || "",
-        day_of_week: item.day_of_week || [],
-        drink_type: item.drink_type || [],
-        venue_name: item.venue_name || "",
-        venue_address: item.venue_address || "",
-        area: item.area || "",
-        promo_type: item.promo_type || "",
-        category: item.category || "",
-        discount_text: item.discount_text || "",
-        price_currency: item.price_currency || "IDR",
-        original_price_amount: item.original_price_amount ?? null,
-        discounted_price_amount: item.discounted_price_amount ?? null,
-        date: item.date || "",
-        time: item.time || "",
-        organizer_name: item.organizer_name || "",
-      }));
+      const extracted = (data?.items || []).map((item: any, idx: number) => {
+        const drinkTypes = item.drink_type || [];
+        const title = item.title || "";
+        const description = item.description || "";
+        const discountText = item.discount_text || "";
+
+        // Auto-detect drink category and assign placeholder image
+        const drinkCategory = detectDrinkCategory(title, description, discountText, drinkTypes);
+        const enrichedDrinkTypes = enrichDrinkTypes(drinkTypes, drinkCategory);
+        const placeholderImage = getPlaceholderImage(drinkCategory);
+
+        return {
+          ...item,
+          id: `item-${idx}-${Date.now()}`,
+          selected: true,
+          description,
+          day_of_week: item.day_of_week || [],
+          drink_type: enrichedDrinkTypes,
+          venue_name: item.venue_name || "",
+          venue_address: item.venue_address || "",
+          area: item.area || "",
+          promo_type: item.promo_type || "",
+          category: item.category || "",
+          discount_text: discountText,
+          price_currency: item.price_currency || "IDR",
+          original_price_amount: item.original_price_amount ?? null,
+          discounted_price_amount: item.discounted_price_amount ?? null,
+          date: item.date || "",
+          time: item.time || "",
+          organizer_name: item.organizer_name || "",
+          image_url: placeholderImage,
+          _drinkCategory: drinkCategory,
+        };
+      });
 
       if (progressInterval.current) clearInterval(progressInterval.current);
       setExtractionProgress(100);
@@ -179,6 +194,7 @@ const BatchImport = () => {
           discounted_price_amount: p.discounted_price_amount,
           price_currency: p.price_currency || "IDR",
           category: p.category || null,
+          image_url: (p as any).image_url || null,
           created_by: user.id,
         };
       });
