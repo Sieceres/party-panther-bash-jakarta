@@ -23,6 +23,9 @@ const BatchImport = () => {
   const [items, setItems] = useState<(ExtractedPromo | ExtractedEvent)[]>([]);
   const [insertedCount, setInsertedCount] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [extractionProgress, setExtractionProgress] = useState(0);
+  const [extractionStatus, setExtractionStatus] = useState("Uploading image...");
+  const progressInterval = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
