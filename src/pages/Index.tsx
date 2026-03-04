@@ -58,18 +58,24 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
     }
     setActiveSection(section);
     
-    // Navigate to proper routes
+    // Navigate to proper routes — only handle sections this component owns
     if (section === 'admin') {
       navigate('/admin');
       return;
     } else if (section === 'profile') {
       navigate('/profile');
       return;
+    } else if (section === 'instagram') {
+      navigate('/instagram-generator');
+      return;
+    } else if (section === 'import') {
+      navigate('/import');
+      return;
     } else if (section === 'events') {
       navigate('/events');
     } else if (section === 'promos') {
       navigate('/promos');
-    } else {
+    } else if (section === 'home') {
       navigate('/');
     }
     
