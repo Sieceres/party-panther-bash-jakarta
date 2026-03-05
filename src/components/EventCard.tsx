@@ -150,7 +150,7 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
   const canDelete = isOwner || isAdmin;
   
   // Use optimized creator name or fallback to fetching
-  const creatorName = event.creator_name || 'Anonymous';
+  const creatorName = event.creator_name || 'Party Panther Admin';
 
   return (
     <Card className="neon-card bg-card/95 backdrop-blur-sm border border-border/50 group hover:border-primary/50 transition-all duration-300 flex flex-col h-full">
