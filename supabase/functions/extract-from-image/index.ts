@@ -25,7 +25,7 @@ const promoTool = {
               discount_text: { type: "string", description: "The discount/deal text, e.g. '2-for-1 cocktails' or '50% off'" },
               promo_type: { type: "string", description: "Type: happy_hour, ladies_night, brunch_deal, food_special, drink_special, live_music, other" },
               day_of_week: { type: "array", items: { type: "string" }, description: "Days this promo is active: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday" },
-              area: { type: "string", description: "Area/neighborhood if visible" },
+              area: { type: "string", description: "Specific neighborhood/area. Must be one of: Kemang, Senopati & Gunawarman, SCBD, Senayan, Blok M & Melawai, Sudirman & Thamrin, Kuningan & Setiabudi, Mega Kuningan, Menteng & Cikini, Kota Tua, PIK, Kelapa Gading, Ancol, Grogol, Kebon Jeruk, Kelapa Gading Timur. Pick the closest match." },
               drink_type: { type: "array", items: { type: "string" }, description: "Types of drinks if applicable" },
               original_price_amount: { type: "number", description: "Original price if visible" },
               discounted_price_amount: { type: "number", description: "Discounted price if visible" },

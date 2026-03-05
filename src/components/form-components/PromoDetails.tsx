@@ -3,11 +3,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { JAKARTA_AREAS } from "@/lib/area-config";
 
 interface PromoDetailsProps {
   validUntilDate: Date | undefined;
@@ -105,11 +106,14 @@ export const PromoDetails = ({
               <SelectValue placeholder="Select area" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="north">North Jakarta</SelectItem>
-              <SelectItem value="south">South Jakarta</SelectItem>
-              <SelectItem value="east">East Jakarta</SelectItem>
-              <SelectItem value="west">West Jakarta</SelectItem>
-              <SelectItem value="central">Central Jakarta</SelectItem>
+              {JAKARTA_AREAS.map((region) => (
+                <SelectGroup key={region.key}>
+                  <SelectLabel>{region.label}</SelectLabel>
+                  {region.neighborhoods.map((hood) => (
+                    <SelectItem key={hood} value={hood}>{hood}</SelectItem>
+                  ))}
+                </SelectGroup>
+              ))}
             </SelectContent>
           </Select>
         </div>

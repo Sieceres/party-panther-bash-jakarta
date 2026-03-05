@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { useOptimizedData } from "@/hooks/useOptimizedData";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { areaMatchesFilter } from "@/lib/area-config";
 
 interface IndexProps {
   initialSection?: string;
@@ -101,7 +102,7 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
         (Array.isArray(promo.day_of_week) ? 
           promo.day_of_week.some((day: string) => dayFilter.includes(day?.toLowerCase() || "")) :
           dayFilter.includes((promo.day_of_week as string)?.toLowerCase() || ""));
-      const areaMatch = areaFilter.includes("all") || areaFilter.includes(promo.area?.toLowerCase().replace(' jakarta', '') || "");
+      const areaMatch = areaFilter.includes("all") || areaMatchesFilter(promo.area, areaFilter);
       const drinkTypeMatch = drinkTypeFilter.includes("all") || 
         (Array.isArray(promo.drink_type) ? 
           promo.drink_type.some((drink: string) => drinkTypeFilter.includes(drink?.toLowerCase() || "")) :
