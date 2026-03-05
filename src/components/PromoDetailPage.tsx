@@ -29,7 +29,7 @@ interface Promo {
   discounted_price_amount: number;
   price_currency: string;
   valid_until: string;
-  day_of_week: string;
+  day_of_week: string | string[];
   category: string;
   promo_type: string;
   image_url: string;
