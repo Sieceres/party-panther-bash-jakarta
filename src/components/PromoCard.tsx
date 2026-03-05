@@ -67,7 +67,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
   // Use optimized data or fallback to defaults
   const averageRating = promo.average_rating || 0;
   const totalReviews = Number(promo.total_reviews) || 0;
-  const creatorName = promo.creator_name || 'Anonymous';
+  const creatorName = promo.creator_name || 'Party Panther Admin';
   const isFavorite = promo.is_favorite || false;
 
   // Category-aware placeholder image
@@ -352,7 +352,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
           >
             {promo.venue}
           </p>
-          <p className="text-xs sm:text-sm text-muted-foreground">Valid until {promo.validUntil}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">{promo.validUntil && promo.validUntil !== "Ongoing" ? `Valid until ${promo.validUntil}` : "No expiry"}</p>
           {creatorName && (
             <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
               <User className="w-3.5 h-3.5" />

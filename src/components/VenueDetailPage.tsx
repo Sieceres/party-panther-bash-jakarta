@@ -233,7 +233,7 @@ export const VenueDetailPage = () => {
                           description: promo.description,
                           discount: promo.discount_text,
                           venue: promo.venue_name,
-                          validUntil: promo.valid_until || "Ongoing",
+                          validUntil: promo.valid_until || "",
                           image: promo.image_url || "",
                           category: promo.category || "",
                           day: promo.day_of_week || [],
