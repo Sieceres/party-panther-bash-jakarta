@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { useOptimizedData } from "@/hooks/useOptimizedData";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { areaMatchesFilter } from "@/lib/area-config";
 
 interface IndexProps {
   initialSection?: string;
