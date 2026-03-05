@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import InstagramPostGenerator from "./pages/InstagramPostGenerator";
 import { EventDetailPage } from "./components/EventDetailPage";
 import { PromoDetailPage } from "./components/PromoDetailPage";
+import { VenueDetailPage } from "./components/VenueDetailPage";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { Contact } from "./pages/Contact";
 import { EditEventPage } from "./pages/EditEventPage";
