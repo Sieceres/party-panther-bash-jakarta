@@ -67,7 +67,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
   // Use optimized data or fallback to defaults
   const averageRating = promo.average_rating || 0;
   const totalReviews = Number(promo.total_reviews) || 0;
-  const creatorName = promo.creator_name || 'Party Panther Admin';
+  const creatorName = (promo.creator_name && !promo.creator_name.startsWith('User ')) ? promo.creator_name : 'Party Panther Admin';
   const isFavorite = promo.is_favorite || false;
 
   // Category-aware placeholder image
