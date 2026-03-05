@@ -48,9 +48,60 @@ export const VenueDetailPage = () => {
     const fetchVenue = async () => {
       if (!id) return;
       try {
-        const { data, error } = await getVenueBySlugOrId(id);
-        if (error) throw error;
-        if (!data) throw new Error("Venue not found");
+        // Try slug/id first, then fall back to name match
+        let { data, error } = await getVenueBySlugOrId(id);
+        
+        if (!data) {
+          // Try by name (for when clicking venue name before venue is seeded)
+          const { data: venueByName } = await supabase
+            .from("venues")
+            .select("*")
+            .ilike("name", decodeURIComponent(id))
+            .maybeSingle();
+          data = venueByName;
+        }
+        
+        if (!data) {
+          // No venue record exists yet - show a basic page from promo/event data
+          const decodedName = decodeURIComponent(id);
+          const { data: matchingPromos } = await supabase
+            .from("promos")
+            .select("*")
+            .ilike("venue_name", decodedName)
+            .order("created_at", { ascending: false });
+          const { data: matchingEvents } = await supabase
+            .from("events")
+            .select("*")
+            .ilike("venue_name", decodedName)
+            .order("date", { ascending: true });
+          
+          if ((matchingPromos && matchingPromos.length > 0) || (matchingEvents && matchingEvents.length > 0)) {
+            const firstItem = matchingPromos?.[0] || matchingEvents?.[0];
+            setVenue({
+              id: "",
+              name: firstItem.venue_name || decodedName,
+              slug: "",
+              address: firstItem.venue_address,
+              latitude: firstItem.venue_latitude,
+              longitude: firstItem.venue_longitude,
+              description: null,
+              instagram: null,
+              whatsapp: null,
+              website: null,
+              opening_hours: null,
+              image_url: null,
+              claimed_by: null,
+              claim_status: "unclaimed",
+              created_at: "",
+            } as Venue);
+            setPromos(matchingPromos || []);
+            setEvents(matchingEvents || []);
+            setLoading(false);
+            return;
+          }
+          throw new Error("Venue not found");
+        }
+        
         setVenue(data as any);
 
         // Fetch promos linked to this venue (by venue_id or venue_name match)
