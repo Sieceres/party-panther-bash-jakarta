@@ -5,8 +5,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trash2, Plus, ChevronDown, ChevronUp, Beer, Wine, Coffee, UtensilsCrossed, GlassWater, Martini } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PLACEHOLDER_IMAGES, type DrinkCategory } from "@/lib/drink-categories";
+import { JAKARTA_AREAS } from "@/lib/area-config";
 
 export interface ExtractedPromo {
   id: string;
@@ -211,11 +212,22 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
                               ))}
                             </SelectContent>
                           </Select>
-                          <Input
-                            value={(item as ExtractedPromo).area}
-                            onChange={(e) => updateItem(item.id, "area", e.target.value)}
-                            placeholder="Area"
-                          />
+                          <Select
+                            value={(item as ExtractedPromo).area || ""}
+                            onValueChange={(v) => updateItem(item.id, "area", v)}
+                          >
+                            <SelectTrigger><SelectValue placeholder="Area" /></SelectTrigger>
+                            <SelectContent>
+                              {JAKARTA_AREAS.map((region) => (
+                                <SelectGroup key={region.key}>
+                                  <SelectLabel>{region.label}</SelectLabel>
+                                  {region.neighborhoods.map((hood) => (
+                                    <SelectItem key={hood} value={hood}>{hood}</SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <Input

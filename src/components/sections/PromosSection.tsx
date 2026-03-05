@@ -4,8 +4,17 @@ import { PromoCard } from "@/components/PromoCard";
 import { CreatePromoForm } from "@/components/CreatePromoForm";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { ContinuousStarfield } from "@/components/ContinuousStarfield";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { LoginDialog } from "@/components/LoginDialog";
+import { Star, Lock, Filter, RotateCcw, ArrowUpDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { User } from "@supabase/supabase-js";
+import { JAKARTA_AREAS } from "@/lib/area-config";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -98,14 +107,11 @@ export const PromosSection = ({
     { id: 'sunday', label: 'Sunday' }
   ];
 
-  const areaOptions = [
-    { id: 'all', label: 'All Areas' },
-    { id: 'north', label: 'North Jakarta' },
-    { id: 'south', label: 'South Jakarta' },
-    { id: 'east', label: 'East Jakarta' },
-    { id: 'west', label: 'West Jakarta' },
-    { id: 'central', label: 'Central Jakarta' }
-  ];
+  // Build area options from JAKARTA_AREAS config
+  const areaFilterOptions = JAKARTA_AREAS.flatMap(region => [
+    { id: region.key, label: region.label, isRegion: true },
+    ...region.neighborhoods.map(n => ({ id: n, label: n, isRegion: false })),
+  ]);
 
   const drinkTypeOptions = [
     { id: 'all', label: 'All Types' },
@@ -209,7 +215,7 @@ export const PromosSection = ({
                 <SelectValue placeholder={getFilterDisplayText(areaFilter, "All areas")} />
               </SelectTrigger>
               <SelectContent>
-                <div className="p-2 space-y-2">
+                <div className="p-2 space-y-2 max-h-64 overflow-y-auto">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="all-areas"
@@ -220,24 +226,46 @@ export const PromosSection = ({
                     />
                     <Label htmlFor="all-areas" className="text-sm">All areas</Label>
                   </div>
-                  {["Central", "South", "North", "East", "West"].map((area) => (
-                    <div key={area} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`area-${area.toLowerCase()}`}
-                        checked={areaFilter.includes(area.toLowerCase())}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            const newFilters = areaFilter.filter(f => f !== "all");
-                            onAreaFilterChange([...newFilters, area.toLowerCase()]);
-                          } else {
-                            const newFilters = areaFilter.filter(f => f !== area.toLowerCase());
-                            onAreaFilterChange(newFilters.length === 0 ? ["all"] : newFilters);
-                          }
-                        }}
-                      />
-                      <Label htmlFor={`area-${area.toLowerCase()}`} className="text-sm">
-                        {area}
-                      </Label>
+                  {JAKARTA_AREAS.map((region) => (
+                    <div key={region.key} className="space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`area-${region.key}`}
+                          checked={areaFilter.includes(region.key)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              const newFilters = areaFilter.filter(f => f !== "all");
+                              onAreaFilterChange([...newFilters, region.key]);
+                            } else {
+                              const newFilters = areaFilter.filter(f => f !== region.key);
+                              onAreaFilterChange(newFilters.length === 0 ? ["all"] : newFilters);
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`area-${region.key}`} className="text-sm font-semibold">
+                          {region.label}
+                        </Label>
+                      </div>
+                      {region.neighborhoods.map((hood) => (
+                        <div key={hood} className="flex items-center space-x-2 pl-5">
+                          <Checkbox
+                            id={`area-${hood}`}
+                            checked={areaFilter.includes(hood)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                const newFilters = areaFilter.filter(f => f !== "all");
+                                onAreaFilterChange([...newFilters, hood]);
+                              } else {
+                                const newFilters = areaFilter.filter(f => f !== hood);
+                                onAreaFilterChange(newFilters.length === 0 ? ["all"] : newFilters);
+                              }
+                            }}
+                          />
+                          <Label htmlFor={`area-${hood}`} className="text-sm">
+                            {hood}
+                          </Label>
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>
