@@ -926,6 +926,71 @@ export const AdminDashboard = () => {
                         {backfillingPromos ? 'Backfilling...' : 'Backfill Promos'}
                       </Button>
                     </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-semibold">Seed Venues from Promos & Events</h4>
+                        <p className="text-sm text-muted-foreground">Create venue records from existing venue names in promos and events</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        onClick={async () => {
+                          try {
+                            toast({ title: "Seeding venues...", description: "Processing existing data" });
+                            // Get unique venue names from promos
+                            const { data: promos } = await supabase.from('promos').select('venue_name, venue_address, venue_latitude, venue_longitude');
+                            const { data: events } = await supabase.from('events').select('venue_name, venue_address, venue_latitude, venue_longitude');
+                            
+                            const venueMap = new Map<string, any>();
+                            [...(promos || []), ...(events || [])].forEach(item => {
+                              if (item.venue_name && !venueMap.has(item.venue_name.toLowerCase())) {
+                                venueMap.set(item.venue_name.toLowerCase(), {
+                                  name: item.venue_name,
+                                  address: item.venue_address,
+                                  latitude: item.venue_latitude,
+                                  longitude: item.venue_longitude,
+                                });
+                              }
+                            });
+
+                            // Check which venues already exist
+                            const { data: existingVenues } = await supabase.from('venues').select('name');
+                            const existingNames = new Set((existingVenues || []).map(v => v.name.toLowerCase()));
+                            
+                            const newVenues = Array.from(venueMap.values()).filter(v => !existingNames.has(v.name.toLowerCase()));
+                            
+                            if (newVenues.length === 0) {
+                              toast({ title: "No new venues", description: "All venue names already exist in the database" });
+                              return;
+                            }
+
+                            const { data: { user } } = await supabase.auth.getUser();
+                            const toInsert = newVenues.map(v => ({ ...v, created_by: user?.id }));
+                            
+                            const { error } = await supabase.from('venues').insert(toInsert);
+                            if (error) throw error;
+
+                            // Now link promos and events to venue records
+                            const { data: allVenues } = await supabase.from('venues').select('id, name');
+                            if (allVenues) {
+                              const venueByName = new Map(allVenues.map(v => [v.name.toLowerCase(), v.id]));
+                              for (const [name, venueId] of venueByName) {
+                                await supabase.from('promos').update({ venue_id: venueId }).ilike('venue_name', name).is('venue_id', null);
+                                await supabase.from('events').update({ venue_id: venueId }).ilike('venue_name', name).is('venue_id', null);
+                              }
+                            }
+
+                            toast({ title: "Success!", description: `Created ${newVenues.length} venue records and linked existing promos/events` });
+                          } catch (error: any) {
+                            console.error('Error seeding venues:', error);
+                            toast({ title: "Error", description: error.message || "Failed to seed venues", variant: "destructive" });
+                          }
+                        }}
+                      >
+                        <Database className="w-4 h-4 mr-2" />
+                        Seed Venues
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
