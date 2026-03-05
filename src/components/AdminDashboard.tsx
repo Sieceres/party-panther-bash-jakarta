@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getEventUrl, getEditEventUrl, getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { detectDrinkCategory, getPlaceholderImage, enrichDrinkTypes } from "@/lib/drink-categories";
 
 interface Event {
   id: string;
@@ -69,6 +70,7 @@ export const AdminDashboard = () => {
   } | null>(null);
   const [refreshingPromoStats, setRefreshingPromoStats] = useState(false);
   const [refreshingEventStats, setRefreshingEventStats] = useState(false);
+  const [backfillingPromos, setBackfillingPromos] = useState(false);
 
   const checkAuthAndPermissions = async () => {
     try {
@@ -472,6 +474,61 @@ export const AdminDashboard = () => {
     }
   };
 
+  const backfillPromoImages = async () => {
+    setBackfillingPromos(true);
+    try {
+      const { data: allPromos, error } = await supabase
+        .from('promos')
+        .select('id, title, description, discount_text, drink_type, image_url');
+
+      if (error) throw error;
+      if (!allPromos || allPromos.length === 0) {
+        toast({ title: "No promos found", description: "There are no promos to backfill." });
+        return;
+      }
+
+      let updatedCount = 0;
+      for (const p of allPromos) {
+        const drinkTypes = Array.isArray(p.drink_type) ? p.drink_type : [];
+        const category = detectDrinkCategory(
+          p.title || '', p.description || '', p.discount_text || '', drinkTypes
+        );
+        const placeholder = getPlaceholderImage(category);
+        const enrichedTypes = enrichDrinkTypes(drinkTypes, category);
+
+        const needsImageUpdate = !p.image_url || p.image_url.includes('unsplash.com') || p.image_url.trim() === '';
+        const needsTypeUpdate = drinkTypes.length === 0 && enrichedTypes.length > 0;
+
+        if (needsImageUpdate || needsTypeUpdate) {
+          const updates: Record<string, any> = {};
+          if (needsImageUpdate) updates.image_url = placeholder;
+          if (needsTypeUpdate) updates.drink_type = enrichedTypes;
+
+          const { error: updateError } = await supabase
+            .from('promos')
+            .update(updates)
+            .eq('id', p.id);
+
+          if (!updateError) updatedCount++;
+        }
+      }
+
+      toast({
+        title: "Backfill Complete",
+        description: `Updated ${updatedCount} of ${allPromos.length} promos with category images and drink types.`
+      });
+    } catch (error: any) {
+      console.error('Error backfilling promos:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to backfill promo images",
+        variant: "destructive"
+      });
+    } finally {
+      setBackfillingPromos(false);
+    }
+  };
+
   const getConfirmationMessage = () => {
     if (!pendingAction) return '';
     
@@ -852,6 +909,21 @@ export const AdminDashboard = () => {
                       >
                         <RefreshCw className={`w-4 h-4 mr-2 ${refreshingEventStats ? 'animate-spin' : ''}`} />
                         {refreshingEventStats ? 'Refreshing...' : 'Refresh Stats'}
+                      </Button>
+                   </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-semibold">Backfill Promo Images & Drink Types</h4>
+                        <p className="text-sm text-muted-foreground">Auto-categorize promos and assign placeholder images based on drink keywords</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        onClick={backfillPromoImages}
+                        disabled={backfillingPromos}
+                      >
+                        <Database className={`w-4 h-4 mr-2 ${backfillingPromos ? 'animate-spin' : ''}`} />
+                        {backfillingPromos ? 'Backfilling...' : 'Backfill Promos'}
                       </Button>
                     </div>
                   </div>

@@ -7,6 +7,7 @@ import { ReviewsList } from "./ReviewsList";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { detectDrinkCategory, getPlaceholderImage } from "@/lib/drink-categories";
 import { useToast } from "@/hooks/use-toast";
 import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import {
@@ -68,6 +69,15 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
   const totalReviews = Number(promo.total_reviews) || 0;
   const creatorName = promo.creator_name || 'Anonymous';
   const isFavorite = promo.is_favorite || false;
+
+  // Category-aware placeholder image
+  const drinkCategory = detectDrinkCategory(
+    promo.title || '',
+    promo.description || '',
+    promo.discount || '',
+    Array.isArray(promo.drinkType) ? promo.drinkType : promo.drinkType ? [promo.drinkType] : []
+  );
+  const categoryPlaceholder = getPlaceholderImage(drinkCategory);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -216,12 +226,12 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
     >
       <div className="relative overflow-hidden rounded-t-2xl bg-muted">
         <img
-          src={promo.image || promo.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop'}
+          src={promo.image || promo.image_url || categoryPlaceholder}
           alt={promo.title}
           loading="lazy"
           className="promo-card-image w-full h-48 object-cover object-center transition-transform duration-300"
           onError={(e) => {
-            e.currentTarget.src = 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop';
+            e.currentTarget.src = categoryPlaceholder;
           }}
         />
         <div className="promo-image-overlay absolute inset-0"></div>
