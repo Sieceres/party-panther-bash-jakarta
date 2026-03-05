@@ -343,7 +343,15 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
 
       <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-5 pt-0 flex-grow">
         <div className="space-y-2">
-          <p className="text-sm sm:text-base font-semibold text-white truncate">{promo.venue}</p>
+          <p 
+            className="text-sm sm:text-base font-semibold text-white truncate hover:text-primary cursor-pointer transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/?section=promos&venue=${encodeURIComponent(promo.venue)}`);
+            }}
+          >
+            {promo.venue}
+          </p>
           <p className="text-xs sm:text-sm text-muted-foreground">Valid until {promo.validUntil}</p>
           {creatorName && (
             <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">

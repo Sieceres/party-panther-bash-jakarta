@@ -53,6 +53,7 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/event/:id" element={<EventDetailPage />} />
           <Route path="/promo/:id" element={<PromoDetailPage />} />
+          <Route path="/venue/:id" element={<VenueDetailPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/instagram-generator" element={<InstagramPostGenerator />} />
           <Route path="/instagram-generator" element={<InstagramPostGenerator />} />
