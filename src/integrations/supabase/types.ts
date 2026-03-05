@@ -428,6 +428,7 @@ export type Database = {
           track_payments: boolean
           updated_at: string
           venue_address: string | null
+          venue_id: string | null
           venue_latitude: number | null
           venue_longitude: number | null
           venue_name: string | null
@@ -454,6 +455,7 @@ export type Database = {
           track_payments?: boolean
           updated_at?: string
           venue_address?: string | null
+          venue_id?: string | null
           venue_latitude?: number | null
           venue_longitude?: number | null
           venue_name?: string | null
@@ -480,11 +482,20 @@ export type Database = {
           track_payments?: boolean
           updated_at?: string
           venue_address?: string | null
+          venue_id?: string | null
           venue_latitude?: number | null
           venue_longitude?: number | null
           venue_name?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "events_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       instagram_posts: {
         Row: {
@@ -769,6 +780,7 @@ export type Database = {
           updated_at: string
           valid_until: string | null
           venue_address: string | null
+          venue_id: string | null
           venue_latitude: number | null
           venue_longitude: number | null
           venue_name: string
@@ -793,6 +805,7 @@ export type Database = {
           updated_at?: string
           valid_until?: string | null
           venue_address?: string | null
+          venue_id?: string | null
           venue_latitude?: number | null
           venue_longitude?: number | null
           venue_name: string
@@ -817,11 +830,20 @@ export type Database = {
           updated_at?: string
           valid_until?: string | null
           venue_address?: string | null
+          venue_id?: string | null
           venue_latitude?: number | null
           venue_longitude?: number | null
           venue_name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "promos_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reports: {
         Row: {
@@ -912,6 +934,66 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      venues: {
+        Row: {
+          address: string | null
+          claim_status: string
+          claimed_by: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          instagram: string | null
+          latitude: number | null
+          longitude: number | null
+          name: string
+          opening_hours: string | null
+          slug: string | null
+          updated_at: string
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          claim_status?: string
+          claimed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          instagram?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          opening_hours?: string | null
+          slug?: string | null
+          updated_at?: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          claim_status?: string
+          claimed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          instagram?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          opening_hours?: string | null
+          slug?: string | null
+          updated_at?: string
+          website?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -1229,6 +1311,10 @@ export type Database = {
       }
       get_unique_promo_slug: {
         Args: { promo_id?: string; title_text: string }
+        Returns: string
+      }
+      get_unique_venue_slug: {
+        Args: { title_text: string; v_id?: string }
         Returns: string
       }
       get_user_admin_status: {

@@ -64,7 +64,15 @@ export const getPromoBySlugOrId = async (identifier: string) => {
   return await supabase.from("promos").select("*").eq("id", identifier).maybeSingle();
 };
 
+export const getVenueBySlugOrId = async (identifier: string) => {
+  const slugResult = await supabase.from("venues").select("*").eq("slug", identifier).maybeSingle();
+  if (slugResult.data) return slugResult;
+
+  return await supabase.from("venues").select("*").eq("id", identifier).maybeSingle();
+};
+
 export const getEventUrl = (event: any) => `/event/${event?.slug || event?.id}`;
 export const getPromoUrl = (promo: any) => `/promo/${promo?.slug || promo?.id}`;
+export const getVenueUrl = (venue: any) => `/venue/${venue?.slug || venue?.id}`;
 export const getEditEventUrl = (event: any) => `/edit-event/${event?.slug || event?.id}`;
 export const getEditPromoUrl = (promo: any) => `/edit-promo/${promo?.slug || promo?.id}`;

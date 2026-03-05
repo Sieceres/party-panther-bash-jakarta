@@ -231,7 +231,16 @@ export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) =>
           </div>
           
           {/* Location */}
-          <p className="text-sm sm:text-base text-muted-foreground line-clamp-2 break-words pl-6">{event.venue || event.venue_name}</p>
+          <p 
+            className="text-sm sm:text-base text-muted-foreground line-clamp-2 break-words pl-6 hover:text-primary cursor-pointer transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              const venueName = event.venue || event.venue_name;
+              if (venueName) navigate(`/?section=events&venue=${encodeURIComponent(venueName)}`);
+            }}
+          >
+            {event.venue || event.venue_name}
+          </p>
           
           {/* Event Tags */}
           {eventTags.length > 0 && (

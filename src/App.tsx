@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import InstagramPostGenerator from "./pages/InstagramPostGenerator";
 import { EventDetailPage } from "./components/EventDetailPage";
 import { PromoDetailPage } from "./components/PromoDetailPage";
+import { VenueDetailPage } from "./components/VenueDetailPage";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { Contact } from "./pages/Contact";
 import { EditEventPage } from "./pages/EditEventPage";
@@ -52,6 +53,7 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/event/:id" element={<EventDetailPage />} />
           <Route path="/promo/:id" element={<PromoDetailPage />} />
+          <Route path="/venue/:id" element={<VenueDetailPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/instagram-generator" element={<InstagramPostGenerator />} />
           <Route path="/instagram-generator" element={<InstagramPostGenerator />} />
