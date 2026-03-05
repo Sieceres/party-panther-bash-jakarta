@@ -213,7 +213,13 @@ export const PromoDetailPage = () => {
                     <div className="flex items-start space-x-2">
                       <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
                       <div className="min-w-0">
-                        <p className="font-medium break-words" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}>{promo.venue_name}</p>
+                        <p 
+                          className="font-medium break-words cursor-pointer hover:text-primary transition-colors" 
+                          style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}
+                          onClick={() => navigate(`/venue/${encodeURIComponent(promo.venue_name)}`)}
+                        >
+                          {promo.venue_name}
+                        </p>
                         <p className="text-muted-foreground break-words" style={{ fontSize: 'clamp(0.813rem, 1.1vw, 0.875rem)' }}>{promo.venue_address}</p>
                       </div>
                     </div>
