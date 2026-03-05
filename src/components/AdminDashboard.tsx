@@ -991,6 +991,70 @@ export const AdminDashboard = () => {
                         Seed Venues
                       </Button>
                     </div>
+
+                    {/* Geocode Venues */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-semibold">Geocode Venues</h4>
+                        <p className="text-sm text-muted-foreground">Auto-populate missing addresses and coordinates using Photon geocoding (OpenStreetMap)</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          const { searchPlaces, formatAddress } = await import("@/lib/photon");
+                          
+                          try {
+                            const { data: venues, error } = await supabase
+                              .from('venues')
+                              .select('id, name, address, latitude, longitude')
+                              .or('address.is.null,latitude.is.null,longitude.is.null');
+                            
+                            if (error) throw error;
+                            if (!venues || venues.length === 0) {
+                              toast({ title: "All done", description: "All venues already have address data" });
+                              return;
+                            }
+
+                            toast({ title: "Geocoding...", description: `Processing ${venues.length} venues...` });
+
+                            let updated = 0;
+                            let skipped = 0;
+
+                            for (const venue of venues) {
+                              try {
+                                const results = await searchPlaces(venue.name + " Jakarta");
+                                if (results.length > 0) {
+                                  const top = results[0];
+                                  const [lng, lat] = top.geometry.coordinates;
+                                  const address = formatAddress(top);
+
+                                  await supabase
+                                    .from('venues')
+                                    .update({ address, latitude: lat, longitude: lng })
+                                    .eq('id', venue.id);
+
+                                  updated++;
+                                } else {
+                                  skipped++;
+                                }
+                                // Rate limit: 300ms between requests
+                                await new Promise(r => setTimeout(r, 300));
+                              } catch {
+                                skipped++;
+                              }
+                            }
+
+                            toast({ title: "Geocoding complete", description: `Updated ${updated} venues, skipped ${skipped}` });
+                          } catch (error: any) {
+                            console.error('Error geocoding venues:', error);
+                            toast({ title: "Error", description: error.message || "Failed to geocode venues", variant: "destructive" });
+                          }
+                        }}
+                      >
+                        <MapPin className="w-4 h-4 mr-2" />
+                        Geocode Venues
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
