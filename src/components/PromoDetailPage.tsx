@@ -229,7 +229,9 @@ export const PromoDetailPage = () => {
                     <h4 className="font-semibold" style={{ fontSize: 'clamp(0.938rem, 1.5vw, 1.125rem)' }}>Validity</h4>
                     <div className="space-y-1">
                       {promo.day_of_week && (
-                        <p style={{ fontSize: 'clamp(0.813rem, 1.1vw, 0.875rem)' }}>Every {promo.day_of_week}</p>
+                        <p style={{ fontSize: 'clamp(0.813rem, 1.1vw, 0.875rem)' }}>
+                          Every {Array.isArray(promo.day_of_week) ? promo.day_of_week.join(', ') : promo.day_of_week}
+                        </p>
                       )}
                       {promo.valid_until && (
                         <p style={{ fontSize: 'clamp(0.813rem, 1.1vw, 0.875rem)' }}>Valid until {promo.valid_until}</p>
@@ -243,7 +245,7 @@ export const PromoDetailPage = () => {
                       <div className="flex items-center gap-2 flex-wrap">
                         <UserIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         <span style={{ fontSize: 'clamp(0.813rem, 1.1vw, 0.875rem)' }}>
-                          {creatorProfile.display_name || 'Anonymous'}
+                          {creatorProfile.display_name || 'Party Panther Admin'}
                         </span>
                         {creatorProfile.venue_status === 'verified' && (
                           <Badge variant="secondary" className="text-xs flex items-center gap-1">
