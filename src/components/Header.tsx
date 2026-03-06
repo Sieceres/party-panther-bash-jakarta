@@ -91,6 +91,17 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     }
   };
 
+  const ROUTE_MAP: Record<string, string> = {
+    home: '/',
+    events: '/events',
+    promos: '/promos',
+    admin: '/admin',
+    profile: '/profile',
+    instagram: '/instagram-generator',
+    import: '/import',
+    map: '/map',
+  };
+
   const menuItems = [
     { id: 'home', label: 'Home', icon: Home, hidden: false },
     { id: 'promos', label: 'Promos', icon: Zap, hidden: false },
@@ -100,6 +111,19 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     { id: 'import', label: 'Import', icon: FileUp, hidden: false },
     { id: 'profile', label: 'Profile', icon: User, hidden: false },
     { id: 'admin', label: 'Admin', icon: Shield, hidden: !isAdmin }
+  ];
+
+  const handleNavClick = (itemId: string, closeMobile = false) => {
+    if (itemId === 'profile' && !user) {
+      navigate('/auth');
+      if (closeMobile) setIsMenuOpen(false);
+      return;
+    }
+    const route = ROUTE_MAP[itemId] || '/';
+    navigate(route);
+    onSectionChange(itemId);
+    if (closeMobile) setIsMenuOpen(false);
+  };
   ];
 
   return (
