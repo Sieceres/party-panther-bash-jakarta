@@ -213,35 +213,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                      key={item.id}
                      variant={activeSection === item.id ? "default" : "ghost"}
                      size="lg"
-                     onClick={() => {
-                         // Check if user is trying to access profile without being authenticated
-                         if (item.id === 'profile' && !user) {
-                           navigate('/auth');
-                           setIsMenuOpen(false);
-                           return;
-                         }
-                         
-                          // Use proper navigation based on item type
-                          if (item.id === 'admin') {
-                            navigate('/admin');
-                          } else if (item.id === 'profile') {
-                            navigate('/profile');
-                          } else if (item.id === 'events') {
-                            navigate('/events');
-                          } else if (item.id === 'promos') {
-                            navigate('/promos');
-                          } else if (item.id === 'instagram') {
-                             navigate('/instagram-generator');
-                            } else if (item.id === 'import') {
-                              navigate('/import');
-                            } else if (item.id === 'map') {
-                              navigate('/map');
-                            } else {
-                             navigate('/');
-                           }
-                          onSectionChange(item.id);
-                           setIsMenuOpen(false);
-                        }}
+                      onClick={() => handleNavClick(item.id, true)}
                      className="justify-start min-h-[44px] text-base"
                    >
                      <Icon className="w-5 h-5 mr-3" />
