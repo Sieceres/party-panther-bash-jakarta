@@ -91,6 +91,17 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     }
   };
 
+  const ROUTE_MAP: Record<string, string> = {
+    home: '/',
+    events: '/events',
+    promos: '/promos',
+    admin: '/admin',
+    profile: '/profile',
+    instagram: '/instagram-generator',
+    import: '/import',
+    map: '/map',
+  };
+
   const menuItems = [
     { id: 'home', label: 'Home', icon: Home, hidden: false },
     { id: 'promos', label: 'Promos', icon: Zap, hidden: false },
@@ -101,6 +112,18 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     { id: 'profile', label: 'Profile', icon: User, hidden: false },
     { id: 'admin', label: 'Admin', icon: Shield, hidden: !isAdmin }
   ];
+
+  const handleNavClick = (itemId: string, closeMobile = false) => {
+    if (itemId === 'profile' && !user) {
+      navigate('/auth');
+      if (closeMobile) setIsMenuOpen(false);
+      return;
+    }
+    const route = ROUTE_MAP[itemId] || '/';
+    navigate(route);
+    onSectionChange(itemId);
+    if (closeMobile) setIsMenuOpen(false);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-lg border-b border-border/30">
@@ -130,33 +153,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                      key={item.id}
                      variant={activeSection === item.id ? "default" : "ghost"}
                      size="default"
-                       onClick={() => {
-                         // Check if user is trying to access profile without being authenticated
-                         if (item.id === 'profile' && !user) {
-                           navigate('/auth');
-                           return;
-                         }
-                         
-                          // Use proper navigation based on item type
-                          if (item.id === 'admin') {
-                            navigate('/admin');
-                          } else if (item.id === 'profile') {
-                            navigate('/profile');
-                          } else if (item.id === 'events') {
-                            navigate('/events');
-                          } else if (item.id === 'promos') {
-                            navigate('/promos');
-                          } else if (item.id === 'instagram') {
-                             navigate('/instagram-generator');
-                            } else if (item.id === 'import') {
-                              navigate('/import');
-                            } else if (item.id === 'map') {
-                              navigate('/map');
-                            } else {
-                            navigate('/');
-                          }
-                         onSectionChange(item.id);
-                       }}
+                        onClick={() => handleNavClick(item.id)}
                      className={`flex items-center gap-2 transition-all text-sm ${
                        activeSection === item.id 
                          ? "bg-primary text-primary-foreground" 
@@ -216,35 +213,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                      key={item.id}
                      variant={activeSection === item.id ? "default" : "ghost"}
                      size="lg"
-                     onClick={() => {
-                         // Check if user is trying to access profile without being authenticated
-                         if (item.id === 'profile' && !user) {
-                           navigate('/auth');
-                           setIsMenuOpen(false);
-                           return;
-                         }
-                         
-                          // Use proper navigation based on item type
-                          if (item.id === 'admin') {
-                            navigate('/admin');
-                          } else if (item.id === 'profile') {
-                            navigate('/profile');
-                          } else if (item.id === 'events') {
-                            navigate('/events');
-                          } else if (item.id === 'promos') {
-                            navigate('/promos');
-                          } else if (item.id === 'instagram') {
-                             navigate('/instagram-generator');
-                            } else if (item.id === 'import') {
-                              navigate('/import');
-                            } else if (item.id === 'map') {
-                              navigate('/map');
-                            } else {
-                             navigate('/');
-                           }
-                          onSectionChange(item.id);
-                           setIsMenuOpen(false);
-                        }}
+                      onClick={() => handleNavClick(item.id, true)}
                      className="justify-start min-h-[44px] text-base"
                    >
                      <Icon className="w-5 h-5 mr-3" />
