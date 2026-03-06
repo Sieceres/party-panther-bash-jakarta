@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Zap, X } from "lucide-react";
-import { JAKARTA_AREAS } from "@/lib/area-config";
+import { JAKARTA_AREAS, NEIGHBORHOOD_COORDS } from "@/lib/area-config";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 // Fix default marker icon
@@ -63,6 +63,32 @@ export default function MapExplorer() {
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Resolve coordinates: use venue lat/lng, or fall back to area/neighborhood coords
+  function resolveCoords(
+    venueLat: number | null,
+    venueLng: number | null,
+    area: string | null | undefined
+  ): { lat: number; lng: number } | null {
+    if (venueLat && venueLng) return { lat: Number(venueLat), lng: Number(venueLng) };
+    if (area) {
+      // Try neighborhood coords first
+      const nc = NEIGHBORHOOD_COORDS[area];
+      if (nc) return nc;
+      // Try matching as region
+      for (const region of JAKARTA_AREAS) {
+        if (region.neighborhoods.some((n) => n.toLowerCase() === area.toLowerCase())) {
+          const match = NEIGHBORHOOD_COORDS[region.neighborhoods.find((n) => n.toLowerCase() === area.toLowerCase())!];
+          if (match) return match;
+          return { lat: region.lat, lng: region.lng };
+        }
+        if (region.key === area.toLowerCase() || region.label.toLowerCase() === area.toLowerCase()) {
+          return { lat: region.lat, lng: region.lng };
+        }
+      }
+    }
+    return null;
+  }
+
   // Fetch data
   useEffect(() => {
     async function load() {
@@ -76,13 +102,14 @@ export default function MapExplorer() {
 
       if (promosRes.data) {
         for (const p of promosRes.data) {
-          if (p.venue_latitude && p.venue_longitude) {
+          const coords = resolveCoords(p.venue_latitude, p.venue_longitude, p.area);
+          if (coords) {
             mapped.push({
               id: p.id,
               title: p.title,
               venue_name: p.venue_name,
-              lat: Number(p.venue_latitude),
-              lng: Number(p.venue_longitude),
+              lat: coords.lat,
+              lng: coords.lng,
               type: "promo",
               slug: p.slug,
               extra: p.discount_text,
@@ -93,13 +120,14 @@ export default function MapExplorer() {
 
       if (eventsRes.data) {
         for (const e of eventsRes.data) {
-          if (e.venue_latitude && e.venue_longitude) {
+          const coords = resolveCoords(e.venue_latitude, e.venue_longitude, null);
+          if (coords) {
             mapped.push({
               id: e.id,
               title: e.title,
               venue_name: e.venue_name ?? "",
-              lat: Number(e.venue_latitude),
-              lng: Number(e.venue_longitude),
+              lat: coords.lat,
+              lng: coords.lng,
               type: "event",
               slug: e.slug,
               extra: e.date ? new Date(e.date).toLocaleDateString() : undefined,
