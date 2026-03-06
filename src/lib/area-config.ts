@@ -6,6 +6,26 @@ export interface AreaRegion {
   neighborhoods: string[];
 }
 
+/** Approximate center coordinates for neighborhoods (for map fallback) */
+export const NEIGHBORHOOD_COORDS: Record<string, { lat: number; lng: number }> = {
+  "Kemang": { lat: -6.260, lng: 106.813 },
+  "Senopati & Gunawarman": { lat: -6.237, lng: 106.800 },
+  "SCBD": { lat: -6.225, lng: 106.805 },
+  "Senayan": { lat: -6.228, lng: 106.789 },
+  "Blok M & Melawai": { lat: -6.244, lng: 106.798 },
+  "Sudirman & Thamrin": { lat: -6.200, lng: 106.822 },
+  "Kuningan & Setiabudi": { lat: -6.220, lng: 106.830 },
+  "Mega Kuningan": { lat: -6.230, lng: 106.835 },
+  "Menteng & Cikini": { lat: -6.190, lng: 106.840 },
+  "Kota Tua": { lat: -6.135, lng: 106.813 },
+  "PIK": { lat: -6.105, lng: 106.740 },
+  "Kelapa Gading": { lat: -6.155, lng: 106.905 },
+  "Ancol": { lat: -6.127, lng: 106.840 },
+  "Grogol": { lat: -6.163, lng: 106.785 },
+  "Kebon Jeruk": { lat: -6.190, lng: 106.770 },
+  "Kelapa Gading Timur": { lat: -6.160, lng: 106.915 },
+};
+
 export const JAKARTA_AREAS: AreaRegion[] = [
   {
     key: "south",
