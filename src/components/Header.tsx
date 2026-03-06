@@ -124,7 +124,6 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     onSectionChange(itemId);
     if (closeMobile) setIsMenuOpen(false);
   };
-  ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-lg border-b border-border/30">
