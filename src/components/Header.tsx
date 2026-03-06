@@ -148,9 +148,11 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                             navigate('/promos');
                           } else if (item.id === 'instagram') {
                              navigate('/instagram-generator');
-                           } else if (item.id === 'import') {
-                             navigate('/import');
-                           } else {
+                            } else if (item.id === 'import') {
+                              navigate('/import');
+                            } else if (item.id === 'map') {
+                              navigate('/map');
+                            } else {
                             navigate('/');
                           }
                          onSectionChange(item.id);
@@ -233,9 +235,11 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                             navigate('/promos');
                           } else if (item.id === 'instagram') {
                              navigate('/instagram-generator');
-                           } else if (item.id === 'import') {
-                             navigate('/import');
-                           } else {
+                            } else if (item.id === 'import') {
+                              navigate('/import');
+                            } else if (item.id === 'map') {
+                              navigate('/map');
+                            } else {
                              navigate('/');
                            }
                           onSectionChange(item.id);
