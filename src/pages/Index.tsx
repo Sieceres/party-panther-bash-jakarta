@@ -72,6 +72,9 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
     } else if (section === 'import') {
       navigate('/import');
       return;
+    } else if (section === 'map') {
+      navigate('/map');
+      return;
     } else if (section === 'events') {
       navigate('/events');
     } else if (section === 'promos') {

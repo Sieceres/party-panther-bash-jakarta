@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Instagram, FileUp } from "lucide-react";
+import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Instagram, FileUp, Map } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
@@ -96,6 +96,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     { id: 'promos', label: 'Promos', icon: Zap, hidden: false },
     { id: 'events', label: 'Events', icon: Calendar, hidden: false },
     { id: 'instagram', label: 'IG Creator', icon: Instagram, hidden: !user },
+    { id: 'map', label: 'Map', icon: Map, hidden: false },
     { id: 'import', label: 'Import', icon: FileUp, hidden: false },
     { id: 'profile', label: 'Profile', icon: User, hidden: false },
     { id: 'admin', label: 'Admin', icon: Shield, hidden: !isAdmin }
@@ -147,9 +148,11 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                             navigate('/promos');
                           } else if (item.id === 'instagram') {
                              navigate('/instagram-generator');
-                           } else if (item.id === 'import') {
-                             navigate('/import');
-                           } else {
+                            } else if (item.id === 'import') {
+                              navigate('/import');
+                            } else if (item.id === 'map') {
+                              navigate('/map');
+                            } else {
                             navigate('/');
                           }
                          onSectionChange(item.id);
@@ -232,9 +235,11 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
                             navigate('/promos');
                           } else if (item.id === 'instagram') {
                              navigate('/instagram-generator');
-                           } else if (item.id === 'import') {
-                             navigate('/import');
-                           } else {
+                            } else if (item.id === 'import') {
+                              navigate('/import');
+                            } else if (item.id === 'map') {
+                              navigate('/map');
+                            } else {
                              navigate('/');
                            }
                           onSectionChange(item.id);
