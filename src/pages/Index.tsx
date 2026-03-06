@@ -59,30 +59,6 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
     }
     setActiveSection(section);
     
-    // Navigate to proper routes — only handle sections this component owns
-    if (section === 'admin') {
-      navigate('/admin');
-      return;
-    } else if (section === 'profile') {
-      navigate('/profile');
-      return;
-    } else if (section === 'instagram') {
-      navigate('/instagram-generator');
-      return;
-    } else if (section === 'import') {
-      navigate('/import');
-      return;
-    } else if (section === 'map') {
-      navigate('/map');
-      return;
-    } else if (section === 'events') {
-      navigate('/events');
-    } else if (section === 'promos') {
-      navigate('/promos');
-    } else if (section === 'home') {
-      navigate('/');
-    }
-    
     // Scroll to top when changing sections
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
