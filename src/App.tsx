@@ -24,6 +24,7 @@ import ResetPassword from "./pages/ResetPassword";
 import WorldCupExplorer from "./pages/WorldCupExplorer";
 import Proofing from "./pages/Proofing";
 import BatchImport from "./pages/BatchImport";
+import MapExplorer from "./pages/MapExplorer";
 
 const queryClient = new QueryClient();
 
