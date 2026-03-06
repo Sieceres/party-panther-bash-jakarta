@@ -68,6 +68,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/wce" element={<WorldCupExplorer />} />
           <Route path="/import" element={<BatchImport />} />
+          <Route path="/map" element={<MapExplorer />} />
           <Route path="/lexium" element={<Proofing />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
