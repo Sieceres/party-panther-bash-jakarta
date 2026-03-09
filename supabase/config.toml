@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.extract-from-image]
 verify_jwt = false
+
+[functions.scrape-venue-images]
+verify_jwt = false
