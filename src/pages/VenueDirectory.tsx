@@ -10,7 +10,7 @@ import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { supabase } from "@/integrations/supabase/client";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { JAKARTA_AREAS } from "@/lib/area-config";
-import { MapPin, Search, Store, Grid3X3, Map, Instagram, Globe, ArrowUpDown } from "lucide-react";
+import { MapPin, Search, Store, Grid3X3, Map as MapIcon, Instagram, Globe, ArrowUpDown } from "lucide-react";
 import L from "leaflet";
 
 interface VenueRow {
