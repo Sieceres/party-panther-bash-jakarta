@@ -186,7 +186,7 @@ export default function VenueDirectory() {
                 onClick={() => setView("map")}
                 className="rounded-none gap-1.5"
               >
-                <Map className="w-4 h-4" /> Map
+                <MapIcon className="w-4 h-4" /> Map
               </Button>
             </div>
           </div>
