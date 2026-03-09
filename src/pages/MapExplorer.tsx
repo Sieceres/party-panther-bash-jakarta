@@ -177,7 +177,7 @@ export default function MapExplorer() {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
     }).addTo(map);
 
-    const cluster = L.markerClusterGroup({
+    const cluster = (L as any).markerClusterGroup({
       maxClusterRadius: 40,
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
