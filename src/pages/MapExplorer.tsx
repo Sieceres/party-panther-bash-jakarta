@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Link } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Calendar, Zap, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MapPin, Calendar, Zap, X, Filter } from "lucide-react";
 import { JAKARTA_AREAS, NEIGHBORHOOD_COORDS } from "@/lib/area-config";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
@@ -27,11 +30,14 @@ interface MapItem {
   lng: number;
   type: "promo" | "event";
   slug?: string | null;
-  extra?: string; // discount_text or date
+  extra?: string;
+  day_of_week?: string[];
+  drink_type?: string[];
+  promo_type?: string | null;
 }
 
-const PROMO_COLOR = "#10b981"; // emerald
-const EVENT_COLOR = "#6366f1"; // indigo
+const PROMO_COLOR = "#10b981";
+const EVENT_COLOR = "#6366f1";
 
 function makeIcon(color: string) {
   return L.divIcon({
@@ -50,12 +56,49 @@ function makeIcon(color: string) {
 const JAKARTA_CENTER: [number, number] = [-6.2, 106.845];
 const DEFAULT_ZOOM = 12;
 
+const DAY_OPTIONS = [
+  { id: "monday", label: "Monday" },
+  { id: "tuesday", label: "Tuesday" },
+  { id: "wednesday", label: "Wednesday" },
+  { id: "thursday", label: "Thursday" },
+  { id: "friday", label: "Friday" },
+  { id: "saturday", label: "Saturday" },
+  { id: "sunday", label: "Sunday" },
+];
+
+const DRINK_TYPE_OPTIONS = [
+  "Beer", "Cocktails", "Coffee & Tea", "Drinks", "Food", "Spirits", "Wine",
+];
+
+function resolveCoords(
+  venueLat: number | null,
+  venueLng: number | null,
+  area: string | null | undefined
+): { lat: number; lng: number } | null {
+  if (venueLat && venueLng) return { lat: Number(venueLat), lng: Number(venueLng) };
+  if (area) {
+    const nc = NEIGHBORHOOD_COORDS[area];
+    if (nc) return nc;
+    for (const region of JAKARTA_AREAS) {
+      if (region.neighborhoods.some((n) => n.toLowerCase() === area.toLowerCase())) {
+        const match = NEIGHBORHOOD_COORDS[region.neighborhoods.find((n) => n.toLowerCase() === area.toLowerCase())!];
+        if (match) return match;
+        return { lat: region.lat, lng: region.lng };
+      }
+      if (region.key === area.toLowerCase() || region.label.toLowerCase() === area.toLowerCase()) {
+        return { lat: region.lat, lng: region.lng };
+      }
+    }
+  }
+  return null;
+}
+
 export default function MapExplorer() {
   usePageTitle("Map Explorer");
 
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
-  const markersLayer = useRef<L.LayerGroup | null>(null);
+  const clusterGroup = useRef<L.MarkerClusterGroup | null>(null);
 
   const [items, setItems] = useState<MapItem[]>([]);
   const [showPromos, setShowPromos] = useState(true);
@@ -63,31 +106,9 @@ export default function MapExplorer() {
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Resolve coordinates: use venue lat/lng, or fall back to area/neighborhood coords
-  function resolveCoords(
-    venueLat: number | null,
-    venueLng: number | null,
-    area: string | null | undefined
-  ): { lat: number; lng: number } | null {
-    if (venueLat && venueLng) return { lat: Number(venueLat), lng: Number(venueLng) };
-    if (area) {
-      // Try neighborhood coords first
-      const nc = NEIGHBORHOOD_COORDS[area];
-      if (nc) return nc;
-      // Try matching as region
-      for (const region of JAKARTA_AREAS) {
-        if (region.neighborhoods.some((n) => n.toLowerCase() === area.toLowerCase())) {
-          const match = NEIGHBORHOOD_COORDS[region.neighborhoods.find((n) => n.toLowerCase() === area.toLowerCase())!];
-          if (match) return match;
-          return { lat: region.lat, lng: region.lng };
-        }
-        if (region.key === area.toLowerCase() || region.label.toLowerCase() === area.toLowerCase()) {
-          return { lat: region.lat, lng: region.lng };
-        }
-      }
-    }
-    return null;
-  }
+  // Filters
+  const [dayFilter, setDayFilter] = useState<string[]>(["all"]);
+  const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(["all"]);
 
   // Fetch data
   useEffect(() => {
@@ -113,6 +134,9 @@ export default function MapExplorer() {
               type: "promo",
               slug: p.slug,
               extra: p.discount_text,
+              day_of_week: p.day_of_week ?? [],
+              drink_type: p.drink_type ?? [],
+              promo_type: p.promo_type,
             });
           }
         }
@@ -153,31 +177,72 @@ export default function MapExplorer() {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
     }).addTo(map);
 
-    markersLayer.current = L.layerGroup().addTo(map);
+    const cluster = L.markerClusterGroup({
+      maxClusterRadius: 40,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true,
+      disableClusteringAtZoom: 17,
+      iconCreateFunction: (c) => {
+        const count = c.getChildCount();
+        const hasPromo = c.getAllChildMarkers().some((m: any) => m.options._itemType === "promo");
+        const hasEvent = c.getAllChildMarkers().some((m: any) => m.options._itemType === "event");
+        let bg = PROMO_COLOR;
+        if (hasPromo && hasEvent) bg = "linear-gradient(135deg, " + PROMO_COLOR + " 50%, " + EVENT_COLOR + " 50%)";
+        else if (hasEvent) bg = EVENT_COLOR;
+
+        return L.divIcon({
+          className: "",
+          iconSize: [36, 36],
+          html: `<div style="
+            width:36px;height:36px;border-radius:50%;
+            background:${bg};border:3px solid white;
+            box-shadow:0 2px 8px rgba(0,0,0,0.3);
+            display:flex;align-items:center;justify-content:center;
+            color:white;font-weight:700;font-size:13px;font-family:system-ui;
+          ">${count}</div>`,
+        });
+      },
+    });
+
+    cluster.addTo(map);
+    clusterGroup.current = cluster;
     mapInstance.current = map;
 
     return () => {
       map.remove();
       mapInstance.current = null;
-      markersLayer.current = null;
+      clusterGroup.current = null;
     };
   }, []);
 
   // Filter visible items
-  const visibleItems = useMemo(
-    () =>
-      items.filter((i) => {
-        if (i.type === "promo" && !showPromos) return false;
-        if (i.type === "event" && !showEvents) return false;
-        return true;
-      }),
-    [items, showPromos, showEvents]
+  const visibleItems = useMemo(() =>
+    items.filter((i) => {
+      if (i.type === "promo" && !showPromos) return false;
+      if (i.type === "event" && !showEvents) return false;
+
+      // Day filter (only applies to promos)
+      if (i.type === "promo" && !dayFilter.includes("all")) {
+        const itemDays = (i.day_of_week || []).map((d) => d.toLowerCase());
+        if (!dayFilter.some((f) => itemDays.includes(f.toLowerCase()))) return false;
+      }
+
+      // Drink type filter (only applies to promos)
+      if (i.type === "promo" && !drinkTypeFilter.includes("all")) {
+        const itemDrinks = (i.drink_type || []).map((d) => d.toLowerCase());
+        if (!drinkTypeFilter.some((f) => itemDrinks.includes(f.toLowerCase()))) return false;
+      }
+
+      return true;
+    }),
+    [items, showPromos, showEvents, dayFilter, drinkTypeFilter]
   );
 
-  // Render markers
+  // Render markers into cluster group
   useEffect(() => {
-    if (!markersLayer.current) return;
-    markersLayer.current.clearLayers();
+    if (!clusterGroup.current) return;
+    clusterGroup.current.clearLayers();
 
     for (const item of visibleItems) {
       const icon = makeIcon(item.type === "promo" ? PROMO_COLOR : EVENT_COLOR);
@@ -201,7 +266,12 @@ export default function MapExplorer() {
         </div>
       `;
 
-      L.marker([item.lat, item.lng], { icon }).bindPopup(popup).addTo(markersLayer.current!);
+      const marker = L.marker([item.lat, item.lng], {
+        icon,
+        _itemType: item.type,
+      } as any).bindPopup(popup);
+
+      clusterGroup.current.addLayer(marker);
     }
   }, [visibleItems]);
 
@@ -222,6 +292,39 @@ export default function MapExplorer() {
 
   const promoCount = visibleItems.filter((i) => i.type === "promo").length;
   const eventCount = visibleItems.filter((i) => i.type === "event").length;
+
+  const hasActiveFilters = !dayFilter.includes("all") || !drinkTypeFilter.includes("all");
+
+  const getFilterDisplayText = (filters: string[], allLabel: string) => {
+    if (filters.includes("all")) return allLabel;
+    if (filters.length === 1) return filters[0].charAt(0).toUpperCase() + filters[0].slice(1);
+    return `${filters.length} selected`;
+  };
+
+  const handleDayChange = (day: string, checked: boolean) => {
+    if (checked) {
+      const newFilters = dayFilter.filter((f) => f !== "all");
+      setDayFilter([...newFilters, day]);
+    } else {
+      const newFilters = dayFilter.filter((f) => f !== day);
+      setDayFilter(newFilters.length === 0 ? ["all"] : newFilters);
+    }
+  };
+
+  const handleDrinkChange = (drink: string, checked: boolean) => {
+    if (checked) {
+      const newFilters = drinkTypeFilter.filter((f) => f !== "all");
+      setDrinkTypeFilter([...newFilters, drink]);
+    } else {
+      const newFilters = drinkTypeFilter.filter((f) => f !== drink);
+      setDrinkTypeFilter(newFilters.length === 0 ? ["all"] : newFilters);
+    }
+  };
+
+  const clearFilters = () => {
+    setDayFilter(["all"]);
+    setDrinkTypeFilter(["all"]);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -252,6 +355,66 @@ export default function MapExplorer() {
               <Calendar className="w-3.5 h-3.5" />
               Events ({eventCount})
             </Button>
+
+            {/* Day filter */}
+            <Select>
+              <SelectTrigger className="h-8 w-auto min-w-[100px] shadow-lg bg-background/95 backdrop-blur-sm text-xs border">
+                <SelectValue placeholder={getFilterDisplayText(dayFilter, "All days")} />
+              </SelectTrigger>
+              <SelectContent>
+                <div className="p-2 space-y-1.5">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Checkbox
+                      checked={dayFilter.includes("all")}
+                      onCheckedChange={(checked) => { if (checked) setDayFilter(["all"]); }}
+                    />
+                    All days
+                  </label>
+                  {DAY_OPTIONS.map((d) => (
+                    <label key={d.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={dayFilter.includes(d.id)}
+                        onCheckedChange={(checked) => handleDayChange(d.id, !!checked)}
+                      />
+                      {d.label}
+                    </label>
+                  ))}
+                </div>
+              </SelectContent>
+            </Select>
+
+            {/* Drink type filter */}
+            <Select>
+              <SelectTrigger className="h-8 w-auto min-w-[100px] shadow-lg bg-background/95 backdrop-blur-sm text-xs border">
+                <SelectValue placeholder={getFilterDisplayText(drinkTypeFilter, "All types")} />
+              </SelectTrigger>
+              <SelectContent>
+                <div className="p-2 space-y-1.5">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Checkbox
+                      checked={drinkTypeFilter.includes("all")}
+                      onCheckedChange={(checked) => { if (checked) setDrinkTypeFilter(["all"]); }}
+                    />
+                    All types
+                  </label>
+                  {DRINK_TYPE_OPTIONS.map((drink) => (
+                    <label key={drink} className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={drinkTypeFilter.includes(drink.toLowerCase())}
+                        onCheckedChange={(checked) => handleDrinkChange(drink.toLowerCase(), !!checked)}
+                      />
+                      {drink}
+                    </label>
+                  ))}
+                </div>
+              </SelectContent>
+            </Select>
+
+            {hasActiveFilters && (
+              <Button size="sm" variant="ghost" onClick={clearFilters} className="h-8 text-xs shadow-sm bg-background/90 backdrop-blur-sm">
+                <X className="w-3 h-3 mr-1" /> Clear
+              </Button>
+            )}
 
             {/* Region chips */}
             {JAKARTA_AREAS.map((region) => (
