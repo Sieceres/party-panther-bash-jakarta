@@ -193,6 +193,11 @@ export const VenueDetailPage = () => {
                   <h1 className="gradient-text leading-tight" style={{ fontSize: "clamp(1.5rem, 4vw + 0.5rem, 2.5rem)" }}>
                     {venue.name}
                   </h1>
+                  {isAdmin && venue.id && (
+                    <Button size="sm" variant="ghost" onClick={() => setShowLocationEditor(true)} className="text-muted-foreground hover:text-primary">
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
                 {venue.claim_status === "approved" && (
                   <Badge variant="secondary" className="text-xs">✓ Claimed Venue</Badge>
