@@ -95,6 +95,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     home: '/',
     events: '/events',
     promos: '/promos',
+    venues: '/venues',
     admin: '/admin',
     profile: '/profile',
     instagram: '/instagram-generator',
