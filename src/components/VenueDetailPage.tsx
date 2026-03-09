@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store } from "lucide-react";
+import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil } from "lucide-react";
 import { GoogleMap } from "./GoogleMap";
 import { SpinningPaws } from "./ui/spinning-paws";
 import { Header } from "./Header";
@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getVenueBySlugOrId } from "@/lib/slug-utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { VenueLocationEditor } from "./map/VenueLocationEditor";
 
 interface Venue {
   id: string;
@@ -41,6 +42,19 @@ export const VenueDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [promos, setPromos] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showLocationEditor, setShowLocationEditor] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        supabase.from("user_roles").select("role").eq("user_id", user.id)
+          .then(({ data }) => {
+            setIsAdmin(data?.some(r => r.role === "admin" || r.role === "superadmin") || false);
+          });
+      }
+    });
+  }, []);
 
   usePageTitle(venue?.name ? `${venue.name}` : "Venue");
 
@@ -179,6 +193,11 @@ export const VenueDetailPage = () => {
                   <h1 className="gradient-text leading-tight" style={{ fontSize: "clamp(1.5rem, 4vw + 0.5rem, 2.5rem)" }}>
                     {venue.name}
                   </h1>
+                  {isAdmin && venue.id && (
+                    <Button size="sm" variant="ghost" onClick={() => setShowLocationEditor(true)} className="text-muted-foreground hover:text-primary">
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
                 {venue.claim_status === "approved" && (
                   <Badge variant="secondary" className="text-xs">✓ Claimed Venue</Badge>
@@ -322,6 +341,19 @@ export const VenueDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {venue.id && (
+        <VenueLocationEditor
+          venueId={venue.id}
+          venueName={venue.name}
+          currentLat={venue.latitude ? Number(venue.latitude) : null}
+          currentLng={venue.longitude ? Number(venue.longitude) : null}
+          currentAddress={venue.address}
+          open={showLocationEditor}
+          onOpenChange={setShowLocationEditor}
+          onSaved={() => window.location.reload()}
+        />
+      )}
     </>
   );
 };
