@@ -98,7 +98,7 @@ export default function MapExplorer() {
 
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
-  const clusterGroup = useRef<L.MarkerClusterGroup | null>(null);
+  const clusterGroup = useRef<any>(null);
 
   const [items, setItems] = useState<MapItem[]>([]);
   const [showPromos, setShowPromos] = useState(true);
