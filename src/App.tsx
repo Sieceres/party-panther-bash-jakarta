@@ -25,6 +25,7 @@ import WorldCupExplorer from "./pages/WorldCupExplorer";
 import Proofing from "./pages/Proofing";
 import BatchImport from "./pages/BatchImport";
 import MapExplorer from "./pages/MapExplorer";
+import VenueDirectory from "./pages/VenueDirectory";
 
 const queryClient = new QueryClient();
 
