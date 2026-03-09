@@ -26,16 +26,15 @@ Deno.serve(async (req) => {
     const { venue_id, venue_ids } = await req.json();
     const ids = venue_ids || (venue_id ? [venue_id] : []);
 
-    // If no IDs, fetch all venues missing images that have instagram or website
+    // If no IDs, fetch all venues missing images
     let venues: any[];
     if (ids.length > 0) {
       const { data } = await supabase.from('venues').select('id, name, instagram, website, image_url').in('id', ids);
       venues = data || [];
     } else {
       const { data } = await supabase.from('venues').select('id, name, instagram, website, image_url')
-        .is('image_url', null)
-        .or('instagram.neq.,website.neq.');
-      venues = (data || []).filter(v => v.instagram || v.website);
+        .is('image_url', null);
+      venues = data || [];
     }
 
     console.log(`Processing ${venues.length} venues for image scraping`);
