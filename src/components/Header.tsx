@@ -107,6 +107,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     { id: 'home', label: 'Home', icon: Home, hidden: false },
     { id: 'promos', label: 'Promos', icon: Zap, hidden: false },
     { id: 'events', label: 'Events', icon: Calendar, hidden: false },
+    { id: 'venues', label: 'Venues', icon: Store, hidden: false },
     { id: 'instagram', label: 'IG Creator', icon: Instagram, hidden: !user },
     { id: 'map', label: 'Map', icon: Map, hidden: false },
     { id: 'import', label: 'Import', icon: FileUp, hidden: false },
