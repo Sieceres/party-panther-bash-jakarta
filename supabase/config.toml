@@ -4,10 +4,10 @@ project_id = "qgttbaibhmzbmknjlghj"
 verify_jwt = false
 
 [functions.secure-delete]
-verify_jwt = true
+verify_jwt = false
 
 [functions.admin-role-update]
-verify_jwt = true
+verify_jwt = false
 
 [functions.photon-proxy]
 verify_jwt = false

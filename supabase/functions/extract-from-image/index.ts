@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,8 +25,8 @@ const promoTool = {
               venue_address: { type: "string", description: "Address if visible" },
               discount_text: { type: "string", description: "The discount/deal text, e.g. '2-for-1 cocktails' or '50% off'" },
               promo_type: { type: "string", description: "Type: happy_hour, ladies_night, brunch_deal, food_special, drink_special, live_music, other" },
-              day_of_week: { type: "array", items: { type: "string" }, description: "Days this promo is active: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday" },
-              area: { type: "string", description: "Specific neighborhood/area. Must be one of: Kemang, Senopati & Gunawarman, SCBD, Senayan, Blok M & Melawai, Sudirman & Thamrin, Kuningan & Setiabudi, Mega Kuningan, Menteng & Cikini, Kota Tua, PIK, Kelapa Gading, Ancol, Grogol, Kebon Jeruk, Kelapa Gading Timur. Pick the closest match." },
+              day_of_week: { type: "array", items: { type: "string" }, description: "Days this promo is active" },
+              area: { type: "string", description: "Specific neighborhood/area." },
               drink_type: { type: "array", items: { type: "string" }, description: "Types of drinks if applicable" },
               original_price_amount: { type: "number", description: "Original price if visible" },
               discounted_price_amount: { type: "number", description: "Discounted price if visible" },
@@ -76,29 +77,16 @@ const eventTool = {
   },
 };
 
-// Try to extract JSON from text content (fallback when tool_calls not used)
 function extractJsonFromText(text: string): any | null {
-  // Try to find JSON in code blocks
   const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (codeBlockMatch) {
-    try {
-      return JSON.parse(codeBlockMatch[1].trim());
-    } catch { /* continue */ }
+    try { return JSON.parse(codeBlockMatch[1].trim()); } catch { /* continue */ }
   }
-
-  // Try to find raw JSON object/array
   const jsonMatch = text.match(/\{[\s\S]*"items"[\s\S]*\}/);
   if (jsonMatch) {
-    try {
-      return JSON.parse(jsonMatch[0]);
-    } catch { /* continue */ }
+    try { return JSON.parse(jsonMatch[0]); } catch { /* continue */ }
   }
-
-  // Try the whole text as JSON
-  try {
-    return JSON.parse(text);
-  } catch { /* continue */ }
-
+  try { return JSON.parse(text); } catch { /* continue */ }
   return null;
 }
 
@@ -108,6 +96,22 @@ serve(async (req) => {
   }
 
   try {
+    // Validate JWT
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const { image, type } = await req.json();
 
     if (!image) {
@@ -140,14 +144,13 @@ Default currency is IDR unless otherwise specified.
 
 IMPORTANT - Drink categorization:
 For drink_type, categorize drinks specifically:
-- Beer brands (Heineken, Bintang, Corona, Tiger, etc.) → ["Beer"]
-- Spirits (Vodka, Gin, Rum, Whiskey, Tequila, etc.) → ["Spirits"]
-- Wine (Red wine, White wine, Prosecco, Champagne) → ["Wine"]
-- Cocktails (Mojito, Margarita, Martini, etc.) → ["Cocktails"]
+- Beer brands → ["Beer"]
+- Spirits → ["Spirits"]
+- Wine → ["Wine"]
+- Cocktails → ["Cocktails"]
 - Coffee/Tea → ["Coffee & Tea"]
 - If multiple types, list all applicable categories.
 - If it's a food deal, use ["Food"].
-- Be specific about brand names in the description but use broad categories for drink_type.
 
 You MUST use the extract_promos tool to return the results.`
       : `You are an expert at extracting event information from images and documents.
@@ -170,7 +173,7 @@ You MUST use the extract_events tool to return the results.`;
           {
             role: "user",
             content: [
-              { type: "text", text: `Extract all ${isPromo ? "promos/deals" : "events"} from this image. Be thorough and extract every item you can find.` },
+              { type: "text", text: `Extract all ${isPromo ? "promos/deals" : "events"} from this image.` },
               { type: "image_url", image_url: { url: image } },
             ],
           },
@@ -185,59 +188,31 @@ You MUST use the extract_events tool to return the results.`;
       const text = await response.text();
       console.error("AI gateway error:", status, text);
       if (status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       if (status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits to your workspace." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-      return new Response(JSON.stringify({ error: `AI extraction failed (${status})` }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: `AI extraction failed (${status})` }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const data = await response.json();
-    console.log("AI response keys:", Object.keys(data));
-    console.log("Choice finish_reason:", data.choices?.[0]?.finish_reason);
-    
     const message = data.choices?.[0]?.message;
     let items: any[] = [];
 
-    // Try tool_calls first
     const toolCall = message?.tool_calls?.[0];
     if (toolCall) {
-      console.log("Found tool call, parsing arguments");
       const parsed = JSON.parse(toolCall.function.arguments);
       items = parsed.items || [];
-    } 
-    // Fallback: try parsing from content text
-    else if (message?.content) {
-      console.log("No tool call found, trying to parse from content text");
-      console.log("Content preview:", message.content.substring(0, 200));
+    } else if (message?.content) {
       const parsed = extractJsonFromText(message.content);
-      if (parsed?.items) {
-        items = parsed.items;
-      } else if (Array.isArray(parsed)) {
-        items = parsed;
-      }
+      if (parsed?.items) items = parsed.items;
+      else if (Array.isArray(parsed)) items = parsed;
     }
 
     console.log(`Extracted ${items.length} ${type} items`);
 
-    if (items.length === 0) {
-      return new Response(JSON.stringify({ error: "No items extracted", items: [] }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify({ items }), {
+    return new Response(JSON.stringify({ items: items.length ? items : [], ...(items.length === 0 ? { error: "No items extracted" } : {}) }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

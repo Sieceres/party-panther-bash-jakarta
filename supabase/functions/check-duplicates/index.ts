@@ -46,6 +46,24 @@ serve(async (req) => {
   }
 
   try {
+    // Validate JWT
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized', duplicates: [] }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: 'Unauthorized', duplicates: [] }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const { type, title, venue, description, promoType, area, date } = await req.json() as DuplicateCheckRequest;
 
     if (!title || !venue) {
@@ -64,107 +82,56 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    // Use service role for data queries
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch existing entries to compare against
     let existingEntries: ExistingEntry[] = [];
 
     if (type === "promo") {
       const { data, error } = await supabase
         .from("promos")
-        .select(`
-          id,
-          title,
-          venue_name,
-          description,
-          slug,
-          created_at,
-          promo_type,
-          area
-        `)
+        .select("id, title, venue_name, description, slug, created_at, promo_type, area")
         .order("created_at", { ascending: false })
         .limit(50);
 
-      if (error) {
-        console.error("Error fetching promos:", error);
-      } else {
-        existingEntries = (data || []).map(p => ({
-          id: p.id,
-          title: p.title,
-          venue_name: p.venue_name,
-          description: p.description,
-          slug: p.slug,
-          created_at: p.created_at,
+      if (!error && data) {
+        existingEntries = data.map(p => ({
+          id: p.id, title: p.title, venue_name: p.venue_name,
+          description: p.description, slug: p.slug, created_at: p.created_at,
           promo_type: p.promo_type,
         }));
       }
     } else {
-      // Fetch events - focus on recent and upcoming
       const { data, error } = await supabase
         .from("events")
-        .select(`
-          id,
-          title,
-          venue_name,
-          description,
-          slug,
-          created_at,
-          date
-        `)
+        .select("id, title, venue_name, description, slug, created_at, date")
         .gte("date", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0])
         .order("date", { ascending: true })
         .limit(50);
 
-      if (error) {
-        console.error("Error fetching events:", error);
-      } else {
-        existingEntries = (data || []).map(e => ({
-          id: e.id,
-          title: e.title,
-          venue_name: e.venue_name,
-          description: e.description,
-          slug: e.slug,
-          created_at: e.created_at,
+      if (!error && data) {
+        existingEntries = data.map(e => ({
+          id: e.id, title: e.title, venue_name: e.venue_name,
+          description: e.description, slug: e.slug, created_at: e.created_at,
           date: e.date,
         }));
       }
     }
 
     if (existingEntries.length === 0) {
-      return new Response(
-        JSON.stringify({ duplicates: [] }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ duplicates: [] }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Build the AI prompt
     const newEntryInfo = type === "promo"
-      ? `NEW PROMO:
-Title: "${title}"
-Venue: "${venue}"
-Description: "${description || "N/A"}"
-Promo Type: "${promoType || "N/A"}"
-Area: "${area || "N/A"}"`
-      : `NEW EVENT:
-Title: "${title}"
-Venue: "${venue}"
-Description: "${description || "N/A"}"
-Date: "${date || "N/A"}"`;
+      ? `NEW PROMO:\nTitle: "${title}"\nVenue: "${venue}"\nDescription: "${description || "N/A"}"\nPromo Type: "${promoType || "N/A"}"\nArea: "${area || "N/A"}"`
+      : `NEW EVENT:\nTitle: "${title}"\nVenue: "${venue}"\nDescription: "${description || "N/A"}"\nDate: "${date || "N/A"}"`;
 
     const existingEntriesInfo = existingEntries.map((e, i) => {
       if (type === "promo") {
-        return `${i + 1}. ID: ${e.id}
-   Title: "${e.title}"
-   Venue: "${e.venue_name}"
-   Promo Type: "${e.promo_type || "N/A"}"`;
+        return `${i + 1}. ID: ${e.id}\n   Title: "${e.title}"\n   Venue: "${e.venue_name}"\n   Promo Type: "${e.promo_type || "N/A"}"`;
       } else {
-        return `${i + 1}. ID: ${e.id}
-   Title: "${e.title}"
-   Venue: "${e.venue_name}"
-   Date: "${e.date || "N/A"}"`;
+        return `${i + 1}. ID: ${e.id}\n   Title: "${e.title}"\n   Venue: "${e.venue_name}"\n   Date: "${e.date || "N/A"}"`;
       }
     }).join("\n\n");
 
@@ -184,12 +151,7 @@ Return a JSON array of matches. Each match should have:
 If no duplicates found, return an empty array: []
 Only return the JSON array, no other text.`;
 
-    const userPrompt = `${newEntryInfo}
-
-EXISTING ${type.toUpperCase()}S TO CHECK AGAINST:
-${existingEntriesInfo}
-
-Find potential duplicates with confidence >= 70%. Return JSON array only.`;
+    const userPrompt = `${newEntryInfo}\n\nEXISTING ${type.toUpperCase()}S TO CHECK AGAINST:\n${existingEntriesInfo}\n\nFind potential duplicates with confidence >= 70%. Return JSON array only.`;
 
     console.log("Calling AI for duplicate check...");
 
@@ -211,35 +173,21 @@ Find potential duplicates with confidence >= 70%. Return JSON array only.`;
     if (!response.ok) {
       const errorText = await response.text();
       console.error("AI gateway error:", response.status, errorText);
-      
       if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded", duplicates: [] }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Rate limit exceeded", duplicates: [] }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Payment required", duplicates: [] }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Payment required", duplicates: [] }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-      
-      return new Response(
-        JSON.stringify({ error: "AI service error", duplicates: [] }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "AI service error", duplicates: [] }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const aiData = await response.json();
     const content = aiData.choices?.[0]?.message?.content || "[]";
-    
     console.log("AI response:", content);
 
-    // Parse AI response
     let aiMatches: { id: string; confidence: number; reason: string }[] = [];
     try {
-      // Extract JSON from response (handle markdown code blocks)
       const jsonMatch = content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
         aiMatches = JSON.parse(jsonMatch[0]);
@@ -249,35 +197,23 @@ Find potential duplicates with confidence >= 70%. Return JSON array only.`;
       aiMatches = [];
     }
 
-    // Enrich matches with entry details
     const duplicates: DuplicateMatch[] = aiMatches
       .filter(m => m.confidence >= 70)
       .map(match => {
         const entry = existingEntries.find(e => e.id === match.id);
         if (!entry) return null;
-        
         return {
-          id: entry.id,
-          title: entry.title,
-          venue: entry.venue_name,
-          slug: entry.slug,
-          createdAt: entry.created_at,
-          creatorName: entry.creator_name,
-          confidence: match.confidence,
-          reason: match.reason,
-          date: entry.date,
+          id: entry.id, title: entry.title, venue: entry.venue_name,
+          slug: entry.slug, createdAt: entry.created_at, creatorName: entry.creator_name,
+          confidence: match.confidence, reason: match.reason, date: entry.date,
         };
       })
       .filter((d): d is DuplicateMatch => d !== null)
-      .slice(0, 5); // Limit to top 5 matches
+      .slice(0, 5);
 
     console.log(`Found ${duplicates.length} potential duplicates`);
 
-    return new Response(
-      JSON.stringify({ duplicates }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-
+    return new Response(JSON.stringify({ duplicates }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Error in check-duplicates:", error);
     return new Response(
