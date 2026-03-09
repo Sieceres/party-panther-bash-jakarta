@@ -126,7 +126,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-lg border-b border-border/30">
+    <header className="fixed top-0 left-0 right-0 z-[1100] bg-background/60 backdrop-blur-lg border-b border-border/30">
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="flex items-center justify-between h-16 sm:h-18">
            {/* Logo */}
