@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Instagram, FileUp, Map } from "lucide-react";
+import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Instagram, FileUp, Map, Store } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
@@ -95,6 +95,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     home: '/',
     events: '/events',
     promos: '/promos',
+    venues: '/venues',
     admin: '/admin',
     profile: '/profile',
     instagram: '/instagram-generator',
@@ -106,6 +107,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     { id: 'home', label: 'Home', icon: Home, hidden: false },
     { id: 'promos', label: 'Promos', icon: Zap, hidden: false },
     { id: 'events', label: 'Events', icon: Calendar, hidden: false },
+    { id: 'venues', label: 'Venues', icon: Store, hidden: false },
     { id: 'instagram', label: 'IG Creator', icon: Instagram, hidden: !user },
     { id: 'map', label: 'Map', icon: Map, hidden: false },
     { id: 'import', label: 'Import', icon: FileUp, hidden: false },

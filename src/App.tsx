@@ -25,6 +25,7 @@ import WorldCupExplorer from "./pages/WorldCupExplorer";
 import Proofing from "./pages/Proofing";
 import BatchImport from "./pages/BatchImport";
 import MapExplorer from "./pages/MapExplorer";
+import VenueDirectory from "./pages/VenueDirectory";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => (
           <Route path="/wce" element={<WorldCupExplorer />} />
           <Route path="/import" element={<BatchImport />} />
           <Route path="/map" element={<MapExplorer />} />
+          <Route path="/venues" element={<VenueDirectory />} />
           <Route path="/lexium" element={<Proofing />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
