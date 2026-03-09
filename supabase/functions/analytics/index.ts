@@ -12,16 +12,41 @@ serve(async (req) => {
   }
 
   try {
+    // Validate JWT and check admin role
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    const userId = claimsData.claims.sub;
+
+    // Check admin role using service role client
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { data: isAdmin } = await supabase.rpc('is_admin_or_superadmin', { _user_id: userId });
+    if (!isAdmin) {
+      return new Response(JSON.stringify({ error: 'Forbidden: admin access required' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     const url = new URL(req.url);
     const startdate = url.searchParams.get('startdate');
     const enddate = url.searchParams.get('enddate');
     const granularity = url.searchParams.get('granularity') || 'daily';
 
     console.log('Analytics request:', { startdate, enddate, granularity });
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     const start = startdate ? new Date(startdate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = enddate ? new Date(enddate) : new Date();
@@ -46,13 +71,11 @@ serve(async (req) => {
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    // Count events per day
     eventsRes.data?.forEach(item => {
       const dateKey = new Date(item.created_at).toISOString().split('T')[0];
       if (dailyData[dateKey]) dailyData[dateKey].events++;
     });
 
-    // Count attendees per day
     attendeesRes.data?.forEach(item => {
       if (item.joined_at) {
         const dateKey = new Date(item.joined_at).toISOString().split('T')[0];
@@ -60,25 +83,21 @@ serve(async (req) => {
       }
     });
 
-    // Count promos per day
     promosRes.data?.forEach(item => {
       const dateKey = new Date(item.created_at).toISOString().split('T')[0];
       if (dailyData[dateKey]) dailyData[dateKey].promos++;
     });
 
-    // Count users per day
     profilesRes.data?.forEach(item => {
       const dateKey = new Date(item.created_at).toISOString().split('T')[0];
       if (dailyData[dateKey]) dailyData[dateKey].users++;
     });
 
-    // Count reviews per day
     reviewsRes.data?.forEach(item => {
       const dateKey = new Date(item.created_at).toISOString().split('T')[0];
       if (dailyData[dateKey]) dailyData[dateKey].reviews++;
     });
 
-    // Convert to array format
     const data = Object.entries(dailyData).map(([date, counts]) => ({
       periodStart: new Date(date).toISOString(),
       periodEnd: new Date(date + 'T23:59:59.999Z').toISOString(),
@@ -89,7 +108,6 @@ serve(async (req) => {
       reviews: counts.reviews,
     })).sort((a, b) => new Date(a.periodStart).getTime() - new Date(b.periodStart).getTime());
 
-    // Calculate totals
     const totals = {
       totalEvents: eventsRes.data?.length || 0,
       totalAttendees: attendeesRes.data?.length || 0,
@@ -108,7 +126,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Analytics error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
