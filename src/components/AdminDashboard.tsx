@@ -1056,6 +1056,40 @@ export const AdminDashboard = () => {
                         Geocode Venues
                       </Button>
                     </div>
+
+                    {/* Scrape Venue Images */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-semibold">Scrape Venue Images</h4>
+                        <p className="text-sm text-muted-foreground">Auto-fetch images from venue Instagram pages and websites using Firecrawl</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            toast({ title: "Scraping images...", description: "This may take a few minutes" });
+                            const { data, error } = await supabase.functions.invoke('scrape-venue-images', {
+                              body: {},
+                            });
+                            if (error) throw error;
+                            if (data?.success) {
+                              toast({ 
+                                title: "Image scraping complete", 
+                                description: `Found images for ${data.summary.found}/${data.summary.total} venues` 
+                              });
+                            } else {
+                              toast({ title: "Error", description: data?.error || "Failed to scrape images", variant: "destructive" });
+                            }
+                          } catch (error: any) {
+                            console.error('Error scraping venue images:', error);
+                            toast({ title: "Error", description: error.message || "Failed to scrape venue images", variant: "destructive" });
+                          }
+                        }}
+                      >
+                        <Image className="w-4 h-4 mr-2" />
+                        Scrape Images
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
