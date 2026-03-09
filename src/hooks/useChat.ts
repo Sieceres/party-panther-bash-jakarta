@@ -1,11 +1,10 @@
 import { useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Message = {
   role: "user" | "assistant";
   content: string;
 };
-
-const CHAT_URL = "https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/chat";
 
 export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -36,11 +35,21 @@ export const useChat = () => {
     };
 
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+      
+      if (!accessToken) {
+        throw new Error("Please log in to use the chat.");
+      }
+
+      const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL || 'https://qgttbaibhmzbmknjlghj.supabase.co'}/functions/v1/chat`;
+
       const response = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFndHRiYWliaG16Ym1rbmpsZ2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MzAyODAsImV4cCI6MjA2NTUwNjI4MH0.jChcXNsowGgb4dz1WTnoTWrBPTK8HeZsUjQA1Mhe5gc`,
+          "Authorization": `Bearer ${accessToken}`,
+          "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFndHRiYWliaG16Ym1rbmpsZ2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MzAyODAsImV4cCI6MjA2NTUwNjI4MH0.jChcXNsowGgb4dz1WTnoTWrBPTK8HeZsUjQA1Mhe5gc",
         },
         body: JSON.stringify({ messages: [...messages, userMessage] }),
       });
@@ -108,7 +117,6 @@ export const useChat = () => {
     } catch (err) {
       console.error("Chat error:", err);
       setError(err instanceof Error ? err.message : "Something went wrong");
-      // Remove the empty assistant message if there was an error
       setMessages((prev) => {
         const last = prev[prev.length - 1];
         if (last?.role === "assistant" && !last.content) {

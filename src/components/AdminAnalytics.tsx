@@ -45,23 +45,22 @@ export const AdminAnalytics = () => {
       const endDate = new Date();
       const startDate = subDays(endDate, days);
       
-      const { data, error: fnError } = await supabase.functions.invoke('analytics', {
-        body: {},
-        headers: {},
-      }).then(async () => {
-        // Use fetch directly for query params
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL || 'https://qgttbaibhmzbmknjlghj.supabase.co'}/functions/v1/analytics?startdate=${format(startDate, 'yyyy-MM-dd')}&enddate=${format(endDate, 'yyyy-MM-dd')}&granularity=daily`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFndHRiYWliaG16Ym1rbmpsZ2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MzAyODAsImV4cCI6MjA2NTUwNjI4MH0.jChcXNsowGgb4dz1WTnoTWrBPTK8HeZsUjQA1Mhe5gc'
-            },
-          }
-        );
-        if (!response.ok) throw new Error('Failed to fetch analytics');
-        return { data: await response.json(), error: null };
-      });
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+      if (!accessToken) throw new Error('Not authenticated');
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL || 'https://qgttbaibhmzbmknjlghj.supabase.co'}/functions/v1/analytics?startdate=${format(startDate, 'yyyy-MM-dd')}&enddate=${format(endDate, 'yyyy-MM-dd')}&granularity=daily`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFndHRiYWliaG16Ym1rbmpsZ2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5MzAyODAsImV4cCI6MjA2NTUwNjI4MH0.jChcXNsowGgb4dz1WTnoTWrBPTK8HeZsUjQA1Mhe5gc'
+          },
+        }
+      );
+      if (!response.ok) throw new Error('Failed to fetch analytics');
+      const { data, error: fnError } = { data: await response.json(), error: null };
 
       if (fnError) throw fnError;
       setAnalyticsData(data);
