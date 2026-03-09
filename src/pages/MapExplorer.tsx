@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster";
@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Calendar, Zap, X, Filter } from "lucide-react";
+import { MapPin, Calendar, Zap, X, LocateFixed, Loader2 } from "lucide-react";
 import { JAKARTA_AREAS, NEIGHBORHOOD_COORDS } from "@/lib/area-config";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { NearbyPanel } from "@/components/map/NearbyPanel";
+import { toast } from "sonner";
 
 // Fix default marker icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -38,6 +40,7 @@ interface MapItem {
 
 const PROMO_COLOR = "#10b981";
 const EVENT_COLOR = "#6366f1";
+const USER_COLOR = "#3b82f6";
 
 function makeIcon(color: string) {
   return L.divIcon({
@@ -50,6 +53,27 @@ function makeIcon(color: string) {
       background:${color};border:3px solid white;
       box-shadow:0 2px 8px rgba(0,0,0,0.3);
     "></div>`,
+  });
+}
+
+function makeUserIcon() {
+  return L.divIcon({
+    className: "",
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    html: `<div style="
+      width:20px;height:20px;border-radius:50%;
+      background:${USER_COLOR};border:3px solid white;
+      box-shadow:0 0 0 3px ${USER_COLOR}40, 0 2px 8px rgba(0,0,0,0.3);
+      animation: pulse-ring 2s ease-out infinite;
+    "></div>
+    <style>
+      @keyframes pulse-ring {
+        0% { box-shadow: 0 0 0 3px ${USER_COLOR}40, 0 2px 8px rgba(0,0,0,0.3); }
+        50% { box-shadow: 0 0 0 8px ${USER_COLOR}15, 0 2px 8px rgba(0,0,0,0.3); }
+        100% { box-shadow: 0 0 0 3px ${USER_COLOR}40, 0 2px 8px rgba(0,0,0,0.3); }
+      }
+    </style>`,
   });
 }
 
@@ -99,6 +123,8 @@ export default function MapExplorer() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const clusterGroup = useRef<any>(null);
+  const userMarkerRef = useRef<L.Marker | null>(null);
+  const radiusCircleRef = useRef<L.Circle | null>(null);
 
   const [items, setItems] = useState<MapItem[]>([]);
   const [showPromos, setShowPromos] = useState(true);
@@ -109,6 +135,11 @@ export default function MapExplorer() {
   // Filters
   const [dayFilter, setDayFilter] = useState<string[]>(["all"]);
   const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(["all"]);
+
+  // User location
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
 
   // Fetch data
   useEffect(() => {
@@ -126,16 +157,10 @@ export default function MapExplorer() {
           const coords = resolveCoords(p.venue_latitude, p.venue_longitude, p.area);
           if (coords) {
             mapped.push({
-              id: p.id,
-              title: p.title,
-              venue_name: p.venue_name,
-              lat: coords.lat,
-              lng: coords.lng,
-              type: "promo",
-              slug: p.slug,
-              extra: p.discount_text,
-              day_of_week: p.day_of_week ?? [],
-              drink_type: p.drink_type ?? [],
+              id: p.id, title: p.title, venue_name: p.venue_name,
+              lat: coords.lat, lng: coords.lng, type: "promo",
+              slug: p.slug, extra: p.discount_text,
+              day_of_week: p.day_of_week ?? [], drink_type: p.drink_type ?? [],
               promo_type: p.promo_type,
             });
           }
@@ -147,14 +172,9 @@ export default function MapExplorer() {
           const coords = resolveCoords(e.venue_latitude, e.venue_longitude, null);
           if (coords) {
             mapped.push({
-              id: e.id,
-              title: e.title,
-              venue_name: e.venue_name ?? "",
-              lat: coords.lat,
-              lng: coords.lng,
-              type: "event",
-              slug: e.slug,
-              extra: e.date ? new Date(e.date).toLocaleDateString() : undefined,
+              id: e.id, title: e.title, venue_name: e.venue_name ?? "",
+              lat: coords.lat, lng: coords.lng, type: "event",
+              slug: e.slug, extra: e.date ? new Date(e.date).toLocaleDateString() : undefined,
             });
           }
         }
@@ -183,7 +203,7 @@ export default function MapExplorer() {
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
       disableClusteringAtZoom: 17,
-      iconCreateFunction: (c) => {
+      iconCreateFunction: (c: any) => {
         const count = c.getChildCount();
         const hasPromo = c.getAllChildMarkers().some((m: any) => m.options._itemType === "promo");
         const hasEvent = c.getAllChildMarkers().some((m: any) => m.options._itemType === "event");
@@ -222,13 +242,11 @@ export default function MapExplorer() {
       if (i.type === "promo" && !showPromos) return false;
       if (i.type === "event" && !showEvents) return false;
 
-      // Day filter (only applies to promos)
       if (i.type === "promo" && !dayFilter.includes("all")) {
         const itemDays = (i.day_of_week || []).map((d) => d.toLowerCase());
         if (!dayFilter.some((f) => itemDays.includes(f.toLowerCase()))) return false;
       }
 
-      // Drink type filter (only applies to promos)
       if (i.type === "promo" && !drinkTypeFilter.includes("all")) {
         const itemDrinks = (i.drink_type || []).map((d) => d.toLowerCase());
         if (!drinkTypeFilter.some((f) => itemDrinks.includes(f.toLowerCase()))) return false;
@@ -274,6 +292,81 @@ export default function MapExplorer() {
       clusterGroup.current.addLayer(marker);
     }
   }, [visibleItems]);
+
+  // Update user marker + radius circle when location or radius changes
+  useEffect(() => {
+    if (!mapInstance.current) return;
+
+    // Remove previous
+    if (userMarkerRef.current) {
+      mapInstance.current.removeLayer(userMarkerRef.current);
+      userMarkerRef.current = null;
+    }
+    if (radiusCircleRef.current) {
+      mapInstance.current.removeLayer(radiusCircleRef.current);
+      radiusCircleRef.current = null;
+    }
+
+    if (userLocation) {
+      const marker = L.marker([userLocation.lat, userLocation.lng], { icon: makeUserIcon(), zIndexOffset: 1000 })
+        .addTo(mapInstance.current)
+        .bindPopup('<div style="font-family:system-ui;font-weight:600;font-size:13px">📍 You are here</div>');
+      userMarkerRef.current = marker;
+
+      if (radiusKm) {
+        const circle = L.circle([userLocation.lat, userLocation.lng], {
+          radius: radiusKm * 1000,
+          color: USER_COLOR,
+          fillColor: USER_COLOR,
+          fillOpacity: 0.08,
+          weight: 2,
+          dashArray: "6 4",
+        }).addTo(mapInstance.current);
+        radiusCircleRef.current = circle;
+      }
+    }
+  }, [userLocation, radiusKm]);
+
+  // Locate me
+  const handleLocateMe = useCallback(() => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUserLocation(loc);
+        setLocating(false);
+        if (mapInstance.current) {
+          mapInstance.current.setView([loc.lat, loc.lng], 14);
+        }
+        toast.success("Location found!");
+      },
+      (err) => {
+        setLocating(false);
+        toast.error(`Could not get location: ${err.message}`);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
+
+  // Handle item click from nearby panel
+  const handleNearbyItemClick = useCallback((item: MapItem) => {
+    if (!mapInstance.current) return;
+    mapInstance.current.setView([item.lat, item.lng], 17);
+    // Find and open the marker popup
+    if (clusterGroup.current) {
+      clusterGroup.current.eachLayer((layer: any) => {
+        const latlng = layer.getLatLng();
+        if (Math.abs(latlng.lat - item.lat) < 0.0001 && Math.abs(latlng.lng - item.lng) < 0.0001) {
+          // Spiderfy cluster if needed, then open popup
+          setTimeout(() => layer.openPopup(), 300);
+        }
+      });
+    }
+  }, []);
 
   // Region zoom
   const handleRegionClick = (regionKey: string) => {
@@ -334,6 +427,18 @@ export default function MapExplorer() {
         {/* Controls overlay */}
         <div className="absolute top-2 left-2 right-2 z-[1000] pointer-events-none">
           <div className="flex flex-wrap gap-2 items-center pointer-events-auto">
+            {/* Locate me button */}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleLocateMe}
+              disabled={locating}
+              className="shadow-lg gap-1.5 bg-background/95 backdrop-blur-sm"
+            >
+              {locating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LocateFixed className="w-3.5 h-3.5" />}
+              {locating ? "Locating..." : "Near me"}
+            </Button>
+
             {/* Type toggles */}
             <Button
               size="sm"
@@ -440,6 +545,15 @@ export default function MapExplorer() {
             </div>
           </div>
         )}
+
+        {/* Nearby panel */}
+        <NearbyPanel
+          items={visibleItems}
+          userLocation={userLocation}
+          radiusKm={radiusKm}
+          onRadiusChange={setRadiusKm}
+          onItemClick={handleNearbyItemClick}
+        />
 
         {/* Map container */}
         <div ref={mapRef} className="w-full h-[calc(100vh-4rem)]" />
