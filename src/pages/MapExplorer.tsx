@@ -424,8 +424,8 @@ export default function MapExplorer() {
       <Header activeSection="map" onSectionChange={() => {}} />
 
       <div className="flex-1 relative pt-16">
-        {/* Controls overlay - below fixed header (z-40 < header z-50) */}
-        <div className="fixed top-[4.5rem] left-2 right-2 z-40 pointer-events-none">
+        {/* Controls overlay - absolute within pt-16 container, below header z-index */}
+        <div className="absolute top-2 left-2 right-2 z-[400] pointer-events-none">
           <div className="flex flex-wrap gap-2 items-center pointer-events-auto">
             {/* Locate me button */}
             <Button
