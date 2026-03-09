@@ -42,6 +42,19 @@ export const VenueDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [promos, setPromos] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showLocationEditor, setShowLocationEditor] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        supabase.from("user_roles").select("role").eq("user_id", user.id)
+          .then(({ data }) => {
+            setIsAdmin(data?.some(r => r.role === "admin" || r.role === "superadmin") || false);
+          });
+      }
+    });
+  }, []);
 
   usePageTitle(venue?.name ? `${venue.name}` : "Venue");
 
