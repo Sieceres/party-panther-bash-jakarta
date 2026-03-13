@@ -90,7 +90,7 @@ export const EditEventPage = () => {
 
   return (
     <>
-      <Header activeSection="events" onSectionChange={() => navigate('/?section=events')} />
+      <Header activeSection="events" />
       <div className="min-h-screen bg-background pt-20 px-4">
         <div className="container mx-auto max-w-2xl">
           <Button

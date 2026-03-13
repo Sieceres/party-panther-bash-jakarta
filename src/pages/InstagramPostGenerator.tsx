@@ -472,7 +472,7 @@ const InstagramPostGenerator = () => {
 
   return (
     <>
-      <Header activeSection="profile" onSectionChange={() => navigate('/profile')} />
+      <Header activeSection="instagram" />
       <div className="min-h-screen bg-background pt-20 px-4 pb-8">
         <div className="container mx-auto space-y-8">
           <div className="space-y-4">

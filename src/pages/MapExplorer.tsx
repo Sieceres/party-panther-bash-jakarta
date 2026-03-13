@@ -421,7 +421,7 @@ export default function MapExplorer() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header activeSection="map" onSectionChange={() => {}} />
+      <Header activeSection="map" />
 
       <div className="flex-1 relative pt-16">
         {/* Controls overlay - absolute within pt-16 container, below header z-index */}

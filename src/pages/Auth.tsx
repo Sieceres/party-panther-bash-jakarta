@@ -168,7 +168,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header activeSection="auth" onSectionChange={() => {}} />
+      <Header activeSection="auth" />
       <div className="flex items-center justify-center px-4 pt-24">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">

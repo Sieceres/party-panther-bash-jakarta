@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 
 interface FooterProps {
-  onSectionChange: (section: string) => void;
+  onSectionChange?: (section: string) => void;
 }
 
 export const Footer = ({ onSectionChange }: FooterProps) => {

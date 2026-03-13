@@ -121,7 +121,7 @@ export default function VenueDirectory() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header activeSection="venues" onSectionChange={() => {}} />
+      <Header activeSection="venues" />
       <div className="pt-20 px-4 pb-12">
         <div className="container mx-auto max-w-6xl">
           {/* Page Header */}

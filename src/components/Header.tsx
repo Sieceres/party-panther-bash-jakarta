@@ -8,11 +8,11 @@ import { useToast } from "@/hooks/use-toast";
 import logoImage from "@/assets/party-panther-logo.png";
 
 interface HeaderProps {
-  activeSection: string;
-  onSectionChange: (section: string) => void;
+  activeSection?: string;
+  onSectionChange?: (section: string) => void;
 }
 
-export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
+export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -80,7 +80,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
           title: "Signed out",
           description: "You have been signed out successfully.",
         });
-        onSectionChange('home');
+        onSectionChange?.('home');
       }
     } catch (error) {
       toast({
@@ -123,7 +123,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
     }
     const route = ROUTE_MAP[itemId] || '/';
     navigate(route);
-    onSectionChange(itemId);
+    onSectionChange?.(itemId);
     if (closeMobile) setIsMenuOpen(false);
   };
 
@@ -132,7 +132,7 @@ export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="flex items-center justify-between h-16 sm:h-18">
            {/* Logo */}
-          <Link to="/" className="flex items-center gap-0" onClick={() => onSectionChange('home')}>
+          <Link to="/" className="flex items-center gap-0" onClick={() => onSectionChange?.('home')}>
             <div className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 flex items-center justify-center flex-shrink-0">
               <img src={logoImage} alt="Party Panther Logo" className="w-full h-full object-contain drop-shadow-[0_0_12px_rgba(0,207,255,0.4)]" />
             </div>
