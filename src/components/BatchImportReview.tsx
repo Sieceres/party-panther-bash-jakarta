@@ -114,9 +114,10 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
       <div className="space-y-3">
         {items.map((item) => {
           const isExpanded = expandedId === item.id;
-          const hasTitle = item.title?.trim();
+          const itemTitle = isContact ? (item as ExtractedContact).venue_name : (item as ExtractedPromo | ExtractedEvent).title;
+          const hasTitle = itemTitle?.trim();
           const hasVenue = isPromo ? (item as ExtractedPromo).venue_name?.trim() : true;
-          const isValid = hasTitle && (isPromo ? (item as ExtractedPromo).discount_text?.trim() && hasVenue : true);
+          const isValid = isContact ? hasTitle : hasTitle && (isPromo ? (item as ExtractedPromo).discount_text?.trim() && hasVenue : true);
 
           return (
             <Card
@@ -132,12 +133,17 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
                   />
                   <div className="flex-1 min-w-0">
                     <Input
-                      value={item.title}
-                      onChange={(e) => updateItem(item.id, "title", e.target.value)}
-                      placeholder="Title *"
+                      value={itemTitle || ""}
+                      onChange={(e) => updateItem(item.id, isContact ? "venue_name" : "title", e.target.value)}
+                      placeholder={isContact ? "Venue name *" : "Title *"}
                       className="font-medium"
                     />
                   </div>
+                  {isContact && (item as ExtractedContact).matched_venue_name && (
+                    <Badge variant="default" className="shrink-0">
+                      ✓ {(item as ExtractedContact).matched_venue_name}
+                    </Badge>
+                  )}
                   {isPromo && (
                     <Badge variant="outline" className="shrink-0">
                       {(item as ExtractedPromo).venue_name || "No venue"}
