@@ -8,11 +8,11 @@ import { useToast } from "@/hooks/use-toast";
 import logoImage from "@/assets/party-panther-logo.png";
 
 interface HeaderProps {
-  activeSection: string;
-  onSectionChange: (section: string) => void;
+  activeSection?: string;
+  onSectionChange?: (section: string) => void;
 }
 
-export const Header = ({ activeSection, onSectionChange }: HeaderProps) => {
+export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
