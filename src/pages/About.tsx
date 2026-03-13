@@ -13,7 +13,7 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header activeSection="" onSectionChange={handleSectionChange} />
+      <Header />
       <div className="pt-20 px-4">
         <div className="container mx-auto max-w-6xl py-12">
           <div className="text-center mb-16">

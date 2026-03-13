@@ -11,7 +11,7 @@ const TermsConditions = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header activeSection="" onSectionChange={handleSectionChange} />
+      <Header />
       <div className="pt-20 px-4">
         <div className="container mx-auto max-w-4xl py-12">
           <h1 className="text-4xl font-bold gradient-text mb-8 text-center">Terms & Conditions</h1>
