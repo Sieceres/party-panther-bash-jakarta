@@ -81,52 +81,86 @@ const BatchImport = () => {
         return;
       }
 
-      const extracted = (data?.items || []).map((item: any, idx: number) => {
-        const drinkTypes = item.drink_type || [];
-        const title = item.title || "";
-        const description = item.description || "";
-        const discountText = item.discount_text || "";
+      if (importType === "contact") {
+        // For contacts, fetch venues to match
+        const { data: venues } = await supabase.from("venues").select("id, name");
+        const venueList = venues || [];
 
-        // Auto-detect drink category and assign placeholder image
-        const drinkCategory = detectDrinkCategory(title, description, discountText, drinkTypes);
-        const enrichedDrinkTypes = enrichDrinkTypes(drinkTypes, drinkCategory);
-        const placeholderImage = getPlaceholderImage(drinkCategory);
+        const extracted = (data?.items || []).map((item: any, idx: number) => {
+          const venueName = (item.venue_name || "").trim();
+          // Fuzzy match: find venue whose name matches (case-insensitive)
+          const matched = venueList.find(v =>
+            v.name.toLowerCase() === venueName.toLowerCase() ||
+            v.name.toLowerCase().includes(venueName.toLowerCase()) ||
+            venueName.toLowerCase().includes(v.name.toLowerCase())
+          );
 
-        return {
-          ...item,
-          id: `item-${idx}-${Date.now()}`,
-          selected: true,
-          description,
-          day_of_week: item.day_of_week || [],
-          drink_type: enrichedDrinkTypes,
-          venue_name: item.venue_name || "",
-          venue_address: item.venue_address || "",
-          area: item.area || "",
-          promo_type: item.promo_type || "",
-          category: item.category || "",
-          discount_text: discountText,
-          price_currency: item.price_currency || "IDR",
-          original_price_amount: item.original_price_amount ?? null,
-          discounted_price_amount: item.discounted_price_amount ?? null,
-          date: item.date || "",
-          time: item.time || "",
-          organizer_name: item.organizer_name || "",
-          image_url: placeholderImage,
-          _drinkCategory: drinkCategory,
-        };
-      });
+          return {
+            id: `item-${idx}-${Date.now()}`,
+            selected: true,
+            venue_name: venueName,
+            instagram: (item.instagram || "").replace(/^@/, ""),
+            whatsapp: item.whatsapp || "",
+            website: item.website || "",
+            google_maps_link: item.google_maps_link || "",
+            opening_hours: item.opening_hours || "",
+            address: item.address || "",
+            matched_venue_id: matched?.id || undefined,
+            matched_venue_name: matched?.name || undefined,
+          } as ExtractedContact;
+        });
 
-      if (progressInterval.current) clearInterval(progressInterval.current);
-      setExtractionProgress(100);
-      setExtractionStatus(`Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}!`);
+        if (progressInterval.current) clearInterval(progressInterval.current);
+        setExtractionProgress(100);
+        setExtractionStatus(`Found ${extracted.length} contacts!`);
+        setItems(extracted);
+        setTimeout(() => setStep("review"), 500);
+        toast({ title: `Found ${extracted.length} venue contacts`, description: "Review and edit before updating venues." });
+      } else {
+        const extracted = (data?.items || []).map((item: any, idx: number) => {
+          const drinkTypes = item.drink_type || [];
+          const title = item.title || "";
+          const description = item.description || "";
+          const discountText = item.discount_text || "";
 
-      setItems(extracted);
-      setTimeout(() => setStep("review"), 500);
+          const drinkCategory = detectDrinkCategory(title, description, discountText, drinkTypes);
+          const enrichedDrinkTypes = enrichDrinkTypes(drinkTypes, drinkCategory);
+          const placeholderImage = getPlaceholderImage(drinkCategory);
 
-      toast({
-        title: `Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}`,
-        description: "Review and edit before importing.",
-      });
+          return {
+            ...item,
+            id: `item-${idx}-${Date.now()}`,
+            selected: true,
+            description,
+            day_of_week: item.day_of_week || [],
+            drink_type: enrichedDrinkTypes,
+            venue_name: item.venue_name || "",
+            venue_address: item.venue_address || "",
+            area: item.area || "",
+            promo_type: item.promo_type || "",
+            category: item.category || "",
+            discount_text: discountText,
+            price_currency: item.price_currency || "IDR",
+            original_price_amount: item.original_price_amount ?? null,
+            discounted_price_amount: item.discounted_price_amount ?? null,
+            date: item.date || "",
+            time: item.time || "",
+            organizer_name: item.organizer_name || "",
+            image_url: placeholderImage,
+            _drinkCategory: drinkCategory,
+          };
+        });
+
+        if (progressInterval.current) clearInterval(progressInterval.current);
+        setExtractionProgress(100);
+        setExtractionStatus(`Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}!`);
+        setItems(extracted);
+        setTimeout(() => setStep("review"), 500);
+        toast({
+          title: `Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}`,
+          description: "Review and edit before importing.",
+        });
+      }
     } catch (err) {
       console.error("Extraction error:", err);
       toast({
