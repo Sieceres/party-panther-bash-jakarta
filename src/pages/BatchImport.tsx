@@ -367,6 +367,7 @@ const BatchImport = () => {
                   <SelectContent>
                     <SelectItem value="promo">Promos / Deals</SelectItem>
                     <SelectItem value="event">Events</SelectItem>
+                    <SelectItem value="contact">Venue Contacts</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
