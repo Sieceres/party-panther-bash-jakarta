@@ -74,8 +74,7 @@ Deno.serve(async (req) => {
       if (mode === 'images') {
         query = query.is('image_url', null);
       } else if (mode === 'contacts') {
-        // Venues missing instagram OR whatsapp that have a website to scrape
-        query = query.not('website', 'is', null);
+        // Venues missing instagram OR whatsapp (no website requirement - we'll use search)
         query = query.or('instagram.is.null,whatsapp.is.null');
       } else {
         // 'all' mode - venues missing any data
