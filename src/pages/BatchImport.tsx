@@ -445,16 +445,16 @@ const BatchImport = () => {
           <Card>
             <CardContent className="py-12 text-center space-y-4">
               <CheckCircle className="w-16 h-16 mx-auto text-primary" />
-              <h2 className="text-2xl font-bold">Import Complete!</h2>
+              <h2 className="text-2xl font-bold">{importType === "contact" ? "Update" : "Import"} Complete!</h2>
               <p className="text-muted-foreground">
-                Successfully imported {insertedCount} {importType === "promo" ? "promos" : "events"}.
+                Successfully {importType === "contact" ? "updated" : "imported"} {insertedCount} {importType === "contact" ? "venues" : importType === "promo" ? "promos" : "events"}.
               </p>
               <div className="flex justify-center gap-3 pt-4">
                 <Button variant="outline" onClick={resetFlow}>
                   Import More
                 </Button>
-                <Button onClick={() => navigate(importType === "promo" ? "/promos" : "/events")}>
-                  View {importType === "promo" ? "Promos" : "Events"}
+                <Button onClick={() => navigate(importType === "contact" ? "/venues" : importType === "promo" ? "/promos" : "/events")}>
+                  View {importType === "contact" ? "Venues" : importType === "promo" ? "Promos" : "Events"}
                 </Button>
               </div>
             </CardContent>
