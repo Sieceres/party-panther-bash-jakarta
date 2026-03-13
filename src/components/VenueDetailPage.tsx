@@ -168,11 +168,7 @@ export const VenueDetailPage = () => {
 
   return (
     <>
-      <Header activeSection="promos" onSectionChange={(section) => {
-        if (section === "home") navigate("/");
-        else if (section === "promos") navigate("/?section=promos");
-        else if (section === "events") navigate("/?section=events");
-      }} />
+      <Header activeSection="venues" />
       <div className="min-h-screen bg-background pt-20 px-4">
         <div className="container mx-auto max-w-5xl">
           <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6 hover:bg-primary/10">
