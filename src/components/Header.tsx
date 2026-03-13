@@ -123,7 +123,7 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
     }
     const route = ROUTE_MAP[itemId] || '/';
     navigate(route);
-    onSectionChange(itemId);
+    onSectionChange?.(itemId);
     if (closeMobile) setIsMenuOpen(false);
   };
 
