@@ -447,7 +447,7 @@ const BatchImport = () => {
                   <div className="space-y-3">
                     <FileImage className="w-12 h-12 mx-auto text-muted-foreground" />
                     <p className="text-lg font-medium">Drop your image here or click to browse</p>
-                    <p className="text-sm text-muted-foreground">Supports JPG, PNG, PDF</p>
+                    <p className="text-sm text-muted-foreground">Supports JPG, PNG, PDF, CSV, XLSX</p>
                   </div>
                 )}
               </div>
