@@ -229,6 +229,25 @@ const BatchImport = () => {
     if (file) handleFileUpload(file);
   }, [handleFileUpload]);
 
+  // Listen for paste events (Ctrl+V / Cmd+V) on the page
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (step !== "upload" || isExtracting) return;
+      const clipItems = e.clipboardData?.items;
+      if (!clipItems) return;
+      for (const item of Array.from(clipItems)) {
+        if (item.type.startsWith("image/")) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) handleFileUpload(file);
+          return;
+        }
+      }
+    };
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [step, isExtracting, handleFileUpload]);
+
   const handleBulkInsert = async () => {
     const selected = items.filter(i => i.selected);
     if (selected.length === 0) {
