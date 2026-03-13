@@ -1,4 +1,11 @@
+/// <reference types="google.maps" />
 import { useEffect, useRef, useState, useMemo } from "react";
+
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 
 interface GoogleMapProps {
