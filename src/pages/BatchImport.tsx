@@ -198,7 +198,34 @@ const BatchImport = () => {
     let successCount = 0;
     const errors: string[] = [];
 
-    if (importType === "promo") {
+    if (importType === "contact") {
+      const contacts = selected as ExtractedContact[];
+      for (const c of contacts) {
+        if (!c.matched_venue_id) {
+          errors.push(`${c.venue_name}: No matching venue found`);
+          continue;
+        }
+        const updateData: Record<string, string | null> = {};
+        if (c.instagram) updateData.instagram = c.instagram;
+        if (c.whatsapp) updateData.whatsapp = c.whatsapp;
+        if (c.website) updateData.website = c.website;
+        if (c.google_maps_link) updateData.google_maps_link = c.google_maps_link;
+        if (c.opening_hours) updateData.opening_hours = c.opening_hours;
+        if (c.address) updateData.address = c.address;
+
+        if (Object.keys(updateData).length === 0) {
+          errors.push(`${c.venue_name}: No contact data to update`);
+          continue;
+        }
+
+        const { error } = await supabase.from("venues").update(updateData).eq("id", c.matched_venue_id);
+        if (error) {
+          errors.push(`${c.venue_name}: ${error.message}`);
+        } else {
+          successCount++;
+        }
+      }
+    } else if (importType === "promo") {
       const promos = selected as ExtractedPromo[];
       const validPromoTypes = ["Free Flow", "Ladies Night", "Bottle Promo", "Other"];
       const promoTypeMap: Record<string, string> = {
@@ -264,16 +291,18 @@ const BatchImport = () => {
     setInsertedCount(successCount);
     setIsInserting(false);
 
+    const typeLabel = importType === "contact" ? "venues" : importType === "promo" ? "promos" : "events";
+
     if (errors.length > 0) {
       toast({
-        title: `Imported ${successCount}, ${errors.length} failed`,
+        title: `Updated ${successCount}, ${errors.length} failed`,
         description: errors[0],
         variant: "destructive",
       });
     } else {
       setStep("done");
       toast({
-        title: `Successfully imported ${successCount} ${importType === "promo" ? "promos" : "events"}!`,
+        title: `Successfully ${importType === "contact" ? "updated" : "imported"} ${successCount} ${typeLabel}!`,
       });
     }
   };
