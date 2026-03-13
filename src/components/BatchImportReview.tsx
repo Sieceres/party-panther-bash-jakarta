@@ -55,9 +55,9 @@ export interface ExtractedContact {
 }
 
 interface BatchImportReviewProps {
-  type: "promo" | "event";
-  items: (ExtractedPromo | ExtractedEvent)[];
-  onItemsChange: (items: (ExtractedPromo | ExtractedEvent)[]) => void;
+  type: "promo" | "event" | "contact";
+  items: (ExtractedPromo | ExtractedEvent | ExtractedContact)[];
+  onItemsChange: (items: (ExtractedPromo | ExtractedEvent | ExtractedContact)[]) => void;
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
