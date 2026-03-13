@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { Clipboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -228,6 +229,25 @@ const BatchImport = () => {
     if (file) handleFileUpload(file);
   }, [handleFileUpload]);
 
+  // Listen for paste events (Ctrl+V / Cmd+V) on the page
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (step !== "upload" || isExtracting) return;
+      const clipItems = e.clipboardData?.items;
+      if (!clipItems) return;
+      for (const item of Array.from(clipItems)) {
+        if (item.type.startsWith("image/")) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) handleFileUpload(file);
+          return;
+        }
+      }
+    };
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [step, isExtracting, handleFileUpload]);
+
   const handleBulkInsert = async () => {
     const selected = items.filter(i => i.selected);
     if (selected.length === 0) {
@@ -448,6 +468,10 @@ const BatchImport = () => {
                     <FileImage className="w-12 h-12 mx-auto text-muted-foreground" />
                     <p className="text-lg font-medium">Drop your image here or click to browse</p>
                     <p className="text-sm text-muted-foreground">Supports JPG, PNG, PDF, CSV, XLSX</p>
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/70">
+                      <Clipboard className="w-3.5 h-3.5" />
+                      <span>You can also paste an image from your clipboard (Ctrl+V / ⌘V)</span>
+                    </div>
                   </div>
                 )}
               </div>
