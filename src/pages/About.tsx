@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,9 +6,6 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 
 const About = () => {
   usePageTitle("About");
-  const navigate = useNavigate();
-
-  const handleSectionChange = () => {};
 
   return (
     <div className="min-h-screen bg-background">

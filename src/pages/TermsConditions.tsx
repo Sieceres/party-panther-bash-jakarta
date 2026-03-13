@@ -1,13 +1,9 @@
-import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 const TermsConditions = () => {
   usePageTitle("Terms & Conditions");
-  const navigate = useNavigate();
-
-  const handleSectionChange = () => {};
 
   return (
     <div className="min-h-screen bg-background">
