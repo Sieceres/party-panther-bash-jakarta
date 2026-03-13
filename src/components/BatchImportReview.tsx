@@ -95,6 +95,7 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
   };
 
   const isPromo = type === "promo";
+  const isContact = type === "contact";
 
   return (
     <div className="space-y-4">
