@@ -32,7 +32,54 @@ const BatchImport = () => {
   const navigate = useNavigate();
 
   const handleFileUpload = useCallback(async (file: File) => {
-    // Show preview
+    // Handle spreadsheet files (CSV/XLSX) client-side
+    if (isSpreadsheetFile(file)) {
+      setIsExtracting(true);
+      setExtractionProgress(0);
+      setExtractionStatus("Parsing spreadsheet...");
+      setPreviewUrl(null);
+
+      try {
+        setExtractionProgress(30);
+        setExtractionStatus("Reading columns...");
+        const parsed = await parseSpreadsheetFile(file, importType);
+        setExtractionProgress(60);
+
+        if (importType === "contact") {
+          // Fuzzy match venues
+          setExtractionStatus("Matching venues...");
+          const { data: venues } = await supabase.from("venues").select("id, name");
+          const venueList = venues || [];
+          const enriched = (parsed as ExtractedContact[]).map((c) => {
+            const matched = venueList.find(v =>
+              v.name.toLowerCase() === c.venue_name.toLowerCase() ||
+              v.name.toLowerCase().includes(c.venue_name.toLowerCase()) ||
+              c.venue_name.toLowerCase().includes(v.name.toLowerCase())
+            );
+            return { ...c, matched_venue_id: matched?.id, matched_venue_name: matched?.name };
+          });
+          setExtractionProgress(100);
+          setExtractionStatus(`Found ${enriched.length} contacts!`);
+          setItems(enriched);
+        } else {
+          setExtractionProgress(100);
+          setExtractionStatus(`Found ${parsed.length} ${importType === "promo" ? "promos" : "events"}!`);
+          setItems(parsed);
+        }
+
+        setTimeout(() => setStep("review"), 500);
+        const typeLabel = importType === "contact" ? "venue contacts" : importType === "promo" ? "promos" : "events";
+        toast({ title: `Found ${(importType === "contact" ? (parsed as any[]) : parsed).length} ${typeLabel}`, description: "Review and edit before importing." });
+      } catch (err) {
+        console.error("Spreadsheet parse error:", err);
+        toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to parse spreadsheet", variant: "destructive" });
+      } finally {
+        setIsExtracting(false);
+      }
+      return;
+    }
+
+    // Image/PDF flow — show preview
     const reader = new FileReader();
     reader.onload = (e) => setPreviewUrl(e.target?.result as string);
     reader.readAsDataURL(file);
