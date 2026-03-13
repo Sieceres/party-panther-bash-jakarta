@@ -214,7 +214,7 @@ You MUST use the extract_events tool to return the results.`;
           {
             role: "user",
             content: [
-              { type: "text", text: `Extract all ${isPromo ? "promos/deals" : "events"} from this image.` },
+              { type: "text", text: `Extract all ${isContact ? "venue contact details (Instagram, WhatsApp, etc.)" : isPromo ? "promos/deals" : "events"} from this image.` },
               { type: "image_url", image_url: { url: image } },
             ],
           },
