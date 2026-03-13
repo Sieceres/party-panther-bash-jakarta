@@ -77,6 +77,38 @@ const eventTool = {
   },
 };
 
+const contactTool = {
+  type: "function" as const,
+  function: {
+    name: "extract_contacts",
+    description: "Extract all venue/business contact information found in the image/document. Each venue should be a separate item.",
+    parameters: {
+      type: "object",
+      properties: {
+        items: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              venue_name: { type: "string", description: "Name of the venue/bar/restaurant/business" },
+              instagram: { type: "string", description: "Instagram handle (without @), e.g. 'barname_jkt'" },
+              whatsapp: { type: "string", description: "WhatsApp number in international format, e.g. '+6281234567890'" },
+              website: { type: "string", description: "Website URL if visible" },
+              google_maps_link: { type: "string", description: "Google Maps link if visible" },
+              opening_hours: { type: "string", description: "Opening hours text if visible" },
+              address: { type: "string", description: "Address if visible" },
+            },
+            required: ["venue_name"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["items"],
+      additionalProperties: false,
+    },
+  },
+};
+
 function extractJsonFromText(text: string): any | null {
   const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (codeBlockMatch) {
