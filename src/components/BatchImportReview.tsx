@@ -40,6 +40,20 @@ export interface ExtractedEvent {
   price_currency: string;
 }
 
+export interface ExtractedContact {
+  id: string;
+  selected: boolean;
+  venue_name: string;
+  instagram: string;
+  whatsapp: string;
+  website: string;
+  google_maps_link: string;
+  opening_hours: string;
+  address: string;
+  matched_venue_id?: string;
+  matched_venue_name?: string;
+}
+
 interface BatchImportReviewProps {
   type: "promo" | "event";
   items: (ExtractedPromo | ExtractedEvent)[];
