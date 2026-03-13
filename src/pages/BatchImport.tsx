@@ -429,7 +429,7 @@ const BatchImport = () => {
                 <input
                   id="batch-file-input"
                   type="file"
-                  accept="image/*,.pdf"
+                  accept="image/*,.pdf,.csv,.xlsx,.xls"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
