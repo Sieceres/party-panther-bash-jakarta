@@ -425,9 +425,9 @@ const BatchImport = () => {
                 disabled={isInserting || items.filter(i => i.selected).length === 0}
               >
                 {isInserting ? (
-                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Importing...</>
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {importType === "contact" ? "Updating..." : "Importing..."}</>
                 ) : (
-                  <>Import {items.filter(i => i.selected).length} {importType === "promo" ? "promos" : "events"} <ArrowRight className="w-4 h-4 ml-2" /></>
+                  <>{importType === "contact" ? "Update" : "Import"} {items.filter(i => i.selected).length} {importType === "contact" ? "venues" : importType === "promo" ? "promos" : "events"} <ArrowRight className="w-4 h-4 ml-2" /></>
                 )}
               </Button>
             </div>
