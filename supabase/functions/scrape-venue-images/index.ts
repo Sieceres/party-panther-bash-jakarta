@@ -23,17 +23,18 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    const { venue_id, venue_ids } = await req.json();
+    const { venue_id, venue_ids, batch_size = 10 } = await req.json();
     const ids = venue_ids || (venue_id ? [venue_id] : []);
 
-    // If no IDs, fetch all venues missing images
+    // If no IDs, fetch all venues missing images (limited by batch_size to avoid timeout)
     let venues: any[];
     if (ids.length > 0) {
       const { data } = await supabase.from('venues').select('id, name, instagram, website, image_url').in('id', ids);
       venues = data || [];
     } else {
       const { data } = await supabase.from('venues').select('id, name, instagram, website, image_url')
-        .is('image_url', null);
+        .is('image_url', null)
+        .limit(batch_size);
       venues = data || [];
     }
 
