@@ -109,7 +109,7 @@ const TermsConditions = () => {
           </div>
         </div>
       </div>
-      <Footer onSectionChange={handleSectionChange} />
+      <Footer />
     </div>
   );
 };

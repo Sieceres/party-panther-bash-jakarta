@@ -119,7 +119,7 @@ const About = () => {
           </div>
         </div>
       </div>
-      <Footer onSectionChange={handleSectionChange} />
+      <Footer />
     </div>
   );
 };
