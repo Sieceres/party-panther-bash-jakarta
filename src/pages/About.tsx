@@ -9,17 +9,7 @@ const About = () => {
   usePageTitle("About");
   const navigate = useNavigate();
 
-  const handleSectionChange = (section: string) => {
-    if (section === 'home') {
-      navigate('/');
-    } else if (section === 'admin') {
-      navigate('/admin');
-    } else if (section === 'profile') {
-      navigate('/profile');
-    } else {
-      navigate(`/?section=${section}`);
-    }
-  };
+  const handleSectionChange = () => {};
 
   return (
     <div className="min-h-screen bg-background">
