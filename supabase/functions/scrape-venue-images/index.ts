@@ -74,8 +74,7 @@ Deno.serve(async (req) => {
       if (mode === 'images') {
         query = query.is('image_url', null);
       } else if (mode === 'contacts') {
-        // Venues missing instagram OR whatsapp that have a website to scrape
-        query = query.not('website', 'is', null);
+        // Venues missing instagram OR whatsapp (no website requirement - we'll use search)
         query = query.or('instagram.is.null,whatsapp.is.null');
       } else {
         // 'all' mode - venues missing any data
@@ -174,9 +173,13 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Google search fallback for image
-        if (needImage && !imageUrl) {
-          console.log(`Searching for image of ${venue.name}`);
+        // Google search fallback - for images AND/OR contacts
+        const stillNeedImage = needImage && !imageUrl;
+        const stillNeedIG = needInstagram && !instagramHandle;
+        const stillNeedWA = needWhatsApp && !whatsappNumber;
+        
+        if (stillNeedImage || stillNeedIG || stillNeedWA) {
+          console.log(`Searching for ${venue.name} (need: ${[stillNeedImage && 'image', stillNeedIG && 'instagram', stillNeedWA && 'whatsapp'].filter(Boolean).join(', ')})`);
           const searchRes = await fetch('https://api.firecrawl.dev/v1/search', {
             method: 'POST',
             headers: {
@@ -184,7 +187,7 @@ Deno.serve(async (req) => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              query: `"${venue.name}" Jakarta bar restaurant`,
+              query: `"${venue.name}" Jakarta ${stillNeedIG ? 'instagram' : ''} ${stillNeedWA ? 'whatsapp' : ''}`.trim(),
               limit: 5,
               scrapeOptions: { formats: ['markdown'] },
             }),
@@ -192,28 +195,43 @@ Deno.serve(async (req) => {
 
           const searchData = await searchRes.json();
           const searchResults = searchData?.data || [];
+          console.log(`Search returned ${searchResults.length} results for ${venue.name}`);
 
           for (const result of searchResults) {
             const meta = result?.metadata;
-            if (meta?.ogImage && meta.ogImage.startsWith('http')) {
-              imageUrl = meta.ogImage;
-              break;
-            }
             const md = result?.markdown || '';
-            const imgMatch = md.match(/!\[.*?\]\((https?:\/\/[^\s)]+\.(?:jpg|jpeg|png|webp)[^\s)]*)\)/i);
-            if (imgMatch) {
-              imageUrl = imgMatch[1];
-              break;
+            const resultUrl = result?.url || '';
+
+            // Extract image from search results
+            if (stillNeedImage && !imageUrl) {
+              if (meta?.ogImage && meta.ogImage.startsWith('http')) {
+                imageUrl = meta.ogImage;
+              } else {
+                const imgMatch = md.match(/!\[.*?\]\((https?:\/\/[^\s)]+\.(?:jpg|jpeg|png|webp)[^\s)]*)\)/i);
+                if (imgMatch) imageUrl = imgMatch[1];
+              }
             }
 
-            // Also try to extract contacts from search results
-            if (needInstagram && !instagramHandle) {
-              const links: string[] = [];
-              instagramHandle = extractInstagram(md, links);
+            // Extract Instagram from search results
+            if (stillNeedIG && !instagramHandle) {
+              // Check if the result URL itself is an Instagram profile
+              const urlIgMatch = resultUrl.match(/instagram\.com\/([a-zA-Z0-9_.]{2,30})\/?$/);
+              if (urlIgMatch && !['p', 'reel', 'explore', 'accounts', 'stories', 'about'].includes(urlIgMatch[1])) {
+                instagramHandle = `@${urlIgMatch[1]}`;
+                console.log(`Found Instagram from search URL for ${venue.name}: ${instagramHandle}`);
+              } else {
+                instagramHandle = extractInstagram(md, [resultUrl]);
+              }
             }
-            if (needWhatsApp && !whatsappNumber) {
-              const links: string[] = [];
-              whatsappNumber = extractWhatsApp(md, links);
+
+            // Extract WhatsApp from search results
+            if (stillNeedWA && !whatsappNumber) {
+              whatsappNumber = extractWhatsApp(md, [resultUrl]);
+            }
+
+            // Stop if we found everything we need
+            if ((!stillNeedImage || imageUrl) && (!stillNeedIG || instagramHandle) && (!stillNeedWA || whatsappNumber)) {
+              break;
             }
           }
         }
