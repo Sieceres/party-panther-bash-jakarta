@@ -468,6 +468,10 @@ const BatchImport = () => {
                     <FileImage className="w-12 h-12 mx-auto text-muted-foreground" />
                     <p className="text-lg font-medium">Drop your image here or click to browse</p>
                     <p className="text-sm text-muted-foreground">Supports JPG, PNG, PDF, CSV, XLSX</p>
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/70">
+                      <Clipboard className="w-3.5 h-3.5" />
+                      <span>You can also paste an image from your clipboard (Ctrl+V / ⌘V)</span>
+                    </div>
                   </div>
                 )}
               </div>
