@@ -648,7 +648,7 @@ export const UserProfile = () => {
     return (
       <>
         <ContinuousStarfield />
-        <Header activeSection={activeSection} onSectionChange={setActiveSection} />
+        <Header activeSection="profile" />
         <div className="max-w-4xl mx-auto space-y-6 pt-20 px-4 relative z-10">
           <Card className="bg-card border-border">
             <CardContent className="pt-6 text-center">
