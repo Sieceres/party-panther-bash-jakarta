@@ -1067,22 +1067,27 @@ export const AdminDashboard = () => {
                         variant="outline"
                         onClick={async () => {
                           try {
-                            toast({ title: "Scraping images...", description: "Processing batch of 10 venues" });
+                            toast({ title: "Scraping images...", description: "Processing batch of 10 venues. Please wait..." });
                             const { data, error } = await supabase.functions.invoke('scrape-venue-images', {
                               body: { batch_size: 10 },
                             });
-                            if (error) throw error;
+                            if (error) {
+                              // Try to read the response body for details
+                              const errorBody = error?.context ? await error.context.json?.().catch(() => null) : null;
+                              throw new Error(errorBody?.error || error.message || 'Edge function error');
+                            }
                             if (data?.success) {
+                              const remaining = data.summary.total - data.summary.found;
                               toast({ 
-                                title: "Image scraping complete", 
-                                description: `Found images for ${data.summary.found}/${data.summary.total} venues` 
+                                title: "✅ Image scraping complete", 
+                                description: `Found images for ${data.summary.found}/${data.summary.total} venues.${remaining > 0 ? ` Click again for more.` : ''}` 
                               });
                             } else {
                               toast({ title: "Error", description: data?.error || "Failed to scrape images", variant: "destructive" });
                             }
                           } catch (error: any) {
                             console.error('Error scraping venue images:', error);
-                            toast({ title: "Error", description: error.message || "Failed to scrape venue images", variant: "destructive" });
+                            toast({ title: "Scraping failed", description: error.message || "Failed to scrape venue images. Try again.", variant: "destructive" });
                           }
                         }}
                       >
