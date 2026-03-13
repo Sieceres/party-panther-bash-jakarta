@@ -32,6 +32,25 @@ const BatchImport = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Listen for paste events on the page
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (step !== "upload" || isExtracting) return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of Array.from(items)) {
+        if (item.type.startsWith("image/")) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) handleFileUpload(file);
+          return;
+        }
+      }
+    };
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [step, isExtracting, handleFileUpload]);
+
   const handleFileUpload = useCallback(async (file: File) => {
     // Handle spreadsheet files (CSV/XLSX) client-side
     if (isSpreadsheetFile(file)) {
