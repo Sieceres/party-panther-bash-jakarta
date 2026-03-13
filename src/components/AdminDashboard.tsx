@@ -1067,9 +1067,9 @@ export const AdminDashboard = () => {
                         variant="outline"
                         onClick={async () => {
                           try {
-                            toast({ title: "Scraping images...", description: "This may take a few minutes" });
+                            toast({ title: "Scraping images...", description: "Processing batch of 10 venues" });
                             const { data, error } = await supabase.functions.invoke('scrape-venue-images', {
-                              body: {},
+                              body: { batch_size: 10 },
                             });
                             if (error) throw error;
                             if (data?.success) {
