@@ -1088,13 +1088,13 @@ export const AdminDashboard = () => {
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
                         <h4 className="font-semibold">Scrape Venue Contacts</h4>
-                        <p className="text-sm text-muted-foreground">Auto-find Instagram handles and WhatsApp numbers from venue websites</p>
+                        <p className="text-sm text-muted-foreground">Auto-find Instagram handles and WhatsApp numbers</p>
                       </div>
                       <Button
                         variant="outline"
                         onClick={async () => {
                           try {
-                            toast({ title: "Scraping contacts...", description: "Looking for Instagram & WhatsApp on venue websites..." });
+                            toast({ title: "Scraping contacts...", description: "Looking for Instagram & WhatsApp..." });
                             const { data, error } = await supabase.functions.invoke('scrape-venue-images', {
                               body: { batch_size: 10, mode: 'contacts' },
                             });
@@ -1112,12 +1112,49 @@ export const AdminDashboard = () => {
                             }
                           } catch (error: any) {
                             console.error('Error scraping venue contacts:', error);
-                            toast({ title: "Scraping failed", description: error.message || "Failed to scrape venue contacts. Try again.", variant: "destructive" });
+                            toast({ title: "Scraping failed", description: error.message || "Failed to scrape venue contacts.", variant: "destructive" });
                           }
                         }}
                       >
                         <Phone className="w-4 h-4 mr-2" />
                         Scrape Contacts
+                      </Button>
+                    </div>
+
+                    {/* Scrape Venue Details (GMaps + Hours) */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-semibold">Scrape Venue Details</h4>
+                        <p className="text-sm text-muted-foreground">Auto-find Google Maps links and opening hours</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            toast({ title: "Scraping details...", description: "Looking for Google Maps links & opening hours..." });
+                            const { data, error } = await supabase.functions.invoke('scrape-venue-images', {
+                              body: { batch_size: 10, mode: 'details' },
+                            });
+                            if (error) {
+                              const errorBody = error?.context ? await error.context.json?.().catch(() => null) : null;
+                              throw new Error(errorBody?.error || error.message || 'Edge function error');
+                            }
+                            if (data?.success) {
+                              toast({ 
+                                title: "✅ Details scraping complete", 
+                                description: `Found ${data.summary.gmaps} Google Maps, ${data.summary.hours} opening hours across ${data.summary.total} venues.${data.summary.total > data.summary.found ? ' Click again for more.' : ''}` 
+                              });
+                            } else {
+                              toast({ title: "Error", description: data?.error || "Failed to scrape details", variant: "destructive" });
+                            }
+                          } catch (error: any) {
+                            console.error('Error scraping venue details:', error);
+                            toast({ title: "Scraping failed", description: error.message || "Failed to scrape venue details.", variant: "destructive" });
+                          }
+                        }}
+                      >
+                        <MapPin className="w-4 h-4 mr-2" />
+                        Scrape Details
                       </Button>
                     </div>
                   </div>

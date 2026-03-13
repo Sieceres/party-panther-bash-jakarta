@@ -945,6 +945,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          google_maps_link: string | null
           id: string
           image_url: string | null
           instagram: string | null
@@ -964,6 +965,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          google_maps_link?: string | null
           id?: string
           image_url?: string | null
           instagram?: string | null
@@ -983,6 +985,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          google_maps_link?: string | null
           id?: string
           image_url?: string | null
           instagram?: string | null
