@@ -80,7 +80,7 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
           title: "Signed out",
           description: "You have been signed out successfully.",
         });
-        onSectionChange('home');
+        onSectionChange?.('home');
       }
     } catch (error) {
       toast({
