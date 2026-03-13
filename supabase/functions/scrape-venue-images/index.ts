@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Google search fallback - search for venue name + Jakarta
+        // Google search fallback - search for venue name + Jakarta, scrape top results for images
         if (!imageUrl) {
           console.log(`Searching for image of ${venue.name}`);
           const searchRes = await fetch('https://api.firecrawl.dev/v1/search', {
@@ -134,20 +134,60 @@ Deno.serve(async (req) => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              query: `${venue.name} Jakarta bar restaurant`,
-              limit: 3,
+              query: `"${venue.name}" Jakarta bar restaurant photo`,
+              limit: 5,
+              scrapeOptions: {
+                formats: ['markdown'],
+              },
             }),
           });
 
           const searchData = await searchRes.json();
           const searchResults = searchData?.data || [];
+          console.log(`Search returned ${searchResults.length} results for ${venue.name}`);
           
-          // Look for og:image in search results
           for (const result of searchResults) {
+            // Check metadata og:image
             const meta = result?.metadata;
-            if (meta?.ogImage) {
+            if (meta?.ogImage && meta.ogImage.startsWith('http')) {
               imageUrl = meta.ogImage;
+              console.log(`Found ogImage for ${venue.name}: ${imageUrl}`);
               break;
+            }
+            // Extract image URLs from markdown content
+            const markdown = result?.markdown || '';
+            const imgMatch = markdown.match(/!\[.*?\]\((https?:\/\/[^\s)]+\.(?:jpg|jpeg|png|webp)[^\s)]*)\)/i);
+            if (imgMatch) {
+              imageUrl = imgMatch[1];
+              console.log(`Found markdown image for ${venue.name}: ${imageUrl}`);
+              break;
+            }
+          }
+
+          // If still nothing, try scraping the first result URL directly
+          if (!imageUrl && searchResults.length > 0 && searchResults[0]?.url) {
+            try {
+              const scrapeRes = await fetch('https://api.firecrawl.dev/v1/scrape', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${apiKey}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  url: searchResults[0].url,
+                  formats: ['links'],
+                  onlyMainContent: true,
+                  waitFor: 2000,
+                }),
+              });
+              const scrapeData = await scrapeRes.json();
+              const meta2 = scrapeData?.data?.metadata || scrapeData?.metadata;
+              if (meta2?.ogImage && meta2.ogImage.startsWith('http')) {
+                imageUrl = meta2.ogImage;
+                console.log(`Found ogImage from scrape for ${venue.name}: ${imageUrl}`);
+              }
+            } catch (e) {
+              console.error(`Scrape fallback failed for ${venue.name}:`, e);
             }
           }
         }
