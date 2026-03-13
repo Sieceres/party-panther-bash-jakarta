@@ -9,10 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { Upload, Loader2, FileImage, CheckCircle, ArrowLeft, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { BatchImportReview, ExtractedPromo, ExtractedEvent } from "@/components/BatchImportReview";
+import { BatchImportReview, ExtractedPromo, ExtractedEvent, ExtractedContact } from "@/components/BatchImportReview";
 import { detectDrinkCategory, getPlaceholderImage, enrichDrinkTypes } from "@/lib/drink-categories";
 
-type ImportType = "promo" | "event";
+type ImportType = "promo" | "event" | "contact";
 type Step = "upload" | "review" | "done";
 
 const BatchImport = () => {
@@ -21,7 +21,7 @@ const BatchImport = () => {
   const [importType, setImportType] = useState<ImportType>("promo");
   const [isExtracting, setIsExtracting] = useState(false);
   const [isInserting, setIsInserting] = useState(false);
-  const [items, setItems] = useState<(ExtractedPromo | ExtractedEvent)[]>([]);
+  const [items, setItems] = useState<(ExtractedPromo | ExtractedEvent | ExtractedContact)[]>([]);
   const [insertedCount, setInsertedCount] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [extractionProgress, setExtractionProgress] = useState(0);
@@ -81,52 +81,86 @@ const BatchImport = () => {
         return;
       }
 
-      const extracted = (data?.items || []).map((item: any, idx: number) => {
-        const drinkTypes = item.drink_type || [];
-        const title = item.title || "";
-        const description = item.description || "";
-        const discountText = item.discount_text || "";
+      if (importType === "contact") {
+        // For contacts, fetch venues to match
+        const { data: venues } = await supabase.from("venues").select("id, name");
+        const venueList = venues || [];
 
-        // Auto-detect drink category and assign placeholder image
-        const drinkCategory = detectDrinkCategory(title, description, discountText, drinkTypes);
-        const enrichedDrinkTypes = enrichDrinkTypes(drinkTypes, drinkCategory);
-        const placeholderImage = getPlaceholderImage(drinkCategory);
+        const extracted = (data?.items || []).map((item: any, idx: number) => {
+          const venueName = (item.venue_name || "").trim();
+          // Fuzzy match: find venue whose name matches (case-insensitive)
+          const matched = venueList.find(v =>
+            v.name.toLowerCase() === venueName.toLowerCase() ||
+            v.name.toLowerCase().includes(venueName.toLowerCase()) ||
+            venueName.toLowerCase().includes(v.name.toLowerCase())
+          );
 
-        return {
-          ...item,
-          id: `item-${idx}-${Date.now()}`,
-          selected: true,
-          description,
-          day_of_week: item.day_of_week || [],
-          drink_type: enrichedDrinkTypes,
-          venue_name: item.venue_name || "",
-          venue_address: item.venue_address || "",
-          area: item.area || "",
-          promo_type: item.promo_type || "",
-          category: item.category || "",
-          discount_text: discountText,
-          price_currency: item.price_currency || "IDR",
-          original_price_amount: item.original_price_amount ?? null,
-          discounted_price_amount: item.discounted_price_amount ?? null,
-          date: item.date || "",
-          time: item.time || "",
-          organizer_name: item.organizer_name || "",
-          image_url: placeholderImage,
-          _drinkCategory: drinkCategory,
-        };
-      });
+          return {
+            id: `item-${idx}-${Date.now()}`,
+            selected: true,
+            venue_name: venueName,
+            instagram: (item.instagram || "").replace(/^@/, ""),
+            whatsapp: item.whatsapp || "",
+            website: item.website || "",
+            google_maps_link: item.google_maps_link || "",
+            opening_hours: item.opening_hours || "",
+            address: item.address || "",
+            matched_venue_id: matched?.id || undefined,
+            matched_venue_name: matched?.name || undefined,
+          } as ExtractedContact;
+        });
 
-      if (progressInterval.current) clearInterval(progressInterval.current);
-      setExtractionProgress(100);
-      setExtractionStatus(`Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}!`);
+        if (progressInterval.current) clearInterval(progressInterval.current);
+        setExtractionProgress(100);
+        setExtractionStatus(`Found ${extracted.length} contacts!`);
+        setItems(extracted);
+        setTimeout(() => setStep("review"), 500);
+        toast({ title: `Found ${extracted.length} venue contacts`, description: "Review and edit before updating venues." });
+      } else {
+        const extracted = (data?.items || []).map((item: any, idx: number) => {
+          const drinkTypes = item.drink_type || [];
+          const title = item.title || "";
+          const description = item.description || "";
+          const discountText = item.discount_text || "";
 
-      setItems(extracted);
-      setTimeout(() => setStep("review"), 500);
+          const drinkCategory = detectDrinkCategory(title, description, discountText, drinkTypes);
+          const enrichedDrinkTypes = enrichDrinkTypes(drinkTypes, drinkCategory);
+          const placeholderImage = getPlaceholderImage(drinkCategory);
 
-      toast({
-        title: `Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}`,
-        description: "Review and edit before importing.",
-      });
+          return {
+            ...item,
+            id: `item-${idx}-${Date.now()}`,
+            selected: true,
+            description,
+            day_of_week: item.day_of_week || [],
+            drink_type: enrichedDrinkTypes,
+            venue_name: item.venue_name || "",
+            venue_address: item.venue_address || "",
+            area: item.area || "",
+            promo_type: item.promo_type || "",
+            category: item.category || "",
+            discount_text: discountText,
+            price_currency: item.price_currency || "IDR",
+            original_price_amount: item.original_price_amount ?? null,
+            discounted_price_amount: item.discounted_price_amount ?? null,
+            date: item.date || "",
+            time: item.time || "",
+            organizer_name: item.organizer_name || "",
+            image_url: placeholderImage,
+            _drinkCategory: drinkCategory,
+          };
+        });
+
+        if (progressInterval.current) clearInterval(progressInterval.current);
+        setExtractionProgress(100);
+        setExtractionStatus(`Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}!`);
+        setItems(extracted);
+        setTimeout(() => setStep("review"), 500);
+        toast({
+          title: `Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}`,
+          description: "Review and edit before importing.",
+        });
+      }
     } catch (err) {
       console.error("Extraction error:", err);
       toast({
@@ -164,7 +198,34 @@ const BatchImport = () => {
     let successCount = 0;
     const errors: string[] = [];
 
-    if (importType === "promo") {
+    if (importType === "contact") {
+      const contacts = selected as ExtractedContact[];
+      for (const c of contacts) {
+        if (!c.matched_venue_id) {
+          errors.push(`${c.venue_name}: No matching venue found`);
+          continue;
+        }
+        const updateData: Record<string, string | null> = {};
+        if (c.instagram) updateData.instagram = c.instagram;
+        if (c.whatsapp) updateData.whatsapp = c.whatsapp;
+        if (c.website) updateData.website = c.website;
+        if (c.google_maps_link) updateData.google_maps_link = c.google_maps_link;
+        if (c.opening_hours) updateData.opening_hours = c.opening_hours;
+        if (c.address) updateData.address = c.address;
+
+        if (Object.keys(updateData).length === 0) {
+          errors.push(`${c.venue_name}: No contact data to update`);
+          continue;
+        }
+
+        const { error } = await supabase.from("venues").update(updateData).eq("id", c.matched_venue_id);
+        if (error) {
+          errors.push(`${c.venue_name}: ${error.message}`);
+        } else {
+          successCount++;
+        }
+      }
+    } else if (importType === "promo") {
       const promos = selected as ExtractedPromo[];
       const validPromoTypes = ["Free Flow", "Ladies Night", "Bottle Promo", "Other"];
       const promoTypeMap: Record<string, string> = {
@@ -230,16 +291,18 @@ const BatchImport = () => {
     setInsertedCount(successCount);
     setIsInserting(false);
 
+    const typeLabel = importType === "contact" ? "venues" : importType === "promo" ? "promos" : "events";
+
     if (errors.length > 0) {
       toast({
-        title: `Imported ${successCount}, ${errors.length} failed`,
+        title: `Updated ${successCount}, ${errors.length} failed`,
         description: errors[0],
         variant: "destructive",
       });
     } else {
       setStep("done");
       toast({
-        title: `Successfully imported ${successCount} ${importType === "promo" ? "promos" : "events"}!`,
+        title: `Successfully ${importType === "contact" ? "updated" : "imported"} ${successCount} ${typeLabel}!`,
       });
     }
   };
@@ -304,6 +367,7 @@ const BatchImport = () => {
                   <SelectContent>
                     <SelectItem value="promo">Promos / Deals</SelectItem>
                     <SelectItem value="event">Events</SelectItem>
+                    <SelectItem value="contact">Venue Contacts</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -361,9 +425,9 @@ const BatchImport = () => {
                 disabled={isInserting || items.filter(i => i.selected).length === 0}
               >
                 {isInserting ? (
-                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Importing...</>
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {importType === "contact" ? "Updating..." : "Importing..."}</>
                 ) : (
-                  <>Import {items.filter(i => i.selected).length} {importType === "promo" ? "promos" : "events"} <ArrowRight className="w-4 h-4 ml-2" /></>
+                  <>{importType === "contact" ? "Update" : "Import"} {items.filter(i => i.selected).length} {importType === "contact" ? "venues" : importType === "promo" ? "promos" : "events"} <ArrowRight className="w-4 h-4 ml-2" /></>
                 )}
               </Button>
             </div>
@@ -381,16 +445,16 @@ const BatchImport = () => {
           <Card>
             <CardContent className="py-12 text-center space-y-4">
               <CheckCircle className="w-16 h-16 mx-auto text-primary" />
-              <h2 className="text-2xl font-bold">Import Complete!</h2>
+              <h2 className="text-2xl font-bold">{importType === "contact" ? "Update" : "Import"} Complete!</h2>
               <p className="text-muted-foreground">
-                Successfully imported {insertedCount} {importType === "promo" ? "promos" : "events"}.
+                Successfully {importType === "contact" ? "updated" : "imported"} {insertedCount} {importType === "contact" ? "venues" : importType === "promo" ? "promos" : "events"}.
               </p>
               <div className="flex justify-center gap-3 pt-4">
                 <Button variant="outline" onClick={resetFlow}>
                   Import More
                 </Button>
-                <Button onClick={() => navigate(importType === "promo" ? "/promos" : "/events")}>
-                  View {importType === "promo" ? "Promos" : "Events"}
+                <Button onClick={() => navigate(importType === "contact" ? "/venues" : importType === "promo" ? "/promos" : "/events")}>
+                  View {importType === "contact" ? "Venues" : importType === "promo" ? "Promos" : "Events"}
                 </Button>
               </div>
             </CardContent>

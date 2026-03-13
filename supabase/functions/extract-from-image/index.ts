@@ -77,6 +77,38 @@ const eventTool = {
   },
 };
 
+const contactTool = {
+  type: "function" as const,
+  function: {
+    name: "extract_contacts",
+    description: "Extract all venue/business contact information found in the image/document. Each venue should be a separate item.",
+    parameters: {
+      type: "object",
+      properties: {
+        items: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              venue_name: { type: "string", description: "Name of the venue/bar/restaurant/business" },
+              instagram: { type: "string", description: "Instagram handle (without @), e.g. 'barname_jkt'" },
+              whatsapp: { type: "string", description: "WhatsApp number in international format, e.g. '+6281234567890'" },
+              website: { type: "string", description: "Website URL if visible" },
+              google_maps_link: { type: "string", description: "Google Maps link if visible" },
+              opening_hours: { type: "string", description: "Opening hours text if visible" },
+              address: { type: "string", description: "Address if visible" },
+            },
+            required: ["venue_name"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["items"],
+      additionalProperties: false,
+    },
+  },
+};
+
 function extractJsonFromText(text: string): any | null {
   const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (codeBlockMatch) {
@@ -130,10 +162,19 @@ serve(async (req) => {
     }
 
     const isPromo = type === "promo";
-    const tool = isPromo ? promoTool : eventTool;
-    const toolName = isPromo ? "extract_promos" : "extract_events";
+    const isContact = type === "contact";
+    const tool = isContact ? contactTool : isPromo ? promoTool : eventTool;
+    const toolName = isContact ? "extract_contacts" : isPromo ? "extract_promos" : "extract_events";
 
-    const systemPrompt = isPromo
+    const systemPrompt = isContact
+      ? `You are an expert at extracting contact information for venues, bars, restaurants, and businesses from images and documents.
+Extract ALL venue contact details you can find. Each venue should be a separate item.
+Look for Instagram handles (with or without @), WhatsApp numbers, phone numbers (especially Indonesian +62 format), websites, Google Maps links, addresses, and opening hours.
+For Instagram, remove the @ symbol and just return the handle.
+For WhatsApp/phone numbers, convert to international format (+62...) if they start with 0.
+Be thorough — extract everything visible.
+You MUST use the extract_contacts tool to return the results.`
+      : isPromo
       ? `You are an expert at extracting promotional offers from images and documents. 
 Extract ALL promos/deals you can find. Each venue+deal combination should be a separate item.
 If a venue has promos on different days, create separate items for each day or group days together.
@@ -173,7 +214,7 @@ You MUST use the extract_events tool to return the results.`;
           {
             role: "user",
             content: [
-              { type: "text", text: `Extract all ${isPromo ? "promos/deals" : "events"} from this image.` },
+              { type: "text", text: `Extract all ${isContact ? "venue contact details (Instagram, WhatsApp, etc.)" : isPromo ? "promos/deals" : "events"} from this image.` },
               { type: "image_url", image_url: { url: image } },
             ],
           },
