@@ -9,10 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { Upload, Loader2, FileImage, CheckCircle, ArrowLeft, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { BatchImportReview, ExtractedPromo, ExtractedEvent } from "@/components/BatchImportReview";
+import { BatchImportReview, ExtractedPromo, ExtractedEvent, ExtractedContact } from "@/components/BatchImportReview";
 import { detectDrinkCategory, getPlaceholderImage, enrichDrinkTypes } from "@/lib/drink-categories";
 
-type ImportType = "promo" | "event";
+type ImportType = "promo" | "event" | "contact";
 type Step = "upload" | "review" | "done";
 
 const BatchImport = () => {
