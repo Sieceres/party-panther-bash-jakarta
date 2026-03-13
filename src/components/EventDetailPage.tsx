@@ -943,15 +943,7 @@ export const EventDetailPage = () => {
   if (!event) {
     return (
       <>
-        <Header
-          activeSection="events"
-          onSectionChange={(section) => {
-            if (section === "home") navigate("/");
-            else if (section === "profile") navigate("/profile");
-            else if (section === "promos") navigate("/?section=promos");
-            else if (section === "events") navigate("/?section=events");
-          }}
-        />
+        <Header activeSection="events" />
         <div className="min-h-screen bg-background pt-20 px-4">
           <div className="container mx-auto">
             <div className="text-center">Event not found</div>
