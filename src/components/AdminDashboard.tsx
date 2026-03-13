@@ -1061,7 +1061,7 @@ export const AdminDashboard = () => {
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
                         <h4 className="font-semibold">Scrape Venue Images</h4>
-                        <p className="text-sm text-muted-foreground">Auto-fetch images from venue Instagram pages and websites using Firecrawl</p>
+                        <p className="text-sm text-muted-foreground">Auto-fetch images from venue websites and Instagram</p>
                       </div>
                       <Button
                         variant="outline"
@@ -1069,18 +1069,16 @@ export const AdminDashboard = () => {
                           try {
                             toast({ title: "Scraping images...", description: "Processing batch of 10 venues. Please wait..." });
                             const { data, error } = await supabase.functions.invoke('scrape-venue-images', {
-                              body: { batch_size: 10 },
+                              body: { batch_size: 10, mode: 'images' },
                             });
                             if (error) {
-                              // Try to read the response body for details
                               const errorBody = error?.context ? await error.context.json?.().catch(() => null) : null;
                               throw new Error(errorBody?.error || error.message || 'Edge function error');
                             }
                             if (data?.success) {
-                              const remaining = data.summary.total - data.summary.found;
                               toast({ 
                                 title: "✅ Image scraping complete", 
-                                description: `Found images for ${data.summary.found}/${data.summary.total} venues.${remaining > 0 ? ` Click again for more.` : ''}` 
+                                description: `Found images for ${data.summary.images}/${data.summary.total} venues.${data.summary.total > data.summary.images ? ' Click again for more.' : ''}` 
                               });
                             } else {
                               toast({ title: "Error", description: data?.error || "Failed to scrape images", variant: "destructive" });
@@ -1093,6 +1091,43 @@ export const AdminDashboard = () => {
                       >
                         <Image className="w-4 h-4 mr-2" />
                         Scrape Images
+                      </Button>
+                    </div>
+
+                    {/* Scrape Venue Contacts */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-semibold">Scrape Venue Contacts</h4>
+                        <p className="text-sm text-muted-foreground">Auto-find Instagram handles and WhatsApp numbers from venue websites</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            toast({ title: "Scraping contacts...", description: "Looking for Instagram & WhatsApp on venue websites..." });
+                            const { data, error } = await supabase.functions.invoke('scrape-venue-images', {
+                              body: { batch_size: 10, mode: 'contacts' },
+                            });
+                            if (error) {
+                              const errorBody = error?.context ? await error.context.json?.().catch(() => null) : null;
+                              throw new Error(errorBody?.error || error.message || 'Edge function error');
+                            }
+                            if (data?.success) {
+                              toast({ 
+                                title: "✅ Contact scraping complete", 
+                                description: `Found ${data.summary.instagram} Instagram, ${data.summary.whatsapp} WhatsApp across ${data.summary.total} venues.${data.summary.total > data.summary.found ? ' Click again for more.' : ''}` 
+                              });
+                            } else {
+                              toast({ title: "Error", description: data?.error || "Failed to scrape contacts", variant: "destructive" });
+                            }
+                          } catch (error: any) {
+                            console.error('Error scraping venue contacts:', error);
+                            toast({ title: "Scraping failed", description: error.message || "Failed to scrape venue contacts. Try again.", variant: "destructive" });
+                          }
+                        }}
+                      >
+                        <Phone className="w-4 h-4 mr-2" />
+                        Scrape Contacts
                       </Button>
                     </div>
                   </div>
