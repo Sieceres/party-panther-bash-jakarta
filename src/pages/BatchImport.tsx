@@ -21,7 +21,7 @@ const BatchImport = () => {
   const [importType, setImportType] = useState<ImportType>("promo");
   const [isExtracting, setIsExtracting] = useState(false);
   const [isInserting, setIsInserting] = useState(false);
-  const [items, setItems] = useState<(ExtractedPromo | ExtractedEvent)[]>([]);
+  const [items, setItems] = useState<(ExtractedPromo | ExtractedEvent | ExtractedContact)[]>([]);
   const [insertedCount, setInsertedCount] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [extractionProgress, setExtractionProgress] = useState(0);
