@@ -166,7 +166,28 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
                   </Button>
                 </div>
 
-                {/* Summary when collapsed */}
+                {/* Summary when collapsed - contacts */}
+                {!isExpanded && isContact && (
+                  <div className="flex flex-wrap items-center gap-1.5 pl-9">
+                    {(item as ExtractedContact).instagram && (
+                      <Badge variant="secondary" className="text-xs">@{(item as ExtractedContact).instagram}</Badge>
+                    )}
+                    {(item as ExtractedContact).whatsapp && (
+                      <Badge variant="outline" className="text-xs">📱 {(item as ExtractedContact).whatsapp}</Badge>
+                    )}
+                    {(item as ExtractedContact).website && (
+                      <Badge variant="outline" className="text-xs">🌐 Website</Badge>
+                    )}
+                    {(item as ExtractedContact).opening_hours && (
+                      <Badge variant="outline" className="text-xs">🕐 Hours</Badge>
+                    )}
+                    {!(item as ExtractedContact).matched_venue_id && (
+                      <Badge variant="destructive" className="text-xs">No venue match</Badge>
+                    )}
+                  </div>
+                )}
+
+                {/* Summary when collapsed - promos */}
                 {!isExpanded && isPromo && (
                   <div className="flex flex-wrap items-center gap-1.5 pl-9">
                     {(item as any).image_url && (
@@ -191,7 +212,44 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
                 {/* Expanded edit form */}
                 {isExpanded && (
                   <div className="pl-9 space-y-3">
-                    {isPromo ? (
+                    {isContact ? (
+                      <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <Input
+                            value={(item as ExtractedContact).instagram}
+                            onChange={(e) => updateItem(item.id, "instagram", e.target.value)}
+                            placeholder="Instagram handle (without @)"
+                          />
+                          <Input
+                            value={(item as ExtractedContact).whatsapp}
+                            onChange={(e) => updateItem(item.id, "whatsapp", e.target.value)}
+                            placeholder="WhatsApp number (+62...)"
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <Input
+                            value={(item as ExtractedContact).website}
+                            onChange={(e) => updateItem(item.id, "website", e.target.value)}
+                            placeholder="Website URL"
+                          />
+                          <Input
+                            value={(item as ExtractedContact).google_maps_link}
+                            onChange={(e) => updateItem(item.id, "google_maps_link", e.target.value)}
+                            placeholder="Google Maps link"
+                          />
+                        </div>
+                        <Input
+                          value={(item as ExtractedContact).opening_hours}
+                          onChange={(e) => updateItem(item.id, "opening_hours", e.target.value)}
+                          placeholder="Opening hours"
+                        />
+                        <Input
+                          value={(item as ExtractedContact).address}
+                          onChange={(e) => updateItem(item.id, "address", e.target.value)}
+                          placeholder="Address"
+                        />
+                      </>
+                    ) : isPromo ? (
                       <>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <Input
@@ -206,7 +264,7 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
                           />
                         </div>
                         <Input
-                          value={item.description}
+                          value={(item as ExtractedPromo).description}
                           onChange={(e) => updateItem(item.id, "description", e.target.value)}
                           placeholder="Description"
                         />
@@ -291,7 +349,7 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
                     ) : (
                       <>
                         <Input
-                          value={item.description}
+                          value={(item as ExtractedEvent).description}
                           onChange={(e) => updateItem(item.id, "description", e.target.value)}
                           placeholder="Description"
                         />
