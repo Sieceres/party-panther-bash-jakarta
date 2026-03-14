@@ -107,7 +107,7 @@ export default function VenueDirectory() {
       list = list.filter(v => v.name.toLowerCase().includes(q) || v.address?.toLowerCase().includes(q));
     }
     if (areaFilter !== "all") {
-      list = list.filter(v => v.area === areaFilter);
+      list = list.filter(v => areaMatchesFilter(v.area, [areaFilter]));
     }
     switch (sort) {
       case "name-asc": list = [...list].sort((a, b) => a.name.localeCompare(b.name)); break;
