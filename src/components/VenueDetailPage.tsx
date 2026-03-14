@@ -49,6 +49,7 @@ export const VenueDetailPage = () => {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
+        setIsLoggedIn(true);
         supabase.from("user_roles").select("role").eq("user_id", user.id)
           .then(({ data }) => {
             setIsAdmin(data?.some(r => r.role === "admin" || r.role === "superadmin") || false);
