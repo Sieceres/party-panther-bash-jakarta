@@ -78,7 +78,15 @@ export const UserProfile = () => {
   const [saving, setSaving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showVenueDialog, setShowVenueDialog] = useState(false);
-  const [venueCtaDismissed, setVenueCtaDismissed] = useState(false);
+  const [venueCtaDismissed, setVenueCtaDismissed] = useState(() => {
+    // Try to read from localStorage immediately to prevent flash
+    try {
+      const keys = Object.keys(localStorage);
+      const dismissKey = keys.find(k => k.startsWith('venueCtaDismissed_v2_'));
+      if (dismissKey) return localStorage.getItem(dismissKey) === 'true';
+    } catch {}
+    return false;
+  });
   const [userEvents, setUserEvents] = useState<EventWithSlug[]>([]);
   const [userPromos, setUserPromos] = useState<PromoWithSlug[]>([]);
   const [joinedEvents, setJoinedEvents] = useState<EventWithSlug[]>([]);
