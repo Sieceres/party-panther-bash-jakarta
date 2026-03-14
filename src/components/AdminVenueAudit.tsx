@@ -98,8 +98,9 @@ export const AdminVenueAudit = () => {
       venues
         .map((v) => ({ ...v, missingFields: getMissingFields(v) }))
         .filter((v) => v.missingFields.length > 0)
+        .filter((v) => missingFilter === "all" || v.missingFields.includes(missingFilter))
         .sort((a, b) => b.missingFields.length - a.missingFields.length),
-    [venues]
+    [venues, missingFilter]
   );
 
   const outsideJakarta = useMemo(
