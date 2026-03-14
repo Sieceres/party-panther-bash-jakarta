@@ -40,6 +40,7 @@ export const VenueDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [fetchKey, setFetchKey] = useState(0);
   const [venue, setVenue] = useState<Venue | null>(null);
   const [loading, setLoading] = useState(true);
   const [promos, setPromos] = useState<any[]>([]);
