@@ -7,11 +7,10 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { Header } from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Calendar, Zap, X, LocateFixed, Loader2 } from "lucide-react";
-import { JAKARTA_AREAS, NEIGHBORHOOD_COORDS } from "@/lib/area-config";
+import { MapPin, Calendar, Zap, X, LocateFixed, Loader2, Store } from "lucide-react";
+import { NEIGHBORHOOD_COORDS, JAKARTA_AREAS } from "@/lib/area-config";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { NearbyPanel } from "@/components/map/NearbyPanel";
 import { toast } from "sonner";
@@ -24,13 +23,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
-interface MapItem {
+export interface MapItem {
   id: string;
   title: string;
   venue_name: string;
   lat: number;
   lng: number;
-  type: "promo" | "event";
+  type: "promo" | "event" | "venue";
   slug?: string | null;
   extra?: string;
   day_of_week?: string[];
@@ -40,6 +39,7 @@ interface MapItem {
 
 const PROMO_COLOR = "#10b981";
 const EVENT_COLOR = "#6366f1";
+const VENUE_COLOR = "#f59e0b";
 const USER_COLOR = "#3b82f6";
 
 function makeIcon(color: string) {
@@ -117,6 +117,12 @@ function resolveCoords(
   return null;
 }
 
+function getColorForType(type: string) {
+  if (type === "promo") return PROMO_COLOR;
+  if (type === "event") return EVENT_COLOR;
+  return VENUE_COLOR;
+}
+
 export default function MapExplorer() {
   usePageTitle("Map Explorer");
 
@@ -129,7 +135,7 @@ export default function MapExplorer() {
   const [items, setItems] = useState<MapItem[]>([]);
   const [showPromos, setShowPromos] = useState(true);
   const [showEvents, setShowEvents] = useState(true);
-  const [activeRegion, setActiveRegion] = useState<string | null>(null);
+  const [showVenues, setShowVenues] = useState(true);
   const [loading, setLoading] = useState(true);
 
   // Filters
@@ -145,9 +151,10 @@ export default function MapExplorer() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const [promosRes, eventsRes] = await Promise.all([
+      const [promosRes, eventsRes, venuesRes] = await Promise.all([
         supabase.rpc("get_promos_simple"),
         supabase.rpc("get_events_simple"),
+        supabase.from("venues").select("id, name, slug, address, latitude, longitude, description"),
       ]);
 
       const mapped: MapItem[] = [];
@@ -180,6 +187,24 @@ export default function MapExplorer() {
         }
       }
 
+      // Add venues that have coordinates (including those without promos/events)
+      if (venuesRes.data) {
+        for (const v of venuesRes.data) {
+          if (v.latitude && v.longitude) {
+            mapped.push({
+              id: v.id,
+              title: v.name,
+              venue_name: v.address || "Venue",
+              lat: Number(v.latitude),
+              lng: Number(v.longitude),
+              type: "venue",
+              slug: v.slug,
+              extra: v.description ? v.description.substring(0, 60) : undefined,
+            });
+          }
+        }
+      }
+
       setItems(mapped);
       setLoading(false);
     }
@@ -205,10 +230,14 @@ export default function MapExplorer() {
       disableClusteringAtZoom: 17,
       iconCreateFunction: (c: any) => {
         const count = c.getChildCount();
-        const hasPromo = c.getAllChildMarkers().some((m: any) => m.options._itemType === "promo");
-        const hasEvent = c.getAllChildMarkers().some((m: any) => m.options._itemType === "event");
-        let bg = PROMO_COLOR;
-        if (hasPromo && hasEvent) bg = "linear-gradient(135deg, " + PROMO_COLOR + " 50%, " + EVENT_COLOR + " 50%)";
+        const markers = c.getAllChildMarkers();
+        const hasPromo = markers.some((m: any) => m.options._itemType === "promo");
+        const hasEvent = markers.some((m: any) => m.options._itemType === "event");
+        const hasVenue = markers.some((m: any) => m.options._itemType === "venue");
+        
+        let bg = VENUE_COLOR;
+        if (hasPromo && hasEvent) bg = `linear-gradient(135deg, ${PROMO_COLOR} 50%, ${EVENT_COLOR} 50%)`;
+        else if (hasPromo) bg = PROMO_COLOR;
         else if (hasEvent) bg = EVENT_COLOR;
 
         return L.divIcon({
@@ -241,6 +270,7 @@ export default function MapExplorer() {
     items.filter((i) => {
       if (i.type === "promo" && !showPromos) return false;
       if (i.type === "event" && !showEvents) return false;
+      if (i.type === "venue" && !showVenues) return false;
 
       if (i.type === "promo" && !dayFilter.includes("all")) {
         const itemDays = (i.day_of_week || []).map((d) => d.toLowerCase());
@@ -254,7 +284,7 @@ export default function MapExplorer() {
 
       return true;
     }),
-    [items, showPromos, showEvents, dayFilter, drinkTypeFilter]
+    [items, showPromos, showEvents, showVenues, dayFilter, drinkTypeFilter]
   );
 
   // Render markers into cluster group
@@ -263,24 +293,33 @@ export default function MapExplorer() {
     clusterGroup.current.clearLayers();
 
     for (const item of visibleItems) {
-      const icon = makeIcon(item.type === "promo" ? PROMO_COLOR : EVENT_COLOR);
-      const detailUrl =
-        item.type === "promo"
-          ? `/promo/${item.slug || item.id}`
-          : `/event/${item.slug || item.id}`;
+      const color = getColorForType(item.type);
+      const icon = makeIcon(color);
+      
+      let detailUrl: string;
+      let typeLabel: string;
+      if (item.type === "promo") {
+        detailUrl = `/promo/${item.slug || item.id}`;
+        typeLabel = "Promo";
+      } else if (item.type === "event") {
+        detailUrl = `/event/${item.slug || item.id}`;
+        typeLabel = "Event";
+      } else {
+        detailUrl = `/venue/${item.slug || item.id}`;
+        typeLabel = "Venue";
+      }
 
-      const typeLabel = item.type === "promo" ? "Promo" : "Event";
       const extraHtml = item.extra
         ? `<div style="font-size:12px;color:#888;margin-top:2px">${item.extra}</div>`
         : "";
 
       const popup = `
         <div style="min-width:180px;font-family:system-ui,sans-serif">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:${item.type === "promo" ? PROMO_COLOR : EVENT_COLOR};margin-bottom:2px">${typeLabel}</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:${color};margin-bottom:2px">${typeLabel}</div>
           <div style="font-weight:600;font-size:14px;line-height:1.3">${item.title}</div>
           <div style="font-size:12px;color:#666;margin-top:2px">${item.venue_name}</div>
           ${extraHtml}
-          <a href="${detailUrl}" style="display:inline-block;margin-top:8px;font-size:12px;color:${item.type === "promo" ? PROMO_COLOR : EVENT_COLOR};font-weight:600;text-decoration:none">View Details →</a>
+          <a href="${detailUrl}" style="display:inline-block;margin-top:8px;font-size:12px;color:${color};font-weight:600;text-decoration:none">View Details →</a>
         </div>
       `;
 
@@ -297,7 +336,6 @@ export default function MapExplorer() {
   useEffect(() => {
     if (!mapInstance.current) return;
 
-    // Remove previous
     if (userMarkerRef.current) {
       mapInstance.current.removeLayer(userMarkerRef.current);
       userMarkerRef.current = null;
@@ -356,35 +394,19 @@ export default function MapExplorer() {
   const handleNearbyItemClick = useCallback((item: MapItem) => {
     if (!mapInstance.current) return;
     mapInstance.current.setView([item.lat, item.lng], 17);
-    // Find and open the marker popup
     if (clusterGroup.current) {
       clusterGroup.current.eachLayer((layer: any) => {
         const latlng = layer.getLatLng();
         if (Math.abs(latlng.lat - item.lat) < 0.0001 && Math.abs(latlng.lng - item.lng) < 0.0001) {
-          // Spiderfy cluster if needed, then open popup
           setTimeout(() => layer.openPopup(), 300);
         }
       });
     }
   }, []);
 
-  // Region zoom
-  const handleRegionClick = (regionKey: string) => {
-    if (!mapInstance.current) return;
-    if (activeRegion === regionKey) {
-      setActiveRegion(null);
-      mapInstance.current.setView(JAKARTA_CENTER, DEFAULT_ZOOM);
-      return;
-    }
-    const region = JAKARTA_AREAS.find((r) => r.key === regionKey);
-    if (region) {
-      setActiveRegion(regionKey);
-      mapInstance.current.setView([region.lat, region.lng], 14);
-    }
-  };
-
-  const promoCount = visibleItems.filter((i) => i.type === "promo").length;
   const eventCount = visibleItems.filter((i) => i.type === "event").length;
+  const promoCount = visibleItems.filter((i) => i.type === "promo").length;
+  const venueCount = visibleItems.filter((i) => i.type === "venue").length;
 
   const hasActiveFilters = !dayFilter.includes("all") || !drinkTypeFilter.includes("all");
 
@@ -424,7 +446,7 @@ export default function MapExplorer() {
       <Header activeSection="map" />
 
       <div className="flex-1 relative pt-16">
-        {/* Controls overlay - absolute within pt-16 container, below header z-index */}
+        {/* Controls overlay */}
         <div className="absolute top-[4.5rem] left-2 right-2 z-[1000] pointer-events-none">
           <div className="flex flex-wrap gap-2 items-center pointer-events-auto">
             {/* Locate me button */}
@@ -439,7 +461,17 @@ export default function MapExplorer() {
               {locating ? "Locating..." : "Near me"}
             </Button>
 
-            {/* Type toggles */}
+            {/* Type toggles — order: Events, Promos, Venues */}
+            <Button
+              size="sm"
+              variant={showEvents ? "default" : "outline"}
+              onClick={() => setShowEvents(!showEvents)}
+              className="shadow-lg gap-1.5"
+              style={showEvents ? { backgroundColor: EVENT_COLOR, borderColor: EVENT_COLOR } : {}}
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              Events ({eventCount})
+            </Button>
             <Button
               size="sm"
               variant={showPromos ? "default" : "outline"}
@@ -452,13 +484,13 @@ export default function MapExplorer() {
             </Button>
             <Button
               size="sm"
-              variant={showEvents ? "default" : "outline"}
-              onClick={() => setShowEvents(!showEvents)}
+              variant={showVenues ? "default" : "outline"}
+              onClick={() => setShowVenues(!showVenues)}
               className="shadow-lg gap-1.5"
-              style={showEvents ? { backgroundColor: EVENT_COLOR, borderColor: EVENT_COLOR } : {}}
+              style={showVenues ? { backgroundColor: VENUE_COLOR, borderColor: VENUE_COLOR } : {}}
             >
-              <Calendar className="w-3.5 h-3.5" />
-              Events ({eventCount})
+              <Store className="w-3.5 h-3.5" />
+              Venues ({venueCount})
             </Button>
 
             {/* Day filter */}
@@ -520,19 +552,6 @@ export default function MapExplorer() {
                 <X className="w-3 h-3 mr-1" /> Clear
               </Button>
             )}
-
-            {/* Region chips */}
-            {JAKARTA_AREAS.map((region) => (
-              <Badge
-                key={region.key}
-                variant={activeRegion === region.key ? "default" : "outline"}
-                className="cursor-pointer shadow-sm hover:shadow-md transition-shadow bg-background/90 backdrop-blur-sm text-xs"
-                onClick={() => handleRegionClick(region.key)}
-              >
-                {activeRegion === region.key && <X className="w-3 h-3 mr-1" />}
-                {region.label}
-              </Badge>
-            ))}
           </div>
         </div>
 
