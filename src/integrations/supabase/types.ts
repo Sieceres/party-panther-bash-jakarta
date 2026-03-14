@@ -937,6 +937,56 @@ export type Database = {
         }
         Relationships: []
       }
+      venue_edits: {
+        Row: {
+          changes: Json
+          created_at: string
+          id: string
+          previous_values: Json | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_by: string
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          changes?: Json
+          created_at?: string
+          id?: string
+          previous_values?: Json | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by: string
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          changes?: Json
+          created_at?: string
+          id?: string
+          previous_values?: Json | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string
+          updated_at?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_edits_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venues: {
         Row: {
           address: string | null
