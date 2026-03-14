@@ -79,7 +79,7 @@ export default function VenueDirectory() {
         claim_status: v.claim_status,
         promo_count: promoMap.get(v.id) || 0,
         event_count: eventMap.get(v.id) || 0,
-        area: guessArea(v.address),
+        area: guessNeighborhood(v.address),
       }));
 
       setVenues(enriched);
