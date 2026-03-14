@@ -100,12 +100,6 @@ export const PromosSection = ({
     { id: 'sunday', label: 'Sunday' }
   ];
 
-  // Build area options from JAKARTA_AREAS config
-  const areaFilterOptions = JAKARTA_AREAS.flatMap(region => [
-    { id: region.key, label: region.label, isRegion: true },
-    ...region.neighborhoods.map(n => ({ id: n, label: n, isRegion: false })),
-  ]);
-
   const drinkTypeOptions = [
     { id: 'all', label: 'All Types' },
     { id: 'Free Flow', label: 'Free Flow' },
