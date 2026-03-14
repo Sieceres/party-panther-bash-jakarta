@@ -445,7 +445,7 @@ export const VenueDetailPage = () => {
           venue={venue}
           open={showEditDialog}
           onOpenChange={setShowEditDialog}
-          onSaved={() => window.location.reload()}
+          onSaved={() => setFetchKey(k => k + 1)}
           isAdmin={isAdmin}
         />
       )}
