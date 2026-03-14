@@ -8,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { ExternalLink, AlertTriangle, MapPin, RefreshCw } from "lucide-react";
+import { ExternalLink, AlertTriangle, MapPin, RefreshCw, Download } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
 
 interface Venue {
   id: string;
@@ -112,6 +113,38 @@ export const AdminVenueAudit = () => {
     ? Math.round(((venues.length - incompleteVenues.length) / venues.length) * 100)
     : 0;
 
+  const exportToXlsx = (data: Record<string, any>[], filename: string) => {
+    if (data.length === 0) {
+      toast.warning("Nothing to export");
+      return;
+    }
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, `${filename}.xlsx`);
+    toast.success(`Exported ${data.length} rows`);
+  };
+
+  const exportMissing = () => {
+    const rows = incompleteVenues.map((v) => ({
+      Name: v.name,
+      Slug: v.slug || "",
+      Address: v.address || "",
+      "Missing Fields": v.missingFields.join(", "),
+      "Missing Count": v.missingFields.length,
+    }));
+    exportToXlsx(rows, "venues-missing-info");
+  };
+
+  const exportOutside = () => {
+    const rows = outsideJakarta.map((v) => ({
+      Name: v.name,
+      Slug: v.slug || "",
+      Address: v.address || "",
+    }));
+    exportToXlsx(rows, "venues-outside-jakarta");
+  };
+
   if (loading) {
     return <div className="text-center py-8">Loading venue audit...</div>;
   }
@@ -178,19 +211,24 @@ export const AdminVenueAudit = () => {
         </TabsList>
 
         <TabsContent value="missing">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm text-muted-foreground">Filter by:</span>
-            <Select value={missingFilter} onValueChange={setMissingFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All missing fields</SelectItem>
-                {REQUIRED_FIELDS.map((f) => (
-                  <SelectItem key={f.label} value={f.label}>{f.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Filter by:</span>
+              <Select value={missingFilter} onValueChange={setMissingFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All missing fields</SelectItem>
+                  {REQUIRED_FIELDS.map((f) => (
+                    <SelectItem key={f.label} value={f.label}>{f.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="outline" size="sm" onClick={exportMissing} disabled={incompleteVenues.length === 0}>
+              <Download className="w-4 h-4 mr-1" /> Export
+            </Button>
           </div>
           {incompleteVenues.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
@@ -245,6 +283,11 @@ export const AdminVenueAudit = () => {
         </TabsContent>
 
         <TabsContent value="outside">
+          <div className="flex justify-end mb-4">
+            <Button variant="outline" size="sm" onClick={exportOutside} disabled={outsideJakarta.length === 0}>
+              <Download className="w-4 h-4 mr-1" /> Export
+            </Button>
+          </div>
           {outsideJakarta.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
               All venues with addresses are within Jakarta! 🎉
