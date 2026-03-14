@@ -176,7 +176,6 @@ export default function MapExplorer() {
 
       if (eventsRes.data) {
         for (const e of eventsRes.data) {
-          if (e.venue_id) venueIdsWithContent.add(e.venue_id);
           const coords = resolveCoords(e.venue_latitude, e.venue_longitude, null);
           if (coords) {
             mapped.push({
