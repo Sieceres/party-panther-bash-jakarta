@@ -13,6 +13,7 @@ import { AdminAnalytics } from "./AdminAnalytics";
 import { AdminImageMigration } from "./AdminImageMigration";
 import { AdminVenueManagement } from "./AdminVenueManagement";
 import { AdminVenueEdits } from "./AdminVenueEdits";
+import { AdminVenueAudit } from "./AdminVenueAudit";
 import { AdminTagManagement } from "./AdminTagManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -646,7 +647,7 @@ export const AdminDashboard = () => {
 
         {/* Management Tabs */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-10">
+          <TabsList className="grid w-full grid-cols-11">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="promos">Promos</TabsTrigger>
@@ -654,6 +655,7 @@ export const AdminDashboard = () => {
             <TabsTrigger value="tags">Tags</TabsTrigger>
             <TabsTrigger value="venues">Venues</TabsTrigger>
             <TabsTrigger value="venue-edits">Edits</TabsTrigger>
+            <TabsTrigger value="venue-audit">Audit</TabsTrigger>
             <TabsTrigger value="receipts">Receipts</TabsTrigger>
             <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="migration">Migration</TabsTrigger>
@@ -861,6 +863,10 @@ export const AdminDashboard = () => {
 
           <TabsContent value="venue-edits" className="space-y-4">
             <AdminVenueEdits />
+          </TabsContent>
+
+          <TabsContent value="venue-audit" className="space-y-4">
+            <AdminVenueAudit />
           </TabsContent>
 
           <TabsContent value="database" className="space-y-4">
