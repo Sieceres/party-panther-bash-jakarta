@@ -126,6 +126,7 @@ export default function VenueDirectory() {
             </h1>
             <p className="text-muted-foreground">Discover bars, clubs, and restaurants across Jakarta</p>
           </div>
+          <AddVenueDialog onVenueAdded={fetchVenues} />
 
           {/* Controls */}
           <div className="flex flex-wrap gap-3 mb-6 items-center">
