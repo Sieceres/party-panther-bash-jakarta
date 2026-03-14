@@ -46,6 +46,23 @@ export const VenueDetailPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteVenue = async () => {
+    if (!venue?.id) return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase.from("venues").delete().eq("id", venue.id);
+      if (error) throw error;
+      toast({ title: "Venue deleted successfully" });
+      navigate("/venues");
+    } catch (error) {
+      console.error("Error deleting venue:", error);
+      toast({ title: "Error", description: "Failed to delete venue", variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
