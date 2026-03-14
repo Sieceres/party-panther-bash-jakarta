@@ -69,6 +69,7 @@ function isOutsideJakarta(venue: Venue): boolean {
 export const AdminVenueAudit = () => {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
+  const [missingFilter, setMissingFilter] = useState<string>("all");
 
   const fetchVenues = async () => {
     setLoading(true);
