@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { X, Navigation, ChevronUp, ChevronDown, Zap, Calendar } from "lucide-react";
+import { X, Navigation, ChevronUp, ChevronDown, Zap, Calendar, Store } from "lucide-react";
 
 interface MapItem {
   id: string;
@@ -10,7 +10,7 @@ interface MapItem {
   venue_name: string;
   lat: number;
   lng: number;
-  type: "promo" | "event";
+  type: "promo" | "event" | "venue";
   slug?: string | null;
   extra?: string;
 }
@@ -38,6 +38,12 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
 function formatDistance(km: number): string {
   if (km < 1) return `${Math.round(km * 1000)}m`;
   return `${km.toFixed(1)}km`;
+}
+
+function getItemIcon(type: string) {
+  if (type === "event") return <Calendar className="w-3.5 h-3.5" style={{ color: "#6366f1" }} />;
+  if (type === "promo") return <Zap className="w-3.5 h-3.5" style={{ color: "#10b981" }} />;
+  return <Store className="w-3.5 h-3.5" style={{ color: "#f59e0b" }} />;
 }
 
 export function NearbyPanel({ items, userLocation, radiusKm, onRadiusChange, onItemClick }: NearbyPanelProps) {
@@ -97,7 +103,7 @@ export function NearbyPanel({ items, userLocation, radiusKm, onRadiusChange, onI
             <ScrollArea className="max-h-60 border-t border-border">
               {sortedItems.length === 0 ? (
                 <div className="p-4 text-center text-sm text-muted-foreground">
-                  No venues found{radiusKm ? ` within ${radiusKm}km` : ""}
+                  No places found{radiusKm ? ` within ${radiusKm}km` : ""}
                 </div>
               ) : (
                 <div className="divide-y divide-border">
@@ -108,11 +114,7 @@ export function NearbyPanel({ items, userLocation, radiusKm, onRadiusChange, onI
                       className="w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors flex items-start gap-2"
                     >
                       <div className="mt-0.5">
-                        {item.type === "promo" ? (
-                          <Zap className="w-3.5 h-3.5" style={{ color: "#10b981" }} />
-                        ) : (
-                          <Calendar className="w-3.5 h-3.5" style={{ color: "#6366f1" }} />
-                        )}
+                        {getItemIcon(item.type)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate">{item.title}</div>
