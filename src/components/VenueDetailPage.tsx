@@ -48,6 +48,8 @@ export const VenueDetailPage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deletePromos, setDeletePromos] = useState(false);
+  const [deleteEvents, setDeleteEvents] = useState(false);
 
   const handleDeleteVenue = async () => {
     if (!venue?.id) return;
