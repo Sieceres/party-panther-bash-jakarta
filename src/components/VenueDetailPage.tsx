@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getVenueBySlugOrId } from "@/lib/slug-utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { VenueLocationEditor } from "./map/VenueLocationEditor";
+import { VenueEditDialog } from "./VenueEditDialog";
 
 interface Venue {
   id: string;
@@ -43,11 +43,13 @@ export const VenueDetailPage = () => {
   const [promos, setPromos] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showLocationEditor, setShowLocationEditor] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
+        setIsLoggedIn(true);
         supabase.from("user_roles").select("role").eq("user_id", user.id)
           .then(({ data }) => {
             setIsAdmin(data?.some(r => r.role === "admin" || r.role === "superadmin") || false);
@@ -189,8 +191,8 @@ export const VenueDetailPage = () => {
                   <h1 className="gradient-text leading-tight" style={{ fontSize: "clamp(1.5rem, 4vw + 0.5rem, 2.5rem)" }}>
                     {venue.name}
                   </h1>
-                  {isAdmin && venue.id && (
-                    <Button size="sm" variant="ghost" onClick={() => setShowLocationEditor(true)} className="text-muted-foreground hover:text-primary">
+                  {isLoggedIn && venue.id && (
+                    <Button size="sm" variant="ghost" onClick={() => setShowEditDialog(true)} className="text-muted-foreground hover:text-primary">
                       <Pencil className="w-4 h-4" />
                     </Button>
                   )}
@@ -339,15 +341,12 @@ export const VenueDetailPage = () => {
       </div>
 
       {venue.id && (
-        <VenueLocationEditor
-          venueId={venue.id}
-          venueName={venue.name}
-          currentLat={venue.latitude ? Number(venue.latitude) : null}
-          currentLng={venue.longitude ? Number(venue.longitude) : null}
-          currentAddress={venue.address}
-          open={showLocationEditor}
-          onOpenChange={setShowLocationEditor}
+        <VenueEditDialog
+          venue={venue}
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
           onSaved={() => window.location.reload()}
+          isAdmin={isAdmin}
         />
       )}
     </>
