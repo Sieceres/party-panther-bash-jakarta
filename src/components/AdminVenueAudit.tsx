@@ -178,9 +178,23 @@ export const AdminVenueAudit = () => {
         </TabsList>
 
         <TabsContent value="missing">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm text-muted-foreground">Filter by:</span>
+            <Select value={missingFilter} onValueChange={setMissingFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All missing fields</SelectItem>
+                {REQUIRED_FIELDS.map((f) => (
+                  <SelectItem key={f.label} value={f.label}>{f.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           {incompleteVenues.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
-              All venues have complete information! 🎉
+              {missingFilter === "all" ? "All venues have complete information! 🎉" : `No venues missing ${missingFilter}! 🎉`}
             </p>
           ) : (
             <div className="rounded-md border overflow-auto">
