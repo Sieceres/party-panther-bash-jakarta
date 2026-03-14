@@ -341,15 +341,12 @@ export const VenueDetailPage = () => {
       </div>
 
       {venue.id && (
-        <VenueLocationEditor
-          venueId={venue.id}
-          venueName={venue.name}
-          currentLat={venue.latitude ? Number(venue.latitude) : null}
-          currentLng={venue.longitude ? Number(venue.longitude) : null}
-          currentAddress={venue.address}
-          open={showLocationEditor}
-          onOpenChange={setShowLocationEditor}
+        <VenueEditDialog
+          venue={venue}
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
           onSaved={() => window.location.reload()}
+          isAdmin={isAdmin}
         />
       )}
     </>
