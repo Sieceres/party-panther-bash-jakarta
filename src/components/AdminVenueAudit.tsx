@@ -283,6 +283,11 @@ export const AdminVenueAudit = () => {
         </TabsContent>
 
         <TabsContent value="outside">
+          <div className="flex justify-end mb-4">
+            <Button variant="outline" size="sm" onClick={exportOutside} disabled={outsideJakarta.length === 0}>
+              <Download className="w-4 h-4 mr-1" /> Export
+            </Button>
+          </div>
           {outsideJakarta.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
               All venues with addresses are within Jakarta! 🎉
