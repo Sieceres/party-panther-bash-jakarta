@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getVenueBySlugOrId } from "@/lib/slug-utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { VenueLocationEditor } from "./map/VenueLocationEditor";
+import { VenueEditDialog } from "./VenueEditDialog";
 
 interface Venue {
   id: string;
