@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Header } from "@/components/Header";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { supabase } from "@/integrations/supabase/client";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { JAKARTA_AREAS } from "@/lib/area-config";
+import { JAKARTA_AREAS, areaMatchesFilter, getAllNeighborhoods } from "@/lib/area-config";
 import { MapPin, Search, Store, Grid3X3, Map as MapIcon, Instagram, Globe, ArrowUpDown } from "lucide-react";
 import L from "leaflet";
 
@@ -79,7 +79,7 @@ export default function VenueDirectory() {
         claim_status: v.claim_status,
         promo_count: promoMap.get(v.id) || 0,
         event_count: eventMap.get(v.id) || 0,
-        area: guessArea(v.address),
+        area: guessNeighborhood(v.address),
       }));
 
       setVenues(enriched);
@@ -88,14 +88,13 @@ export default function VenueDirectory() {
     fetchVenues();
   }, []);
 
-  // Simple area guess from address string
-  function guessArea(address: string | null): string | null {
+  // Guess neighborhood from address string (returns neighborhood name or null)
+  function guessNeighborhood(address: string | null): string | null {
     if (!address) return null;
     const lower = address.toLowerCase();
     for (const region of JAKARTA_AREAS) {
-      if (lower.includes(region.label.toLowerCase().replace("jakarta", "").trim())) return region.key;
       for (const n of region.neighborhoods) {
-        if (lower.includes(n.toLowerCase())) return region.key;
+        if (lower.includes(n.toLowerCase())) return n;
       }
     }
     return null;
@@ -108,7 +107,7 @@ export default function VenueDirectory() {
       list = list.filter(v => v.name.toLowerCase().includes(q) || v.address?.toLowerCase().includes(q));
     }
     if (areaFilter !== "all") {
-      list = list.filter(v => v.area === areaFilter);
+      list = list.filter(v => areaMatchesFilter(v.area, [areaFilter]));
     }
     switch (sort) {
       case "name-asc": list = [...list].sort((a, b) => a.name.localeCompare(b.name)); break;
@@ -146,13 +145,22 @@ export default function VenueDirectory() {
             </div>
 
             <Select value={areaFilter} onValueChange={setAreaFilter}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="All areas" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All areas</SelectItem>
-                {JAKARTA_AREAS.map(a => (
-                  <SelectItem key={a.key} value={a.key}>{a.label}</SelectItem>
+                {JAKARTA_AREAS.map(region => (
+                  <React.Fragment key={region.key}>
+                    <SelectItem value={region.key} className="font-semibold">
+                      {region.label}
+                    </SelectItem>
+                    {region.neighborhoods.map(n => (
+                      <SelectItem key={n} value={n} className="pl-8 text-sm">
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </React.Fragment>
                 ))}
               </SelectContent>
             </Select>
