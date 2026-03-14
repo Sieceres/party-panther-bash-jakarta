@@ -188,7 +188,7 @@ export const VenueDetailPage = () => {
       }
     };
     fetchVenue();
-  }, [id, toast]);
+  }, [id, toast, fetchKey]);
 
   if (loading) {
     return (
