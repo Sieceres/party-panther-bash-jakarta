@@ -52,6 +52,11 @@ export const VenueDetailPage = () => {
     if (!venue?.id) return;
     setDeleting(true);
     try {
+      // Unlink related promos and events first to avoid FK constraint errors
+      await supabase.from("promos").update({ venue_id: null }).eq("venue_id", venue.id);
+      await supabase.from("events").update({ venue_id: null }).eq("venue_id", venue.id);
+      await supabase.from("venue_edits").delete().eq("venue_id", venue.id);
+      
       const { error } = await supabase.from("venues").delete().eq("id", venue.id);
       if (error) throw error;
       toast({ title: "Venue deleted successfully" });
