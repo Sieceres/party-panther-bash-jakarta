@@ -87,8 +87,9 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
 
       // Auto-geocode if address changed but lat/lng weren't manually updated
       if ("address" in changes && !("latitude" in changes) && !("longitude" in changes) && changes.address) {
+        toast.info("Geocoding new address…");
         try {
-          const { searchPlaces, formatAddress } = await import("@/lib/photon");
+          const { searchPlaces } = await import("@/lib/photon");
           const results = await searchPlaces(changes.address + " Jakarta");
           if (results.length > 0) {
             const [lng, lat] = results[0].geometry.coordinates;
@@ -96,10 +97,13 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
             changes.longitude = lng;
             previousValues.latitude = venue.latitude ?? null;
             previousValues.longitude = venue.longitude ?? null;
-            toast.info("Auto-geocoded coordinates from new address");
+            toast.success(`Geocoded to ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+          } else {
+            toast.warning("Geocoding returned no results — saving without coordinates");
           }
         } catch (e) {
-          console.warn("Auto-geocode failed, saving without coordinates:", e);
+          console.warn("Auto-geocode failed:", e);
+          toast.error("Geocoding failed — saving without updated coordinates");
         }
       }
 
