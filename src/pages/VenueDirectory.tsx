@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AreaFilterList } from "@/components/ui/area-filter";
 import { Header } from "@/components/Header";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { supabase } from "@/integrations/supabase/client";
@@ -144,26 +146,24 @@ export default function VenueDirectory() {
               />
             </div>
 
-            <Select value={areaFilter} onValueChange={setAreaFilter}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="All areas" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All areas</SelectItem>
-                {JAKARTA_AREAS.map(region => (
-                  <React.Fragment key={region.key}>
-                    <SelectItem value={region.key} className="font-semibold">
-                      {region.label}
-                    </SelectItem>
-                    {region.neighborhoods.map(n => (
-                      <SelectItem key={n} value={n} className="pl-8 text-sm">
-                        {n}
-                      </SelectItem>
-                    ))}
-                  </React.Fragment>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-[200px] justify-between">
+                  <MapPin className="w-3.5 h-3.5 mr-1.5" />
+                  {areaFilter === "all" ? "All areas" : areaFilter}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[240px] p-0" align="start">
+                <AreaFilterList
+                  selectedValues={areaFilter === "all" ? [] : [areaFilter]}
+                  onToggle={(val) => setAreaFilter(val === areaFilter ? "all" : val)}
+                  showAll
+                  allChecked={areaFilter === "all"}
+                  onAllToggle={() => setAreaFilter("all")}
+                  singleSelect
+                />
+              </PopoverContent>
+            </Popover>
 
             <Select value={sort} onValueChange={v => setSort(v as SortOption)}>
               <SelectTrigger className="w-[160px]">
