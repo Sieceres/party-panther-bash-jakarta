@@ -271,6 +271,18 @@ export const VenueDetailPage = () => {
                                   </ul>
                                 </div>
                               )}
+                              {promos.length > 0 && (
+                                <label className="flex items-center gap-2 pt-1 cursor-pointer">
+                                  <Checkbox checked={deletePromos} onCheckedChange={(v) => setDeletePromos(!!v)} />
+                                  <span className="text-sm text-destructive font-medium">Also delete {promos.length} promo{promos.length !== 1 ? "s" : ""}</span>
+                                </label>
+                              )}
+                              {events.length > 0 && (
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <Checkbox checked={deleteEvents} onCheckedChange={(v) => setDeleteEvents(!!v)} />
+                                  <span className="text-sm text-destructive font-medium">Also delete {events.length} event{events.length !== 1 ? "s" : ""}</span>
+                                </label>
+                              )}
                             </div>
                           </AlertDialogDescription>
                         </AlertDialogHeader>
