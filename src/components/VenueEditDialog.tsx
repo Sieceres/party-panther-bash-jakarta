@@ -85,6 +85,24 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Auto-geocode if address changed but lat/lng weren't manually updated
+      if ("address" in changes && !("latitude" in changes) && !("longitude" in changes) && changes.address) {
+        try {
+          const { searchPlaces, formatAddress } = await import("@/lib/photon");
+          const results = await searchPlaces(changes.address + " Jakarta");
+          if (results.length > 0) {
+            const [lng, lat] = results[0].geometry.coordinates;
+            changes.latitude = lat;
+            changes.longitude = lng;
+            previousValues.latitude = venue.latitude ?? null;
+            previousValues.longitude = venue.longitude ?? null;
+            toast.info("Auto-geocoded coordinates from new address");
+          }
+        } catch (e) {
+          console.warn("Auto-geocode failed, saving without coordinates:", e);
+        }
+      }
+
       if (isAdmin) {
         // Direct edit - apply changes immediately
         const { error } = await supabase
