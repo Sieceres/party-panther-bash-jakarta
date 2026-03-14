@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil, Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { GoogleMap } from "./GoogleMap";
 import { SpinningPaws } from "./ui/spinning-paws";
 import { Header } from "./Header";
@@ -47,14 +48,34 @@ export const VenueDetailPage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deletePromos, setDeletePromos] = useState(false);
+  const [deleteEvents, setDeleteEvents] = useState(false);
 
   const handleDeleteVenue = async () => {
     if (!venue?.id) return;
     setDeleting(true);
     try {
-      // Unlink related promos and events first to avoid FK constraint errors
-      await supabase.from("promos").update({ venue_id: null }).eq("venue_id", venue.id);
-      await supabase.from("events").update({ venue_id: null }).eq("venue_id", venue.id);
+      // Handle related promos
+      if (deletePromos && promos.length > 0) {
+        for (const p of promos) {
+          await supabase.from("promo_reviews").delete().eq("promo_id", p.id);
+          await supabase.from("promo_comments").delete().eq("promo_id", p.id);
+        }
+        await supabase.from("promos").delete().eq("venue_id", venue.id);
+      } else {
+        await supabase.from("promos").update({ venue_id: null }).eq("venue_id", venue.id);
+      }
+      // Handle related events
+      if (deleteEvents && events.length > 0) {
+        for (const e of events) {
+          await supabase.from("event_attendees").delete().eq("event_id", e.id);
+          await supabase.from("event_comments").delete().eq("event_id", e.id);
+          await supabase.from("event_tag_assignments").delete().eq("event_id", e.id);
+        }
+        await supabase.from("events").delete().eq("venue_id", venue.id);
+      } else {
+        await supabase.from("events").update({ venue_id: null }).eq("venue_id", venue.id);
+      }
       await supabase.from("venue_edits").delete().eq("venue_id", venue.id);
       
       const { error } = await supabase.from("venues").delete().eq("id", venue.id);
@@ -249,6 +270,18 @@ export const VenueDetailPage = () => {
                                     {events.length > 5 && <li>…and {events.length - 5} more</li>}
                                   </ul>
                                 </div>
+                              )}
+                              {promos.length > 0 && (
+                                <label className="flex items-center gap-2 pt-1 cursor-pointer">
+                                  <Checkbox checked={deletePromos} onCheckedChange={(v) => setDeletePromos(!!v)} />
+                                  <span className="text-sm text-destructive font-medium">Also delete {promos.length} promo{promos.length !== 1 ? "s" : ""}</span>
+                                </label>
+                              )}
+                              {events.length > 0 && (
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <Checkbox checked={deleteEvents} onCheckedChange={(v) => setDeleteEvents(!!v)} />
+                                  <span className="text-sm text-destructive font-medium">Also delete {events.length} event{events.length !== 1 ? "s" : ""}</span>
+                                </label>
                               )}
                             </div>
                           </AlertDialogDescription>
