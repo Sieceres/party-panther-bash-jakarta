@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,7 @@ function isOutsideJakarta(venue: Venue): boolean {
 export const AdminVenueAudit = () => {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
+  const [missingFilter, setMissingFilter] = useState<string>("all");
 
   const fetchVenues = async () => {
     setLoading(true);
@@ -96,8 +98,9 @@ export const AdminVenueAudit = () => {
       venues
         .map((v) => ({ ...v, missingFields: getMissingFields(v) }))
         .filter((v) => v.missingFields.length > 0)
+        .filter((v) => missingFilter === "all" || v.missingFields.includes(missingFilter))
         .sort((a, b) => b.missingFields.length - a.missingFields.length),
-    [venues]
+    [venues, missingFilter]
   );
 
   const outsideJakarta = useMemo(
@@ -175,9 +178,23 @@ export const AdminVenueAudit = () => {
         </TabsList>
 
         <TabsContent value="missing">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm text-muted-foreground">Filter by:</span>
+            <Select value={missingFilter} onValueChange={setMissingFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All missing fields</SelectItem>
+                {REQUIRED_FIELDS.map((f) => (
+                  <SelectItem key={f.label} value={f.label}>{f.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           {incompleteVenues.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
-              All venues have complete information! 🎉
+              {missingFilter === "all" ? "All venues have complete information! 🎉" : `No venues missing ${missingFilter}! 🎉`}
             </p>
           ) : (
             <div className="rounded-md border overflow-auto">
