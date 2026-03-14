@@ -104,9 +104,10 @@ export default function VenueDirectory() {
     if (areaFilter !== "all") {
       list = list.filter(v => areaMatchesFilter(v.area, [areaFilter]));
     }
+    const sortName = (name: string) => name.replace(/^the\s+/i, "");
     switch (sort) {
-      case "name-asc": list = [...list].sort((a, b) => a.name.localeCompare(b.name)); break;
-      case "name-desc": list = [...list].sort((a, b) => b.name.localeCompare(a.name)); break;
+      case "name-asc": list = [...list].sort((a, b) => sortName(a.name).localeCompare(sortName(b.name))); break;
+      case "name-desc": list = [...list].sort((a, b) => sortName(b.name).localeCompare(sortName(a.name))); break;
       case "promos": list = [...list].sort((a, b) => b.promo_count - a.promo_count); break;
       case "events": list = [...list].sort((a, b) => b.event_count - a.event_count); break;
     }
