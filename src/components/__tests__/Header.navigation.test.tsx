@@ -127,8 +127,6 @@ describe("Header Navigation", () => {
       ["venues", "/venues"],
       ["admin", "/admin"],
       ["profile", "/profile"],
-      ["instagram", "/instagram-generator"],
-      ["import", "/import"],
       ["map", "/map"],
     ];
 
