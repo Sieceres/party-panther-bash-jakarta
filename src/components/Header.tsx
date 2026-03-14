@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Instagram, FileUp, Map, Store } from "lucide-react";
+import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Map, Store } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
@@ -98,8 +98,6 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
     venues: '/venues',
     admin: '/admin',
     profile: '/profile',
-    instagram: '/instagram-generator',
-    import: '/import',
     map: '/map',
   };
 
@@ -108,9 +106,7 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
     { id: 'promos', label: 'Promos', icon: Zap, hidden: false },
     { id: 'events', label: 'Events', icon: Calendar, hidden: false },
     { id: 'venues', label: 'Venues', icon: Store, hidden: false },
-    { id: 'instagram', label: 'IG Creator', icon: Instagram, hidden: !isAdmin },
     { id: 'map', label: 'Map', icon: Map, hidden: false },
-    { id: 'import', label: 'Import', icon: FileUp, hidden: !isAdmin },
     { id: 'profile', label: 'Profile', icon: User, hidden: false },
     { id: 'admin', label: 'Admin', icon: Shield, hidden: !isAdmin }
   ];

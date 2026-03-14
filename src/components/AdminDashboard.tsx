@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw, Instagram, MapPin, Image, Phone } from "lucide-react";
+import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw, Instagram, MapPin, Image, Phone, FileUp } from "lucide-react";
 import { Header } from "./Header";
 import { AdminReceiptManagement } from "./AdminReceiptManagement";
 import { AdminAnalytics } from "./AdminAnalytics";
@@ -647,7 +647,7 @@ export const AdminDashboard = () => {
 
         {/* Management Tabs */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-11">
+          <TabsList className="grid w-full grid-cols-13">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="promos">Promos</TabsTrigger>
@@ -659,6 +659,8 @@ export const AdminDashboard = () => {
             <TabsTrigger value="receipts">Receipts</TabsTrigger>
             <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="migration">Migration</TabsTrigger>
+            <TabsTrigger value="ig-creator">IG Creator</TabsTrigger>
+            <TabsTrigger value="import">Import</TabsTrigger>
           </TabsList>
 
           <TabsContent value="analytics">
@@ -1177,6 +1179,42 @@ export const AdminDashboard = () => {
 
           <TabsContent value="migration" className="space-y-4">
             <AdminImageMigration />
+          </TabsContent>
+
+          <TabsContent value="ig-creator" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Instagram className="w-5 h-5" />
+                  Instagram Post Generator
+                </CardTitle>
+                <CardDescription>Create and manage Instagram posts for events and promos</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => navigate('/instagram-generator')} className="flex items-center gap-2">
+                  <Instagram className="w-4 h-4" />
+                  Open IG Creator
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="import" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileUp className="w-5 h-5" />
+                  Batch Import
+                </CardTitle>
+                <CardDescription>Import promos, events, or contacts from images and spreadsheets</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => navigate('/import')} className="flex items-center gap-2">
+                  <FileUp className="w-4 h-4" />
+                  Open Import Tool
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="tags" className="space-y-4">

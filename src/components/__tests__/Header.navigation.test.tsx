@@ -46,8 +46,6 @@ const ROUTE_MAP: Record<string, string> = {
   venues: "/venues",
   admin: "/admin",
   profile: "/profile",
-  instagram: "/instagram-generator",
-  import: "/import",
   map: "/map",
 };
 
@@ -71,7 +69,6 @@ describe("Header Navigation", () => {
     { label: "Events", route: "/events" },
     { label: "Venues", route: "/venues" },
     { label: "Map", route: "/map" },
-    { label: "Import", route: "/import" },
   ];
 
   publicNavItems.forEach(({ label, route }) => {
@@ -130,8 +127,6 @@ describe("Header Navigation", () => {
       ["venues", "/venues"],
       ["admin", "/admin"],
       ["profile", "/profile"],
-      ["instagram", "/instagram-generator"],
-      ["import", "/import"],
       ["map", "/map"],
     ];
 
