@@ -647,7 +647,7 @@ export const AdminDashboard = () => {
 
         {/* Management Tabs */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-11">
+          <TabsList className="grid w-full grid-cols-13">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="promos">Promos</TabsTrigger>
@@ -659,6 +659,8 @@ export const AdminDashboard = () => {
             <TabsTrigger value="receipts">Receipts</TabsTrigger>
             <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="migration">Migration</TabsTrigger>
+            <TabsTrigger value="ig-creator">IG Creator</TabsTrigger>
+            <TabsTrigger value="import">Import</TabsTrigger>
           </TabsList>
 
           <TabsContent value="analytics">
