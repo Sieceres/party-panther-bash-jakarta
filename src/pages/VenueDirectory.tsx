@@ -45,51 +45,43 @@ export default function VenueDirectory() {
 
   usePageTitle("Venues");
 
-  useEffect(() => {
-    const fetchVenues = async () => {
-      // Fetch venues
-      const { data: venueData } = await supabase.from("venues").select("*").order("name");
-      if (!venueData) { setLoading(false); return; }
+  const fetchVenues = async () => {
+    const { data: venueData } = await supabase.from("venues").select("*").order("name");
+    if (!venueData) { setLoading(false); return; }
 
-      // Fetch promo and event counts per venue
-      const { data: promoCounts } = await supabase
-        .from("promos")
-        .select("venue_id");
-      const { data: eventCounts } = await supabase
-        .from("events")
-        .select("venue_id");
+    const { data: promoCounts } = await supabase.from("promos").select("venue_id");
+    const { data: eventCounts } = await supabase.from("events").select("venue_id");
 
-      const promoMap = new Map<string, number>();
-      promoCounts?.forEach(p => {
-        if (p.venue_id) promoMap.set(p.venue_id, (promoMap.get(p.venue_id) || 0) + 1);
-      });
-      const eventMap = new Map<string, number>();
-      eventCounts?.forEach(e => {
-        if (e.venue_id) eventMap.set(e.venue_id, (eventMap.get(e.venue_id) || 0) + 1);
-      });
+    const promoMap = new Map<string, number>();
+    promoCounts?.forEach(p => {
+      if (p.venue_id) promoMap.set(p.venue_id, (promoMap.get(p.venue_id) || 0) + 1);
+    });
+    const eventMap = new Map<string, number>();
+    eventCounts?.forEach(e => {
+      if (e.venue_id) eventMap.set(e.venue_id, (eventMap.get(e.venue_id) || 0) + 1);
+    });
 
-      // Determine area from address or coordinates
-      const enriched: VenueRow[] = venueData.map(v => ({
-        id: v.id,
-        name: v.name,
-        slug: v.slug,
-        address: v.address,
-        latitude: v.latitude ? Number(v.latitude) : null,
-        longitude: v.longitude ? Number(v.longitude) : null,
-        image_url: v.image_url,
-        instagram: v.instagram,
-        website: v.website,
-        claim_status: v.claim_status,
-        promo_count: promoMap.get(v.id) || 0,
-        event_count: eventMap.get(v.id) || 0,
-        area: guessNeighborhood(v.address),
-      }));
+    const enriched: VenueRow[] = venueData.map(v => ({
+      id: v.id,
+      name: v.name,
+      slug: v.slug,
+      address: v.address,
+      latitude: v.latitude ? Number(v.latitude) : null,
+      longitude: v.longitude ? Number(v.longitude) : null,
+      image_url: v.image_url,
+      instagram: v.instagram,
+      website: v.website,
+      claim_status: v.claim_status,
+      promo_count: promoMap.get(v.id) || 0,
+      event_count: eventMap.get(v.id) || 0,
+      area: guessNeighborhood(v.address),
+    }));
 
-      setVenues(enriched);
-      setLoading(false);
-    };
-    fetchVenues();
-  }, []);
+    setVenues(enriched);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchVenues(); }, []);
 
   // Guess neighborhood from address string (returns neighborhood name or null)
   function guessNeighborhood(address: string | null): string | null {
