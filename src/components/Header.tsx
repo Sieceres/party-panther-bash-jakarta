@@ -98,8 +98,6 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
     venues: '/venues',
     admin: '/admin',
     profile: '/profile',
-    instagram: '/instagram-generator',
-    import: '/import',
     map: '/map',
   };
 
