@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Instagram, FileUp, Map, Store } from "lucide-react";
+import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Map, Store } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
