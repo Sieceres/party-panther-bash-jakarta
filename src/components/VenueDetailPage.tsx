@@ -229,8 +229,28 @@ export const VenueDetailPage = () => {
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete venue?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete "{venue.name}" and cannot be undone. Promos and events linked to this venue will not be deleted.
+                          <AlertDialogDescription asChild>
+                            <div className="space-y-3">
+                              <p>This will permanently delete "{venue.name}" and cannot be undone. Promos and events linked to this venue will be unlinked but not deleted.</p>
+                              {promos.length > 0 && (
+                                <div>
+                                  <p className="font-medium text-foreground">Active promos ({promos.length}):</p>
+                                  <ul className="list-disc pl-5 text-sm mt-1 space-y-0.5">
+                                    {promos.slice(0, 5).map(p => <li key={p.id}>{p.title}</li>)}
+                                    {promos.length > 5 && <li>…and {promos.length - 5} more</li>}
+                                  </ul>
+                                </div>
+                              )}
+                              {events.length > 0 && (
+                                <div>
+                                  <p className="font-medium text-foreground">Active events ({events.length}):</p>
+                                  <ul className="list-disc pl-5 text-sm mt-1 space-y-0.5">
+                                    {events.slice(0, 5).map(e => <li key={e.id}>{e.title}</li>)}
+                                    {events.length > 5 && <li>…and {events.length - 5} more</li>}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
