@@ -159,12 +159,8 @@ export default function MapExplorer() {
 
       const mapped: MapItem[] = [];
 
-      // Track venue IDs that have promos or events
-      const venueIdsWithContent = new Set<string>();
-
       if (promosRes.data) {
         for (const p of promosRes.data) {
-          if (p.venue_id) venueIdsWithContent.add(p.venue_id);
           const coords = resolveCoords(p.venue_latitude, p.venue_longitude, p.area);
           if (coords) {
             mapped.push({
