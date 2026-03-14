@@ -208,60 +208,21 @@ export const PromosSection = ({
                 <SelectValue placeholder={getFilterDisplayText(areaFilter, "All areas")} />
               </SelectTrigger>
               <SelectContent>
-                <div className="p-2 space-y-2 max-h-64 overflow-y-auto">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="all-areas"
-                      checked={areaFilter.includes("all")}
-                      onCheckedChange={(checked) => {
-                        if (checked) onAreaFilterChange(["all"]);
-                      }}
-                    />
-                    <Label htmlFor="all-areas" className="text-sm">All areas</Label>
-                  </div>
-                  {JAKARTA_AREAS.map((region) => (
-                    <div key={region.key} className="space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`area-${region.key}`}
-                          checked={areaFilter.includes(region.key)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              const newFilters = areaFilter.filter(f => f !== "all");
-                              onAreaFilterChange([...newFilters, region.key]);
-                            } else {
-                              const newFilters = areaFilter.filter(f => f !== region.key);
-                              onAreaFilterChange(newFilters.length === 0 ? ["all"] : newFilters);
-                            }
-                          }}
-                        />
-                        <Label htmlFor={`area-${region.key}`} className="text-sm font-semibold">
-                          {region.label}
-                        </Label>
-                      </div>
-                      {region.neighborhoods.map((hood) => (
-                        <div key={hood} className="flex items-center space-x-2 pl-5">
-                          <Checkbox
-                            id={`area-${hood}`}
-                            checked={areaFilter.includes(hood)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                const newFilters = areaFilter.filter(f => f !== "all");
-                                onAreaFilterChange([...newFilters, hood]);
-                              } else {
-                                const newFilters = areaFilter.filter(f => f !== hood);
-                                onAreaFilterChange(newFilters.length === 0 ? ["all"] : newFilters);
-                              }
-                            }}
-                          />
-                          <Label htmlFor={`area-${hood}`} className="text-sm">
-                            {hood}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
+                <AreaFilterList
+                  selectedValues={areaFilter.includes("all") ? [] : areaFilter}
+                  onToggle={(val) => {
+                    const current = areaFilter.filter(f => f !== "all");
+                    if (current.includes(val)) {
+                      const next = current.filter(f => f !== val);
+                      onAreaFilterChange(next.length === 0 ? ["all"] : next);
+                    } else {
+                      onAreaFilterChange([...current, val]);
+                    }
+                  }}
+                  showAll
+                  allChecked={areaFilter.includes("all")}
+                  onAllToggle={() => onAreaFilterChange(["all"])}
+                />
               </SelectContent>
             </Select>
           </div>
