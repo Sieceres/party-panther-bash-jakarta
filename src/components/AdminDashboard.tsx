@@ -647,7 +647,7 @@ export const AdminDashboard = () => {
 
         {/* Management Tabs */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-13">
+          <TabsList className="flex w-full flex-wrap h-auto gap-1">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="promos">Promos</TabsTrigger>
