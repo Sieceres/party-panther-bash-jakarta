@@ -113,6 +113,38 @@ export const AdminVenueAudit = () => {
     ? Math.round(((venues.length - incompleteVenues.length) / venues.length) * 100)
     : 0;
 
+  const exportToXlsx = (data: Record<string, any>[], filename: string) => {
+    if (data.length === 0) {
+      toast.warning("Nothing to export");
+      return;
+    }
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, `${filename}.xlsx`);
+    toast.success(`Exported ${data.length} rows`);
+  };
+
+  const exportMissing = () => {
+    const rows = incompleteVenues.map((v) => ({
+      Name: v.name,
+      Slug: v.slug || "",
+      Address: v.address || "",
+      "Missing Fields": v.missingFields.join(", "),
+      "Missing Count": v.missingFields.length,
+    }));
+    exportToXlsx(rows, "venues-missing-info");
+  };
+
+  const exportOutside = () => {
+    const rows = outsideJakarta.map((v) => ({
+      Name: v.name,
+      Slug: v.slug || "",
+      Address: v.address || "",
+    }));
+    exportToXlsx(rows, "venues-outside-jakarta");
+  };
+
   if (loading) {
     return <div className="text-center py-8">Loading venue audit...</div>;
   }
