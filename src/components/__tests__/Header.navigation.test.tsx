@@ -69,7 +69,6 @@ describe("Header Navigation", () => {
     { label: "Events", route: "/events" },
     { label: "Venues", route: "/venues" },
     { label: "Map", route: "/map" },
-    { label: "Import", route: "/import" },
   ];
 
   publicNavItems.forEach(({ label, route }) => {
