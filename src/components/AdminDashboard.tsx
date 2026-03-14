@@ -655,6 +655,7 @@ export const AdminDashboard = () => {
             <TabsTrigger value="tags">Tags</TabsTrigger>
             <TabsTrigger value="venues">Venues</TabsTrigger>
             <TabsTrigger value="venue-edits">Edits</TabsTrigger>
+            <TabsTrigger value="venue-audit">Audit</TabsTrigger>
             <TabsTrigger value="receipts">Receipts</TabsTrigger>
             <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="migration">Migration</TabsTrigger>
