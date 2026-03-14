@@ -211,19 +211,24 @@ export const AdminVenueAudit = () => {
         </TabsList>
 
         <TabsContent value="missing">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm text-muted-foreground">Filter by:</span>
-            <Select value={missingFilter} onValueChange={setMissingFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All missing fields</SelectItem>
-                {REQUIRED_FIELDS.map((f) => (
-                  <SelectItem key={f.label} value={f.label}>{f.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Filter by:</span>
+              <Select value={missingFilter} onValueChange={setMissingFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All missing fields</SelectItem>
+                  {REQUIRED_FIELDS.map((f) => (
+                    <SelectItem key={f.label} value={f.label}>{f.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="outline" size="sm" onClick={exportMissing} disabled={incompleteVenues.length === 0}>
+              <Download className="w-4 h-4 mr-1" /> Export
+            </Button>
           </div>
           {incompleteVenues.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
