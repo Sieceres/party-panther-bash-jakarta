@@ -88,14 +88,13 @@ export default function VenueDirectory() {
     fetchVenues();
   }, []);
 
-  // Simple area guess from address string
-  function guessArea(address: string | null): string | null {
+  // Guess neighborhood from address string (returns neighborhood name or null)
+  function guessNeighborhood(address: string | null): string | null {
     if (!address) return null;
     const lower = address.toLowerCase();
     for (const region of JAKARTA_AREAS) {
-      if (lower.includes(region.label.toLowerCase().replace("jakarta", "").trim())) return region.key;
       for (const n of region.neighborhoods) {
-        if (lower.includes(n.toLowerCase())) return region.key;
+        if (lower.includes(n.toLowerCase())) return n;
       }
     }
     return null;
