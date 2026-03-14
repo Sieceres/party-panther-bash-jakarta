@@ -40,6 +40,7 @@ export const VenueDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [fetchKey, setFetchKey] = useState(0);
   const [venue, setVenue] = useState<Venue | null>(null);
   const [loading, setLoading] = useState(true);
   const [promos, setPromos] = useState<any[]>([]);
@@ -187,7 +188,7 @@ export const VenueDetailPage = () => {
       }
     };
     fetchVenue();
-  }, [id, toast]);
+  }, [id, toast, fetchKey]);
 
   if (loading) {
     return (
@@ -444,7 +445,7 @@ export const VenueDetailPage = () => {
           venue={venue}
           open={showEditDialog}
           onOpenChange={setShowEditDialog}
-          onSaved={() => window.location.reload()}
+          onSaved={() => setFetchKey(k => k + 1)}
           isAdmin={isAdmin}
         />
       )}
