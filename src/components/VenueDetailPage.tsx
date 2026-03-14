@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil } from "lucide-react";
+import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { GoogleMap } from "./GoogleMap";
 import { SpinningPaws } from "./ui/spinning-paws";
 import { Header } from "./Header";
@@ -45,6 +46,23 @@ export const VenueDetailPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteVenue = async () => {
+    if (!venue?.id) return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase.from("venues").delete().eq("id", venue.id);
+      if (error) throw error;
+      toast({ title: "Venue deleted successfully" });
+      navigate("/venues");
+    } catch (error) {
+      console.error("Error deleting venue:", error);
+      toast({ title: "Error", description: "Failed to delete venue", variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -195,6 +213,29 @@ export const VenueDetailPage = () => {
                     <Button size="sm" variant="ghost" onClick={() => setShowEditDialog(true)} className="text-muted-foreground hover:text-primary">
                       <Pencil className="w-4 h-4" />
                     </Button>
+                  )}
+                  {isAdmin && venue.id && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete venue?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently delete "{venue.name}" and cannot be undone. Promos and events linked to this venue will not be deleted.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDeleteVenue} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            {deleting ? "Deleting..." : "Delete"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
                 </div>
                 {venue.claim_status === "approved" && (
