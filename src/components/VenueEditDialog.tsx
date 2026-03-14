@@ -99,11 +99,11 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
             previousValues.longitude = venue.longitude ?? null;
             toast.success(`Geocoded to ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
           } else {
-            toast.warning("Geocoding returned no results — saving without coordinates");
+            toast.warning("Geocoding returned no results — saving without coordinates", { duration: 5000 });
           }
         } catch (e) {
           console.warn("Auto-geocode failed:", e);
-          toast.error("Geocoding failed — saving without updated coordinates");
+          toast.error("Geocoding failed — saving without updated coordinates", { duration: 5000 });
         }
       }
 
