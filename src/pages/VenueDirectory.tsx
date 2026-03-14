@@ -119,14 +119,16 @@ export default function VenueDirectory() {
       <div className="pt-20 px-4 pb-12">
         <div className="container mx-auto max-w-6xl">
           {/* Page Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold gradient-text mb-2 flex items-center gap-3">
-              <Store className="w-8 h-8 text-primary" />
-              Venue Directory
-            </h1>
-            <p className="text-muted-foreground">Discover bars, clubs, and restaurants across Jakarta</p>
+          <div className="mb-8 flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold gradient-text mb-2 flex items-center gap-3">
+                <Store className="w-8 h-8 text-primary" />
+                Venue Directory
+              </h1>
+              <p className="text-muted-foreground">Discover bars, clubs, and restaurants across Jakarta</p>
+            </div>
+            <AddVenueDialog onVenueAdded={fetchVenues} />
           </div>
-          <AddVenueDialog onVenueAdded={fetchVenues} />
 
           {/* Controls */}
           <div className="flex flex-wrap gap-3 mb-6 items-center">
