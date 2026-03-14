@@ -46,8 +46,6 @@ const ROUTE_MAP: Record<string, string> = {
   venues: "/venues",
   admin: "/admin",
   profile: "/profile",
-  instagram: "/instagram-generator",
-  import: "/import",
   map: "/map",
 };
 
