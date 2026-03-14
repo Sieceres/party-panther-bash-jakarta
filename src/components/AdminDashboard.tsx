@@ -13,6 +13,7 @@ import { AdminAnalytics } from "./AdminAnalytics";
 import { AdminImageMigration } from "./AdminImageMigration";
 import { AdminVenueManagement } from "./AdminVenueManagement";
 import { AdminVenueEdits } from "./AdminVenueEdits";
+import { AdminVenueAudit } from "./AdminVenueAudit";
 import { AdminTagManagement } from "./AdminTagManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
