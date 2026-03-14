@@ -43,7 +43,8 @@ export const VenueDetailPage = () => {
   const [promos, setPromos] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showLocationEditor, setShowLocationEditor] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
