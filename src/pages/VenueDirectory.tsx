@@ -145,13 +145,22 @@ export default function VenueDirectory() {
             </div>
 
             <Select value={areaFilter} onValueChange={setAreaFilter}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="All areas" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All areas</SelectItem>
-                {JAKARTA_AREAS.map(a => (
-                  <SelectItem key={a.key} value={a.key}>{a.label}</SelectItem>
+                {JAKARTA_AREAS.map(region => (
+                  <React.Fragment key={region.key}>
+                    <SelectItem value={region.key} className="font-semibold">
+                      {region.label}
+                    </SelectItem>
+                    {region.neighborhoods.map(n => (
+                      <SelectItem key={n} value={n} className="pl-8 text-sm">
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </React.Fragment>
                 ))}
               </SelectContent>
             </Select>
