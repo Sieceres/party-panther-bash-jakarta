@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { JAKARTA_AREAS } from "@/lib/area-config";
+
 
 interface PromosSectionProps {
   promos: Tables<'promos'>[];
