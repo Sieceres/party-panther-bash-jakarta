@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AreaFilterList } from "@/components/ui/area-filter";
 import { Header } from "@/components/Header";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { supabase } from "@/integrations/supabase/client";
