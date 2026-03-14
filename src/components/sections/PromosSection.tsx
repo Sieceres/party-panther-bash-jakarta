@@ -5,6 +5,7 @@ import { CreatePromoForm } from "@/components/CreatePromoForm";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { ContinuousStarfield } from "@/components/ContinuousStarfield";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
+import { AreaFilterList } from "@/components/ui/area-filter";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
