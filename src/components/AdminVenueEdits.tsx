@@ -57,8 +57,10 @@ export function AdminVenueEdits() {
       const venueMap = new Map((venuesRes.data || []).map(v => [v.id, v.name]));
       const profileMap = new Map((profilesRes.data || []).map(p => [p.user_id, p.display_name]));
 
-      const enriched = (data || []).map(e => ({
+      const enriched: VenueEdit[] = (data || []).map(e => ({
         ...e,
+        changes: (e.changes || {}) as Record<string, any>,
+        previous_values: (e.previous_values || {}) as Record<string, any>,
         venue_name: venueMap.get(e.venue_id) || "Unknown",
         submitter_name: profileMap.get(e.submitted_by) || "Unknown",
       }));
