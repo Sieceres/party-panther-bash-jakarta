@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { JAKARTA_AREAS, areaMatchesFilter, getAllNeighborhoods } from "@/lib/area-config";
 import { MapPin, Search, Store, Grid3X3, Map as MapIcon, Instagram, Globe, ArrowUpDown } from "lucide-react";
+import { AddVenueDialog } from "@/components/AddVenueDialog";
 import L from "leaflet";
 
 interface VenueRow {
