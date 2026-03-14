@@ -1181,6 +1181,42 @@ export const AdminDashboard = () => {
             <AdminImageMigration />
           </TabsContent>
 
+          <TabsContent value="ig-creator" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Instagram className="w-5 h-5" />
+                  Instagram Post Generator
+                </CardTitle>
+                <CardDescription>Create and manage Instagram posts for events and promos</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => navigate('/instagram-generator')} className="flex items-center gap-2">
+                  <Instagram className="w-4 h-4" />
+                  Open IG Creator
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="import" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileUp className="w-5 h-5" />
+                  Batch Import
+                </CardTitle>
+                <CardDescription>Import promos, events, or contacts from images and spreadsheets</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => navigate('/import')} className="flex items-center gap-2">
+                  <FileUp className="w-4 h-4" />
+                  Open Import Tool
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="tags" className="space-y-4">
             <AdminTagManagement />
           </TabsContent>
