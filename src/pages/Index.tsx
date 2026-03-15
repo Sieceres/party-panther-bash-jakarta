@@ -72,6 +72,7 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
   const [areaFilter, setAreaFilter] = useState<string[]>(["all"]);
   const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(["all"]);
   const [promoSortBy, setPromoSortBy] = useState("newest");
+  const [promoSearchQuery, setPromoSearchQuery] = useState("");
   const [eventSortBy, setEventSortBy] = useState("date-asc");
 
 
