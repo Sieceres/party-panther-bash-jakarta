@@ -62,7 +62,6 @@ interface BatchImportReviewProps {
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-import { PROMO_TYPES as PROMO_TYPE_OPTIONS, normalizePromoType } from "@/lib/promo-types";
 const PROMO_TYPES = [...PROMO_TYPE_OPTIONS];
 const CATEGORIES = ["bar", "club", "restaurant", "cafe", "hotel", "rooftop", "beach_club", "other"];
 
