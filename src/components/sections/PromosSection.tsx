@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
+import { PROMO_TYPES as PROMO_TYPE_LIST } from "@/lib/promo-types";
 
 
 interface PromosSectionProps {
