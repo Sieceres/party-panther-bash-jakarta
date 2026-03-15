@@ -1,5 +1,6 @@
 import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { PromoCard } from "@/components/PromoCard";
 import { CreatePromoForm } from "@/components/CreatePromoForm";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
@@ -10,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LoginDialog } from "@/components/LoginDialog";
-import { Star, Lock, Filter, RotateCcw, ArrowUpDown, Download } from "lucide-react";
+import { Star, Lock, Filter, RotateCcw, ArrowUpDown, Download, Search } from "lucide-react";
 import { exportPromosToExcel } from "@/lib/promo-export";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
