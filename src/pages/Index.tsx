@@ -78,6 +78,18 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
 
   const filteredAndSortedPromos = promos
     .filter((promo) => {
+      // Search filter
+      if (promoSearchQuery.trim()) {
+        const q = promoSearchQuery.toLowerCase();
+        const searchMatch = 
+          (promo.title?.toLowerCase().includes(q)) ||
+          (promo.venue_name?.toLowerCase().includes(q)) ||
+          (promo.area?.toLowerCase().includes(q)) ||
+          (promo.description?.toLowerCase().includes(q)) ||
+          (promo.discount_text?.toLowerCase().includes(q)) ||
+          (promo.promo_type?.toLowerCase().includes(q));
+        if (!searchMatch) return false;
+      }
       const dayMatch = dayFilter.includes("all") || 
         (Array.isArray(promo.day_of_week) ? 
           promo.day_of_week.some((day: string) => dayFilter.includes(day?.toLowerCase() || "")) :
