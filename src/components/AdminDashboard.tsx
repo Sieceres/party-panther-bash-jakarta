@@ -578,6 +578,7 @@ export const AdminDashboard = () => {
     } finally {
       setReclassifying(false);
     }
+  };
 
   const getConfirmationMessage = () => {
     if (!pendingAction) return '';
