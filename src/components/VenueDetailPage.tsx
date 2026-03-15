@@ -216,9 +216,6 @@ export const VenueDetailPage = () => {
     );
   }
 
-  const markers = venue.latitude && venue.longitude
-    ? [{ lat: Number(venue.latitude), lng: Number(venue.longitude), title: venue.name }]
-    : [];
 
   return (
     <>
