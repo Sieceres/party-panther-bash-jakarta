@@ -142,10 +142,8 @@ serve(async (req) => {
         status: 200,
       });
 
-    } else if (type === 'venue') {
-      const venue_id_val = event_id || promo_id || user_id;
-      const { venue_id: vid } = await req.json().catch(() => ({}));
-      const id = vid || venue_id_val;
+    } else if (venue_id || type === 'venue') {
+      const id = venue_id;
 
       if (!isAdmin) {
         return new Response(JSON.stringify({ error: 'Only admins can delete venues' }), {
@@ -154,12 +152,8 @@ serve(async (req) => {
         });
       }
 
-      // Check venue exists
       const { data: venueData } = await adminClient
-        .from('venues')
-        .select('id')
-        .eq('id', id)
-        .maybeSingle();
+        .from('venues').select('id').eq('id', id).maybeSingle();
 
       if (!venueData) {
         return new Response(JSON.stringify({ error: 'Venue not found' }), {
@@ -168,37 +162,43 @@ serve(async (req) => {
         });
       }
 
-      // Parse options from request body
-      const bodyText = JSON.stringify({ event_id, promo_id, user_id, type });
-      // Re-read wasn't possible, so we accept delete_promos/delete_events from original parse
-      // We'll handle both modes: unlink or delete
-
-      // Get linked promos and events
+      // Handle linked promos
       const { data: linkedPromos } = await adminClient.from('promos').select('id').eq('venue_id', id);
-      const { data: linkedEvents } = await adminClient.from('events').select('id').eq('venue_id', id);
-
-      // Unlink promos (set venue_id to null)
       if (linkedPromos && linkedPromos.length > 0) {
-        await adminClient.from('promos').update({ venue_id: null }).eq('venue_id', id);
+        if (delete_promos) {
+          for (const p of linkedPromos) {
+            await adminClient.from('promo_reviews').delete().eq('promo_id', p.id);
+            await adminClient.from('promo_comments').delete().eq('promo_id', p.id);
+          }
+          await adminClient.from('promos').delete().eq('venue_id', id);
+        } else {
+          await adminClient.from('promos').update({ venue_id: null }).eq('venue_id', id);
+        }
       }
 
-      // Unlink events (set venue_id to null)
+      // Handle linked events
+      const { data: linkedEvents } = await adminClient.from('events').select('id').eq('venue_id', id);
       if (linkedEvents && linkedEvents.length > 0) {
-        await adminClient.from('events').update({ venue_id: null }).eq('venue_id', id);
+        if (delete_events) {
+          for (const ev of linkedEvents) {
+            await adminClient.from('event_attendees').delete().eq('event_id', ev.id);
+            await adminClient.from('event_comments').delete().eq('event_id', ev.id);
+            await adminClient.from('event_tag_assignments').delete().eq('event_id', ev.id);
+          }
+          await adminClient.from('events').delete().eq('venue_id', id);
+        } else {
+          await adminClient.from('events').update({ venue_id: null }).eq('venue_id', id);
+        }
       }
 
-      // Delete venue edits
+      // Delete venue edits and venue
       await adminClient.from('venue_edits').delete().eq('venue_id', id);
-
-      // Delete venue
       const { data, error } = await adminClient.from('venues').delete().eq('id', id).select();
 
       return new Response(JSON.stringify({
         message: 'Venue securely deleted',
         success: !error && data && data.length > 0,
         deletedRows: data?.length || 0,
-        unlinkedPromos: linkedPromos?.length || 0,
-        unlinkedEvents: linkedEvents?.length || 0,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
