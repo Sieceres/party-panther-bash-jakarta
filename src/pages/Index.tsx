@@ -36,6 +36,7 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
   const { 
     events, 
     promos, 
+    allPromos,
     loading, 
     user, 
     userAdminStatus,
