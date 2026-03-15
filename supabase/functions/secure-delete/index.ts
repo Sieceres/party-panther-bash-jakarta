@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { event_id, promo_id, user_id, type } = await req.json();
+    const { event_id, promo_id, user_id, venue_id, type, delete_promos, delete_events } = await req.json();
     
     // Get auth header
     const authHeader = req.headers.get('Authorization');
@@ -137,6 +137,68 @@ serve(async (req) => {
         message: 'Promo securely deleted',
         success: !error && data && data.length > 0,
         deletedRows: data?.length || 0
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+
+    } else if (venue_id || type === 'venue') {
+      const id = venue_id;
+
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: 'Only admins can delete venues' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 403,
+        });
+      }
+
+      const { data: venueData } = await adminClient
+        .from('venues').select('id').eq('id', id).maybeSingle();
+
+      if (!venueData) {
+        return new Response(JSON.stringify({ error: 'Venue not found' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 404,
+        });
+      }
+
+      // Handle linked promos
+      const { data: linkedPromos } = await adminClient.from('promos').select('id').eq('venue_id', id);
+      if (linkedPromos && linkedPromos.length > 0) {
+        if (delete_promos) {
+          for (const p of linkedPromos) {
+            await adminClient.from('promo_reviews').delete().eq('promo_id', p.id);
+            await adminClient.from('promo_comments').delete().eq('promo_id', p.id);
+          }
+          await adminClient.from('promos').delete().eq('venue_id', id);
+        } else {
+          await adminClient.from('promos').update({ venue_id: null }).eq('venue_id', id);
+        }
+      }
+
+      // Handle linked events
+      const { data: linkedEvents } = await adminClient.from('events').select('id').eq('venue_id', id);
+      if (linkedEvents && linkedEvents.length > 0) {
+        if (delete_events) {
+          for (const ev of linkedEvents) {
+            await adminClient.from('event_attendees').delete().eq('event_id', ev.id);
+            await adminClient.from('event_comments').delete().eq('event_id', ev.id);
+            await adminClient.from('event_tag_assignments').delete().eq('event_id', ev.id);
+          }
+          await adminClient.from('events').delete().eq('venue_id', id);
+        } else {
+          await adminClient.from('events').update({ venue_id: null }).eq('venue_id', id);
+        }
+      }
+
+      // Delete venue edits and venue
+      await adminClient.from('venue_edits').delete().eq('venue_id', id);
+      const { data, error } = await adminClient.from('venues').delete().eq('id', id).select();
+
+      return new Response(JSON.stringify({
+        message: 'Venue securely deleted',
+        success: !error && data && data.length > 0,
+        deletedRows: data?.length || 0,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

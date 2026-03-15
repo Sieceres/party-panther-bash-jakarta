@@ -56,36 +56,30 @@ export const VenueDetailPage = () => {
     if (!venue?.id) return;
     setDeleting(true);
     try {
-      // Handle related promos
-      if (deletePromos && promos.length > 0) {
-        for (const p of promos) {
-          await supabase.from("promo_reviews").delete().eq("promo_id", p.id);
-          await supabase.from("promo_comments").delete().eq("promo_id", p.id);
-        }
-        await supabase.from("promos").delete().eq("venue_id", venue.id);
-      } else {
-        await supabase.from("promos").update({ venue_id: null }).eq("venue_id", venue.id);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({ title: "Error", description: "Not authenticated", variant: "destructive" });
+        return;
       }
-      // Handle related events
-      if (deleteEvents && events.length > 0) {
-        for (const e of events) {
-          await supabase.from("event_attendees").delete().eq("event_id", e.id);
-          await supabase.from("event_comments").delete().eq("event_id", e.id);
-          await supabase.from("event_tag_assignments").delete().eq("event_id", e.id);
-        }
-        await supabase.from("events").delete().eq("venue_id", venue.id);
-      } else {
-        await supabase.from("events").update({ venue_id: null }).eq("venue_id", venue.id);
+
+      const res = await supabase.functions.invoke("secure-delete", {
+        body: {
+          venue_id: venue.id,
+          type: "venue",
+          delete_promos: deletePromos,
+          delete_events: deleteEvents,
+        },
+      });
+
+      if (res.error || !res.data?.success) {
+        throw new Error(res.data?.error || res.error?.message || "Delete failed");
       }
-      await supabase.from("venue_edits").delete().eq("venue_id", venue.id);
-      
-      const { error } = await supabase.from("venues").delete().eq("id", venue.id);
-      if (error) throw error;
+
       toast({ title: "Venue deleted successfully" });
       navigate("/venues");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting venue:", error);
-      toast({ title: "Error", description: "Failed to delete venue", variant: "destructive" });
+      toast({ title: "Error", description: error.message || "Failed to delete venue", variant: "destructive" });
     } finally {
       setDeleting(false);
     }
