@@ -129,16 +129,28 @@ export const PromosSection = ({
             </Button>
           )}
           {user && (
-            <Button
-              onClick={handleCreatePromoClick}
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground min-h-[44px]"
-            >
-              <Star className="w-5 h-5 mr-2" />
-              Create Promo
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={handleCreatePromoClick}
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground min-h-[44px]"
+              >
+                <Star className="w-5 h-5 mr-2" />
+                Create Promo
+              </Button>
+              {userAdminStatus?.is_admin && (
+                <Button
+                  onClick={() => exportPromosToExcel(promos)}
+                  size="lg"
+                  variant="outline"
+                  className="min-h-[44px]"
+                >
+                  <Download className="w-5 h-5 mr-2" />
+                  Export to Excel
+                </Button>
+              )}
+            </div>
           )}
-        </div>
 
         {showCreatePromo && (
           <div className="mb-8">
