@@ -31,6 +31,7 @@ interface Venue {
   website: string | null;
   opening_hours: string | null;
   image_url: string | null;
+  google_maps_link: string | null;
   claimed_by: string | null;
   claim_status: string;
   created_at: string;
