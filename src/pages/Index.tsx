@@ -271,12 +271,14 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
             areaFilter={areaFilter}
             drinkTypeFilter={drinkTypeFilter}
             sortBy={promoSortBy}
+            searchQuery={promoSearchQuery}
             loading={loading}
             onToggleCreatePromo={() => setShowCreatePromo(!showCreatePromo)}
             onDayFilterChange={handleDayFilterChange}
             onAreaFilterChange={handleAreaFilterChange}
             onDrinkTypeFilterChange={handleDrinkTypeFilterChange}
             onSortChange={setPromoSortBy}
+            onSearchChange={setPromoSearchQuery}
             userAdminStatus={userAdminStatus}
             onFavoriteToggle={updatePromoFavorite}
             onLoadMore={loadMorePromos}
