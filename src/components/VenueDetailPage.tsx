@@ -322,23 +322,29 @@ export const VenueDetailPage = () => {
               )}
 
               {/* Map */}
-              {markers.length > 0 && (
+              {venue.address && (
                 <Card>
                   <CardHeader><CardTitle>Location</CardTitle></CardHeader>
                   <CardContent>
-                    {venue.address && (
-                      <a
-                        href={venue.google_maps_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue.address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-start gap-2 mb-4 hover:text-primary transition-colors"
-                      >
-                        <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
-                        <p className="text-muted-foreground hover:text-primary underline underline-offset-2">{venue.address}</p>
-                      </a>
-                    )}
+                    <a
+                      href={venue.google_maps_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-start gap-2 mb-4 hover:text-primary transition-colors"
+                      title={venue.address}
+                    >
+                      <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
+                      <p className="text-muted-foreground hover:text-primary underline underline-offset-2">{truncateAddress(venue.address)}</p>
+                    </a>
                     <div className="rounded-lg overflow-hidden">
-                      <GoogleMap center={{ lat: Number(venue.latitude), lng: Number(venue.longitude) }} markers={markers} height="300px" />
+                      <iframe
+                        width="100%"
+                        height="300"
+                        style={{ border: 0 }}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        src={`https://maps.google.com/maps?q=${encodeURIComponent(venue.address)}&output=embed`}
+                      />
                     </div>
                   </CardContent>
                 </Card>
