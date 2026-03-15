@@ -187,7 +187,7 @@ const BatchImport = () => {
             venue_name: item.venue_name || "",
             venue_address: item.venue_address || "",
             area: item.area || "",
-            promo_type: item.promo_type || "",
+            promo_type: normalizePromoType(item.promo_type),
             category: item.category || "",
             discount_text: discountText,
             price_currency: item.price_currency || "IDR",
