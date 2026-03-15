@@ -56,3 +56,84 @@ export function normalizePromoType(raw: string | null | undefined): string {
   const lower = trimmed.toLowerCase();
   return PROMO_TYPE_ALIASES[lower] || trimmed;
 }
+
+/**
+ * Keyword-based reclassification of promo type using title, discount text, and description.
+ * Returns a PromoType if a match is found, or null if uncertain.
+ */
+export function reclassifyPromoType(
+  title: string | null | undefined,
+  discountText: string | null | undefined,
+  description: string | null | undefined
+): PromoType | null {
+  const combined = [title, discountText, description]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  if (!combined) return null;
+
+  // Free Flow — ONLY unlimited / all-you-can-drink
+  if (
+    /\b(free\s*flow|unlimited|all[- ]you[- ]can[- ]drink|all[- ]you[- ]can[- ]eat)\b/.test(combined)
+  ) {
+    return "Free Flow";
+  }
+
+  // Ladies Night
+  if (/\b(ladies?\s*(night|nite|only)|women'?s?\s*night)\b/.test(combined)) {
+    return "Ladies Night";
+  }
+
+  // Brunch Deal
+  if (/\bbrunch\b/.test(combined)) {
+    return "Brunch Deal";
+  }
+
+  // Live Music
+  if (/\b(live\s*music|live\s*band|dj\s*night|live\s*performance)\b/.test(combined)) {
+    return "Live Music";
+  }
+
+  // Bucket Deal — multi-buy bundles
+  if (
+    /\b(bucket|buy\s*\d+\s*get\s*\d+|(\d+)\s*(beers?|drinks?|bottles?)\s*(for|@)|bundle)\b/.test(combined)
+  ) {
+    return "Bucket Deal";
+  }
+
+  // Bottle Promo — bottle service
+  if (/\b(bottle\s*(promo|service|deal|special|discount))\b/.test(combined)) {
+    return "Bottle Promo";
+  }
+
+  // Happy Hour — time-limited discounts, BOGO, percentage off
+  if (
+    /\b(happy\s*hour|b[1o]g[1o]|buy\s*1\s*get\s*1|buy\s*one\s*get\s*one|\d+\s*%\s*off|half\s*price|2[\s-]*for[\s-]*1)\b/.test(combined)
+  ) {
+    return "Happy Hour";
+  }
+
+  // Food Special
+  if (
+    /\b(food\s*special|food\s*deal|food\s*promo|eat|meal|dinner\s*deal|lunch\s*deal)\b/.test(combined) &&
+    !/\bdrink\b/.test(combined)
+  ) {
+    return "Food Special";
+  }
+
+  // Drink Special — catch-all for drink discounts not matching above
+  if (
+    /\b(drink\s*special|cocktail\s*special|beer\s*special|wine\s*special|spirits?\s*special)\b/.test(combined)
+  ) {
+    return "Drink Special";
+  }
+
+  // If it looks like a price discount on drinks, classify as Happy Hour
+  if (/\b(idr|rp|k)\b.*\b(cocktail|beer|wine|spirit|drink|shot)\b/.test(combined) ||
+      /\b(cocktail|beer|wine|spirit|drink|shot)\b.*\b(idr|rp|k)\b/.test(combined)) {
+    return "Happy Hour";
+  }
+
+  return null;
+}
