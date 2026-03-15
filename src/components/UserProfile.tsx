@@ -1336,7 +1336,7 @@ export const UserProfile = () => {
               )}
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-wrap justify-center md:justify-start gap-3">
                 {isEditing ? (
                   <>
                     <Button 
