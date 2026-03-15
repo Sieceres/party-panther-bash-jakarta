@@ -163,6 +163,17 @@ export const PromosSection = ({
           </div>
         )}
 
+        {/* Search */}
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search venue, area, or keyword..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-10 glass-control"
+          />
+        </div>
+
         {/* Filters and Sort */}
         <div className="flex flex-wrap gap-4 mb-6 items-end">
           <div className="flex flex-col space-y-2">
