@@ -390,10 +390,15 @@ export const VenueDetailPage = () => {
                 <CardHeader><CardTitle>Venue Info</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                   {venue.address && (
-                    <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
-                      <span className="text-sm text-muted-foreground">{venue.address}</span>
-                    </div>
+                      <a
+                        href={venue.google_maps_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue.address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-start gap-2 hover:text-primary transition-colors"
+                      >
+                        <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
+                        <span className="text-sm text-muted-foreground hover:text-primary underline underline-offset-2">{venue.address}</span>
+                      </a>
                   )}
                   {venue.opening_hours && (
                     <div className="flex items-start gap-2">
