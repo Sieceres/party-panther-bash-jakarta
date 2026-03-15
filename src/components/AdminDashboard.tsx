@@ -38,6 +38,8 @@ interface Promo {
   title: string;
   venue_name: string;
   discount_text: string;
+  description?: string;
+  promo_type?: string;
   valid_until: string;
   created_at: string;
   slug?: string;
