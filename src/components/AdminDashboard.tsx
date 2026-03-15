@@ -982,6 +982,21 @@ export const AdminDashboard = () => {
 
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
+                        <h4 className="font-semibold">Re-categorize Promo Types</h4>
+                        <p className="text-sm text-muted-foreground">Re-classify all promos using keyword rules (fixes misclassified Free Flow, Other, etc.)</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        onClick={reclassifyPromos}
+                        disabled={reclassifying}
+                      >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${reclassifying ? 'animate-spin' : ''}`} />
+                        {reclassifying ? 'Re-categorizing...' : 'Re-categorize'}
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
                         <h4 className="font-semibold">Seed Venues from Promos & Events</h4>
                         <p className="text-sm text-muted-foreground">Create venue records from existing venue names in promos and events</p>
                       </div>
