@@ -151,7 +151,7 @@ export const PromosSection = ({
               )}
             </div>
           )}
-
+        </div>
         {showCreatePromo && (
           <div className="mb-8">
             <CreatePromoForm />
