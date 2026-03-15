@@ -273,6 +273,7 @@ export function useOptimizedData() {
   return {
     events,
     promos,
+    allPromos,
     loading,
     user,
     userAdminStatus,
