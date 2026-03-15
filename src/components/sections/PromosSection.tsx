@@ -27,6 +27,7 @@ interface PromosSectionProps {
   dayFilter: string[];
   areaFilter: string[];
   drinkTypeFilter: string[];
+  promoTypeFilter: string[];
   sortBy: string;
   searchQuery: string;
   loading?: boolean;
@@ -34,6 +35,7 @@ interface PromosSectionProps {
   onDayFilterChange: (filter: string[]) => void;
   onAreaFilterChange: (filter: string[]) => void;
   onDrinkTypeFilterChange: (filter: string[]) => void;
+  onPromoTypeFilterChange: (filter: string[]) => void;
   onSortChange: (sort: string) => void;
   onSearchChange: (query: string) => void;
   userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
