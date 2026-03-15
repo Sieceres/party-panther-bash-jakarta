@@ -37,6 +37,18 @@ interface Venue {
   created_at: string;
 }
 
+const truncateAddress = (address: string) => {
+  const parts = address.split(",");
+  if (parts.length <= 2) return address;
+  const cityPatterns = /jakarta|indonesia|dki|java|\d{5}/i;
+  const truncated: string[] = [];
+  for (const part of parts) {
+    if (cityPatterns.test(part.trim())) break;
+    truncated.push(part.trim());
+  }
+  return truncated.length > 0 ? truncated.join(", ") : parts.slice(0, 2).join(", ");
+};
+
 export const VenueDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
