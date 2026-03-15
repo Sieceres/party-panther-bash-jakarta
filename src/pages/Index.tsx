@@ -78,8 +78,9 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
   const [eventSortBy, setEventSortBy] = useState("date-asc");
 
 
-  const filteredAndSortedPromos = promos
-    .filter((promo) => {
+  // Use allPromos when searching to avoid missing results beyond paginated set
+  const promoSource = promoSearchQuery.trim() ? allPromos : promos;
+  const filteredAndSortedPromos = promoSource
       // Search filter
       if (promoSearchQuery.trim()) {
         const q = promoSearchQuery.toLowerCase();
