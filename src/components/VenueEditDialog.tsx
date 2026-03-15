@@ -115,8 +115,9 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
           .eq("id", venue.id);
         if (error) throw error;
 
-        // Sync lat/lng/address to linked promos and events
+        // Sync name/lat/lng/address to linked promos and events
         const syncFields: Record<string, any> = {};
+        if ("name" in changes) syncFields.venue_name = changes.name;
         if ("latitude" in changes) syncFields.venue_latitude = changes.latitude;
         if ("longitude" in changes) syncFields.venue_longitude = changes.longitude;
         if ("address" in changes) syncFields.venue_address = changes.address;
