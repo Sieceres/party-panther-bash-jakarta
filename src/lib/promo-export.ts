@@ -1,7 +1,14 @@
-import * as XLSX from "xlsx";
+import XLSX from "xlsx-js-style";
 import { Tables } from "@/integrations/supabase/types";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+// Color mapping for promo types (RGB hex without #)
+const PROMO_TYPE_COLORS: Record<string, { bg: string; font: string }> = {
+  "Free Flow": { bg: "00C853", font: "FFFFFF" },      // Green
+  "Ladies Night": { bg: "E91E90", font: "FFFFFF" },    // Pink/Magenta
+};
+const DEFAULT_PROMO_COLOR = { bg: "FFD600", font: "000000" }; // Gold/Yellow for regular promos
 
 interface PromoForExport {
   title: string;
@@ -20,13 +27,11 @@ interface PromoForExport {
 function buildCellText(promo: PromoForExport): string {
   const lines: string[] = [];
 
-  // Promo type label
   const promoType = promo.promo_type || "";
   if (promoType) {
     lines.push(promoType);
   }
 
-  // Description / discount text
   if (promo.discount_text) {
     lines.push(promo.discount_text);
   }
@@ -37,9 +42,15 @@ function buildCellText(promo: PromoForExport): string {
   return lines.join("\n") || "–";
 }
 
+function getPromoColor(promo: PromoForExport) {
+  const type = promo.promo_type || "";
+  return PROMO_TYPE_COLORS[type] || DEFAULT_PROMO_COLOR;
+}
+
 /**
  * Export promos as a weekly schedule Excel file grouped by area,
  * with venues as rows and days of week as columns.
+ * Cells are color-coded by promo type.
  */
 export function exportPromosToExcel(promos: Tables<"promos">[]) {
   const wb = XLSX.utils.book_new();
@@ -84,7 +95,6 @@ export function exportPromosToExcel(promos: Tables<"promos">[]) {
       const row: (string | null)[] = [venue];
 
       for (const day of DAYS) {
-        // Find promos for this venue on this day
         const dayLower = day.toLowerCase();
         const matching = venuePromos.filter(p => {
           const days = p.day_of_week || [];
@@ -113,6 +123,48 @@ export function exportPromosToExcel(promos: Tables<"promos">[]) {
 
     // Merge title row across all columns
     ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }];
+
+    // Apply color coding to data cells (row 3 onwards = index 3+)
+    const dataStartRow = 3; // 0=title, 1=spacer, 2=header
+    for (let vi = 0; vi < sortedVenues.length; vi++) {
+      const venue = sortedVenues[vi];
+      const venuePromos = venueMap.get(venue)!;
+      const rowIdx = dataStartRow + vi;
+
+      for (let di = 0; di < DAYS.length; di++) {
+        const colIdx = di + 1; // column 0 is venue name
+        const dayLower = DAYS[di].toLowerCase();
+        const matching = venuePromos.filter(p => {
+          const days = p.day_of_week || [];
+          return days.some(d => d.toLowerCase() === dayLower);
+        });
+
+        if (matching.length > 0) {
+          // Use the first promo's type for color
+          const color = getPromoColor(matching[0] as PromoForExport);
+          const cellRef = XLSX.utils.encode_cell({ r: rowIdx, c: colIdx });
+          if (ws[cellRef]) {
+            ws[cellRef].s = {
+              fill: { fgColor: { rgb: color.bg } },
+              font: { color: { rgb: color.font } },
+              alignment: { wrapText: true, vertical: "top" },
+            };
+          }
+        }
+      }
+    }
+
+    // Style header row
+    for (let c = 0; c <= DAYS.length; c++) {
+      const cellRef = XLSX.utils.encode_cell({ r: 2, c });
+      if (ws[cellRef]) {
+        ws[cellRef].s = {
+          fill: { fgColor: { rgb: "37474F" } },
+          font: { color: { rgb: "FFFFFF" }, bold: true },
+          alignment: { horizontal: "center" },
+        };
+      }
+    }
 
     // Sanitize sheet name (max 31 chars, no special chars)
     const sheetName = area.substring(0, 31).replace(/[[\]*?/\\:]/g, "");

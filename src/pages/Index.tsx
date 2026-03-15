@@ -72,11 +72,24 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
   const [areaFilter, setAreaFilter] = useState<string[]>(["all"]);
   const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(["all"]);
   const [promoSortBy, setPromoSortBy] = useState("newest");
+  const [promoSearchQuery, setPromoSearchQuery] = useState("");
   const [eventSortBy, setEventSortBy] = useState("date-asc");
 
 
   const filteredAndSortedPromos = promos
     .filter((promo) => {
+      // Search filter
+      if (promoSearchQuery.trim()) {
+        const q = promoSearchQuery.toLowerCase();
+        const searchMatch = 
+          (promo.title?.toLowerCase().includes(q)) ||
+          (promo.venue_name?.toLowerCase().includes(q)) ||
+          (promo.area?.toLowerCase().includes(q)) ||
+          (promo.description?.toLowerCase().includes(q)) ||
+          (promo.discount_text?.toLowerCase().includes(q)) ||
+          (promo.promo_type?.toLowerCase().includes(q));
+        if (!searchMatch) return false;
+      }
       const dayMatch = dayFilter.includes("all") || 
         (Array.isArray(promo.day_of_week) ? 
           promo.day_of_week.some((day: string) => dayFilter.includes(day?.toLowerCase() || "")) :
@@ -258,12 +271,14 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
             areaFilter={areaFilter}
             drinkTypeFilter={drinkTypeFilter}
             sortBy={promoSortBy}
+            searchQuery={promoSearchQuery}
             loading={loading}
             onToggleCreatePromo={() => setShowCreatePromo(!showCreatePromo)}
             onDayFilterChange={handleDayFilterChange}
             onAreaFilterChange={handleAreaFilterChange}
             onDrinkTypeFilterChange={handleDrinkTypeFilterChange}
             onSortChange={setPromoSortBy}
+            onSearchChange={setPromoSearchQuery}
             userAdminStatus={userAdminStatus}
             onFavoriteToggle={updatePromoFavorite}
             onLoadMore={loadMorePromos}
