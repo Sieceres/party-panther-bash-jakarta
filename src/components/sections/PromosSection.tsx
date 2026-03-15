@@ -145,7 +145,15 @@ export const PromosSection = ({
               </Button>
               {(userAdminStatus?.is_admin || userAdminStatus?.is_super_admin) && (
                 <Button
-                  onClick={() => exportPromosToExcel(promos)}
+                  onClick={async () => {
+                    // Fetch ALL promos directly to avoid pagination/filter issues
+                    const { data: allPromos, error } = await supabase.rpc('get_promos_simple');
+                    if (error) {
+                      toast({ title: "Export failed", description: error.message, variant: "destructive" });
+                      return;
+                    }
+                    exportPromosToExcel((allPromos || []) as Tables<'promos'>[]);
+                  }}
                   size="lg"
                   variant="outline"
                   className="min-h-[44px]"
