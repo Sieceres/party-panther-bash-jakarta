@@ -72,10 +72,9 @@ export const PromoDetails = ({
               <SelectValue placeholder="Select promo type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Free Flow">Free Flow</SelectItem>
-              <SelectItem value="Ladies Night">Ladies Night</SelectItem>
-              <SelectItem value="Bottle Promo">Bottle Promo</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
+              {PROMO_TYPES.map((type) => (
+                <SelectItem key={type} value={type}>{type}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

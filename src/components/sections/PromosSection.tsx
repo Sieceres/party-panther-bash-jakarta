@@ -109,10 +109,7 @@ export const PromosSection = ({
 
   const drinkTypeOptions = [
     { id: 'all', label: 'All Types' },
-    { id: 'Free Flow', label: 'Free Flow' },
-    { id: 'Ladies Night', label: 'Ladies Night' },
-    { id: 'Bottle Promo', label: 'Bottle Promo' },
-    { id: 'Other', label: 'Other' }
+    ...PROMO_TYPE_LIST.map(t => ({ id: t, label: t }))
   ];
 
   return (
