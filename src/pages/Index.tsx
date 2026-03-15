@@ -100,7 +100,9 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
         (Array.isArray(promo.drink_type) ? 
           promo.drink_type.some((drink: string) => drinkTypeFilter.includes(drink?.toLowerCase() || "")) :
           drinkTypeFilter.includes((promo.drink_type as string)?.toLowerCase() || ""));
-      return dayMatch && areaMatch && drinkTypeMatch;
+      const promoTypeMatch = promoTypeFilter.includes("all") || 
+        promoTypeFilter.includes(promo.promo_type || "");
+      return dayMatch && areaMatch && drinkTypeMatch && promoTypeMatch;
     })
     .sort((a, b) => {
       switch (promoSortBy) {
