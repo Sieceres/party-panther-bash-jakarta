@@ -27,12 +27,14 @@ interface PromosSectionProps {
   areaFilter: string[];
   drinkTypeFilter: string[];
   sortBy: string;
+  searchQuery: string;
   loading?: boolean;
   onToggleCreatePromo: () => void;
   onDayFilterChange: (filter: string[]) => void;
   onAreaFilterChange: (filter: string[]) => void;
   onDrinkTypeFilterChange: (filter: string[]) => void;
   onSortChange: (sort: string) => void;
+  onSearchChange: (query: string) => void;
   userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
   onFavoriteToggle?: (promoId: string, isFavorite: boolean) => void;
   onLoadMore?: () => void;
