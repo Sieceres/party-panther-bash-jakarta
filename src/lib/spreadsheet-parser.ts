@@ -1,6 +1,7 @@
 import * as XLSX from "xlsx";
 import type { ExtractedPromo, ExtractedEvent, ExtractedContact } from "@/components/BatchImportReview";
 import { detectDrinkCategory, getPlaceholderImage, enrichDrinkTypes } from "@/lib/drink-categories";
+import { normalizePromoType } from "@/lib/promo-types";
 
 type ImportType = "promo" | "event" | "contact";
 
@@ -150,7 +151,7 @@ function parseSpreadsheetData(
       venue_name: normalized.venue_name || "",
       venue_address: normalized.venue_address || "",
       discount_text: discountText,
-      promo_type: normalized.promo_type || "",
+      promo_type: normalizePromoType(normalized.promo_type),
       day_of_week: parseArrayField(String(normalized.day_of_week || "")),
       area: normalized.area || "",
       drink_type: enrichedDrinkTypes,

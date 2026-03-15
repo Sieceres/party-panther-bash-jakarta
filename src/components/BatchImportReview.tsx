@@ -8,6 +8,7 @@ import { Trash2, Plus, ChevronDown, ChevronUp, Beer, Wine, Coffee, UtensilsCross
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PLACEHOLDER_IMAGES, type DrinkCategory } from "@/lib/drink-categories";
 import { JAKARTA_AREAS } from "@/lib/area-config";
+import { PROMO_TYPES as PROMO_TYPE_OPTIONS, normalizePromoType } from "@/lib/promo-types";
 
 export interface ExtractedPromo {
   id: string;
@@ -61,7 +62,7 @@ interface BatchImportReviewProps {
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const PROMO_TYPES = ["Free Flow", "Ladies Night", "Bottle Promo", "Other"];
+const PROMO_TYPES = [...PROMO_TYPE_OPTIONS];
 const CATEGORIES = ["bar", "club", "restaurant", "cafe", "hotel", "rooftop", "beach_club", "other"];
 
 export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportReviewProps) => {

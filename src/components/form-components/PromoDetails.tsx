@@ -9,6 +9,7 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { JAKARTA_AREAS } from "@/lib/area-config";
+import { PROMO_TYPES } from "@/lib/promo-types";
 
 interface PromoDetailsProps {
   validUntilDate: Date | undefined;
@@ -72,10 +73,9 @@ export const PromoDetails = ({
               <SelectValue placeholder="Select promo type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Free Flow">Free Flow</SelectItem>
-              <SelectItem value="Ladies Night">Ladies Night</SelectItem>
-              <SelectItem value="Bottle Promo">Bottle Promo</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
+              {PROMO_TYPES.map((type) => (
+                <SelectItem key={type} value={type}>{type}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
