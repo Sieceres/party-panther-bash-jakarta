@@ -277,6 +277,7 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
             dayFilter={dayFilter}
             areaFilter={areaFilter}
             drinkTypeFilter={drinkTypeFilter}
+            promoTypeFilter={promoTypeFilter}
             sortBy={promoSortBy}
             searchQuery={promoSearchQuery}
             loading={loading}
@@ -284,6 +285,7 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
             onDayFilterChange={handleDayFilterChange}
             onAreaFilterChange={handleAreaFilterChange}
             onDrinkTypeFilterChange={handleDrinkTypeFilterChange}
+            onPromoTypeFilterChange={handlePromoTypeFilterChange}
             onSortChange={setPromoSortBy}
             onSearchChange={setPromoSearchQuery}
             userAdminStatus={userAdminStatus}
