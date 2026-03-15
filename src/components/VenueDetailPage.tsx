@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil, Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { GoogleMap } from "./GoogleMap";
+
 import { SpinningPaws } from "./ui/spinning-paws";
 import { Header } from "./Header";
 import { PromoCard } from "./PromoCard";
@@ -36,6 +36,18 @@ interface Venue {
   claim_status: string;
   created_at: string;
 }
+
+const truncateAddress = (address: string) => {
+  const parts = address.split(",");
+  if (parts.length <= 2) return address;
+  const cityPatterns = /jakarta|indonesia|dki|java|\d{5}/i;
+  const truncated: string[] = [];
+  for (const part of parts) {
+    if (cityPatterns.test(part.trim())) break;
+    truncated.push(part.trim());
+  }
+  return truncated.length > 0 ? truncated.join(", ") : parts.slice(0, 2).join(", ");
+};
 
 export const VenueDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -204,9 +216,6 @@ export const VenueDetailPage = () => {
     );
   }
 
-  const markers = venue.latitude && venue.longitude
-    ? [{ lat: Number(venue.latitude), lng: Number(venue.longitude), title: venue.name }]
-    : [];
 
   return (
     <>
@@ -313,23 +322,29 @@ export const VenueDetailPage = () => {
               )}
 
               {/* Map */}
-              {markers.length > 0 && (
+              {venue.address && (
                 <Card>
                   <CardHeader><CardTitle>Location</CardTitle></CardHeader>
                   <CardContent>
-                    {venue.address && (
-                      <a
-                        href={venue.google_maps_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue.address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-start gap-2 mb-4 hover:text-primary transition-colors"
-                      >
-                        <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
-                        <p className="text-muted-foreground hover:text-primary underline underline-offset-2">{venue.address}</p>
-                      </a>
-                    )}
+                    <a
+                      href={venue.google_maps_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-start gap-2 mb-4 hover:text-primary transition-colors"
+                      title={venue.address}
+                    >
+                      <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
+                      <p className="text-muted-foreground hover:text-primary underline underline-offset-2">{truncateAddress(venue.address)}</p>
+                    </a>
                     <div className="rounded-lg overflow-hidden">
-                      <GoogleMap center={{ lat: Number(venue.latitude), lng: Number(venue.longitude) }} markers={markers} height="300px" />
+                      <iframe
+                        width="100%"
+                        height="300"
+                        style={{ border: 0 }}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        src={`https://maps.google.com/maps?q=${encodeURIComponent(venue.address)}&output=embed`}
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -396,9 +411,10 @@ export const VenueDetailPage = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-start gap-2 hover:text-primary transition-colors"
+                        title={venue.address}
                       >
                         <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
-                        <span className="text-sm text-muted-foreground hover:text-primary underline underline-offset-2">{venue.address}</span>
+                        <span className="text-sm text-muted-foreground hover:text-primary underline underline-offset-2">{truncateAddress(venue.address)}</span>
                       </a>
                   )}
                   {venue.opening_hours && (
