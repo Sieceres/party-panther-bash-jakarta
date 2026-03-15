@@ -60,6 +60,12 @@ export const PromosSection = ({
   const [user, setUser] = useState<User | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
 
+  // Need access to all promos (unfiltered) for export
+  // We receive filteredPromos for display but need full list via parent
+  // The promos prop is already in the interface but destructured away — let's use filteredPromos for export
+  const [user, setUser] = useState<User | null>(null);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
