@@ -21,6 +21,7 @@ import { getEventUrl, getEditEventUrl, getPromoUrl, getEditPromoUrl } from "@/li
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { detectDrinkCategory, getPlaceholderImage, enrichDrinkTypes } from "@/lib/drink-categories";
+import { reclassifyPromoType } from "@/lib/promo-types";
 
 interface Event {
   id: string;
@@ -37,6 +38,8 @@ interface Promo {
   title: string;
   venue_name: string;
   discount_text: string;
+  description?: string;
+  promo_type?: string;
   valid_until: string;
   created_at: string;
   slug?: string;
@@ -74,6 +77,7 @@ export const AdminDashboard = () => {
   const [refreshingPromoStats, setRefreshingPromoStats] = useState(false);
   const [refreshingEventStats, setRefreshingEventStats] = useState(false);
   const [backfillingPromos, setBackfillingPromos] = useState(false);
+  const [reclassifying, setReclassifying] = useState(false);
 
   const checkAuthAndPermissions = async () => {
     try {
@@ -532,6 +536,50 @@ export const AdminDashboard = () => {
     }
   };
 
+  const reclassifyPromos = async () => {
+    setReclassifying(true);
+    try {
+      const { data: allPromos, error } = await supabase
+        .from('promos')
+        .select('id, title, discount_text, description, promo_type');
+
+      if (error) throw error;
+
+      let changed = 0;
+      let skipped = 0;
+
+      for (const promo of allPromos || []) {
+        const newType = reclassifyPromoType(promo.title, promo.discount_text, promo.description);
+        if (!newType || newType === promo.promo_type) {
+          skipped++;
+          continue;
+        }
+
+        const { error: updateError } = await supabase
+          .from('promos')
+          .update({ promo_type: newType })
+          .eq('id', promo.id);
+
+        if (!updateError) changed++;
+      }
+
+      toast({
+        title: "Re-categorization complete",
+        description: `${changed} promos updated, ${skipped} unchanged`,
+      });
+      fetchData();
+    } catch (error: any) {
+      console.error('Error reclassifying promos:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reclassify promos",
+        variant: "destructive"
+      });
+    } finally {
+      setReclassifying(false);
+    }
+  };
+
   const getConfirmationMessage = () => {
     if (!pendingAction) return '';
     
@@ -929,6 +977,21 @@ export const AdminDashboard = () => {
                       >
                         <Database className={`w-4 h-4 mr-2 ${backfillingPromos ? 'animate-spin' : ''}`} />
                         {backfillingPromos ? 'Backfilling...' : 'Backfill Promos'}
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-semibold">Re-categorize Promo Types</h4>
+                        <p className="text-sm text-muted-foreground">Re-classify all promos using keyword rules (fixes misclassified Free Flow, Other, etc.)</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        onClick={reclassifyPromos}
+                        disabled={reclassifying}
+                      >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${reclassifying ? 'animate-spin' : ''}`} />
+                        {reclassifying ? 'Re-categorizing...' : 'Re-categorize'}
                       </Button>
                     </div>
 
