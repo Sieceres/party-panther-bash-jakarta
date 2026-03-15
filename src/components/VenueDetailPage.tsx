@@ -411,9 +411,10 @@ export const VenueDetailPage = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-start gap-2 hover:text-primary transition-colors"
+                        title={venue.address}
                       >
                         <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
-                        <span className="text-sm text-muted-foreground hover:text-primary underline underline-offset-2">{venue.address}</span>
+                        <span className="text-sm text-muted-foreground hover:text-primary underline underline-offset-2">{truncateAddress(venue.address)}</span>
                       </a>
                   )}
                   {venue.opening_hours && (
