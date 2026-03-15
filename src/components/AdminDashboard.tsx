@@ -21,6 +21,7 @@ import { getEventUrl, getEditEventUrl, getPromoUrl, getEditPromoUrl } from "@/li
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { detectDrinkCategory, getPlaceholderImage, enrichDrinkTypes } from "@/lib/drink-categories";
+import { reclassifyPromoType } from "@/lib/promo-types";
 
 interface Event {
   id: string;
