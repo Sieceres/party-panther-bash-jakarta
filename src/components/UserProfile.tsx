@@ -1067,7 +1067,19 @@ export const UserProfile = () => {
                 </div>
               ) : (
                 <div>
-                  <h2 className="text-3xl font-bold gradient-text break-words leading-tight mb-2">{displayName}</h2>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h2 className="text-3xl font-bold gradient-text break-words leading-tight">{displayName}</h2>
+                    {profile?.is_super_admin && (
+                      <Badge className="bg-gradient-to-r from-red-500 to-purple-600 text-white border-none text-sm">
+                        🔥 Super Admin
+                      </Badge>
+                    )}
+                    {profile?.is_admin && !profile?.is_super_admin && (
+                      <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-none text-sm">
+                        ⚡ Admin
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground mt-3 max-w-md">
                     {profile?.bio || "Jakarta party enthusiast 🎉"}
                   </p>
