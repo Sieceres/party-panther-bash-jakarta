@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BatchImportReview, ExtractedPromo, ExtractedEvent, ExtractedContact } from "@/components/BatchImportReview";
 import { detectDrinkCategory, getPlaceholderImage, enrichDrinkTypes } from "@/lib/drink-categories";
 import { isSpreadsheetFile, parseSpreadsheetFile } from "@/lib/spreadsheet-parser";
+import { normalizePromoType } from "@/lib/promo-types";
 
 type ImportType = "promo" | "event" | "contact";
 type Step = "upload" | "review" | "done";
