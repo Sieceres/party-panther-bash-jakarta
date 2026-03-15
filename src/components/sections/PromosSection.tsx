@@ -91,9 +91,10 @@ export const PromosSection = ({
     onDayFilterChange(["all"]);
     onAreaFilterChange(["all"]);
     onDrinkTypeFilterChange(["all"]);
+    onPromoTypeFilterChange(["all"]);
   };
 
-  const hasActiveFilters = !dayFilter.includes("all") || !areaFilter.includes("all") || !drinkTypeFilter.includes("all");
+  const hasActiveFilters = !dayFilter.includes("all") || !areaFilter.includes("all") || !drinkTypeFilter.includes("all") || !promoTypeFilter.includes("all");
 
   const getFilterDisplayText = (filters: string[], allLabel: string) => {
     if (filters.includes("all") || filters.length === 0) return allLabel;
