@@ -81,6 +81,7 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
   // Use allPromos when searching to avoid missing results beyond paginated set
   const promoSource = promoSearchQuery.trim() ? allPromos : promos;
   const filteredAndSortedPromos = promoSource
+    .filter((promo) => {
       // Search filter
       if (promoSearchQuery.trim()) {
         const q = promoSearchQuery.toLowerCase();
