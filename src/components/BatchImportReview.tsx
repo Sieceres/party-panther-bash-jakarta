@@ -8,6 +8,7 @@ import { Trash2, Plus, ChevronDown, ChevronUp, Beer, Wine, Coffee, UtensilsCross
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PLACEHOLDER_IMAGES, type DrinkCategory } from "@/lib/drink-categories";
 import { JAKARTA_AREAS } from "@/lib/area-config";
+import { PROMO_TYPES as PROMO_TYPE_OPTIONS, normalizePromoType } from "@/lib/promo-types";
 
 export interface ExtractedPromo {
   id: string;
