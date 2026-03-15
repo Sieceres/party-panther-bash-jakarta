@@ -536,6 +536,49 @@ export const AdminDashboard = () => {
     }
   };
 
+  const reclassifyPromos = async () => {
+    setReclassifying(true);
+    try {
+      const { data: allPromos, error } = await supabase
+        .from('promos')
+        .select('id, title, discount_text, description, promo_type');
+
+      if (error) throw error;
+
+      let changed = 0;
+      let skipped = 0;
+
+      for (const promo of allPromos || []) {
+        const newType = reclassifyPromoType(promo.title, promo.discount_text, promo.description);
+        if (!newType || newType === promo.promo_type) {
+          skipped++;
+          continue;
+        }
+
+        const { error: updateError } = await supabase
+          .from('promos')
+          .update({ promo_type: newType })
+          .eq('id', promo.id);
+
+        if (!updateError) changed++;
+      }
+
+      toast({
+        title: "Re-categorization complete",
+        description: `${changed} promos updated, ${skipped} unchanged`,
+      });
+      fetchData();
+    } catch (error: any) {
+      console.error('Error reclassifying promos:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reclassify promos",
+        variant: "destructive"
+      });
+    } finally {
+      setReclassifying(false);
+    }
+
   const getConfirmationMessage = () => {
     if (!pendingAction) return '';
     
