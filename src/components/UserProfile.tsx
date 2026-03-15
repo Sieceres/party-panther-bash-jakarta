@@ -125,14 +125,27 @@ export const UserProfile = () => {
     }
 
     try {
-      const { data, error } = await supabase
+      const { data: roles, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .in('role', ['admin', 'superadmin'])
-        .single();
+        .in('role', ['admin', 'superadmin']);
 
-      setIsAdmin(!!data && !error);
+      if (error || !roles || roles.length === 0) {
+        setIsAdmin(false);
+        return;
+      }
+
+      const hasAdmin = roles.some(r => r.role === 'admin' || r.role === 'superadmin');
+      const hasSuperAdmin = roles.some(r => r.role === 'superadmin');
+      setIsAdmin(hasAdmin);
+
+      // Update profile with admin status for badge display
+      setProfile(prev => prev ? {
+        ...prev,
+        is_admin: hasAdmin,
+        is_super_admin: hasSuperAdmin,
+      } : prev);
     } catch (error) {
       setIsAdmin(false);
     }
