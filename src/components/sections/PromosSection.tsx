@@ -27,6 +27,7 @@ interface PromosSectionProps {
   dayFilter: string[];
   areaFilter: string[];
   drinkTypeFilter: string[];
+  promoTypeFilter: string[];
   sortBy: string;
   searchQuery: string;
   loading?: boolean;
@@ -34,6 +35,7 @@ interface PromosSectionProps {
   onDayFilterChange: (filter: string[]) => void;
   onAreaFilterChange: (filter: string[]) => void;
   onDrinkTypeFilterChange: (filter: string[]) => void;
+  onPromoTypeFilterChange: (filter: string[]) => void;
   onSortChange: (sort: string) => void;
   onSearchChange: (query: string) => void;
   userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
@@ -49,6 +51,7 @@ export const PromosSection = ({
   dayFilter,
   areaFilter,
   drinkTypeFilter,
+  promoTypeFilter,
   sortBy,
   searchQuery,
   loading = false,
@@ -56,6 +59,7 @@ export const PromosSection = ({
   onDayFilterChange,
   onAreaFilterChange,
   onDrinkTypeFilterChange,
+  onPromoTypeFilterChange,
   onSortChange,
   onSearchChange,
   userAdminStatus,
@@ -87,9 +91,10 @@ export const PromosSection = ({
     onDayFilterChange(["all"]);
     onAreaFilterChange(["all"]);
     onDrinkTypeFilterChange(["all"]);
+    onPromoTypeFilterChange(["all"]);
   };
 
-  const hasActiveFilters = !dayFilter.includes("all") || !areaFilter.includes("all") || !drinkTypeFilter.includes("all");
+  const hasActiveFilters = !dayFilter.includes("all") || !areaFilter.includes("all") || !drinkTypeFilter.includes("all") || !promoTypeFilter.includes("all");
 
   const getFilterDisplayText = (filters: string[], allLabel: string) => {
     if (filters.includes("all") || filters.length === 0) return allLabel;
@@ -303,6 +308,51 @@ export const PromosSection = ({
             </Select>
           </div>
           
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-white/90">
+              <Filter className="w-4 h-4 inline mr-1" />
+              Promo Type
+            </label>
+            <Select>
+              <SelectTrigger className="glass-control">
+                <SelectValue placeholder={getFilterDisplayText(promoTypeFilter, "All types")} />
+              </SelectTrigger>
+              <SelectContent>
+                <div className="p-2 space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="all-promo-types"
+                      checked={promoTypeFilter.includes("all")}
+                      onCheckedChange={(checked) => {
+                        if (checked) onPromoTypeFilterChange(["all"]);
+                      }}
+                    />
+                    <Label htmlFor="all-promo-types" className="text-sm">All types</Label>
+                  </div>
+                  {PROMO_TYPE_LIST.map((type) => (
+                    <div key={type} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`promo-type-${type}`}
+                        checked={promoTypeFilter.includes(type)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            const newFilters = promoTypeFilter.filter(f => f !== "all");
+                            onPromoTypeFilterChange([...newFilters, type]);
+                          } else {
+                            const newFilters = promoTypeFilter.filter(f => f !== type);
+                            onPromoTypeFilterChange(newFilters.length === 0 ? ["all"] : newFilters);
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`promo-type-${type}`} className="text-sm">
+                        {type}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex flex-col space-y-2">
             <label className="text-sm font-medium text-white/90">
               <ArrowUpDown className="w-4 h-4 inline mr-1" />

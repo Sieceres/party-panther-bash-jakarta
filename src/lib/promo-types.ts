@@ -73,9 +73,9 @@ export function reclassifyPromoType(
 
   if (!combined) return null;
 
-  // Free Flow — ONLY unlimited / all-you-can-drink
+  // Free Flow — ONLY unlimited / all-you-can-drink (strict match)
   if (
-    /\b(free\s*flow|unlimited|all[- ]you[- ]can[- ]drink|all[- ]you[- ]can[- ]eat)\b/.test(combined)
+    /\b(free\s*flow|unlimited\s*(drink|beer|wine|cocktail|alcohol)|all[- ]you[- ]can[- ]drink|all[- ]you[- ]can[- ]eat)\b/.test(combined)
   ) {
     return "Free Flow";
   }
@@ -95,7 +95,7 @@ export function reclassifyPromoType(
     return "Live Music";
   }
 
-  // Bucket Deal — multi-buy bundles
+  // Bucket Deal — multi-buy bundles (buy X get Y, X beers for price, bucket)
   if (
     /\b(bucket|buy\s*\d+\s*get\s*\d+|(\d+)\s*(beers?|drinks?|bottles?)\s*(for|@)|bundle)\b/.test(combined)
   ) {
@@ -107,7 +107,7 @@ export function reclassifyPromoType(
     return "Bottle Promo";
   }
 
-  // Happy Hour — time-limited discounts, BOGO, percentage off
+  // Happy Hour — time-limited discounts, BOGO, percentage off, price deals
   if (
     /\b(happy\s*hour|b[1o]g[1o]|buy\s*1\s*get\s*1|buy\s*one\s*get\s*one|\d+\s*%\s*off|half\s*price|2[\s-]*for[\s-]*1)\b/.test(combined)
   ) {
@@ -129,9 +129,15 @@ export function reclassifyPromoType(
     return "Drink Special";
   }
 
-  // If it looks like a price discount on drinks, classify as Happy Hour
-  if (/\b(idr|rp|k)\b.*\b(cocktail|beer|wine|spirit|drink|shot)\b/.test(combined) ||
-      /\b(cocktail|beer|wine|spirit|drink|shot)\b.*\b(idr|rp|k)\b/.test(combined)) {
+  // If it looks like a price discount on drinks (IDR/Rp amounts with drink keywords), classify as Happy Hour
+  if (/\b(idr|rp)\s*\d/i.test(combined) && 
+      /\b(cocktail|beer|wine|spirit|drink|shot|mojito|margarita|negroni|gin|vodka|whiskey|rum)\b/.test(combined)) {
+    return "Happy Hour";
+  }
+
+  // Generic price-based promos (e.g. "50k", "88k") with drink context → Happy Hour
+  if (/\d+k\b/.test(combined) && 
+      /\b(cocktail|beer|wine|spirit|drink|shot)\b/.test(combined)) {
     return "Happy Hour";
   }
 

@@ -71,6 +71,7 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
   const [dayFilter, setDayFilter] = useState<string[]>(["all"]);
   const [areaFilter, setAreaFilter] = useState<string[]>(["all"]);
   const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(["all"]);
+  const [promoTypeFilter, setPromoTypeFilter] = useState<string[]>(["all"]);
   const [promoSortBy, setPromoSortBy] = useState("newest");
   const [promoSearchQuery, setPromoSearchQuery] = useState("");
   const [eventSortBy, setEventSortBy] = useState("date-asc");
@@ -99,7 +100,9 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
         (Array.isArray(promo.drink_type) ? 
           promo.drink_type.some((drink: string) => drinkTypeFilter.includes(drink?.toLowerCase() || "")) :
           drinkTypeFilter.includes((promo.drink_type as string)?.toLowerCase() || ""));
-      return dayMatch && areaMatch && drinkTypeMatch;
+      const promoTypeMatch = promoTypeFilter.includes("all") || 
+        promoTypeFilter.includes(promo.promo_type || "");
+      return dayMatch && areaMatch && drinkTypeMatch && promoTypeMatch;
     })
     .sort((a, b) => {
       switch (promoSortBy) {
@@ -163,6 +166,10 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
 
   const handleDrinkTypeFilterChange = (filter: string[]) => {
     setDrinkTypeFilter(filter);
+  };
+
+  const handlePromoTypeFilterChange = (filter: string[]) => {
+    setPromoTypeFilter(filter);
   };
 
   const handleJoinEvent = async (eventId: string) => {
@@ -270,6 +277,7 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
             dayFilter={dayFilter}
             areaFilter={areaFilter}
             drinkTypeFilter={drinkTypeFilter}
+            promoTypeFilter={promoTypeFilter}
             sortBy={promoSortBy}
             searchQuery={promoSearchQuery}
             loading={loading}
@@ -277,6 +285,7 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
             onDayFilterChange={handleDayFilterChange}
             onAreaFilterChange={handleAreaFilterChange}
             onDrinkTypeFilterChange={handleDrinkTypeFilterChange}
+            onPromoTypeFilterChange={handlePromoTypeFilterChange}
             onSortChange={setPromoSortBy}
             onSearchChange={setPromoSearchQuery}
             userAdminStatus={userAdminStatus}
