@@ -9,6 +9,7 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { JAKARTA_AREAS } from "@/lib/area-config";
+import { PROMO_TYPES } from "@/lib/promo-types";
 
 interface PromoDetailsProps {
   validUntilDate: Date | undefined;
