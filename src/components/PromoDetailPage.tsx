@@ -289,21 +289,6 @@ export const PromoDetailPage = () => {
                 <CardTitle>Promo Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-muted-foreground" style={{ fontSize: 'clamp(0.813rem, 1.2vw, 0.875rem)' }}>Original Price</span>
-                    <span className="line-through text-muted-foreground" style={{ fontSize: 'clamp(0.813rem, 1.2vw, 0.875rem)' }}>
-                      {promo.original_price_amount ? `${promo.price_currency} ${promo.original_price_amount.toLocaleString()}` : 'N/A'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-semibold" style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}>Your Price</span>
-                    <span className="font-bold text-neon-pink" style={{ fontSize: 'clamp(1.25rem, 2vw, 1.5rem)' }}>
-                      {promo.discounted_price_amount ? `${promo.price_currency} ${promo.discounted_price_amount.toLocaleString()}` : 'FREE'}
-                    </span>
-                  </div>
-                </div>
-
                 {promo.area && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Area</span>
