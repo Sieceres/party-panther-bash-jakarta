@@ -168,6 +168,10 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
     setDrinkTypeFilter(filter);
   };
 
+  const handlePromoTypeFilterChange = (filter: string[]) => {
+    setPromoTypeFilter(filter);
+  };
+
   const handleJoinEvent = async (eventId: string) => {
     try {
       if (!user) {
