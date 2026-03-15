@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { event_id, promo_id, user_id, type } = await req.json();
+    const { event_id, promo_id, user_id, venue_id, type, delete_promos, delete_events } = await req.json();
     
     // Get auth header
     const authHeader = req.headers.get('Authorization');
