@@ -138,7 +138,7 @@ export const PromosSection = ({
                 <Star className="w-5 h-5 mr-2" />
                 Create Promo
               </Button>
-              {userAdminStatus?.is_admin && (
+              {(userAdminStatus?.is_admin || userAdminStatus?.is_super_admin) && (
                 <Button
                   onClick={() => exportPromosToExcel(promos)}
                   size="lg"
