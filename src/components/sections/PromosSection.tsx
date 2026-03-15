@@ -39,6 +39,7 @@ interface PromosSectionProps {
 }
 
 export const PromosSection = ({ 
+  promos,
   filteredPromos,
   showCreatePromo,
   dayFilter,
