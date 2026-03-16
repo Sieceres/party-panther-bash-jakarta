@@ -713,9 +713,17 @@ export const AdminDashboard = () => {
         </div>
 
         {/* Management Tabs */}
-        <Tabs defaultValue="analytics" className="space-y-6">
+        <Tabs defaultValue={defaultTab} className="space-y-6">
           <TabsList className="flex w-full flex-wrap h-auto gap-1">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="reports" className="relative">
+              Reports
+              {pendingReportCount > 0 && (
+                <Badge variant="destructive" className="ml-1.5 px-1.5 py-0 text-[10px] min-w-[18px] h-[18px] flex items-center justify-center">
+                  {pendingReportCount}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="promos">Promos</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
