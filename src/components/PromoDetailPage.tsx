@@ -341,11 +341,22 @@ export const PromoDetailPage = () => {
                   Share Promo
                 </Button>
                 
-                <ReportDialog
-                  type="promo"
-                  targetId={promo.id}
-                  targetTitle={promo.title}
-                />
+                {(currentUserId === promo.created_by || isAdmin) ? (
+                  <Button
+                    onClick={() => navigate(`/edit-promo/${promo.id}`)}
+                    className="w-full min-h-[44px]"
+                    style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
+                  >
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Edit Promo
+                  </Button>
+                ) : (
+                  <ReportDialog
+                    type="promo"
+                    targetId={promo.id}
+                    targetTitle={promo.title}
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
