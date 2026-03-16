@@ -25,19 +25,9 @@ interface PromoForExport {
 }
 
 function buildCellText(promo: PromoForExport): string {
-  const lines: string[] = [];
-
-  if (promo.discount_text) {
-    lines.push(promo.discount_text);
-  }
-  // Only add description if it's meaningfully different from discount_text
-  if (promo.description && promo.description !== promo.discount_text &&
-      !promo.discount_text?.includes(promo.description) &&
-      !promo.description?.includes(promo.discount_text || "")) {
-    lines.push(promo.description);
-  }
-
-  return lines.join("\n") || "–";
+  if (promo.description) return promo.description;
+  if (promo.discount_text) return promo.discount_text;
+  return "–";
 }
 
 function getPromoColor(promoType: string) {
