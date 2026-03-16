@@ -82,16 +82,6 @@ export function reclassifyPromoType(
     return "Ladies Night";
   }
 
-  // Brunch Deal
-  if (/\bbrunch\b/.test(combined)) {
-    return "Brunch Deal";
-  }
-
-  // Live Music
-  if (/\b(live\s*music|live\s*band|dj\s*night|live\s*performance)\b/.test(combined)) {
-    return "Live Music";
-  }
-
   // Bucket Deal — multi-buy bundles (buy X get Y, X beers for price, bucket)
   if (
     /\b(bucket|buy\s*\d+\s*get\s*\d+|(\d+)\s*(beers?|drinks?|bottles?)\s*(for|@)|bundle)\b/.test(combined)
@@ -109,21 +99,6 @@ export function reclassifyPromoType(
     /\b(happy\s*hour|b[1o]g[1o]|buy\s*1\s*get\s*1|buy\s*one\s*get\s*one|\d+\s*%\s*off|half\s*price|2[\s-]*for[\s-]*1)\b/.test(combined)
   ) {
     return "Happy Hour";
-  }
-
-  // Food Special
-  if (
-    /\b(food\s*special|food\s*deal|food\s*promo|eat|meal|dinner\s*deal|lunch\s*deal)\b/.test(combined) &&
-    !/\bdrink\b/.test(combined)
-  ) {
-    return "Food Special";
-  }
-
-  // Drink Special — catch-all for drink discounts not matching above
-  if (
-    /\b(drink\s*special|cocktail\s*special|beer\s*special|wine\s*special|spirits?\s*special)\b/.test(combined)
-  ) {
-    return "Drink Special";
   }
 
   // If it looks like a price discount on drinks (IDR/Rp amounts with drink keywords), classify as Happy Hour
