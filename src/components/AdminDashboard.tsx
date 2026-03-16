@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw, Instagram, MapPin, Image, Phone, FileUp } from "lucide-react";
+import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw, Instagram, MapPin, Image, Phone, FileUp, AlertTriangle } from "lucide-react";
 import { Header } from "./Header";
 import { AdminReceiptManagement } from "./AdminReceiptManagement";
 import { AdminAnalytics } from "./AdminAnalytics";
@@ -15,6 +15,7 @@ import { AdminVenueManagement } from "./AdminVenueManagement";
 import { AdminVenueEdits } from "./AdminVenueEdits";
 import { AdminVenueAudit } from "./AdminVenueAudit";
 import { AdminTagManagement } from "./AdminTagManagement";
+import { AdminReportManagement } from "./AdminReportManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEventUrl, getEditEventUrl, getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
@@ -78,6 +79,8 @@ export const AdminDashboard = () => {
   const [refreshingEventStats, setRefreshingEventStats] = useState(false);
   const [backfillingPromos, setBackfillingPromos] = useState(false);
   const [reclassifying, setReclassifying] = useState(false);
+  const [pendingReportCount, setPendingReportCount] = useState(0);
+  const defaultTab = new URLSearchParams(window.location.search).get('tab') || 'analytics';
 
   const checkAuthAndPermissions = async () => {
     try {
@@ -209,8 +212,23 @@ export const AdminDashboard = () => {
   useEffect(() => {
     if (isAuthorized) {
       fetchData();
+      fetchPendingReportCount();
     }
   }, [isAuthorized, toast]);
+
+  const fetchPendingReportCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('reports')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      if (!error && count !== null) setPendingReportCount(count);
+    } catch (e) {
+      console.error('Error fetching report count:', e);
+    }
+  };
+
+
 
   const handleDeleteEvent = async (id: string) => {
     try {
@@ -694,9 +712,17 @@ export const AdminDashboard = () => {
         </div>
 
         {/* Management Tabs */}
-        <Tabs defaultValue="analytics" className="space-y-6">
+        <Tabs defaultValue={defaultTab} className="space-y-6">
           <TabsList className="flex w-full flex-wrap h-auto gap-1">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="reports" className="relative">
+              Reports
+              {pendingReportCount > 0 && (
+                <Badge variant="destructive" className="ml-1.5 px-1.5 py-0 text-[10px] min-w-[18px] h-[18px] flex items-center justify-center">
+                  {pendingReportCount}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="promos">Promos</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
@@ -713,6 +739,10 @@ export const AdminDashboard = () => {
 
           <TabsContent value="analytics">
             <AdminAnalytics />
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <AdminReportManagement />
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4">

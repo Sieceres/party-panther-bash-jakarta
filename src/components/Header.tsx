@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Map, Store } from "lucide-react";
+import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Map, Store, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,7 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pendingReportCount, setPendingReportCount] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -59,10 +60,28 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
         return;
       }
 
-      setIsAdmin(roles && roles.length > 0);
+      const adminStatus = roles && roles.length > 0;
+      setIsAdmin(adminStatus);
+      if (adminStatus) {
+        fetchPendingReportCount();
+      }
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
       setIsAdmin(false);
+    }
+  };
+
+  const fetchPendingReportCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('reports')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      if (!error && count !== null) {
+        setPendingReportCount(count);
+      }
+    } catch (error) {
+      console.error('Error fetching pending reports:', error);
     }
   };
 
@@ -163,8 +182,25 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
                   </Button>
                );
              })}
+              {/* Notification Bell for Admins */}
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="default"
+                  onClick={() => navigate('/admin?tab=reports')}
+                  className="relative flex items-center gap-1 text-sm"
+                  title="Pending reports"
+                >
+                  <Bell className="w-4 h-4" />
+                  {pendingReportCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {pendingReportCount > 99 ? '99+' : pendingReportCount}
+                    </span>
+                  )}
+                </Button>
+              )}
               {/* Auth Button */}
-              {user ? (
+               {user ? (
                 <Button
                   variant="outline"
                   onClick={handleSignOut}
