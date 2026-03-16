@@ -55,7 +55,18 @@ export const PromoDetailPage = () => {
   usePageTitle(promo?.title ? `${promo.title}` : "Promo");
 
   useEffect(() => {
-    const fetchPromo = async () => {
+    const fetchUserStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+        const adminStatus = await checkUserAdminStatus(user.id);
+        setIsAdmin(adminStatus.is_admin);
+      }
+    };
+    fetchUserStatus();
+  }, []);
+
+  useEffect(() => {
       if (!id) return;
       
       try {
