@@ -80,6 +80,7 @@ export const AdminDashboard = () => {
   const [backfillingPromos, setBackfillingPromos] = useState(false);
   const [reclassifying, setReclassifying] = useState(false);
   const [pendingReportCount, setPendingReportCount] = useState(0);
+  const defaultTab = new URLSearchParams(window.location.search).get('tab') || 'analytics';
 
   const checkAuthAndPermissions = async () => {
     try {
