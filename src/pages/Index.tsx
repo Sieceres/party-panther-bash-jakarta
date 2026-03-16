@@ -83,6 +83,13 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
 
 
   // Determine if any filter or search is active
+  // Save promo filters to sessionStorage whenever they change
+  useEffect(() => {
+    sessionStorage.setItem('promoFilters', JSON.stringify({
+      dayFilter, areaFilter, drinkTypeFilter, promoTypeFilter, promoSortBy, promoSearchQuery
+    }));
+  }, [dayFilter, areaFilter, drinkTypeFilter, promoTypeFilter, promoSortBy, promoSearchQuery]);
+
   const isPromoFiltering = promoSearchQuery.trim() !== "" || 
     !dayFilter.includes("all") || 
     !areaFilter.includes("all") || 
