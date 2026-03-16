@@ -235,19 +235,6 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
           }}
         />
         <div className="promo-image-overlay absolute inset-0"></div>
-        {promo.discount && (
-          <div className={cn(
-            "neon-tag absolute top-3",
-            currentUser && !isOwner ? "right-12" : "right-3"
-          )}>
-            {promo.discount}
-          </div>
-        )}
-        {promo.category && (
-          <div className="neon-tag absolute top-3 left-3">
-            {promo.category}
-          </div>
-        )}
         {canDelete && (
           <div className="absolute top-3 right-20 flex gap-2">
             <Button
