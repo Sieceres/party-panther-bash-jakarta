@@ -60,10 +60,28 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
         return;
       }
 
-      setIsAdmin(roles && roles.length > 0);
+      const adminStatus = roles && roles.length > 0;
+      setIsAdmin(adminStatus);
+      if (adminStatus) {
+        fetchPendingReportCount();
+      }
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
       setIsAdmin(false);
+    }
+  };
+
+  const fetchPendingReportCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('reports')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      if (!error && count !== null) {
+        setPendingReportCount(count);
+      }
+    } catch (error) {
+      console.error('Error fetching pending reports:', error);
     }
   };
 
