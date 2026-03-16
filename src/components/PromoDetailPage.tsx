@@ -153,7 +153,7 @@ export const PromoDetailPage = () => {
         <div className="container mx-auto max-w-4xl">
           <Button
             variant="ghost"
-            onClick={() => navigate('/?section=promos')}
+            onClick={() => navigate('/promos')}
             className="mb-6 hover:bg-gradient-to-r hover:from-neon-blue hover:to-neon-cyan hover:text-white transition-all"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />

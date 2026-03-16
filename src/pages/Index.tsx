@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { HomeContent } from "@/components/sections/HomeContent";
@@ -69,16 +69,27 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
     }
   };
 
-  const [dayFilter, setDayFilter] = useState<string[]>(["all"]);
-  const [areaFilter, setAreaFilter] = useState<string[]>(["all"]);
-  const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(["all"]);
-  const [promoTypeFilter, setPromoTypeFilter] = useState<string[]>(["all"]);
-  const [promoSortBy, setPromoSortBy] = useState("newest");
-  const [promoSearchQuery, setPromoSearchQuery] = useState("");
+  // Persist promo filters in sessionStorage so they survive navigation
+  const storedFilters = typeof window !== 'undefined' ? sessionStorage.getItem('promoFilters') : null;
+  const parsedFilters = storedFilters ? JSON.parse(storedFilters) : null;
+
+  const [dayFilter, setDayFilter] = useState<string[]>(parsedFilters?.dayFilter || ["all"]);
+  const [areaFilter, setAreaFilter] = useState<string[]>(parsedFilters?.areaFilter || ["all"]);
+  const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(parsedFilters?.drinkTypeFilter || ["all"]);
+  const [promoTypeFilter, setPromoTypeFilter] = useState<string[]>(parsedFilters?.promoTypeFilter || ["all"]);
+  const [promoSortBy, setPromoSortBy] = useState(parsedFilters?.promoSortBy || "newest");
+  const [promoSearchQuery, setPromoSearchQuery] = useState(parsedFilters?.promoSearchQuery || "");
   const [eventSortBy, setEventSortBy] = useState("date-asc");
 
 
   // Determine if any filter or search is active
+  // Save promo filters to sessionStorage whenever they change
+  useEffect(() => {
+    sessionStorage.setItem('promoFilters', JSON.stringify({
+      dayFilter, areaFilter, drinkTypeFilter, promoTypeFilter, promoSortBy, promoSearchQuery
+    }));
+  }, [dayFilter, areaFilter, drinkTypeFilter, promoTypeFilter, promoSortBy, promoSearchQuery]);
+
   const isPromoFiltering = promoSearchQuery.trim() !== "" || 
     !dayFilter.includes("all") || 
     !areaFilter.includes("all") || 
