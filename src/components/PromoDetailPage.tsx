@@ -49,6 +49,8 @@ export const PromoDetailPage = () => {
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   usePageTitle(promo?.title ? `${promo.title}` : "Promo");
 
