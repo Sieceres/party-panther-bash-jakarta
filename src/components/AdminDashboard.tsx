@@ -228,9 +228,7 @@ export const AdminDashboard = () => {
     }
   };
 
-  // Read tab from URL query params
-  const urlParams = new URLSearchParams(window.location.search);
-  const defaultTab = urlParams.get('tab') || 'analytics';
+
 
   const handleDeleteEvent = async (id: string) => {
     try {
