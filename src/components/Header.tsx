@@ -17,6 +17,7 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pendingReportCount, setPendingReportCount] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
