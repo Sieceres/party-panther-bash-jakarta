@@ -6,6 +6,7 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = 'https://connector-gateway.lovable.dev/telegram';
+const APP_BASE_URL = 'https://party-panther-bash-jakarta.lovable.app';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -22,7 +23,17 @@ Deno.serve(async (req) => {
     const TELEGRAM_CHAT_ID = Deno.env.get('TELEGRAM_ADMIN_CHAT_ID');
     if (!TELEGRAM_CHAT_ID) throw new Error('TELEGRAM_ADMIN_CHAT_ID is not configured');
 
-    const { reason, target_type, target_title, description } = await req.json();
+    const { reason, target_type, target_id, target_title, description, reporter_email } = await req.json();
+
+    // Build a link to the reported content
+    let targetLink = '';
+    if (target_type === 'promo' && target_id) {
+      targetLink = `\n<b>Link:</b> <a href="${APP_BASE_URL}/promos/${target_id}">${APP_BASE_URL}/promos/${target_id}</a>`;
+    } else if (target_type === 'event' && target_id) {
+      targetLink = `\n<b>Link:</b> <a href="${APP_BASE_URL}/events/${target_id}">${APP_BASE_URL}/events/${target_id}</a>`;
+    } else if (target_type === 'profile' && target_id) {
+      targetLink = `\n<b>Link:</b> <a href="${APP_BASE_URL}/profile/${target_id}">${APP_BASE_URL}/profile/${target_id}</a>`;
+    }
 
     const message = [
       `🚨 <b>New Report</b>`,
@@ -31,6 +42,8 @@ Deno.serve(async (req) => {
       `<b>Target:</b> ${target_title || 'Unknown'}`,
       `<b>Reason:</b> ${reason}`,
       description ? `<b>Details:</b> ${description}` : '',
+      `<b>Reported by:</b> ${reporter_email || 'Unknown'}`,
+      targetLink,
       ``,
       `Check the admin dashboard to review.`,
     ].filter(Boolean).join('\n');
