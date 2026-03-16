@@ -79,6 +79,7 @@ export const AdminDashboard = () => {
   const [refreshingEventStats, setRefreshingEventStats] = useState(false);
   const [backfillingPromos, setBackfillingPromos] = useState(false);
   const [reclassifying, setReclassifying] = useState(false);
+  const [pendingReportCount, setPendingReportCount] = useState(0);
 
   const checkAuthAndPermissions = async () => {
     try {
