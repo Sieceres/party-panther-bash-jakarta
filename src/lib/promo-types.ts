@@ -22,10 +22,6 @@ const PROMO_TYPE_ALIASES: Record<string, PromoType> = {
   free_flow: "Free Flow",
   bottle_promo: "Bottle Promo",
   bucket_deal: "Bucket Deal",
-  brunch_deal: "Brunch Deal",
-  food_special: "Food Special",
-  drink_special: "Drink Special",
-  live_music: "Live Music",
   other: "Other",
   // Common variations
   "happy hour": "Happy Hour",
@@ -33,10 +29,15 @@ const PROMO_TYPE_ALIASES: Record<string, PromoType> = {
   "free flow": "Free Flow",
   "bottle promo": "Bottle Promo",
   "bucket deal": "Bucket Deal",
-  "brunch deal": "Brunch Deal",
-  "food special": "Food Special",
-  "drink special": "Drink Special",
-  "live music": "Live Music",
+  // Map removed types to Other
+  brunch_deal: "Other",
+  food_special: "Other",
+  drink_special: "Other",
+  live_music: "Other",
+  "brunch deal": "Other",
+  "food special": "Other",
+  "drink special": "Other",
+  "live music": "Other",
 };
 
 /**
