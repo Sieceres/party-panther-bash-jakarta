@@ -24,6 +24,25 @@ interface PromoForExport {
   price_currency: string | null;
 }
 
+function getSignificantWords(text: string): Set<string> {
+  const stopWords = new Set(["the", "a", "an", "and", "or", "for", "from", "to", "of", "in", "on", "at", "with", "all", "is", "are"]);
+  return new Set(
+    text.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/)
+      .filter(w => w.length > 1 && !stopWords.has(w))
+  );
+}
+
+function hasHighOverlap(textA: string, textB: string): boolean {
+  const wordsA = getSignificantWords(textA);
+  const wordsB = getSignificantWords(textB);
+  if (wordsA.size === 0) return false;
+  let overlap = 0;
+  for (const w of wordsA) {
+    if (wordsB.has(w)) overlap++;
+  }
+  return overlap / wordsA.size >= 0.5;
+}
+
 function buildCellText(promo: PromoForExport): string {
   const lines: string[] = [];
 
@@ -33,7 +52,8 @@ function buildCellText(promo: PromoForExport): string {
   // Only add description if it's meaningfully different from discount_text
   if (promo.description && promo.description !== promo.discount_text &&
       !promo.discount_text?.includes(promo.description) &&
-      !promo.description?.includes(promo.discount_text || "")) {
+      !promo.description?.includes(promo.discount_text || "") &&
+      !hasHighOverlap(promo.discount_text || "", promo.description)) {
     lines.push(promo.description);
   }
 
