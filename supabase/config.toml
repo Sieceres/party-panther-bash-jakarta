@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.scrape-venue-images]
 verify_jwt = false
+
+[functions.notify-report]
+verify_jwt = false

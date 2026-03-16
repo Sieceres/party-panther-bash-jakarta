@@ -113,6 +113,11 @@ export const ReportDialog = ({ type, targetId, targetTitle, open, onOpenChange }
         description: "Thank you for your report. We'll review it as soon as possible.",
       });
 
+      // Send Telegram notification (fire-and-forget)
+      supabase.functions.invoke('notify-report', {
+        body: { reason, target_type: type, target_title: targetTitle, description: description.trim() || null }
+      }).catch(err => console.error('Telegram notify failed:', err));
+
       setIsOpen(false);
       setReason("");
       setDescription("");

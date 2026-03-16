@@ -742,6 +742,10 @@ export const AdminDashboard = () => {
             <AdminAnalytics />
           </TabsContent>
 
+          <TabsContent value="reports">
+            <AdminReportManagement />
+          </TabsContent>
+
           <TabsContent value="events" className="space-y-4">
             <Card>
               <CardHeader>

@@ -182,8 +182,25 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
                   </Button>
                );
              })}
+              {/* Notification Bell for Admins */}
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="default"
+                  onClick={() => navigate('/admin?tab=reports')}
+                  className="relative flex items-center gap-1 text-sm"
+                  title="Pending reports"
+                >
+                  <Bell className="w-4 h-4" />
+                  {pendingReportCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {pendingReportCount > 99 ? '99+' : pendingReportCount}
+                    </span>
+                  )}
+                </Button>
+              )}
               {/* Auth Button */}
-              {user ? (
+               {user ? (
                 <Button
                   variant="outline"
                   onClick={handleSignOut}
