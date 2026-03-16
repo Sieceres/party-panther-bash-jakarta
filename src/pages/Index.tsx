@@ -301,7 +301,7 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
             userAdminStatus={userAdminStatus}
             onFavoriteToggle={updatePromoFavorite}
             onLoadMore={loadMorePromos}
-            hasMore={hasMorePromos}
+            hasMore={isPromoFiltering ? false : hasMorePromos}
           />
         );
       
