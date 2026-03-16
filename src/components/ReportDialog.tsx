@@ -51,10 +51,13 @@ export const ReportDialog = ({ type, targetId, targetTitle, open, onOpenChange }
       "Other"
     ],
     promo: [
-      "Misleading offer",
+      "Expired / no longer valid",
+      "Wrong venue info",
+      "Incorrect pricing / discount",
+      "Wrong day / schedule",
+      "Duplicate promo",
+      "Spam / not a real promo",
       "Inappropriate content",
-      "Spam",
-      "Fake promo",
       "Other"
     ],
     comment: [

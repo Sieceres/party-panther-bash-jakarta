@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Star, Share2, User as UserIcon, BadgeCheck } from "lucide-react";
+import { MapPin, ArrowLeft, Star, Share2, User as UserIcon, BadgeCheck, Pencil } from "lucide-react";
 import { GoogleMap } from "./GoogleMap";
 import { ReviewsList } from "./ReviewsList";
 import { ReportDialog } from "./ReportDialog";
@@ -13,6 +13,7 @@ import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getPromoBySlugOrId } from "@/lib/slug-utils";
+import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import Linkify from "linkify-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
@@ -48,8 +49,22 @@ export const PromoDetailPage = () => {
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   usePageTitle(promo?.title ? `${promo.title}` : "Promo");
+
+  useEffect(() => {
+    const fetchUserStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+        const adminStatus = await checkUserAdminStatus(user.id);
+        setIsAdmin(adminStatus.is_admin);
+      }
+    };
+    fetchUserStatus();
+  }, []);
 
   useEffect(() => {
     const fetchPromo = async () => {
@@ -326,11 +341,22 @@ export const PromoDetailPage = () => {
                   Share Promo
                 </Button>
                 
-                <ReportDialog
-                  type="promo"
-                  targetId={promo.id}
-                  targetTitle={promo.title}
-                />
+                {(currentUserId === promo.created_by || isAdmin) ? (
+                  <Button
+                    onClick={() => navigate(`/edit-promo/${promo.id}`)}
+                    className="w-full min-h-[44px]"
+                    style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
+                  >
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Edit Promo
+                  </Button>
+                ) : (
+                  <ReportDialog
+                    type="promo"
+                    targetId={promo.id}
+                    targetTitle={promo.title}
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
