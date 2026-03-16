@@ -8,10 +8,6 @@ export const PROMO_TYPES = [
   "Free Flow",
   "Bottle Promo",
   "Bucket Deal",
-  "Brunch Deal",
-  "Food Special",
-  "Drink Special",
-  "Live Music",
   "Other",
 ] as const;
 
@@ -26,10 +22,6 @@ const PROMO_TYPE_ALIASES: Record<string, PromoType> = {
   free_flow: "Free Flow",
   bottle_promo: "Bottle Promo",
   bucket_deal: "Bucket Deal",
-  brunch_deal: "Brunch Deal",
-  food_special: "Food Special",
-  drink_special: "Drink Special",
-  live_music: "Live Music",
   other: "Other",
   // Common variations
   "happy hour": "Happy Hour",
@@ -37,10 +29,15 @@ const PROMO_TYPE_ALIASES: Record<string, PromoType> = {
   "free flow": "Free Flow",
   "bottle promo": "Bottle Promo",
   "bucket deal": "Bucket Deal",
-  "brunch deal": "Brunch Deal",
-  "food special": "Food Special",
-  "drink special": "Drink Special",
-  "live music": "Live Music",
+  // Map removed types to Other
+  brunch_deal: "Other",
+  food_special: "Other",
+  drink_special: "Other",
+  live_music: "Other",
+  "brunch deal": "Other",
+  "food special": "Other",
+  "drink special": "Other",
+  "live music": "Other",
 };
 
 /**
@@ -85,16 +82,6 @@ export function reclassifyPromoType(
     return "Ladies Night";
   }
 
-  // Brunch Deal
-  if (/\bbrunch\b/.test(combined)) {
-    return "Brunch Deal";
-  }
-
-  // Live Music
-  if (/\b(live\s*music|live\s*band|dj\s*night|live\s*performance)\b/.test(combined)) {
-    return "Live Music";
-  }
-
   // Bucket Deal — multi-buy bundles (buy X get Y, X beers for price, bucket)
   if (
     /\b(bucket|buy\s*\d+\s*get\s*\d+|(\d+)\s*(beers?|drinks?|bottles?)\s*(for|@)|bundle)\b/.test(combined)
@@ -112,21 +99,6 @@ export function reclassifyPromoType(
     /\b(happy\s*hour|b[1o]g[1o]|buy\s*1\s*get\s*1|buy\s*one\s*get\s*one|\d+\s*%\s*off|half\s*price|2[\s-]*for[\s-]*1)\b/.test(combined)
   ) {
     return "Happy Hour";
-  }
-
-  // Food Special
-  if (
-    /\b(food\s*special|food\s*deal|food\s*promo|eat|meal|dinner\s*deal|lunch\s*deal)\b/.test(combined) &&
-    !/\bdrink\b/.test(combined)
-  ) {
-    return "Food Special";
-  }
-
-  // Drink Special — catch-all for drink discounts not matching above
-  if (
-    /\b(drink\s*special|cocktail\s*special|beer\s*special|wine\s*special|spirits?\s*special)\b/.test(combined)
-  ) {
-    return "Drink Special";
   }
 
   // If it looks like a price discount on drinks (IDR/Rp amounts with drink keywords), classify as Happy Hour
