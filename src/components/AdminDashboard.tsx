@@ -211,8 +211,25 @@ export const AdminDashboard = () => {
   useEffect(() => {
     if (isAuthorized) {
       fetchData();
+      fetchPendingReportCount();
     }
   }, [isAuthorized, toast]);
+
+  const fetchPendingReportCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('reports')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      if (!error && count !== null) setPendingReportCount(count);
+    } catch (e) {
+      console.error('Error fetching report count:', e);
+    }
+  };
+
+  // Read tab from URL query params
+  const urlParams = new URLSearchParams(window.location.search);
+  const defaultTab = urlParams.get('tab') || 'analytics';
 
   const handleDeleteEvent = async (id: string) => {
     try {
