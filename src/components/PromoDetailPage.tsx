@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Star, Share2, User as UserIcon, BadgeCheck } from "lucide-react";
+import { MapPin, ArrowLeft, Star, Share2, User as UserIcon, BadgeCheck, Pencil } from "lucide-react";
 import { GoogleMap } from "./GoogleMap";
 import { ReviewsList } from "./ReviewsList";
 import { ReportDialog } from "./ReportDialog";
@@ -13,6 +13,7 @@ import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getPromoBySlugOrId } from "@/lib/slug-utils";
+import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import Linkify from "linkify-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
