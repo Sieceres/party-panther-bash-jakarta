@@ -32,21 +32,21 @@ export const JAKARTA_AREAS: AreaRegion[] = [
     label: "South Jakarta",
     lat: -6.261,
     lng: 106.810,
-    neighborhoods: ["Kemang", "Senopati & Gunawarman", "SCBD", "Senayan", "Blok M & Melawai"],
+    neighborhoods: ["Kemang", "Senopati & Gunawarman", "SCBD", "Senayan", "Blok M & Melawai", "Kuningan & Setiabudi", "Mega Kuningan"],
   },
   {
     key: "central",
     label: "Central Jakarta",
     lat: -6.186,
     lng: 106.834,
-    neighborhoods: ["Sudirman & Thamrin", "Kuningan & Setiabudi", "Mega Kuningan", "Menteng & Cikini", "Kota Tua"],
+    neighborhoods: ["Sudirman & Thamrin", "Menteng & Cikini", "Kota Tua"],
   },
   {
     key: "north",
     label: "North Jakarta",
     lat: -6.121,
     lng: 106.830,
-    neighborhoods: ["PIK", "Kelapa Gading", "Ancol"],
+    neighborhoods: ["PIK", "Kelapa Gading", "Kelapa Gading Timur", "Ancol"],
   },
   {
     key: "west",
@@ -54,13 +54,6 @@ export const JAKARTA_AREAS: AreaRegion[] = [
     lat: -6.168,
     lng: 106.765,
     neighborhoods: ["Grogol", "Kebon Jeruk"],
-  },
-  {
-    key: "east",
-    label: "East Jakarta",
-    lat: -6.225,
-    lng: 106.900,
-    neighborhoods: ["Kelapa Gading Timur"],
   },
 ];
 

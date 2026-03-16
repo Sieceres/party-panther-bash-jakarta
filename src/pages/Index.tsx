@@ -78,8 +78,15 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
   const [eventSortBy, setEventSortBy] = useState("date-asc");
 
 
-  // Use allPromos when searching to avoid missing results beyond paginated set
-  const promoSource = promoSearchQuery.trim() ? allPromos : promos;
+  // Determine if any filter or search is active
+  const isPromoFiltering = promoSearchQuery.trim() !== "" || 
+    !dayFilter.includes("all") || 
+    !areaFilter.includes("all") || 
+    !drinkTypeFilter.includes("all") || 
+    !promoTypeFilter.includes("all");
+
+  // Use allPromos when any filter/search is active to avoid missing results beyond paginated set
+  const promoSource = isPromoFiltering ? allPromos : promos;
   const filteredAndSortedPromos = promoSource
     .filter((promo) => {
       // Search filter
@@ -294,7 +301,7 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
             userAdminStatus={userAdminStatus}
             onFavoriteToggle={updatePromoFavorite}
             onLoadMore={loadMorePromos}
-            hasMore={hasMorePromos}
+            hasMore={isPromoFiltering ? false : hasMorePromos}
           />
         );
       
