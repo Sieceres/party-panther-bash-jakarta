@@ -67,6 +67,7 @@ export const PromoDetailPage = () => {
   }, []);
 
   useEffect(() => {
+    const fetchPromo = async () => {
       if (!id) return;
       
       try {
