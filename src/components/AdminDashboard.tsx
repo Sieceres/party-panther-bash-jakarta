@@ -576,6 +576,15 @@ export const AdminDashboard = () => {
       case 'makeSuperAdmin':
         handleSetSuperAdmin(pendingAction.id, !pendingAction.isCurrentlySuperAdmin);
         break;
+      case 'purgeActivity':
+        handlePurgeActivity(pendingAction.id);
+        break;
+      case 'banUser':
+        handleBanUser(pendingAction.id);
+        break;
+      case 'unbanUser':
+        handleUnbanUser(pendingAction.id);
+        break;
     }
   };
 
