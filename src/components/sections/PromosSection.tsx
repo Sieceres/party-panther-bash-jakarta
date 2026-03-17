@@ -429,6 +429,7 @@ export const PromosSection = ({
                   validUntil: promo.valid_until || "",
                   image: promo.image_url || "",
                   category: promo.category || "",
+                  promoType: promo.promo_type || "",
                   day: promo.day_of_week || [],
                   area: promo.area || "",
                   drinkType: promo.drink_type || []
@@ -466,7 +467,7 @@ export const PromosSection = ({
               id: p.id,
               title: p.title,
               venue_name: p.venue_name,
-              category: p.category,
+              category: p.promo_type,
             }))}
             onClose={() => {
               setReviewMode(false);
@@ -476,7 +477,7 @@ export const PromosSection = ({
             onSelectedChange={setSelectedPromoId}
             onCategoryUpdated={(promoId, newCategory) => {
               setLocalPromos(prev =>
-                prev.map(p => p.id === promoId ? { ...p, category: newCategory } : p)
+                prev.map(p => p.id === promoId ? { ...p, promo_type: newCategory } : p)
               );
             }}
           />

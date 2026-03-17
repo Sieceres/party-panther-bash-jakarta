@@ -35,6 +35,7 @@ interface Promo {
   day: string[] | string;
   area: string;
   drinkType: string[] | string;
+  promoType?: string;
   created_by?: string;
   // Optimized data fields
   creator_name?: string;
@@ -240,9 +241,9 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
           }}
         />
         <div className="promo-image-overlay absolute inset-0"></div>
-        {promo.category && (
-          <Badge className="absolute bottom-3 left-3 bg-black/60 text-white border-none backdrop-blur-sm text-xs z-10">
-            {promo.category}
+        {promo.promoType && (
+          <Badge className="absolute top-3 left-3 bg-black/60 text-white border-none backdrop-blur-sm text-xs z-10">
+            {promo.promoType}
           </Badge>
         )}
         {canDelete && (
