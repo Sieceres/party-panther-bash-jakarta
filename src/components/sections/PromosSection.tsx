@@ -458,27 +458,6 @@ export const PromosSection = ({
           }}
         />
         
-        {reviewMode && (userAdminStatus?.is_admin || userAdminStatus?.is_super_admin) && (
-          <PromoReviewPanel
-            promos={localPromos.map(p => ({
-              id: p.id,
-              title: p.title,
-              venue_name: p.venue_name,
-              category: p.promo_type,
-            }))}
-            onClose={() => {
-              setReviewMode(false);
-              setSelectedPromoId(null);
-            }}
-            selectedPromoId={selectedPromoId}
-            onSelectedChange={setSelectedPromoId}
-            onCategoryUpdated={(promoId, newCategory) => {
-              setLocalPromos(prev =>
-                prev.map(p => p.id === promoId ? { ...p, promo_type: newCategory } : p)
-              );
-            }}
-          />
-        )}
       </div>
       </div>
     </div>
