@@ -171,13 +171,13 @@ export const PromosSection = ({
                     Export to Excel
                   </Button>
                   <Button
-                    onClick={() => setReviewMode(!reviewMode)}
+                    onClick={() => navigate("/admin/review-promos")}
                     size="lg"
-                    variant={reviewMode ? "default" : "outline"}
+                    variant="outline"
                     className="min-h-[44px]"
                   >
                     <ClipboardCheck className="w-5 h-5 mr-2" />
-                    {reviewMode ? "Exit Review" : "Review Categories"}
+                    Review Categories
                   </Button>
                 </>
               )}
