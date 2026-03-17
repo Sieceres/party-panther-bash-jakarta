@@ -155,23 +155,33 @@ export const PromosSection = ({
                 Create Promo
               </Button>
               {(userAdminStatus?.is_admin || userAdminStatus?.is_super_admin) && (
-                <Button
-                  onClick={async () => {
-                    // Fetch ALL promos directly to avoid pagination/filter issues
-                    const { data: allPromos, error } = await supabase.rpc('get_promos_simple');
-                    if (error) {
-                      toast({ title: "Export failed", description: error.message, variant: "destructive" });
-                      return;
-                    }
-                    exportPromosToExcel((allPromos || []) as Tables<'promos'>[]);
-                  }}
-                  size="lg"
-                  variant="outline"
-                  className="min-h-[44px]"
-                >
-                  <Download className="w-5 h-5 mr-2" />
-                  Export to Excel
-                </Button>
+                <>
+                  <Button
+                    onClick={async () => {
+                      const { data: allPromos, error } = await supabase.rpc('get_promos_simple');
+                      if (error) {
+                        toast({ title: "Export failed", description: error.message, variant: "destructive" });
+                        return;
+                      }
+                      exportPromosToExcel((allPromos || []) as Tables<'promos'>[]);
+                    }}
+                    size="lg"
+                    variant="outline"
+                    className="min-h-[44px]"
+                  >
+                    <Download className="w-5 h-5 mr-2" />
+                    Export to Excel
+                  </Button>
+                  <Button
+                    onClick={() => setReviewMode(!reviewMode)}
+                    size="lg"
+                    variant={reviewMode ? "default" : "outline"}
+                    className="min-h-[44px]"
+                  >
+                    <ClipboardCheck className="w-5 h-5 mr-2" />
+                    {reviewMode ? "Exit Review" : "Review Categories"}
+                  </Button>
+                </>
               )}
             </div>
           )}
