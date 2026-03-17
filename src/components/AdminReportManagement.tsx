@@ -81,10 +81,10 @@ export const AdminReportManagement = () => {
   const viewTarget = (report: Report) => {
     switch (report.target_type) {
       case 'promo':
-        navigate(`/promos/${report.target_id}`);
+        navigate(`/promo/${report.target_id}`);
         break;
       case 'event':
-        navigate(`/events/${report.target_id}`);
+        navigate(`/event/${report.target_id}`);
         break;
       case 'profile':
         navigate(`/profile/${report.target_id}`);
