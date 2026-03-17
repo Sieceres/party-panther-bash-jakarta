@@ -50,6 +50,7 @@ interface PromoCardProps {
   userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
   onFavoriteToggle?: (promoId: string, isFavorite: boolean) => void;
   index?: number;
+  isSelected?: boolean;
 }
 
 import { format } from "date-fns";
