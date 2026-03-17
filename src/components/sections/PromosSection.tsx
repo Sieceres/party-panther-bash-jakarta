@@ -15,6 +15,7 @@ import { Star, Lock, Filter, RotateCcw, ArrowUpDown, Download, Search, Clipboard
 import { exportPromosToExcel } from "@/lib/promo-export";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { PROMO_TYPES as PROMO_TYPE_LIST } from "@/lib/promo-types";
