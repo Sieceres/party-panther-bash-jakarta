@@ -18,6 +18,7 @@ import { AdminVenueEdits } from "./AdminVenueEdits";
 import { AdminVenueAudit } from "./AdminVenueAudit";
 import { AdminTagManagement } from "./AdminTagManagement";
 import { AdminReportManagement } from "./AdminReportManagement";
+import { AdminUserFlags } from "./AdminUserFlags";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEventUrl, getEditEventUrl, getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
