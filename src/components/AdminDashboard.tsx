@@ -344,6 +344,7 @@ export const AdminDashboard = () => {
       });
     }
     setPendingAction(null);
+  };
 
   const handleDeleteEvent = async (id: string) => {
     try {
