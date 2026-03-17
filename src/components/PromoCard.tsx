@@ -35,6 +35,7 @@ interface Promo {
   day: string[] | string;
   area: string;
   drinkType: string[] | string;
+  promoType?: string;
   created_by?: string;
   // Optimized data fields
   creator_name?: string;

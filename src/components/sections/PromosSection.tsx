@@ -467,7 +467,7 @@ export const PromosSection = ({
               id: p.id,
               title: p.title,
               venue_name: p.venue_name,
-              category: p.category,
+              category: p.promo_type,
             }))}
             onClose={() => {
               setReviewMode(false);
