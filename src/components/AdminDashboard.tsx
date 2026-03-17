@@ -71,7 +71,7 @@ export const AdminDashboard = () => {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [pendingAction, setPendingAction] = useState<{
-    type: 'deleteEvent' | 'deletePromo' | 'deleteUser' | 'makeAdmin' | 'makeSuperAdmin';
+    type: 'deleteEvent' | 'deletePromo' | 'deleteUser' | 'makeAdmin' | 'makeSuperAdmin' | 'purgeActivity' | 'banUser' | 'unbanUser';
     id: string;
     title?: string;
     userName?: string;
@@ -83,6 +83,11 @@ export const AdminDashboard = () => {
   const [backfillingPromos, setBackfillingPromos] = useState(false);
   const [reclassifying, setReclassifying] = useState(false);
   const [pendingReportCount, setPendingReportCount] = useState(0);
+  const [pendingFlagCount, setPendingFlagCount] = useState(0);
+  const [bannedUserIds, setBannedUserIds] = useState<Set<string>>(new Set());
+  const [banReason, setBanReason] = useState('');
+  const [banExpiry, setBanExpiry] = useState('');
+  const [purgingUserId, setPurgingUserId] = useState<string | null>(null);
   const defaultTab = new URLSearchParams(window.location.search).get('tab') || 'analytics';
 
   const checkAuthAndPermissions = async () => {
