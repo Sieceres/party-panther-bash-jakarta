@@ -344,7 +344,8 @@ export const AdminDashboard = () => {
       });
     }
     setPendingAction(null);
-  };
+
+  const handleDeleteEvent = async (id: string) => {
     try {
       // Use secure-delete function with proper authorization checks
       const authData = JSON.parse(localStorage.getItem('sb-qgttbaibhmzbmknjlghj-auth-token') || '{}');
