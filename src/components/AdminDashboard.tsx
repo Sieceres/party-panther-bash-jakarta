@@ -854,6 +854,15 @@ export const AdminDashboard = () => {
                 </Badge>
               )}
             </TabsTrigger>
+            <TabsTrigger value="flags" className="relative">
+              <Flag className="w-3 h-3 mr-1" />
+              Flags
+              {pendingFlagCount > 0 && (
+                <Badge variant="destructive" className="ml-1.5 px-1.5 py-0 text-[10px] min-w-[18px] h-[18px] flex items-center justify-center">
+                  {pendingFlagCount}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="promos">Promos</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
