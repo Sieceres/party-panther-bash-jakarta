@@ -998,7 +998,7 @@ export const AdminDashboard = () => {
                           <span>Type: {user.profile_type}</span>
                           <span>Joined: {new Date(user.created_at).toLocaleDateString()}</span>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           {user.roles?.some(r => r.role === 'admin' || r.role === 'superadmin') ? (
                             <Badge variant="destructive">
                               {user.roles.find(r => r.role === 'superadmin') ? 'Super Admin' : 'Admin'}
@@ -1011,6 +1011,11 @@ export const AdminDashboard = () => {
                           {user.is_verified && (
                             <Badge variant="outline" className="text-green-600 border-green-600">
                               Verified
+                            </Badge>
+                          )}
+                          {bannedUserIds.has(user.user_id) && (
+                            <Badge variant="destructive" className="flex items-center gap-1">
+                              <Ban className="w-3 h-3" /> Banned
                             </Badge>
                           )}
                         </div>
