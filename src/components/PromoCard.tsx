@@ -240,6 +240,11 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
           }}
         />
         <div className="promo-image-overlay absolute inset-0"></div>
+        {promo.category && (
+          <Badge className="absolute bottom-3 left-3 bg-black/60 text-white border-none backdrop-blur-sm text-xs z-10">
+            {promo.category}
+          </Badge>
+        )}
         {canDelete && (
           <div className="absolute top-3 right-20 flex gap-2">
             <Button
