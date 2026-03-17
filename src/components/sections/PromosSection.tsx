@@ -69,11 +69,9 @@ export const PromosSection = ({
   hasMore = false
 }: PromosSectionProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const [reviewMode, setReviewMode] = useState(false);
-  const [selectedPromoId, setSelectedPromoId] = useState<string | null>(null);
-  const [localPromos, setLocalPromos] = useState(filteredPromos);
 
   // Sync localPromos with filteredPromos
   useEffect(() => {
