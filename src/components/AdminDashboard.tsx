@@ -1515,6 +1515,29 @@ export const AdminDashboard = () => {
                 {getConfirmationMessage()}
               </AlertDialogDescription>
             </AlertDialogHeader>
+            {pendingAction?.type === 'banUser' && (
+              <div className="space-y-3 py-2">
+                <div>
+                  <Label htmlFor="ban-reason">Reason</Label>
+                  <Input
+                    id="ban-reason"
+                    placeholder="Reason for ban..."
+                    value={banReason}
+                    onChange={(e) => setBanReason(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ban-expiry">Expires (optional)</Label>
+                  <Input
+                    id="ban-expiry"
+                    type="datetime-local"
+                    value={banExpiry}
+                    onChange={(e) => setBanExpiry(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Leave empty for permanent ban</p>
+                </div>
+              </div>
+            )}
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setPendingAction(null)}>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={confirmAction}>Confirm</AlertDialogAction>
