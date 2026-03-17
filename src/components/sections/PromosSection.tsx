@@ -1,6 +1,5 @@
 import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { PromoReviewPanel } from "@/components/PromoReviewPanel";
 import { Input } from "@/components/ui/input";
 import { PromoCard } from "@/components/PromoCard";
 import { CreatePromoForm } from "@/components/CreatePromoForm";
@@ -16,6 +15,7 @@ import { Star, Lock, Filter, RotateCcw, ArrowUpDown, Download, Search, Clipboard
 import { exportPromosToExcel } from "@/lib/promo-export";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { PROMO_TYPES as PROMO_TYPE_LIST } from "@/lib/promo-types";
@@ -69,16 +69,11 @@ export const PromosSection = ({
   hasMore = false
 }: PromosSectionProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const [reviewMode, setReviewMode] = useState(false);
-  const [selectedPromoId, setSelectedPromoId] = useState<string | null>(null);
-  const [localPromos, setLocalPromos] = useState(filteredPromos);
 
-  // Sync localPromos with filteredPromos
-  useEffect(() => {
-    setLocalPromos(filteredPromos);
-  }, [filteredPromos]);
+  
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -173,13 +168,13 @@ export const PromosSection = ({
                     Export to Excel
                   </Button>
                   <Button
-                    onClick={() => setReviewMode(!reviewMode)}
+                    onClick={() => navigate("/admin/review-promos")}
                     size="lg"
-                    variant={reviewMode ? "default" : "outline"}
+                    variant="outline"
                     className="min-h-[44px]"
                   >
                     <ClipboardCheck className="w-5 h-5 mr-2" />
-                    {reviewMode ? "Exit Review" : "Review Categories"}
+                    Review Categories
                   </Button>
                 </>
               )}
@@ -419,7 +414,7 @@ export const PromosSection = ({
               </div>
             </div>
           ) : (
-            localPromos.map((promo, index) => (
+            filteredPromos.map((promo, index) => (
                <PromoCard 
                 key={promo.id} 
                 promo={{
@@ -437,7 +432,6 @@ export const PromosSection = ({
                 userAdminStatus={userAdminStatus}
                 onFavoriteToggle={onFavoriteToggle}
                 index={index}
-                isSelected={reviewMode && promo.id === selectedPromoId}
               />
             ))
           )}
@@ -461,27 +455,6 @@ export const PromosSection = ({
           }}
         />
         
-        {reviewMode && (userAdminStatus?.is_admin || userAdminStatus?.is_super_admin) && (
-          <PromoReviewPanel
-            promos={localPromos.map(p => ({
-              id: p.id,
-              title: p.title,
-              venue_name: p.venue_name,
-              category: p.promo_type,
-            }))}
-            onClose={() => {
-              setReviewMode(false);
-              setSelectedPromoId(null);
-            }}
-            selectedPromoId={selectedPromoId}
-            onSelectedChange={setSelectedPromoId}
-            onCategoryUpdated={(promoId, newCategory) => {
-              setLocalPromos(prev =>
-                prev.map(p => p.id === promoId ? { ...p, promo_type: newCategory } : p)
-              );
-            }}
-          />
-        )}
       </div>
       </div>
     </div>
