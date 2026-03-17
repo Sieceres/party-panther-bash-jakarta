@@ -278,16 +278,6 @@ const PromoReview = () => {
             <div className="lg:col-span-2 overflow-y-auto">
               {selectedPromo ? (
                 <div className="space-y-6">
-                  {/* Image */}
-                  {selectedPromo.image_url && (
-                    <div className="aspect-video rounded-lg overflow-hidden bg-muted max-h-64">
-                      <img
-                        src={selectedPromo.image_url}
-                        alt={selectedPromo.title}
-                        className="w-full h-full object-cover object-center"
-                      />
-                    </div>
-                  )}
 
                   {/* Title + current type */}
                   <div className="space-y-2">
