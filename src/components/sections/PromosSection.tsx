@@ -477,7 +477,7 @@ export const PromosSection = ({
             onSelectedChange={setSelectedPromoId}
             onCategoryUpdated={(promoId, newCategory) => {
               setLocalPromos(prev =>
-                prev.map(p => p.id === promoId ? { ...p, category: newCategory } : p)
+                prev.map(p => p.id === promoId ? { ...p, promo_type: newCategory } : p)
               );
             }}
           />
