@@ -73,10 +73,7 @@ export const PromosSection = ({
   const [user, setUser] = useState<User | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
 
-  // Sync localPromos with filteredPromos
-  useEffect(() => {
-    setLocalPromos(filteredPromos);
-  }, [filteredPromos]);
+  
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
