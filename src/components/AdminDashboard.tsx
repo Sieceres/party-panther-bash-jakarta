@@ -221,6 +221,8 @@ export const AdminDashboard = () => {
     if (isAuthorized) {
       fetchData();
       fetchPendingReportCount();
+      fetchBannedUsers();
+    }
     }
   }, [isAuthorized, toast]);
 
