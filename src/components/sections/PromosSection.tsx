@@ -419,7 +419,7 @@ export const PromosSection = ({
               </div>
             </div>
           ) : (
-            filteredPromos.map((promo, index) => (
+            localPromos.map((promo, index) => (
                <PromoCard 
                 key={promo.id} 
                 promo={{
@@ -436,6 +436,7 @@ export const PromosSection = ({
                 userAdminStatus={userAdminStatus}
                 onFavoriteToggle={onFavoriteToggle}
                 index={index}
+                isSelected={reviewMode && promo.id === selectedPromoId}
               />
             ))
           )}
