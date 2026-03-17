@@ -219,7 +219,11 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
 
   return (
     <Card 
-      className="promo-card-enhanced cursor-pointer animate-stagger-in hover:border-primary/50 transition-all duration-300 flex flex-col h-full" 
+      id={`promo-card-${promo.id}`}
+      className={cn(
+        "promo-card-enhanced cursor-pointer animate-stagger-in hover:border-primary/50 transition-all duration-300 flex flex-col h-full",
+        isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background"
+      )}
       style={{ animationDelay: `${index * 80}ms` }}
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
