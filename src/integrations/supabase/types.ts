@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      banned_users: {
+        Row: {
+          banned_at: string
+          banned_by: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          banned_at?: string
+          banned_by: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          banned_at?: string
+          banned_by?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       contact_logs: {
         Row: {
           contact_date: string
@@ -913,6 +943,39 @@ export type Database = {
           },
         ]
       }
+      user_flags: {
+        Row: {
+          created_at: string
+          details: Json | null
+          flag_type: Database["public"]["Enums"]["flag_type"]
+          id: string
+          is_resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          flag_type: Database["public"]["Enums"]["flag_type"]
+          id?: string
+          is_resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          flag_type?: Database["public"]["Enums"]["flag_type"]
+          id?: string
+          is_resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1388,12 +1451,18 @@ export type Database = {
         Args: { event_id_param: string; user_id_param: string }
         Returns: boolean
       }
+      is_user_banned: { Args: { _user_id: string }; Returns: boolean }
       refresh_event_attendee_stats: { Args: never; Returns: undefined }
       refresh_promo_review_stats: { Args: never; Returns: undefined }
       should_show_organizer_contact: { Args: never; Returns: boolean }
     }
     Enums: {
       event_access_level: "public" | "private" | "invite_only" | "secret"
+      flag_type:
+        | "spam_reviews"
+        | "spam_comments"
+        | "spam_reports"
+        | "rapid_activity"
       user_role: "user" | "admin" | "superadmin"
     }
     CompositeTypes: {
@@ -1523,6 +1592,12 @@ export const Constants = {
   public: {
     Enums: {
       event_access_level: ["public", "private", "invite_only", "secret"],
+      flag_type: [
+        "spam_reviews",
+        "spam_comments",
+        "spam_reports",
+        "rapid_activity",
+      ],
       user_role: ["user", "admin", "superadmin"],
     },
   },

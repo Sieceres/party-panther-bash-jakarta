@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw, Instagram, MapPin, Image, Phone, FileUp, AlertTriangle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw, Instagram, MapPin, Image, Phone, FileUp, AlertTriangle, Ban, Eraser, Flag, ShieldAlert } from "lucide-react";
 import { Header } from "./Header";
 import { AdminReceiptManagement } from "./AdminReceiptManagement";
 import { AdminAnalytics } from "./AdminAnalytics";
@@ -16,6 +18,7 @@ import { AdminVenueEdits } from "./AdminVenueEdits";
 import { AdminVenueAudit } from "./AdminVenueAudit";
 import { AdminTagManagement } from "./AdminTagManagement";
 import { AdminReportManagement } from "./AdminReportManagement";
+import { AdminUserFlags } from "./AdminUserFlags";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEventUrl, getEditEventUrl, getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
@@ -68,7 +71,7 @@ export const AdminDashboard = () => {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [pendingAction, setPendingAction] = useState<{
-    type: 'deleteEvent' | 'deletePromo' | 'deleteUser' | 'makeAdmin' | 'makeSuperAdmin';
+    type: 'deleteEvent' | 'deletePromo' | 'deleteUser' | 'makeAdmin' | 'makeSuperAdmin' | 'purgeActivity' | 'banUser' | 'unbanUser';
     id: string;
     title?: string;
     userName?: string;
@@ -80,6 +83,11 @@ export const AdminDashboard = () => {
   const [backfillingPromos, setBackfillingPromos] = useState(false);
   const [reclassifying, setReclassifying] = useState(false);
   const [pendingReportCount, setPendingReportCount] = useState(0);
+  const [pendingFlagCount, setPendingFlagCount] = useState(0);
+  const [bannedUserIds, setBannedUserIds] = useState<Set<string>>(new Set());
+  const [banReason, setBanReason] = useState('');
+  const [banExpiry, setBanExpiry] = useState('');
+  const [purgingUserId, setPurgingUserId] = useState<string | null>(null);
   const defaultTab = new URLSearchParams(window.location.search).get('tab') || 'analytics';
 
   const checkAuthAndPermissions = async () => {
@@ -213,6 +221,7 @@ export const AdminDashboard = () => {
     if (isAuthorized) {
       fetchData();
       fetchPendingReportCount();
+      fetchBannedUsers();
     }
   }, [isAuthorized, toast]);
 
@@ -229,6 +238,113 @@ export const AdminDashboard = () => {
   };
 
 
+  const fetchBannedUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('banned_users')
+        .select('user_id');
+      if (!error && data) {
+        setBannedUserIds(new Set(data.map(b => b.user_id)));
+      }
+    } catch (e) {
+      console.error('Error fetching banned users:', e);
+    }
+  };
+
+  const handlePurgeActivity = async (userId: string) => {
+    setPurgingUserId(userId);
+    try {
+      const authData = JSON.parse(localStorage.getItem('sb-qgttbaibhmzbmknjlghj-auth-token') || '{}');
+      const response = await fetch('https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/purge-user-activity', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authData.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ target_user_id: userId })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({ 
+          title: "Activity Purged", 
+          description: result.message 
+        });
+      } else {
+        throw new Error(result.error || 'Purge failed');
+      }
+    } catch (error: any) {
+      console.error('Error purging user activity:', error);
+      toast({
+        title: "Error",
+        description: `Failed to purge activity: ${error.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setPurgingUserId(null);
+    }
+    setPendingAction(null);
+  };
+
+  const handleBanUser = async (userId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const insertData: any = {
+        user_id: userId,
+        banned_by: user?.id,
+        reason: banReason || 'Banned by admin',
+      };
+      if (banExpiry) {
+        insertData.expires_at = new Date(banExpiry).toISOString();
+      }
+
+      const { error } = await supabase
+        .from('banned_users')
+        .insert(insertData);
+
+      if (error) throw error;
+
+      setBannedUserIds(prev => new Set([...prev, userId]));
+      toast({ title: "User Banned", description: "User has been banned successfully" });
+    } catch (error: any) {
+      console.error('Error banning user:', error);
+      toast({
+        title: "Error",
+        description: `Failed to ban user: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+    setBanReason('');
+    setBanExpiry('');
+    setPendingAction(null);
+  };
+
+  const handleUnbanUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('banned_users')
+        .delete()
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      setBannedUserIds(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+      toast({ title: "User Unbanned", description: "User ban has been removed" });
+    } catch (error: any) {
+      console.error('Error unbanning user:', error);
+      toast({
+        title: "Error",
+        description: `Failed to unban user: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+    setPendingAction(null);
+  };
 
   const handleDeleteEvent = async (id: string) => {
     try {
@@ -460,6 +576,15 @@ export const AdminDashboard = () => {
       case 'makeSuperAdmin':
         handleSetSuperAdmin(pendingAction.id, !pendingAction.isCurrentlySuperAdmin);
         break;
+      case 'purgeActivity':
+        handlePurgeActivity(pendingAction.id);
+        break;
+      case 'banUser':
+        handleBanUser(pendingAction.id);
+        break;
+      case 'unbanUser':
+        handleUnbanUser(pendingAction.id);
+        break;
     }
   };
 
@@ -616,6 +741,12 @@ export const AdminDashboard = () => {
         return pendingAction.isCurrentlySuperAdmin
           ? `Are you sure you want to revoke super admin privileges from "${pendingAction.userName}"?`
           : `Are you sure you want to make "${pendingAction.userName}" a Super Admin?`;
+      case 'purgeActivity':
+        return `This will permanently delete ALL activity by "${pendingAction.userName}" — comments, reviews, reports, photos, and event attendance. This cannot be undone.`;
+      case 'banUser':
+        return `Ban "${pendingAction.userName}"? They will be unable to create events, promos, comments, or reviews.`;
+      case 'unbanUser':
+        return `Remove the ban on "${pendingAction.userName}"? They will regain full access.`;
       default:
         return 'Are you sure you want to perform this action?';
     }
@@ -723,6 +854,15 @@ export const AdminDashboard = () => {
                 </Badge>
               )}
             </TabsTrigger>
+            <TabsTrigger value="flags" className="relative">
+              <Flag className="w-3 h-3 mr-1" />
+              Flags
+              {pendingFlagCount > 0 && (
+                <Badge variant="destructive" className="ml-1.5 px-1.5 py-0 text-[10px] min-w-[18px] h-[18px] flex items-center justify-center">
+                  {pendingFlagCount}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="promos">Promos</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
@@ -743,6 +883,10 @@ export const AdminDashboard = () => {
 
           <TabsContent value="reports">
             <AdminReportManagement />
+          </TabsContent>
+
+          <TabsContent value="flags">
+            <AdminUserFlags onFlagCountChange={setPendingFlagCount} />
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4">
@@ -854,7 +998,7 @@ export const AdminDashboard = () => {
                           <span>Type: {user.profile_type}</span>
                           <span>Joined: {new Date(user.created_at).toLocaleDateString()}</span>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           {user.roles?.some(r => r.role === 'admin' || r.role === 'superadmin') ? (
                             <Badge variant="destructive">
                               {user.roles.find(r => r.role === 'superadmin') ? 'Super Admin' : 'Admin'}
@@ -867,6 +1011,11 @@ export const AdminDashboard = () => {
                           {user.is_verified && (
                             <Badge variant="outline" className="text-green-600 border-green-600">
                               Verified
+                            </Badge>
+                          )}
+                          {bannedUserIds.has(user.user_id) && (
+                            <Badge variant="destructive" className="flex items-center gap-1">
+                              <Ban className="w-3 h-3" /> Banned
                             </Badge>
                           )}
                         </div>
@@ -914,6 +1063,48 @@ export const AdminDashboard = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={purgingUserId === user.user_id}
+                          onClick={() => setPendingAction({
+                            type: 'purgeActivity',
+                            id: user.user_id,
+                            userName: user.display_name || 'Unnamed User'
+                          })}
+                          title="Purge all activity"
+                        >
+                          <Eraser className="w-4 h-4" />
+                        </Button>
+                        {bannedUserIds.has(user.user_id) ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPendingAction({
+                              type: 'unbanUser',
+                              id: user.user_id,
+                              userName: user.display_name || 'Unnamed User'
+                            })}
+                          >
+                            Unban
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setBanReason('');
+                              setBanExpiry('');
+                              setPendingAction({
+                                type: 'banUser',
+                                id: user.user_id,
+                                userName: user.display_name || 'Unnamed User'
+                              });
+                            }}
+                          >
+                            <Ban className="w-4 h-4" />
+                          </Button>
+                        )}
                         <Button 
                           variant="destructive" 
                           size="sm"
@@ -1324,6 +1515,29 @@ export const AdminDashboard = () => {
                 {getConfirmationMessage()}
               </AlertDialogDescription>
             </AlertDialogHeader>
+            {pendingAction?.type === 'banUser' && (
+              <div className="space-y-3 py-2">
+                <div>
+                  <Label htmlFor="ban-reason">Reason</Label>
+                  <Input
+                    id="ban-reason"
+                    placeholder="Reason for ban..."
+                    value={banReason}
+                    onChange={(e) => setBanReason(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ban-expiry">Expires (optional)</Label>
+                  <Input
+                    id="ban-expiry"
+                    type="datetime-local"
+                    value={banExpiry}
+                    onChange={(e) => setBanExpiry(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Leave empty for permanent ban</p>
+                </div>
+              </div>
+            )}
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setPendingAction(null)}>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={confirmAction}>Confirm</AlertDialogAction>
