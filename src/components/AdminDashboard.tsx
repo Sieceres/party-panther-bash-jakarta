@@ -885,6 +885,10 @@ export const AdminDashboard = () => {
             <AdminReportManagement />
           </TabsContent>
 
+          <TabsContent value="flags">
+            <AdminUserFlags onFlagCountChange={setPendingFlagCount} />
+          </TabsContent>
+
           <TabsContent value="events" className="space-y-4">
             <Card>
               <CardHeader>
