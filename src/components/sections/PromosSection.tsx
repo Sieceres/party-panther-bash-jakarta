@@ -429,6 +429,7 @@ export const PromosSection = ({
                   validUntil: promo.valid_until || "",
                   image: promo.image_url || "",
                   category: promo.category || "",
+                  promoType: promo.promo_type || "",
                   day: promo.day_of_week || [],
                   area: promo.area || "",
                   drinkType: promo.drink_type || []
