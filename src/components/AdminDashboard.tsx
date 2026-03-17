@@ -1063,6 +1063,48 @@ export const AdminDashboard = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={purgingUserId === user.user_id}
+                          onClick={() => setPendingAction({
+                            type: 'purgeActivity',
+                            id: user.user_id,
+                            userName: user.display_name || 'Unnamed User'
+                          })}
+                          title="Purge all activity"
+                        >
+                          <Eraser className="w-4 h-4" />
+                        </Button>
+                        {bannedUserIds.has(user.user_id) ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPendingAction({
+                              type: 'unbanUser',
+                              id: user.user_id,
+                              userName: user.display_name || 'Unnamed User'
+                            })}
+                          >
+                            Unban
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setBanReason('');
+                              setBanExpiry('');
+                              setPendingAction({
+                                type: 'banUser',
+                                id: user.user_id,
+                                userName: user.display_name || 'Unnamed User'
+                              });
+                            }}
+                          >
+                            <Ban className="w-4 h-4" />
+                          </Button>
+                        )}
                         <Button 
                           variant="destructive" 
                           size="sm"
