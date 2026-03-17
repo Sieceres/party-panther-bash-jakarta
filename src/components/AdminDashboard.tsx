@@ -223,7 +223,6 @@ export const AdminDashboard = () => {
       fetchPendingReportCount();
       fetchBannedUsers();
     }
-    }
   }, [isAuthorized, toast]);
 
   const fetchPendingReportCount = async () => {
