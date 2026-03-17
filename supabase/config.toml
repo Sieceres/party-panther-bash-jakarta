@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.notify-report]
 verify_jwt = false
+
+[functions.purge-user-activity]
+verify_jwt = false
