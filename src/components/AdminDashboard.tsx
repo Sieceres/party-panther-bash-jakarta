@@ -239,8 +239,113 @@ export const AdminDashboard = () => {
   };
 
 
+  const fetchBannedUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('banned_users')
+        .select('user_id');
+      if (!error && data) {
+        setBannedUserIds(new Set(data.map(b => b.user_id)));
+      }
+    } catch (e) {
+      console.error('Error fetching banned users:', e);
+    }
+  };
 
-  const handleDeleteEvent = async (id: string) => {
+  const handlePurgeActivity = async (userId: string) => {
+    setPurgingUserId(userId);
+    try {
+      const authData = JSON.parse(localStorage.getItem('sb-qgttbaibhmzbmknjlghj-auth-token') || '{}');
+      const response = await fetch('https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/purge-user-activity', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authData.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ target_user_id: userId })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({ 
+          title: "Activity Purged", 
+          description: result.message 
+        });
+      } else {
+        throw new Error(result.error || 'Purge failed');
+      }
+    } catch (error: any) {
+      console.error('Error purging user activity:', error);
+      toast({
+        title: "Error",
+        description: `Failed to purge activity: ${error.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setPurgingUserId(null);
+    }
+    setPendingAction(null);
+  };
+
+  const handleBanUser = async (userId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const insertData: any = {
+        user_id: userId,
+        banned_by: user?.id,
+        reason: banReason || 'Banned by admin',
+      };
+      if (banExpiry) {
+        insertData.expires_at = new Date(banExpiry).toISOString();
+      }
+
+      const { error } = await supabase
+        .from('banned_users')
+        .insert(insertData);
+
+      if (error) throw error;
+
+      setBannedUserIds(prev => new Set([...prev, userId]));
+      toast({ title: "User Banned", description: "User has been banned successfully" });
+    } catch (error: any) {
+      console.error('Error banning user:', error);
+      toast({
+        title: "Error",
+        description: `Failed to ban user: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+    setBanReason('');
+    setBanExpiry('');
+    setPendingAction(null);
+  };
+
+  const handleUnbanUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('banned_users')
+        .delete()
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      setBannedUserIds(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+      toast({ title: "User Unbanned", description: "User ban has been removed" });
+    } catch (error: any) {
+      console.error('Error unbanning user:', error);
+      toast({
+        title: "Error",
+        description: `Failed to unban user: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+    setPendingAction(null);
+  };
     try {
       // Use secure-delete function with proper authorization checks
       const authData = JSON.parse(localStorage.getItem('sb-qgttbaibhmzbmknjlghj-auth-token') || '{}');
