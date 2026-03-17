@@ -741,6 +741,12 @@ export const AdminDashboard = () => {
         return pendingAction.isCurrentlySuperAdmin
           ? `Are you sure you want to revoke super admin privileges from "${pendingAction.userName}"?`
           : `Are you sure you want to make "${pendingAction.userName}" a Super Admin?`;
+      case 'purgeActivity':
+        return `This will permanently delete ALL activity by "${pendingAction.userName}" — comments, reviews, reports, photos, and event attendance. This cannot be undone.`;
+      case 'banUser':
+        return `Ban "${pendingAction.userName}"? They will be unable to create events, promos, comments, or reviews.`;
+      case 'unbanUser':
+        return `Remove the ban on "${pendingAction.userName}"? They will regain full access.`;
       default:
         return 'Are you sure you want to perform this action?';
     }
