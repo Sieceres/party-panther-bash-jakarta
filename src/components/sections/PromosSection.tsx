@@ -1,5 +1,6 @@
 import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
+import { PromoReviewPanel } from "@/components/PromoReviewPanel";
 import { Input } from "@/components/ui/input";
 import { PromoCard } from "@/components/PromoCard";
 import { CreatePromoForm } from "@/components/CreatePromoForm";
@@ -11,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LoginDialog } from "@/components/LoginDialog";
-import { Star, Lock, Filter, RotateCcw, ArrowUpDown, Download, Search } from "lucide-react";
+import { Star, Lock, Filter, RotateCcw, ArrowUpDown, Download, Search, ClipboardCheck } from "lucide-react";
 import { exportPromosToExcel } from "@/lib/promo-export";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -70,7 +71,14 @@ export const PromosSection = ({
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [selectedPromoId, setSelectedPromoId] = useState<string | null>(null);
+  const [localPromos, setLocalPromos] = useState(filteredPromos);
 
+  // Sync localPromos with filteredPromos
+  useEffect(() => {
+    setLocalPromos(filteredPromos);
+  }, [filteredPromos]);
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -147,23 +155,33 @@ export const PromosSection = ({
                 Create Promo
               </Button>
               {(userAdminStatus?.is_admin || userAdminStatus?.is_super_admin) && (
-                <Button
-                  onClick={async () => {
-                    // Fetch ALL promos directly to avoid pagination/filter issues
-                    const { data: allPromos, error } = await supabase.rpc('get_promos_simple');
-                    if (error) {
-                      toast({ title: "Export failed", description: error.message, variant: "destructive" });
-                      return;
-                    }
-                    exportPromosToExcel((allPromos || []) as Tables<'promos'>[]);
-                  }}
-                  size="lg"
-                  variant="outline"
-                  className="min-h-[44px]"
-                >
-                  <Download className="w-5 h-5 mr-2" />
-                  Export to Excel
-                </Button>
+                <>
+                  <Button
+                    onClick={async () => {
+                      const { data: allPromos, error } = await supabase.rpc('get_promos_simple');
+                      if (error) {
+                        toast({ title: "Export failed", description: error.message, variant: "destructive" });
+                        return;
+                      }
+                      exportPromosToExcel((allPromos || []) as Tables<'promos'>[]);
+                    }}
+                    size="lg"
+                    variant="outline"
+                    className="min-h-[44px]"
+                  >
+                    <Download className="w-5 h-5 mr-2" />
+                    Export to Excel
+                  </Button>
+                  <Button
+                    onClick={() => setReviewMode(!reviewMode)}
+                    size="lg"
+                    variant={reviewMode ? "default" : "outline"}
+                    className="min-h-[44px]"
+                  >
+                    <ClipboardCheck className="w-5 h-5 mr-2" />
+                    {reviewMode ? "Exit Review" : "Review Categories"}
+                  </Button>
+                </>
               )}
             </div>
           )}
@@ -401,7 +419,7 @@ export const PromosSection = ({
               </div>
             </div>
           ) : (
-            filteredPromos.map((promo, index) => (
+            localPromos.map((promo, index) => (
                <PromoCard 
                 key={promo.id} 
                 promo={{
@@ -418,6 +436,7 @@ export const PromosSection = ({
                 userAdminStatus={userAdminStatus}
                 onFavoriteToggle={onFavoriteToggle}
                 index={index}
+                isSelected={reviewMode && promo.id === selectedPromoId}
               />
             ))
           )}
@@ -440,6 +459,28 @@ export const PromosSection = ({
             onToggleCreatePromo();
           }}
         />
+        
+        {reviewMode && (userAdminStatus?.is_admin || userAdminStatus?.is_super_admin) && (
+          <PromoReviewPanel
+            promos={localPromos.map(p => ({
+              id: p.id,
+              title: p.title,
+              venue_name: p.venue_name,
+              category: p.category,
+            }))}
+            onClose={() => {
+              setReviewMode(false);
+              setSelectedPromoId(null);
+            }}
+            selectedPromoId={selectedPromoId}
+            onSelectedChange={setSelectedPromoId}
+            onCategoryUpdated={(promoId, newCategory) => {
+              setLocalPromos(prev =>
+                prev.map(p => p.id === promoId ? { ...p, category: newCategory } : p)
+              );
+            }}
+          />
+        )}
       </div>
       </div>
     </div>

@@ -50,12 +50,13 @@ interface PromoCardProps {
   userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
   onFavoriteToggle?: (promoId: string, isFavorite: boolean) => void;
   index?: number;
+  isSelected?: boolean;
 }
 
 import { format } from "date-fns";
 import { getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
 
-export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 }: PromoCardProps) => {
+export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0, isSelected = false }: PromoCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showReviews, setShowReviews] = useState(false);
@@ -218,7 +219,11 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
 
   return (
     <Card 
-      className="promo-card-enhanced cursor-pointer animate-stagger-in hover:border-primary/50 transition-all duration-300 flex flex-col h-full" 
+      id={`promo-card-${promo.id}`}
+      className={cn(
+        "promo-card-enhanced cursor-pointer animate-stagger-in hover:border-primary/50 transition-all duration-300 flex flex-col h-full",
+        isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background"
+      )}
       style={{ animationDelay: `${index * 80}ms` }}
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -235,6 +240,11 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 
           }}
         />
         <div className="promo-image-overlay absolute inset-0"></div>
+        {promo.category && (
+          <Badge className="absolute bottom-3 left-3 bg-black/60 text-white border-none backdrop-blur-sm text-xs z-10">
+            {promo.category}
+          </Badge>
+        )}
         {canDelete && (
           <div className="absolute top-3 right-20 flex gap-2">
             <Button
