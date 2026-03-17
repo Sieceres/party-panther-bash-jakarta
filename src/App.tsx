@@ -26,6 +26,7 @@ import Proofing from "./pages/Proofing";
 import BatchImport from "./pages/BatchImport";
 import MapExplorer from "./pages/MapExplorer";
 import VenueDirectory from "./pages/VenueDirectory";
+import PromoReview from "./pages/PromoReview";
 
 const queryClient = new QueryClient();
 
