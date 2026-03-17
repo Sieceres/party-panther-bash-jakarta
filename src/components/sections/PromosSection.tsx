@@ -1,5 +1,6 @@
 import { Tables } from "../../integrations/supabase/types";
 import { Button } from "@/components/ui/button";
+import { PromoReviewPanel } from "@/components/PromoReviewPanel";
 import { Input } from "@/components/ui/input";
 import { PromoCard } from "@/components/PromoCard";
 import { CreatePromoForm } from "@/components/CreatePromoForm";
