@@ -71,7 +71,14 @@ export const PromosSection = ({
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [selectedPromoId, setSelectedPromoId] = useState<string | null>(null);
+  const [localPromos, setLocalPromos] = useState(filteredPromos);
 
+  // Sync localPromos with filteredPromos
+  useEffect(() => {
+    setLocalPromos(filteredPromos);
+  }, [filteredPromos]);
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
