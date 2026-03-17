@@ -56,7 +56,7 @@ interface PromoCardProps {
 import { format } from "date-fns";
 import { getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
 
-export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0 }: PromoCardProps) => {
+export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0, isSelected = false }: PromoCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showReviews, setShowReviews] = useState(false);
