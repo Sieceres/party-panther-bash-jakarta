@@ -43,16 +43,14 @@ export const WhatsAppGroupDialog = () => {
             <MessageCircle className="w-6 h-6 text-green-400" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">Join the Party Panthers! 🐾</h3>
-          <p className="text-sm text-muted-foreground">
-            Do you want to join our Party Panther WhatsApp Group?
-          </p>
+          <p className="text-sm text-muted-foreground">Do you want to join our Party Panther WhatsApp Group?</p>
         </div>
         <div className="flex flex-col gap-2 pt-3">
           <Button
             onClick={handleJoin}
             className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold text-sm min-h-[42px]"
           >
-            🐾 ROAR Yes!
+            🐾 ROAR, yes!
           </Button>
           <Button
             variant="outline"
@@ -61,12 +59,8 @@ export const WhatsAppGroupDialog = () => {
           >
             😺 Purr, I'm already there!
           </Button>
-          <Button
-            variant="ghost"
-            onClick={handleDismiss}
-            className="w-full text-muted-foreground text-sm min-h-[38px]"
-          >
-            😴 ZZZzzzZZZ I'll join some other time
+          <Button variant="ghost" onClick={handleDismiss} className="w-full text-muted-foreground text-sm min-h-[38px]">
+            😴 Yawn, I'll join some other time
           </Button>
         </div>
       </div>
