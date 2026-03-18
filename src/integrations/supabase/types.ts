@@ -527,6 +527,30 @@ export type Database = {
           },
         ]
       }
+      instagram_oembed_cache: {
+        Row: {
+          cached_at: string
+          expires_at: string
+          id: string
+          instagram_url: string
+          oembed_html: string
+        }
+        Insert: {
+          cached_at?: string
+          expires_at: string
+          id?: string
+          instagram_url: string
+          oembed_html: string
+        }
+        Update: {
+          cached_at?: string
+          expires_at?: string
+          id?: string
+          instagram_url?: string
+          oembed_html?: string
+        }
+        Relationships: []
+      }
       instagram_posts: {
         Row: {
           content_url: string
