@@ -17,7 +17,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { MapPin, ArrowLeft, User as UserIcon, Star, Share2, Edit2, Trash2, BadgeCheck } from "lucide-react";
+import { MapPin, ArrowLeft, User as UserIcon, Star, Share2, Edit2, Trash2, BadgeCheck, EyeOff, HelpCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { GoogleMap } from "./GoogleMap";
 import { CommentItem, Comment } from "./CommentItem";
@@ -94,6 +96,7 @@ export const EventDetailPage = () => {
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
   const [eventTags, setEventTags] = useState<any[]>([]);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [joinAnonymously, setJoinAnonymously] = useState(false);
 
   usePageTitle(event?.title ? `${event.title}` : "Event");
   const memoizedCenter = useMemo(() => {
@@ -200,7 +203,7 @@ export const EventDetailPage = () => {
         const { data: attendeesData, error: attendeesError } = await supabase
           .from("event_attendees")
           .select(
-            "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+            "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note, is_anonymous, is_co_organizer",
           )
           .eq("event_id", eventData.id)
           .order("joined_at", { ascending: false });
@@ -278,6 +281,7 @@ export const EventDetailPage = () => {
       const { error } = await supabase.from("event_attendees").insert({
         event_id: event.id,
         user_id: user.id,
+        is_anonymous: joinAnonymously,
       });
 
       if (error) {
@@ -314,7 +318,7 @@ export const EventDetailPage = () => {
       const { data: attendeesData } = await supabase
         .from("event_attendees")
         .select(
-          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note, is_anonymous, is_co_organizer",
         )
         .eq("event_id", event.id)
         .order("joined_at", { ascending: false });
@@ -361,6 +365,7 @@ export const EventDetailPage = () => {
           const { error } = await supabase.from("event_attendees").insert({
             event_id: event.id,
             user_id: user.id,
+            is_anonymous: joinAnonymously,
           });
 
           if (error) {
@@ -1104,26 +1109,38 @@ export const EventDetailPage = () => {
                         key={attendee.id}
                         className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                       >
+                      {(() => {
+                        const isAnon = attendee.is_anonymous && !isAdmin && user?.id !== attendee.user_id;
+                        const isOwnAnon = attendee.is_anonymous && user?.id === attendee.user_id;
+                        return (
                         <div
-                          className="flex items-center gap-3 cursor-pointer min-w-0"
-                          onClick={() => handleProfileClick(attendee.user_id)}
+                          className={`flex items-center gap-3 min-w-0 ${isAnon ? "" : "cursor-pointer"}`}
+                          onClick={() => !isAnon && handleProfileClick(attendee.user_id)}
                         >
                           <Avatar className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0">
-                            <AvatarImage src={attendee.profiles?.avatar_url || defaultAvatar} />
+                            {isAnon ? (
+                              <div className="w-full h-full bg-muted flex items-center justify-center">
+                                <EyeOff className="w-4 h-4 text-muted-foreground" />
+                              </div>
+                            ) : (
+                              <AvatarImage src={attendee.profiles?.avatar_url || defaultAvatar} />
+                            )}
                             <AvatarFallback className="text-xs sm:text-sm">
-                              {attendee.profiles?.display_name?.[0]?.toUpperCase() || "A"}
+                              {isAnon ? "?" : attendee.profiles?.display_name?.[0]?.toUpperCase() || "A"}
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm sm:text-base font-medium">
-                                {attendee.profiles?.display_name || "Anonymous"}
+                              <span className={`text-sm sm:text-base font-medium ${isAnon ? "italic text-muted-foreground" : ""}`}>
+                                {isAnon ? "Anonymous Attendee" : attendee.profiles?.display_name || "Anonymous"}
+                                {isOwnAnon && " (you, anonymous)"}
+                                {isAdmin && attendee.is_anonymous && !isOwnAnon && ` (anon: ${attendee.profiles?.display_name || "Unknown"})`}
                               </span>
                               {attendee.payment_status && event.track_payments && (
                                 <span className="text-base sm:text-lg">💰</span>
                               )}
                             </div>
-                            {attendee.profiles?.bio && (
+                            {!isAnon && attendee.profiles?.bio && (
                               <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
                                 {attendee.profiles.bio}
                               </p>
@@ -1135,6 +1152,8 @@ export const EventDetailPage = () => {
                             )}
                           </div>
                         </div>
+                        );
+                      })()}
                         <div className="flex items-center flex-wrap gap-2 w-full md:w-auto md:justify-end">
                           {attendee.profiles?.is_verified && (
                             <Badge variant="secondary" className="text-xs">
@@ -1378,9 +1397,28 @@ export const EventDetailPage = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {user && !hasJoined && (
-                    <Button variant="cta" onClick={handleJoinEvent} disabled={joiningEvent} className="w-full">
-                      {joiningEvent ? "Joining..." : "Join Event"}
-                    </Button>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Switch checked={joinAnonymously} onCheckedChange={setJoinAnonymously} />
+                        <div className="flex items-center gap-1.5">
+                          <EyeOff className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">Join anonymously</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs text-xs leading-relaxed">
+                                Attending an event creates engagement and might convince others to go too. However, you might not always want other users to see that you are attending, so you have the option to attend anonymously. To prevent abuse, Party Panther Admins will still be able to see anonymous attendees.
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </div>
+                      <Button variant="cta" onClick={handleJoinEvent} disabled={joiningEvent} className="w-full">
+                        {joiningEvent ? "Joining..." : "Join Event"}
+                      </Button>
+                    </div>
                   )}
                   {user && hasJoined && (
                     <Button
