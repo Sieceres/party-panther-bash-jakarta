@@ -42,6 +42,7 @@ interface EventCardProps {
   event: Event;
   onJoin?: (eventId: string) => void;
   userAdminStatus?: { is_admin: boolean; is_super_admin: boolean } | null;
+  isVenueOwner?: boolean;
 }
 
 import { format } from "date-fns";
