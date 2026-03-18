@@ -38,6 +38,7 @@ interface Promo {
   drink_type: string;
   created_at: string;
   created_by: string;
+  venue_id: string | null;
 }
 
 export const PromoDetailPage = () => {
