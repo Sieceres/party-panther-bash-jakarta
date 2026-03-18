@@ -1109,26 +1109,38 @@ export const EventDetailPage = () => {
                         key={attendee.id}
                         className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                       >
+                      {(() => {
+                        const isAnon = attendee.is_anonymous && !isAdmin && user?.id !== attendee.user_id;
+                        const isOwnAnon = attendee.is_anonymous && user?.id === attendee.user_id;
+                        return (
                         <div
-                          className="flex items-center gap-3 cursor-pointer min-w-0"
-                          onClick={() => handleProfileClick(attendee.user_id)}
+                          className={`flex items-center gap-3 min-w-0 ${isAnon ? "" : "cursor-pointer"}`}
+                          onClick={() => !isAnon && handleProfileClick(attendee.user_id)}
                         >
                           <Avatar className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0">
-                            <AvatarImage src={attendee.profiles?.avatar_url || defaultAvatar} />
+                            {isAnon ? (
+                              <div className="w-full h-full bg-muted flex items-center justify-center">
+                                <EyeOff className="w-4 h-4 text-muted-foreground" />
+                              </div>
+                            ) : (
+                              <AvatarImage src={attendee.profiles?.avatar_url || defaultAvatar} />
+                            )}
                             <AvatarFallback className="text-xs sm:text-sm">
-                              {attendee.profiles?.display_name?.[0]?.toUpperCase() || "A"}
+                              {isAnon ? "?" : attendee.profiles?.display_name?.[0]?.toUpperCase() || "A"}
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm sm:text-base font-medium">
-                                {attendee.profiles?.display_name || "Anonymous"}
+                              <span className={`text-sm sm:text-base font-medium ${isAnon ? "italic text-muted-foreground" : ""}`}>
+                                {isAnon ? "Anonymous Attendee" : attendee.profiles?.display_name || "Anonymous"}
+                                {isOwnAnon && " (you, anonymous)"}
+                                {isAdmin && attendee.is_anonymous && !isOwnAnon && ` (anon: ${attendee.profiles?.display_name || "Unknown"})`}
                               </span>
                               {attendee.payment_status && event.track_payments && (
                                 <span className="text-base sm:text-lg">💰</span>
                               )}
                             </div>
-                            {attendee.profiles?.bio && (
+                            {!isAnon && attendee.profiles?.bio && (
                               <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
                                 {attendee.profiles.bio}
                               </p>
@@ -1140,6 +1152,8 @@ export const EventDetailPage = () => {
                             )}
                           </div>
                         </div>
+                        );
+                      })()}
                         <div className="flex items-center flex-wrap gap-2 w-full md:w-auto md:justify-end">
                           {attendee.profiles?.is_verified && (
                             <Badge variant="secondary" className="text-xs">
