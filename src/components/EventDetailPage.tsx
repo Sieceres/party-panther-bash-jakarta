@@ -96,6 +96,7 @@ export const EventDetailPage = () => {
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
   const [eventTags, setEventTags] = useState<any[]>([]);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [joinAnonymously, setJoinAnonymously] = useState(false);
 
   usePageTitle(event?.title ? `${event.title}` : "Event");
   const memoizedCenter = useMemo(() => {
