@@ -1383,9 +1383,28 @@ export const EventDetailPage = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {user && !hasJoined && (
-                    <Button variant="cta" onClick={handleJoinEvent} disabled={joiningEvent} className="w-full">
-                      {joiningEvent ? "Joining..." : "Join Event"}
-                    </Button>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Switch checked={joinAnonymously} onCheckedChange={setJoinAnonymously} />
+                        <div className="flex items-center gap-1.5">
+                          <EyeOff className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">Join anonymously</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs text-xs leading-relaxed">
+                                Attending an event creates engagement and might convince others to go too. However, you might not always want other users to see that you are attending, so you have the option to attend anonymously. To prevent abuse, Party Panther Admins will still be able to see anonymous attendees.
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </div>
+                      <Button variant="cta" onClick={handleJoinEvent} disabled={joiningEvent} className="w-full">
+                        {joiningEvent ? "Joining..." : "Join Event"}
+                      </Button>
+                    </div>
                   )}
                   {user && hasJoined && (
                     <Button
