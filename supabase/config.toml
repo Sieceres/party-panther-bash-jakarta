@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.purge-user-activity]
 verify_jwt = false
+
+[functions.notify-admin]
+verify_jwt = false
