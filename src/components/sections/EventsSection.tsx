@@ -42,15 +42,23 @@ export const EventsSection = ({
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  // Restore event filters from sessionStorage
+  const storedEventFilters = typeof window !== 'undefined' ? sessionStorage.getItem('eventSectionFilters') : null;
+  const parsedEventFilters = storedEventFilters ? JSON.parse(storedEventFilters) : null;
+
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    parsedEventFilters?.selectedDate ? new Date(parsedEventFilters.selectedDate) : undefined
+  );
+  const [searchTerm, setSearchTerm] = useState(parsedEventFilters?.searchTerm || "");
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(parsedEventFilters?.selectedTagIds || []);
   const [eventTagAssignments, setEventTagAssignments] = useState<Record<string, string[]>>({});
   // States for past events section
-  const [showPastEvents, setShowPastEvents] = useState(false);
-  const [pastEventsSearchTerm, setPastEventsSearchTerm] = useState("");
-  const [pastEventsSelectedDate, setPastEventsSelectedDate] = useState<Date | undefined>();
-  const [pastEventsSelectedTagIds, setPastEventsSelectedTagIds] = useState<string[]>([]);
+  const [showPastEvents, setShowPastEvents] = useState(parsedEventFilters?.showPastEvents || false);
+  const [pastEventsSearchTerm, setPastEventsSearchTerm] = useState(parsedEventFilters?.pastEventsSearchTerm || "");
+  const [pastEventsSelectedDate, setPastEventsSelectedDate] = useState<Date | undefined>(
+    parsedEventFilters?.pastEventsSelectedDate ? new Date(parsedEventFilters.pastEventsSelectedDate) : undefined
+  );
+  const [pastEventsSelectedTagIds, setPastEventsSelectedTagIds] = useState<string[]>(parsedEventFilters?.pastEventsSelectedTagIds || []);
 
   useEffect(() => {
     const getUser = async () => {
