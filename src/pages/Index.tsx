@@ -90,7 +90,9 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
   const [promoTypeFilter, setPromoTypeFilter] = useState<string[]>(parsedFilters?.promoTypeFilter || ["all"]);
   const [promoSortBy, setPromoSortBy] = useState(parsedFilters?.promoSortBy || "newest");
   const [promoSearchQuery, setPromoSearchQuery] = useState(parsedFilters?.promoSearchQuery || "");
-  const [eventSortBy, setEventSortBy] = useState("date-asc");
+  const storedEventFilters = typeof window !== 'undefined' ? sessionStorage.getItem('eventFilters') : null;
+  const parsedEventFilters = storedEventFilters ? JSON.parse(storedEventFilters) : null;
+  const [eventSortBy, setEventSortBy] = useState(parsedEventFilters?.eventSortBy || "date-asc");
 
 
   // Determine if any filter or search is active
