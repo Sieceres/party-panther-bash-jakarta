@@ -869,6 +869,7 @@ export const AdminDashboard = () => {
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="tags">Tags</TabsTrigger>
             <TabsTrigger value="venues">Venues</TabsTrigger>
+            <TabsTrigger value="venue-claims">Claims</TabsTrigger>
             <TabsTrigger value="venue-edits">Edits</TabsTrigger>
             <TabsTrigger value="venue-audit">Audit</TabsTrigger>
             <TabsTrigger value="receipts">Receipts</TabsTrigger>
