@@ -60,6 +60,19 @@ export const EventsSection = ({
   );
   const [pastEventsSelectedTagIds, setPastEventsSelectedTagIds] = useState<string[]>(parsedEventFilters?.pastEventsSelectedTagIds || []);
 
+  // Persist event section filters to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem('eventSectionFilters', JSON.stringify({
+      selectedDate: selectedDate?.toISOString() || null,
+      searchTerm,
+      selectedTagIds,
+      showPastEvents,
+      pastEventsSearchTerm,
+      pastEventsSelectedDate: pastEventsSelectedDate?.toISOString() || null,
+      pastEventsSelectedTagIds,
+    }));
+  }, [selectedDate, searchTerm, selectedTagIds, showPastEvents, pastEventsSearchTerm, pastEventsSelectedDate, pastEventsSelectedTagIds]);
+
   useEffect(() => {
     const getUser = async () => {
       setAuthLoading(true);
