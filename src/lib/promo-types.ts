@@ -21,7 +21,7 @@ const PROMO_TYPE_ALIASES: Record<string, PromoType> = {
   ladies_night: "Ladies Night",
   free_flow: "Free Flow",
   bottle_promo: "Bottle Promo",
-  bucket_deal: "Bucket Deal",
+  bucket_deal: "Beer Deal",
   other: "Other",
   // Common variations
   "happy hour": "Happy Hour",
