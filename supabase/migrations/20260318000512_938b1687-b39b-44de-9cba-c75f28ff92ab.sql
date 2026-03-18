@@ -1,0 +1,2 @@
+ALTER TABLE public.promos DROP CONSTRAINT promos_promo_type_check;
+ALTER TABLE public.promos ADD CONSTRAINT promos_promo_type_check CHECK (promo_type = ANY (ARRAY['Happy Hour'::text, 'Ladies Night'::text, 'Free Flow'::text, 'Bottle Promo'::text, 'Bucket Deal'::text, 'Other'::text]));
