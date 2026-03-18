@@ -65,7 +65,7 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
       const adminStatus = roles && roles.length > 0;
       setIsAdmin(adminStatus);
       if (adminStatus) {
-        fetchPendingReportCount();
+        fetchPendingCounts();
       }
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
