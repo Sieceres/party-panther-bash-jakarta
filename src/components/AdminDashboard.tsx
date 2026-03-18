@@ -1515,6 +1515,10 @@ export const AdminDashboard = () => {
           <TabsContent value="tags" className="space-y-4">
             <AdminTagManagement />
           </TabsContent>
+
+          <TabsContent value="notifications">
+            <AdminNotificationSettings />
+          </TabsContent>
         </Tabs>
 
         {/* Confirmation Dialog */}
