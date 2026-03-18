@@ -109,6 +109,7 @@ export const VenueDetailPage = () => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setIsLoggedIn(true);
+        setCurrentUserId(user.id);
         supabase.from("user_roles").select("role").eq("user_id", user.id)
           .then(({ data }) => {
             setIsAdmin(data?.some(r => r.role === "admin" || r.role === "superadmin") || false);
@@ -116,6 +117,42 @@ export const VenueDetailPage = () => {
       }
     });
   }, []);
+
+  // Check if user already has a pending claim for this venue
+  useEffect(() => {
+    if (!currentUserId || !venue?.id) return;
+    supabase
+      .from("venue_claims")
+      .select("status")
+      .eq("venue_id", venue.id)
+      .eq("user_id", currentUserId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .then(({ data }) => {
+        setExistingClaim(data?.[0]?.status || null);
+      });
+  }, [currentUserId, venue?.id]);
+
+  const handleClaimSubmit = async () => {
+    if (!venue?.id || !currentUserId) return;
+    setSubmittingClaim(true);
+    try {
+      const { error } = await supabase.from("venue_claims").insert({
+        venue_id: venue.id,
+        user_id: currentUserId,
+        message: claimMessage.trim(),
+      });
+      if (error) throw error;
+      toast({ title: "Claim submitted", description: "An admin will review your claim." });
+      setShowClaimDialog(false);
+      setClaimMessage("");
+      setExistingClaim("pending");
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setSubmittingClaim(false);
+    }
+  };
 
   usePageTitle(venue?.name ? `${venue.name}` : "Venue");
 
