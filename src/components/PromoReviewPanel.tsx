@@ -33,7 +33,7 @@ const SHORTCUT_MAP: Record<string, PromoType> = {
   s: "Ladies Night",
   f: "Free Flow",
   b: "Bottle Promo",
-  d: "Bucket Deal",
+  d: "Beer Deal",
   t: "Other",
 };
 

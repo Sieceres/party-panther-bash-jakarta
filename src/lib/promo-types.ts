@@ -7,7 +7,7 @@ export const PROMO_TYPES = [
   "Ladies Night",
   "Free Flow",
   "Bottle Promo",
-  "Bucket Deal",
+  "Beer Deal",
   "Other",
 ] as const;
 
@@ -21,14 +21,15 @@ const PROMO_TYPE_ALIASES: Record<string, PromoType> = {
   ladies_night: "Ladies Night",
   free_flow: "Free Flow",
   bottle_promo: "Bottle Promo",
-  bucket_deal: "Bucket Deal",
+  bucket_deal: "Beer Deal",
   other: "Other",
   // Common variations
   "happy hour": "Happy Hour",
   "ladies night": "Ladies Night",
   "free flow": "Free Flow",
   "bottle promo": "Bottle Promo",
-  "bucket deal": "Bucket Deal",
+  "bucket deal": "Beer Deal",
+  "beer deal": "Beer Deal",
   // Map removed types to Other
   brunch_deal: "Other",
   food_special: "Other",
@@ -82,11 +83,11 @@ export function reclassifyPromoType(
     return "Ladies Night";
   }
 
-  // Bucket Deal — multi-buy bundles (buy X get Y, X beers for price, bucket)
+  // Beer Deal — multi-buy bundles (buy X get Y, X beers for price, bucket)
   if (
     /\b(bucket|buy\s*\d+\s*get\s*\d+|(\d+)\s*(beers?|drinks?|bottles?)\s*(for|@)|bundle)\b/.test(combined)
   ) {
-    return "Bucket Deal";
+    return "Beer Deal";
   }
 
   // Bottle Promo — bottle service
