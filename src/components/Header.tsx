@@ -73,17 +73,16 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
     }
   };
 
-  const fetchPendingReportCount = async () => {
+  const fetchPendingCounts = async () => {
     try {
-      const { count, error } = await supabase
-        .from('reports')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
-      if (!error && count !== null) {
-        setPendingReportCount(count);
-      }
+      const [reportsRes, claimsRes] = await Promise.all([
+        supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('venue_claims').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      ]);
+      if (!reportsRes.error && reportsRes.count !== null) setPendingReportCount(reportsRes.count);
+      if (!claimsRes.error && claimsRes.count !== null) setPendingClaimCount(claimsRes.count);
     } catch (error) {
-      console.error('Error fetching pending reports:', error);
+      console.error('Error fetching pending counts:', error);
     }
   };
 
