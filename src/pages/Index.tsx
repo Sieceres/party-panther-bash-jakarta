@@ -60,6 +60,17 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
     }
     setActiveSection(section);
     
+    // Use URL navigation so browser back button works
+    const sectionRoutes: Record<string, string> = {
+      home: '/',
+      events: '/events',
+      promos: '/promos',
+    };
+    const targetRoute = sectionRoutes[section];
+    if (targetRoute && window.location.pathname !== targetRoute) {
+      navigate(targetRoute);
+    }
+    
     // Scroll to top when changing sections
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
@@ -79,7 +90,9 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
   const [promoTypeFilter, setPromoTypeFilter] = useState<string[]>(parsedFilters?.promoTypeFilter || ["all"]);
   const [promoSortBy, setPromoSortBy] = useState(parsedFilters?.promoSortBy || "newest");
   const [promoSearchQuery, setPromoSearchQuery] = useState(parsedFilters?.promoSearchQuery || "");
-  const [eventSortBy, setEventSortBy] = useState("date-asc");
+  const storedEventFilters = typeof window !== 'undefined' ? sessionStorage.getItem('eventFilters') : null;
+  const parsedEventFilters = storedEventFilters ? JSON.parse(storedEventFilters) : null;
+  const [eventSortBy, setEventSortBy] = useState(parsedEventFilters?.eventSortBy || "date-asc");
 
 
   // Determine if any filter or search is active
@@ -89,6 +102,11 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
       dayFilter, areaFilter, drinkTypeFilter, promoTypeFilter, promoSortBy, promoSearchQuery
     }));
   }, [dayFilter, areaFilter, drinkTypeFilter, promoTypeFilter, promoSortBy, promoSearchQuery]);
+
+  // Save event filters to sessionStorage whenever they change
+  useEffect(() => {
+    sessionStorage.setItem('eventFilters', JSON.stringify({ eventSortBy }));
+  }, [eventSortBy]);
 
   const isPromoFiltering = promoSearchQuery.trim() !== "" || 
     !dayFilter.includes("all") || 
