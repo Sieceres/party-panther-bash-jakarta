@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw, Instagram, MapPin, Image, Phone, FileUp, AlertTriangle, Ban, Eraser, Flag, ShieldAlert } from "lucide-react";
+import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw, Instagram, MapPin, Image, Phone, FileUp, AlertTriangle, Ban, Eraser, Flag, ShieldAlert, Bell } from "lucide-react";
 import { Header } from "./Header";
 import { AdminReceiptManagement } from "./AdminReceiptManagement";
 import { AdminAnalytics } from "./AdminAnalytics";
