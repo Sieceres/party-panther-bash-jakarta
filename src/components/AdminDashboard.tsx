@@ -90,7 +90,8 @@ export const AdminDashboard = () => {
   const [banReason, setBanReason] = useState('');
   const [banExpiry, setBanExpiry] = useState('');
   const [purgingUserId, setPurgingUserId] = useState<string | null>(null);
-  const defaultTab = new URLSearchParams(window.location.search).get('tab') || 'analytics';
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'analytics';
 
   const checkAuthAndPermissions = async () => {
     try {
