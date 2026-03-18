@@ -290,7 +290,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
           body: {
             type: 'new_event',
             title: formData.title,
-            details: { Venue: formData.venueName, Date: eventDate?.toLocaleDateString() || 'TBD' },
+            details: { Venue: formData.venue, Date: eventDate?.toLocaleDateString() || 'TBD' },
             link: `/event/${newEventId}`,
           }
         }).catch(err => console.error('Notify failed:', err));
