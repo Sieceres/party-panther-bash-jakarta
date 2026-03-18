@@ -47,7 +47,7 @@ interface EventCardProps {
 
 import { format } from "date-fns";
 
-export const EventCard = ({ event, onJoin, userAdminStatus }: EventCardProps) => {
+export const EventCard = ({ event, onJoin, userAdminStatus, isVenueOwner = false }: EventCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState<any>(null);
