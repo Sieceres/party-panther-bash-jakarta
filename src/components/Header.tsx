@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Map, Store, Bell } from "lucide-react";
+import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Map, Store, Bell, Flag, Building2 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +19,7 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [pendingReportCount, setPendingReportCount] = useState(0);
+  const [pendingClaimCount, setPendingClaimCount] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -63,7 +65,7 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
       const adminStatus = roles && roles.length > 0;
       setIsAdmin(adminStatus);
       if (adminStatus) {
-        fetchPendingReportCount();
+        fetchPendingCounts();
       }
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
@@ -71,17 +73,16 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
     }
   };
 
-  const fetchPendingReportCount = async () => {
+  const fetchPendingCounts = async () => {
     try {
-      const { count, error } = await supabase
-        .from('reports')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
-      if (!error && count !== null) {
-        setPendingReportCount(count);
-      }
+      const [reportsRes, claimsRes] = await Promise.all([
+        supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('venue_claims').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      ]);
+      if (!reportsRes.error && reportsRes.count !== null) setPendingReportCount(reportsRes.count);
+      if (!claimsRes.error && claimsRes.count !== null) setPendingClaimCount(claimsRes.count);
     } catch (error) {
-      console.error('Error fetching pending reports:', error);
+      console.error('Error fetching pending counts:', error);
     }
   };
 
@@ -184,20 +185,47 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
              })}
               {/* Notification Bell for Admins */}
               {isAdmin && (
-                <Button
-                  variant="ghost"
-                  size="default"
-                  onClick={() => navigate('/admin?tab=reports')}
-                  className="relative flex items-center gap-1 text-sm"
-                  title="Pending reports"
-                >
-                  <Bell className="w-4 h-4" />
-                  {pendingReportCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                      {pendingReportCount > 99 ? '99+' : pendingReportCount}
-                    </span>
-                  )}
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="default"
+                      className="relative flex items-center gap-1 text-sm"
+                      title="Admin notifications"
+                    >
+                      <Bell className="w-4 h-4" />
+                      {(pendingReportCount + pendingClaimCount) > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                          {(pendingReportCount + pendingClaimCount) > 99 ? '99+' : pendingReportCount + pendingClaimCount}
+                        </span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56 p-2" align="end">
+                    <button
+                      onClick={() => navigate('/admin?tab=reports')}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-md text-sm hover:bg-accent transition-colors"
+                    >
+                      <span className="flex items-center gap-2"><Flag className="w-4 h-4" /> Reports</span>
+                      {pendingReportCount > 0 && (
+                        <span className="bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+                          {pendingReportCount}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => navigate('/admin?tab=venue-claims')}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-md text-sm hover:bg-accent transition-colors"
+                    >
+                      <span className="flex items-center gap-2"><Building2 className="w-4 h-4" /> Venue Claims</span>
+                      {pendingClaimCount > 0 && (
+                        <span className="bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+                          {pendingClaimCount}
+                        </span>
+                      )}
+                    </button>
+                  </PopoverContent>
+                </Popover>
               )}
               {/* Auth Button */}
                {user ? (
