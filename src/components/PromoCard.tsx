@@ -52,6 +52,7 @@ interface PromoCardProps {
   onFavoriteToggle?: (promoId: string, isFavorite: boolean) => void;
   index?: number;
   isSelected?: boolean;
+  isVenueOwner?: boolean;
 }
 
 import { format } from "date-fns";
