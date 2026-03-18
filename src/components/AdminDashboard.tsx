@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -90,7 +90,8 @@ export const AdminDashboard = () => {
   const [banReason, setBanReason] = useState('');
   const [banExpiry, setBanExpiry] = useState('');
   const [purgingUserId, setPurgingUserId] = useState<string | null>(null);
-  const defaultTab = new URLSearchParams(window.location.search).get('tab') || 'analytics';
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'analytics';
 
   const checkAuthAndPermissions = async () => {
     try {
@@ -845,7 +846,7 @@ export const AdminDashboard = () => {
         </div>
 
         {/* Management Tabs */}
-        <Tabs defaultValue={defaultTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={(val) => setSearchParams({ tab: val })} className="space-y-6">
           <TabsList className="flex w-full flex-wrap h-auto gap-1">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="reports" className="relative">
