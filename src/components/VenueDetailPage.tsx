@@ -464,7 +464,7 @@ export const VenueDetailPage = () => {
                   <h2 className="text-xl font-bold mb-4">Events at {venue.name}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {events.map((event) => (
-                      <EventCard key={event.id} event={event} />
+                      <EventCard key={event.id} event={event} isVenueOwner={venue.claim_status === "approved" && venue.claimed_by === currentUserId} />
                     ))}
                   </div>
                 </div>
