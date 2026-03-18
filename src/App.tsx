@@ -79,6 +79,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
         <ChatBot />
+        <WhatsAppGroupDialog />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
