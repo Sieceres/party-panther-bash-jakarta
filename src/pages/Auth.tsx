@@ -84,6 +84,15 @@ const Auth = () => {
           });
         }
       } else {
+        // Notify admin of new signup (fire-and-forget)
+        supabase.functions.invoke('notify-admin', {
+          body: {
+            type: 'new_user',
+            title: displayName || email,
+            details: { Email: email },
+          }
+        }).catch(err => console.error('Notify failed:', err));
+
         toast({
           title: "Check your email!",
           description: "We've sent you a confirmation link. Please verify your email to complete signup.",

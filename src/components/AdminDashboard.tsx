@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw, Instagram, MapPin, Image, Phone, FileUp, AlertTriangle, Ban, Eraser, Flag, ShieldAlert } from "lucide-react";
+import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshCw, Instagram, MapPin, Image, Phone, FileUp, AlertTriangle, Ban, Eraser, Flag, ShieldAlert, Bell } from "lucide-react";
 import { Header } from "./Header";
 import { AdminReceiptManagement } from "./AdminReceiptManagement";
 import { AdminAnalytics } from "./AdminAnalytics";
@@ -20,6 +20,7 @@ import { AdminTagManagement } from "./AdminTagManagement";
 import { AdminReportManagement } from "./AdminReportManagement";
 import { AdminUserFlags } from "./AdminUserFlags";
 import { AdminVenueClaims } from "./AdminVenueClaims";
+import { AdminNotificationSettings } from "./AdminNotificationSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEventUrl, getEditEventUrl, getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
@@ -877,6 +878,10 @@ export const AdminDashboard = () => {
             <TabsTrigger value="migration">Migration</TabsTrigger>
             <TabsTrigger value="ig-creator">IG Creator</TabsTrigger>
             <TabsTrigger value="import">Import</TabsTrigger>
+            <TabsTrigger value="notifications">
+              <Bell className="w-3 h-3 mr-1" />
+              Notifications
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="analytics">
@@ -1509,6 +1514,10 @@ export const AdminDashboard = () => {
 
           <TabsContent value="tags" className="space-y-4">
             <AdminTagManagement />
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <AdminNotificationSettings />
           </TabsContent>
         </Tabs>
 

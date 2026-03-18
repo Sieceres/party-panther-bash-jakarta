@@ -144,6 +144,15 @@ export const CreatePromoForm = () => {
 
       if (error) throw error;
 
+      // Notify admin (fire-and-forget)
+      supabase.functions.invoke('notify-admin', {
+        body: {
+          type: 'new_promo',
+          title: formData.title,
+          details: { Venue: formData.venue, Type: formData.promoType, Area: formData.area || 'N/A' },
+        }
+      }).catch(err => console.error('Notify failed:', err));
+
       toast({
         title: "Promo Created! 🎉",
         description: "Your promo has been submitted for review and will be live soon.",

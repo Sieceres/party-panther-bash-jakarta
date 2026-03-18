@@ -79,6 +79,16 @@ export const ReviewForm = ({ promoId, existingReview, onReviewSubmitted, onCance
 
         if (error) throw error;
 
+        // Notify admin (fire-and-forget)
+        supabase.functions.invoke('notify-admin', {
+          body: {
+            type: 'new_review',
+            title: `${rating}★ review`,
+            details: { 'Promo ID': promoId, Comment: comment.trim() || 'No comment' },
+            link: `/promo/${promoId}`,
+          }
+        }).catch(err => console.error('Notify failed:', err));
+
         toast({
           title: "Review submitted! ⭐",
           description: "Thank you for your feedback!",

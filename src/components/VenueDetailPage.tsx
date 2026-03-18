@@ -143,6 +143,15 @@ export const VenueDetailPage = () => {
         message: claimMessage.trim(),
       });
       if (error) throw error;
+      // Notify admin (fire-and-forget)
+      supabase.functions.invoke('notify-admin', {
+        body: {
+          type: 'new_venue_claim',
+          title: venue.name,
+          details: { Message: claimMessage.trim() || 'No message' },
+          link: `/venue/${venue.slug || venue.id}`,
+        }
+      }).catch(err => console.error('Notify failed:', err));
       toast({ title: "Claim submitted", description: "An admin will review your claim." });
       setShowClaimDialog(false);
       setClaimMessage("");

@@ -114,16 +114,19 @@ export const ReportDialog = ({ type, targetId, targetTitle, open, onOpenChange }
       });
 
       // Send Telegram notification (fire-and-forget)
-      supabase.functions.invoke('notify-report', {
+      supabase.functions.invoke('notify-admin', {
         body: {
-          reason,
-          target_type: type,
-          target_id: targetId,
-          target_title: targetTitle,
-          description: description.trim() || null,
-          reporter_email: user.email || 'unknown',
+          type: 'new_report',
+          title: targetTitle,
+          details: {
+            Type: type,
+            Reason: reason,
+            Details: description.trim() || null,
+            'Reported by': user.email || 'unknown',
+          },
+          link: type === 'promo' ? `/promos/${targetId}` : type === 'event' ? `/events/${targetId}` : type === 'profile' ? `/profile/${targetId}` : null,
         }
-      }).catch(err => console.error('Telegram notify failed:', err));
+      }).catch(err => console.error('Notify failed:', err));
 
       setIsOpen(false);
       setReason("");

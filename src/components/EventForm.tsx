@@ -285,6 +285,16 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
 
       // Handle new event creation tasks
       if (!initialData?.id && newEventId) {
+        // Notify admin (fire-and-forget)
+        supabase.functions.invoke('notify-admin', {
+          body: {
+            type: 'new_event',
+            title: formData.title,
+            details: { Venue: formData.venue, Date: eventDate?.toLocaleDateString() || 'TBD' },
+            link: `/event/${newEventId}`,
+          }
+        }).catch(err => console.error('Notify failed:', err));
+
         // Automatically join the organizer to their own event
         const { error: attendeeError } = await supabase
           .from('event_attendees')
