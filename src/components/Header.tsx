@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Calendar, Star, User, LogIn, LogOut, BookOpen, Home, Zap, Shield, Map, Store, Bell, Flag, Building2 } from "lucide-react";
+import { UserNotificationBell } from "@/components/UserNotificationBell";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
