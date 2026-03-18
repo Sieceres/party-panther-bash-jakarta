@@ -66,6 +66,11 @@ export const VenueDetailPage = () => {
   const [deleting, setDeleting] = useState(false);
   const [deletePromos, setDeletePromos] = useState(false);
   const [deleteEvents, setDeleteEvents] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showClaimDialog, setShowClaimDialog] = useState(false);
+  const [claimMessage, setClaimMessage] = useState("");
+  const [submittingClaim, setSubmittingClaim] = useState(false);
+  const [existingClaim, setExistingClaim] = useState<string | null>(null);
 
   const handleDeleteVenue = async () => {
     if (!venue?.id) return;
