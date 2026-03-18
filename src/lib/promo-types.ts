@@ -7,7 +7,7 @@ export const PROMO_TYPES = [
   "Ladies Night",
   "Free Flow",
   "Bottle Promo",
-  "Bucket Deal",
+  "Beer Deal",
   "Other",
 ] as const;
 
