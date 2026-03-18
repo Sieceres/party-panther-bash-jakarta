@@ -1,12 +1,5 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, X } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const WHATSAPP_GROUP_LINK = "https://chat.whatsapp.com/H0YrbCkjWYiJ1hJkWRaNTk";
@@ -18,7 +11,6 @@ export const WhatsAppGroupDialog = () => {
   useEffect(() => {
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (!dismissed) {
-      // Small delay so it doesn't flash immediately on load
       const timer = setTimeout(() => setOpen(true), 1500);
       return () => clearTimeout(timer);
     }
@@ -35,41 +27,49 @@ export const WhatsAppGroupDialog = () => {
     setOpen(false);
   };
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
-      <DialogContent className="sm:max-w-md border-primary/30 bg-card">
-        <DialogHeader className="text-center space-y-3">
-          <div className="mx-auto w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center">
-            <MessageCircle className="w-7 h-7 text-green-400" />
+    <div className="fixed bottom-4 right-4 z-50 w-[340px] max-w-[calc(100vw-2rem)] animate-in slide-in-from-bottom-5 fade-in duration-300">
+      <div className="rounded-xl border border-primary/30 bg-card shadow-2xl p-5">
+        <button
+          onClick={handleDismiss}
+          className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+        <div className="text-center space-y-3">
+          <div className="mx-auto w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+            <MessageCircle className="w-6 h-6 text-green-400" />
           </div>
-          <DialogTitle className="text-xl">Join the Party Panthers! 🐾</DialogTitle>
-          <DialogDescription className="text-base text-muted-foreground">
+          <h3 className="text-lg font-semibold text-foreground">Join the Party Panthers! 🐾</h3>
+          <p className="text-sm text-muted-foreground">
             Do you want to join our Party Panther WhatsApp Group?
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-3 pt-2">
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 pt-3">
           <Button
             onClick={handleJoin}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold text-base min-h-[48px]"
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold text-sm min-h-[42px]"
           >
             🐾 ROAR Yes!
           </Button>
           <Button
             variant="outline"
             onClick={handleDismiss}
-            className="w-full glass-control text-muted-foreground min-h-[44px]"
+            className="w-full text-muted-foreground text-sm min-h-[38px]"
           >
             😺 Purr, I'm already there!
           </Button>
           <Button
             variant="ghost"
             onClick={handleDismiss}
-            className="w-full text-muted-foreground min-h-[44px]"
+            className="w-full text-muted-foreground text-sm min-h-[38px]"
           >
             😴 ZZZzzzZZZ I'll join some other time
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
