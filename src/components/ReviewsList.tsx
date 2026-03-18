@@ -174,7 +174,7 @@ export const ReviewsList = ({ promoId, venueOwnerId, onReviewsChange }: ReviewsL
       {editingReview && (
         <ReviewForm
           promoId={promoId}
-          existingReview={{ ...editingReview, is_anonymous: editingReview.is_anonymous }}
+          existingReview={{ id: editingReview.id, rating: editingReview.rating, comment: editingReview.comment, is_anonymous: editingReview.is_anonymous }}
           onReviewSubmitted={() => { setEditingReview(null); fetchReviews(); }}
           onCancel={() => setEditingReview(null)}
         />
