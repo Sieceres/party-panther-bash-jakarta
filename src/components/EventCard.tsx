@@ -148,7 +148,7 @@ export const EventCard = ({ event, onJoin, userAdminStatus, isVenueOwner = false
 
   const isOwner = currentUser && currentUser.id === event.created_by;
   const isAdmin = userAdminStatus?.is_admin || userAdminStatus?.is_super_admin || false;
-  const canDelete = isOwner || isAdmin;
+  const canDelete = isOwner || isAdmin || isVenueOwner;
   
   // Use optimized creator name or fallback to fetching
   const creatorName = (event.creator_name && !event.creator_name.startsWith('User ')) ? event.creator_name : 'Party Panther Admin';

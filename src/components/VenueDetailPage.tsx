@@ -438,6 +438,7 @@ export const VenueDetailPage = () => {
                       <PromoCard
                         key={promo.id}
                         index={i}
+                        isVenueOwner={venue.claim_status === "approved" && venue.claimed_by === currentUserId}
                         promo={{
                           id: promo.id,
                           title: promo.title,
