@@ -599,6 +599,30 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_settings: {
+        Row: {
+          enabled: boolean
+          id: string
+          notification_type: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          id?: string
+          notification_type: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          id?: string
+          notification_type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
