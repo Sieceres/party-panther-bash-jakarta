@@ -83,11 +83,11 @@ export function reclassifyPromoType(
     return "Ladies Night";
   }
 
-  // Bucket Deal — multi-buy bundles (buy X get Y, X beers for price, bucket)
+  // Beer Deal — multi-buy bundles (buy X get Y, X beers for price, bucket)
   if (
     /\b(bucket|buy\s*\d+\s*get\s*\d+|(\d+)\s*(beers?|drinks?|bottles?)\s*(for|@)|bundle)\b/.test(combined)
   ) {
-    return "Bucket Deal";
+    return "Beer Deal";
   }
 
   // Bottle Promo — bottle service
