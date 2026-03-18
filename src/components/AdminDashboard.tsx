@@ -1138,6 +1138,7 @@ export const AdminDashboard = () => {
             <AdminVenueClaims />
           </TabsContent>
 
+          <TabsContent value="venue-edits" className="space-y-4">
             <AdminVenueEdits />
           </TabsContent>
 
