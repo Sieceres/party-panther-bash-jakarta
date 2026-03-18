@@ -103,6 +103,11 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
     }));
   }, [dayFilter, areaFilter, drinkTypeFilter, promoTypeFilter, promoSortBy, promoSearchQuery]);
 
+  // Save event filters to sessionStorage whenever they change
+  useEffect(() => {
+    sessionStorage.setItem('eventFilters', JSON.stringify({ eventSortBy }));
+  }, [eventSortBy]);
+
   const isPromoFiltering = promoSearchQuery.trim() !== "" || 
     !dayFilter.includes("all") || 
     !areaFilter.includes("all") || 

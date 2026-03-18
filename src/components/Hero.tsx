@@ -188,17 +188,6 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
               <span className="truncate">Explore Events</span>
             </Button>
           </div>
-          {user && (
-            <Button
-              size="lg"
-              onClick={() => navigate('/instagram-generator')}
-              className="cta-button group w-full sm:w-auto min-h-[48px] max-w-md sm:max-w-none"
-              style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
-            >
-              <Instagram className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0 group-hover:rotate-12 transition-transform" />
-              <span className="truncate">IG Creator</span>
-            </Button>
-          )}
         </div>
 
       </div>
