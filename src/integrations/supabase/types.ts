@@ -81,6 +81,7 @@ export type Database = {
         Row: {
           event_id: string
           id: string
+          is_anonymous: boolean
           is_co_organizer: boolean
           joined_at: string | null
           note: string | null
@@ -94,6 +95,7 @@ export type Database = {
         Insert: {
           event_id: string
           id?: string
+          is_anonymous?: boolean
           is_co_organizer?: boolean
           joined_at?: string | null
           note?: string | null
@@ -107,6 +109,7 @@ export type Database = {
         Update: {
           event_id?: string
           id?: string
+          is_anonymous?: boolean
           is_co_organizer?: boolean
           joined_at?: string | null
           note?: string | null

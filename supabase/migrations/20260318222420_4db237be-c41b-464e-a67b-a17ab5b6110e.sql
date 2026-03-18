@@ -1,0 +1,1 @@
+ALTER TABLE public.event_attendees ADD COLUMN is_anonymous boolean NOT NULL DEFAULT false;
