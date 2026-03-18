@@ -779,6 +779,7 @@ export type Database = {
           comment: string | null
           created_at: string
           id: string
+          is_anonymous: boolean
           promo_id: string
           promo_id_uuid: string | null
           rating: number
@@ -789,6 +790,7 @@ export type Database = {
           comment?: string | null
           created_at?: string
           id?: string
+          is_anonymous?: boolean
           promo_id: string
           promo_id_uuid?: string | null
           rating: number
@@ -799,6 +801,7 @@ export type Database = {
           comment?: string | null
           created_at?: string
           id?: string
+          is_anonymous?: boolean
           promo_id?: string
           promo_id_uuid?: string | null
           rating?: number
@@ -962,6 +965,41 @@ export type Database = {
         }
         Relationships: []
       }
+      review_replies: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          review_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          review_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          review_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_replies_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: true
+            referencedRelation: "promo_reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_favorite_promos: {
         Row: {
           created_at: string
@@ -1020,6 +1058,42 @@ export type Database = {
           is_resolved?: boolean
           resolved_at?: string | null
           resolved_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          message: string
+          metadata: Json
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message: string
+          metadata?: Json
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string
+          metadata?: Json
+          title?: string
+          type?: string
           user_id?: string
         }
         Relationships: []

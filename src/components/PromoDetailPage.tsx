@@ -38,6 +38,7 @@ interface Promo {
   drink_type: string;
   created_at: string;
   created_by: string;
+  venue_id: string | null;
 }
 
 export const PromoDetailPage = () => {
@@ -51,6 +52,7 @@ export const PromoDetailPage = () => {
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [venueOwnerId, setVenueOwnerId] = useState<string | null>(null);
 
   usePageTitle(promo?.title ? `${promo.title}` : "Promo");
 
@@ -89,6 +91,17 @@ export const PromoDetailPage = () => {
             .single();
           
           setCreatorProfile(creatorProfileData);
+        }
+
+        // Fetch venue owner if promo has a venue_id
+        if (data.venue_id) {
+          const { data: venueData } = await supabase
+            .from('venues')
+            .select('claimed_by')
+            .eq('id', data.venue_id)
+            .eq('claim_status', 'approved')
+            .single();
+          if (venueData?.claimed_by) setVenueOwnerId(venueData.claimed_by);
         }
       } catch (error) {
         console.error('Error fetching promo:', error);
@@ -291,6 +304,7 @@ export const PromoDetailPage = () => {
               <CardContent>
                 <ReviewsList 
                  promoId={promo.id} 
+                 venueOwnerId={venueOwnerId}
                  onReviewsChange={handleReviewsChange}
                 />
               </CardContent>
