@@ -17,7 +17,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { MapPin, ArrowLeft, User as UserIcon, Star, Share2, Edit2, Trash2, BadgeCheck } from "lucide-react";
+import { MapPin, ArrowLeft, User as UserIcon, Star, Share2, Edit2, Trash2, BadgeCheck, EyeOff, HelpCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { GoogleMap } from "./GoogleMap";
 import { CommentItem, Comment } from "./CommentItem";
