@@ -24,7 +24,7 @@ const promoTool = {
               venue_name: { type: "string", description: "Name of the venue/bar/restaurant" },
               venue_address: { type: "string", description: "Address if visible" },
               discount_text: { type: "string", description: "The discount/deal text, e.g. '2-for-1 cocktails' or '50% off'" },
-              promo_type: { type: "string", enum: ["Happy Hour", "Ladies Night", "Free Flow", "Bottle Promo", "Bucket Deal", "Brunch Deal", "Food Special", "Drink Special", "Live Music", "Other"], description: "MUST be one of the enum values. Use 'Free Flow' ONLY for unlimited/all-you-can-drink deals. Use 'Bucket Deal' for buy-X-get-Y or multi-drink bundle deals. Use 'Bottle Promo' for bottle service discounts. Use 'Happy Hour' for time-limited discount periods." },
+              promo_type: { type: "string", enum: ["Happy Hour", "Ladies Night", "Free Flow", "Bottle Promo", "Beer Deal", "Brunch Deal", "Food Special", "Drink Special", "Live Music", "Other"], description: "MUST be one of the enum values. Use 'Free Flow' ONLY for unlimited/all-you-can-drink deals. Use 'Beer Deal' for buy-X-get-Y or multi-drink bundle deals. Use 'Bottle Promo' for bottle service discounts. Use 'Happy Hour' for time-limited discount periods." },
               day_of_week: { type: "array", items: { type: "string" }, description: "Days this promo is active" },
               area: { type: "string", description: "Specific neighborhood/area." },
               drink_type: { type: "array", items: { type: "string" }, description: "Types of drinks if applicable" },
