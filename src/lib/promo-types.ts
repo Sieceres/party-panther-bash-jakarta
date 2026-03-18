@@ -28,7 +28,8 @@ const PROMO_TYPE_ALIASES: Record<string, PromoType> = {
   "ladies night": "Ladies Night",
   "free flow": "Free Flow",
   "bottle promo": "Bottle Promo",
-  "bucket deal": "Bucket Deal",
+  "bucket deal": "Beer Deal",
+  "beer deal": "Beer Deal",
   // Map removed types to Other
   brunch_deal: "Other",
   food_special: "Other",
