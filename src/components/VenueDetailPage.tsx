@@ -348,6 +348,41 @@ export const VenueDetailPage = () => {
                 {venue.claim_status === "approved" && (
                   <Badge variant="secondary" className="text-xs">✓ Claimed Venue</Badge>
                 )}
+                {/* Claim button: show for logged-in users when venue is unclaimed and no existing claim */}
+                {isLoggedIn && venue.id && venue.claim_status !== "approved" && venue.claimed_by !== currentUserId && !existingClaim && (
+                  <Dialog open={showClaimDialog} onOpenChange={setShowClaimDialog}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="outline" className="text-xs">
+                        <ShieldCheck className="w-3 h-3 mr-1" /> Claim This Venue
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Claim {venue.name}</DialogTitle>
+                        <DialogDescription>
+                          Tell us why you're the owner of this venue. An admin will review your claim.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <Textarea
+                        placeholder="e.g. I'm the owner, here's my Instagram @venuename..."
+                        value={claimMessage}
+                        onChange={(e) => setClaimMessage(e.target.value)}
+                        rows={3}
+                      />
+                      <DialogFooter>
+                        <Button onClick={handleClaimSubmit} disabled={submittingClaim || !claimMessage.trim()}>
+                          {submittingClaim ? "Submitting..." : "Submit Claim"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+                {existingClaim === "pending" && (
+                  <Badge variant="outline" className="text-xs text-muted-foreground">Claim pending review</Badge>
+                )}
+                {existingClaim === "rejected" && (
+                  <Badge variant="outline" className="text-xs text-destructive">Claim rejected</Badge>
+                )}
               </div>
             </div>
           </div>
