@@ -184,7 +184,9 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
                   </Button>
                );
              })}
-              {/* Notification Bell for Admins */}
+              {/* User Notification Bell */}
+              {user && <UserNotificationBell userId={user.id} />}
+              {/* Admin Notification Bell */}
               {isAdmin && (
                 <Popover>
                   <PopoverTrigger asChild>
