@@ -364,12 +364,10 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
           <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
             <Star className="w-4 h-4 text-yellow-400 fill-current" />
             <span>{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
-            <span>•</span>
-            <span>{totalReviews} {totalReviews === 1 ? "review" : "reviews"}</span>
           </div>
           <Button
             variant="ghost"
-            size="default"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
               setShowReviews(!showReviews);
@@ -377,7 +375,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
             className="text-xs sm:text-sm text-muted-foreground hover:text-primary min-h-[36px] px-3"
           >
             <MessageSquare className="w-4 h-4 mr-1.5" />
-            {showReviews ? "Hide" : "Reviews"}
+            {showReviews ? "Hide" : `${totalReviews} ${totalReviews === 1 ? "review" : "reviews"}`}
           </Button>
         </div>
       </CardContent>
