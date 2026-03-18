@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil, Trash2 } from "lucide-react";
+import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil, Trash2, ShieldCheck } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 
 import { SpinningPaws } from "./ui/spinning-paws";
 import { Header } from "./Header";
@@ -64,6 +66,11 @@ export const VenueDetailPage = () => {
   const [deleting, setDeleting] = useState(false);
   const [deletePromos, setDeletePromos] = useState(false);
   const [deleteEvents, setDeleteEvents] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showClaimDialog, setShowClaimDialog] = useState(false);
+  const [claimMessage, setClaimMessage] = useState("");
+  const [submittingClaim, setSubmittingClaim] = useState(false);
+  const [existingClaim, setExistingClaim] = useState<string | null>(null);
 
   const handleDeleteVenue = async () => {
     if (!venue?.id) return;
@@ -102,6 +109,7 @@ export const VenueDetailPage = () => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setIsLoggedIn(true);
+        setCurrentUserId(user.id);
         supabase.from("user_roles").select("role").eq("user_id", user.id)
           .then(({ data }) => {
             setIsAdmin(data?.some(r => r.role === "admin" || r.role === "superadmin") || false);
@@ -109,6 +117,42 @@ export const VenueDetailPage = () => {
       }
     });
   }, []);
+
+  // Check if user already has a pending claim for this venue
+  useEffect(() => {
+    if (!currentUserId || !venue?.id) return;
+    supabase
+      .from("venue_claims")
+      .select("status")
+      .eq("venue_id", venue.id)
+      .eq("user_id", currentUserId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .then(({ data }) => {
+        setExistingClaim(data?.[0]?.status || null);
+      });
+  }, [currentUserId, venue?.id]);
+
+  const handleClaimSubmit = async () => {
+    if (!venue?.id || !currentUserId) return;
+    setSubmittingClaim(true);
+    try {
+      const { error } = await supabase.from("venue_claims").insert({
+        venue_id: venue.id,
+        user_id: currentUserId,
+        message: claimMessage.trim(),
+      });
+      if (error) throw error;
+      toast({ title: "Claim submitted", description: "An admin will review your claim." });
+      setShowClaimDialog(false);
+      setClaimMessage("");
+      setExistingClaim("pending");
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setSubmittingClaim(false);
+    }
+  };
 
   usePageTitle(venue?.name ? `${venue.name}` : "Venue");
 
@@ -304,6 +348,41 @@ export const VenueDetailPage = () => {
                 {venue.claim_status === "approved" && (
                   <Badge variant="secondary" className="text-xs">✓ Claimed Venue</Badge>
                 )}
+                {/* Claim button: show for logged-in users when venue is unclaimed and no existing claim */}
+                {isLoggedIn && venue.id && venue.claim_status !== "approved" && venue.claimed_by !== currentUserId && !existingClaim && (
+                  <Dialog open={showClaimDialog} onOpenChange={setShowClaimDialog}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="outline" className="text-xs">
+                        <ShieldCheck className="w-3 h-3 mr-1" /> Claim This Venue
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Claim {venue.name}</DialogTitle>
+                        <DialogDescription>
+                          Tell us why you're the owner of this venue. An admin will review your claim.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <Textarea
+                        placeholder="e.g. I'm the owner, here's my Instagram @venuename..."
+                        value={claimMessage}
+                        onChange={(e) => setClaimMessage(e.target.value)}
+                        rows={3}
+                      />
+                      <DialogFooter>
+                        <Button onClick={handleClaimSubmit} disabled={submittingClaim || !claimMessage.trim()}>
+                          {submittingClaim ? "Submitting..." : "Submit Claim"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+                {existingClaim === "pending" && (
+                  <Badge variant="outline" className="text-xs text-muted-foreground">Claim pending review</Badge>
+                )}
+                {existingClaim === "rejected" && (
+                  <Badge variant="outline" className="text-xs text-destructive">Claim rejected</Badge>
+                )}
               </div>
             </div>
           </div>
@@ -359,6 +438,7 @@ export const VenueDetailPage = () => {
                       <PromoCard
                         key={promo.id}
                         index={i}
+                        isVenueOwner={venue.claim_status === "approved" && venue.claimed_by === currentUserId}
                         promo={{
                           id: promo.id,
                           title: promo.title,
@@ -385,7 +465,7 @@ export const VenueDetailPage = () => {
                   <h2 className="text-xl font-bold mb-4">Events at {venue.name}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {events.map((event) => (
-                      <EventCard key={event.id} event={event} />
+                      <EventCard key={event.id} event={event} isVenueOwner={venue.claim_status === "approved" && venue.claimed_by === currentUserId} />
                     ))}
                   </div>
                 </div>

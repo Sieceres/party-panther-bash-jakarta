@@ -19,6 +19,7 @@ import { AdminVenueAudit } from "./AdminVenueAudit";
 import { AdminTagManagement } from "./AdminTagManagement";
 import { AdminReportManagement } from "./AdminReportManagement";
 import { AdminUserFlags } from "./AdminUserFlags";
+import { AdminVenueClaims } from "./AdminVenueClaims";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEventUrl, getEditEventUrl, getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
@@ -868,6 +869,7 @@ export const AdminDashboard = () => {
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="tags">Tags</TabsTrigger>
             <TabsTrigger value="venues">Venues</TabsTrigger>
+            <TabsTrigger value="venue-claims">Claims</TabsTrigger>
             <TabsTrigger value="venue-edits">Edits</TabsTrigger>
             <TabsTrigger value="venue-audit">Audit</TabsTrigger>
             <TabsTrigger value="receipts">Receipts</TabsTrigger>
@@ -1130,6 +1132,10 @@ export const AdminDashboard = () => {
 
           <TabsContent value="venues" className="space-y-4">
             <AdminVenueManagement />
+          </TabsContent>
+
+          <TabsContent value="venue-claims" className="space-y-4">
+            <AdminVenueClaims />
           </TabsContent>
 
           <TabsContent value="venue-edits" className="space-y-4">

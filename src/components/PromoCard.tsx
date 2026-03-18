@@ -52,12 +52,13 @@ interface PromoCardProps {
   onFavoriteToggle?: (promoId: string, isFavorite: boolean) => void;
   index?: number;
   isSelected?: boolean;
+  isVenueOwner?: boolean;
 }
 
 import { format } from "date-fns";
 import { getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
 
-export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0, isSelected = false }: PromoCardProps) => {
+export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0, isSelected = false, isVenueOwner = false }: PromoCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showReviews, setShowReviews] = useState(false);
@@ -216,7 +217,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
 
   const isOwner = currentUser && currentUser.id === promo.created_by;
   const isAdmin = userAdminStatus?.is_admin || userAdminStatus?.is_super_admin || false;
-  const canDelete = isOwner || isAdmin;
+  const canDelete = isOwner || isAdmin || isVenueOwner;
 
   return (
     <Card 
