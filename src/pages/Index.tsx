@@ -60,6 +60,17 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
     }
     setActiveSection(section);
     
+    // Use URL navigation so browser back button works
+    const sectionRoutes: Record<string, string> = {
+      home: '/',
+      events: '/events',
+      promos: '/promos',
+    };
+    const targetRoute = sectionRoutes[section];
+    if (targetRoute && window.location.pathname !== targetRoute) {
+      navigate(targetRoute);
+    }
+    
     // Scroll to top when changing sections
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
