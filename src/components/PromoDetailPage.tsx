@@ -92,6 +92,17 @@ export const PromoDetailPage = () => {
           
           setCreatorProfile(creatorProfileData);
         }
+
+        // Fetch venue owner if promo has a venue_id
+        if (data.venue_id) {
+          const { data: venueData } = await supabase
+            .from('venues')
+            .select('claimed_by')
+            .eq('id', data.venue_id)
+            .eq('claim_status', 'approved')
+            .single();
+          if (venueData?.claimed_by) setVenueOwnerId(venueData.claimed_by);
+        }
       } catch (error) {
         console.error('Error fetching promo:', error);
         toast({
