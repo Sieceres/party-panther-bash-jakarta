@@ -365,6 +365,7 @@ export const EventDetailPage = () => {
           const { error } = await supabase.from("event_attendees").insert({
             event_id: event.id,
             user_id: user.id,
+            is_anonymous: joinAnonymously,
           });
 
           if (error) {
