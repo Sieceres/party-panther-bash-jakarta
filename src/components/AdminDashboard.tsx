@@ -878,6 +878,10 @@ export const AdminDashboard = () => {
             <TabsTrigger value="migration">Migration</TabsTrigger>
             <TabsTrigger value="ig-creator">IG Creator</TabsTrigger>
             <TabsTrigger value="import">Import</TabsTrigger>
+            <TabsTrigger value="notifications">
+              <Bell className="w-3 h-3 mr-1" />
+              Notifications
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="analytics">
