@@ -150,6 +150,16 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
           previous_values: previousValues,
         });
 
+        // Notify admin (fire-and-forget)
+        supabase.functions.invoke('notify-admin', {
+          body: {
+            type: 'new_venue_edit',
+            title: venue.name,
+            details: { 'Fields changed': Object.keys(changes).join(', ') },
+            link: `/venue/${venue.id}`,
+          }
+        }).catch(err => console.error('Notify failed:', err));
+
         toast.success("Your edit suggestion has been submitted for admin review");
       }
 

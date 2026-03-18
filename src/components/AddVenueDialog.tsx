@@ -56,6 +56,15 @@ export function AddVenueDialog({ onVenueAdded }: AddVenueDialogProps) {
 
       if (error) throw error;
 
+      // Notify admin (fire-and-forget)
+      supabase.functions.invoke('notify-admin', {
+        body: {
+          type: 'new_venue',
+          title: form.name.trim(),
+          details: { Address: form.address.trim() || 'N/A', Instagram: form.instagram.trim() || 'N/A' },
+        }
+      }).catch(err => console.error('Notify failed:', err));
+
       toast.success("Venue added successfully!");
       setForm({ name: "", address: "", description: "", instagram: "", website: "", whatsapp: "", google_maps_link: "" });
       setOpen(false);
