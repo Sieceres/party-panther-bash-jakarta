@@ -174,22 +174,31 @@ export const UserProfile = () => {
       
       try {
         if (isAdminView) {
-          // Admin viewing a user: use full profile function with profile ID
+          // Admin viewing a user: query profiles table directly
           const profileResult = await supabase.from('profiles').select('user_id').eq('id', userId).single();
           if (profileResult.data) {
-            const { data } = await supabase.rpc('get_full_profile_info', { profile_user_id: profileResult.data.user_id });
-            profileData = data && data.length > 0 ? data[0] : null;
+            const { data, error: fetchError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('user_id', profileResult.data.user_id)
+              .single();
+            error = fetchError;
+            profileData = data;
           }
         } else if (isSharedProfile) {
           // Shared profile: use public profile function
           const { data } = await supabase.rpc('get_public_profile_info', { profile_user_id: userId });
           profileData = data && data.length > 0 ? data[0] : null;
         } else if (user) {
-          // Current user's own profile: use full profile function
-          const { data } = await supabase.rpc('get_full_profile_info', { profile_user_id: user.id });
-          profileData = data && data.length > 0 ? data[0] : null;
+          // Current user's own profile: query profiles table directly
+          const { data, error: fetchError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+          error = fetchError;
+          profileData = data;
         } else {
-          // No user and not a shared profile - should not happen due to earlier check
           setLoading(false);
           return;
         }
