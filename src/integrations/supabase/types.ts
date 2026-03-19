@@ -929,6 +929,41 @@ export type Database = {
           },
         ]
       }
+      removed_event_attendees: {
+        Row: {
+          event_id: string
+          id: string
+          reason: string | null
+          removed_at: string
+          removed_by: string
+          user_id: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          reason?: string | null
+          removed_at?: string
+          removed_by: string
+          user_id: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          reason?: string | null
+          removed_at?: string
+          removed_by?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "removed_event_attendees_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string
@@ -1618,6 +1653,10 @@ export type Database = {
       is_current_user_admin: { Args: never; Returns: boolean }
       is_event_co_organizer: {
         Args: { event_id_param: string; user_id_param: string }
+        Returns: boolean
+      }
+      is_removed_from_event: {
+        Args: { _event_id: string; _user_id: string }
         Returns: boolean
       }
       is_user_banned: { Args: { _user_id: string }; Returns: boolean }

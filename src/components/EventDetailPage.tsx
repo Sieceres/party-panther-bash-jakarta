@@ -78,6 +78,7 @@ export const EventDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [hasJoined, setHasJoined] = useState(false);
+  const [isRemovedFromEvent, setIsRemovedFromEvent] = useState(false);
   const [attendees, setAttendees] = useState<any[]>([]);
   const [joiningEvent, setJoiningEvent] = useState(false);
   const [leavingEvent, setLeavingEvent] = useState(false);
@@ -152,16 +153,25 @@ export const EventDetailPage = () => {
           setIsAdmin(roles && roles.length > 0);
         }
 
-        // Check if user has joined this event
+        // Check if user has joined this event and if they were removed
         if (user) {
-          const { data: attendeeData } = await supabase
-            .from("event_attendees")
-            .select("id")
-            .eq("event_id", eventData.id)
-            .eq("user_id", user.id)
-            .single();
+          const [{ data: attendeeData }, { data: removalData }] = await Promise.all([
+            supabase
+              .from("event_attendees")
+              .select("id")
+              .eq("event_id", eventData.id)
+              .eq("user_id", user.id)
+              .single(),
+            supabase
+              .from("removed_event_attendees")
+              .select("id")
+              .eq("event_id", eventData.id)
+              .eq("user_id", user.id)
+              .maybeSingle(),
+          ]);
 
           setHasJoined(!!attendeeData);
+          setIsRemovedFromEvent(!!removalData);
         }
 
         // Use attendee count from RPC function (eventData has attendee_count)
@@ -276,6 +286,14 @@ export const EventDetailPage = () => {
 
     if (!event) return;
 
+    if (isRemovedFromEvent) {
+      toast({
+        title: "Cannot rejoin",
+        description: "You have been removed from this event and cannot rejoin.",
+        variant: "destructive",
+      });
+      return;
+    }
     setJoiningEvent(true);
     try {
       const { error } = await supabase.from("event_attendees").insert({
@@ -818,10 +836,24 @@ export const EventDetailPage = () => {
       return;
     }
 
-    try {
-      const { error } = await supabase.from("event_attendees").delete().eq("id", attendeeId);
+    if (!event || !user) return;
 
+    try {
+      // Find the attendee's user_id before deleting
+      const removedAttendee = attendees.find((a) => a.id === attendeeId);
+      const removedUserId = removedAttendee?.user_id;
+
+      const { error } = await supabase.from("event_attendees").delete().eq("id", attendeeId);
       if (error) throw error;
+
+      // Record removal to prevent rejoining
+      if (removedUserId) {
+        await supabase.from("removed_event_attendees").insert({
+          event_id: event.id,
+          user_id: removedUserId,
+          removed_by: user.id,
+        });
+      }
 
       // Update local state
       setAttendees((prev) => prev.filter((attendee) => attendee.id !== attendeeId));
@@ -829,7 +861,7 @@ export const EventDetailPage = () => {
 
       toast({
         title: "Attendee removed",
-        description: `${attendeeName} has been removed from the event.`,
+        description: `${attendeeName} has been removed from the event and cannot rejoin.`,
       });
     } catch (error) {
       console.error("Error removing attendee:", error);
@@ -1396,7 +1428,12 @@ export const EventDetailPage = () => {
                   <CardTitle>Event Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {user && !hasJoined && (
+                  {user && isRemovedFromEvent && !hasJoined && (
+                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+                      You have been removed from this event and cannot rejoin.
+                    </div>
+                  )}
+                  {user && !hasJoined && !isRemovedFromEvent && (
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <Switch checked={joinAnonymously} onCheckedChange={setJoinAnonymously} />

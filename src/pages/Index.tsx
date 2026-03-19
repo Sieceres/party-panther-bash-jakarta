@@ -233,6 +233,23 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
         return;
       }
 
+      // Check if user was removed from this event
+      const { data: removalData } = await supabase
+        .from('removed_event_attendees')
+        .select('id')
+        .eq('event_id', eventId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (removalData) {
+        toast({
+          title: "Cannot rejoin",
+          description: "You have been removed from this event and cannot rejoin.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       // Optimistically update UI
       updateEventAttendance(eventId, true);
 
