@@ -819,10 +819,24 @@ export const EventDetailPage = () => {
       return;
     }
 
-    try {
-      const { error } = await supabase.from("event_attendees").delete().eq("id", attendeeId);
+    if (!event || !user) return;
 
+    try {
+      // Find the attendee's user_id before deleting
+      const removedAttendee = attendees.find((a) => a.id === attendeeId);
+      const removedUserId = removedAttendee?.user_id;
+
+      const { error } = await supabase.from("event_attendees").delete().eq("id", attendeeId);
       if (error) throw error;
+
+      // Record removal to prevent rejoining
+      if (removedUserId) {
+        await supabase.from("removed_event_attendees").insert({
+          event_id: event.id,
+          user_id: removedUserId,
+          removed_by: user.id,
+        });
+      }
 
       // Update local state
       setAttendees((prev) => prev.filter((attendee) => attendee.id !== attendeeId));
@@ -830,7 +844,7 @@ export const EventDetailPage = () => {
 
       toast({
         title: "Attendee removed",
-        description: `${attendeeName} has been removed from the event.`,
+        description: `${attendeeName} has been removed from the event and cannot rejoin.`,
       });
     } catch (error) {
       console.error("Error removing attendee:", error);
