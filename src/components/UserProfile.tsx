@@ -440,12 +440,11 @@ export const UserProfile = () => {
       console.log('Saving profile data:', profileData);
       console.log('Gender value being saved:', editForm.gender);
 
+      // Use update instead of upsert to avoid overwriting fields not in profileData
       const { error } = await supabase
         .from('profiles')
-        .upsert(profileData, { 
-          onConflict: 'user_id',
-          ignoreDuplicates: false 
-        });
+        .update(profileData)
+        .eq('user_id', user.id);
 
       if (error) {
         console.error('Error updating profile:', error);
