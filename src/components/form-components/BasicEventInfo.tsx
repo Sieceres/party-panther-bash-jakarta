@@ -29,6 +29,8 @@ export const BasicEventInfo = ({ title, description, onTitleChange, onDescriptio
           placeholder="Tell people what makes your event special..."
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
+          autoResize
+          maxHeight={400}
           className="min-h-[100px]"
         />
       </div>

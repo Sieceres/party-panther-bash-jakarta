@@ -30,6 +30,8 @@ export const EventBasicInfo = ({ title, description, onTitleChange, onDescriptio
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
           required
+          autoResize
+          maxHeight={400}
           className="min-h-[100px]"
         />
       </div>
