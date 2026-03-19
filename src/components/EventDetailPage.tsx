@@ -153,16 +153,25 @@ export const EventDetailPage = () => {
           setIsAdmin(roles && roles.length > 0);
         }
 
-        // Check if user has joined this event
+        // Check if user has joined this event and if they were removed
         if (user) {
-          const { data: attendeeData } = await supabase
-            .from("event_attendees")
-            .select("id")
-            .eq("event_id", eventData.id)
-            .eq("user_id", user.id)
-            .single();
+          const [{ data: attendeeData }, { data: removalData }] = await Promise.all([
+            supabase
+              .from("event_attendees")
+              .select("id")
+              .eq("event_id", eventData.id)
+              .eq("user_id", user.id)
+              .single(),
+            supabase
+              .from("removed_event_attendees")
+              .select("id")
+              .eq("event_id", eventData.id)
+              .eq("user_id", user.id)
+              .maybeSingle(),
+          ]);
 
           setHasJoined(!!attendeeData);
+          setIsRemovedFromEvent(!!removalData);
         }
 
         // Use attendee count from RPC function (eventData has attendee_count)
