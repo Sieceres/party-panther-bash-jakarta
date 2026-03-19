@@ -78,6 +78,7 @@ export const EventDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [hasJoined, setHasJoined] = useState(false);
+  const [isRemovedFromEvent, setIsRemovedFromEvent] = useState(false);
   const [attendees, setAttendees] = useState<any[]>([]);
   const [joiningEvent, setJoiningEvent] = useState(false);
   const [leavingEvent, setLeavingEvent] = useState(false);
