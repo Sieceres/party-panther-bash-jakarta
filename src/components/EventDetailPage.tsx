@@ -286,6 +286,14 @@ export const EventDetailPage = () => {
 
     if (!event) return;
 
+    if (isRemovedFromEvent) {
+      toast({
+        title: "Cannot rejoin",
+        description: "You have been removed from this event and cannot rejoin.",
+        variant: "destructive",
+      });
+      return;
+    }
     setJoiningEvent(true);
     try {
       const { error } = await supabase.from("event_attendees").insert({
