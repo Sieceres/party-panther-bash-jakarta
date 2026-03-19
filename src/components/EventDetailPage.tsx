@@ -1420,7 +1420,12 @@ export const EventDetailPage = () => {
                   <CardTitle>Event Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {user && !hasJoined && (
+                  {user && isRemovedFromEvent && !hasJoined && (
+                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+                      You have been removed from this event and cannot rejoin.
+                    </div>
+                  )}
+                  {user && !hasJoined && !isRemovedFromEvent && (
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <Switch checked={joinAnonymously} onCheckedChange={setJoinAnonymously} />
