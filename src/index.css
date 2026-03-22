@@ -255,6 +255,12 @@
     transform: scale(1.02);
   }
 
+  .glass-control-active {
+    border-color: #00CFFF !important;
+    box-shadow: 0 0 12px rgba(0, 207, 255, 0.25);
+    background: rgba(0, 207, 255, 0.1);
+  }
+
   .promo-card-enhanced {
     background: rgba(15, 15, 15, 0.95);
     border: 1px solid rgba(0, 207, 255, 0.2);

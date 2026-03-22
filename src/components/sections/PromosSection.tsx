@@ -206,7 +206,7 @@ export const PromosSection = ({
               Day
             </label>
             <Select>
-              <SelectTrigger className="glass-control">
+              <SelectTrigger className={`glass-control ${!dayFilter.includes("all") ? "glass-control-active" : ""}`}>
                 <SelectValue placeholder={getFilterDisplayText(dayFilter, "All days")} />
               </SelectTrigger>
               <SelectContent>
@@ -252,7 +252,7 @@ export const PromosSection = ({
               Area
             </label>
             <Select>
-              <SelectTrigger className="glass-control">
+              <SelectTrigger className={`glass-control ${!areaFilter.includes("all") ? "glass-control-active" : ""}`}>
                 <SelectValue placeholder={getFilterDisplayText(areaFilter, "All areas")} />
               </SelectTrigger>
               <SelectContent>
@@ -281,7 +281,7 @@ export const PromosSection = ({
               Drink Type
             </label>
             <Select>
-              <SelectTrigger className="glass-control">
+              <SelectTrigger className={`glass-control ${!drinkTypeFilter.includes("all") ? "glass-control-active" : ""}`}>
                 <SelectValue placeholder={getFilterDisplayText(drinkTypeFilter, "All types")} />
               </SelectTrigger>
               <SelectContent>
@@ -327,7 +327,7 @@ export const PromosSection = ({
               Promo Type
             </label>
             <Select>
-              <SelectTrigger className="glass-control">
+              <SelectTrigger className={`glass-control ${!promoTypeFilter.includes("all") ? "glass-control-active" : ""}`}>
                 <SelectValue placeholder={getFilterDisplayText(promoTypeFilter, "All types")} />
               </SelectTrigger>
               <SelectContent>
