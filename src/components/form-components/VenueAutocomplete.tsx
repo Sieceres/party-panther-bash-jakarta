@@ -4,11 +4,10 @@ import { Label } from "@/components/ui/label";
 import { MapPin, Loader2, Building2, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-interface VenueResult {
+export interface VenueResult {
   id: string;
   name: string;
   address: string | null;
-  area: string | null;
 }
 
 interface VenueAutocompleteProps {
@@ -31,7 +30,6 @@ export const VenueAutocomplete = ({
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
@@ -42,11 +40,8 @@ export const VenueAutocomplete = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Debounced search
   useEffect(() => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
 
     if (venue.length < 2) {
       setSuggestions([]);
@@ -54,7 +49,6 @@ export const VenueAutocomplete = ({
       return;
     }
 
-    // If a venue is already selected and the text matches, don't re-search
     if (selectedVenueId) return;
 
     setIsSearching(true);
@@ -62,12 +56,12 @@ export const VenueAutocomplete = ({
       try {
         const { data, error } = await supabase
           .from("venues")
-          .select("id, name, address, area")
+          .select("id, name, address")
           .ilike("name", `%${venue}%`)
           .limit(8);
 
         if (!error && data) {
-          setSuggestions(data as VenueResult[]);
+          setSuggestions(data);
         }
       } catch (err) {
         console.error("Venue search error:", err);
@@ -92,7 +86,6 @@ export const VenueAutocomplete = ({
 
   const handleInputChange = (value: string) => {
     onVenueChange(value);
-    // Clear venue selection when user modifies the text
     if (selectedVenueId) {
       onVenueSelect(null);
     }
@@ -124,7 +117,6 @@ export const VenueAutocomplete = ({
           )}
         </div>
 
-        {/* Dropdown suggestions */}
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
             {suggestions.map((s) => (
@@ -140,16 +132,12 @@ export const VenueAutocomplete = ({
                   {s.address && (
                     <div className="text-xs text-muted-foreground truncate">{s.address}</div>
                   )}
-                  {s.area && (
-                    <div className="text-xs text-muted-foreground">{s.area}</div>
-                  )}
                 </div>
               </button>
             ))}
           </div>
         )}
 
-        {/* No results message */}
         {showSuggestions && noResults && (
           <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg p-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -162,7 +150,6 @@ export const VenueAutocomplete = ({
         )}
       </div>
 
-      {/* Selected venue indicator */}
       {selectedVenueId && (
         <div className="text-xs text-muted-foreground bg-accent/50 rounded-md px-3 py-2 flex items-center gap-1.5">
           <MapPin className="w-3 h-3 flex-shrink-0" />
@@ -170,7 +157,6 @@ export const VenueAutocomplete = ({
         </div>
       )}
 
-      {/* New venue indicator (when typed but no match selected) */}
       {!selectedVenueId && venue.length >= 2 && hasSearched && !isSearching && !showSuggestions && (
         <div className="text-xs text-muted-foreground bg-accent/50 rounded-md px-3 py-2 flex items-center gap-1.5">
           <Plus className="w-3 h-3 flex-shrink-0" />
