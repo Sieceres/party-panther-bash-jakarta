@@ -1,31 +1,39 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { VenueAutocomplete, VenueResult } from "./VenueAutocomplete";
 
 interface PromoDiscountProps {
   venue: string;
   address: string;
+  selectedVenueId?: string | null;
   onVenueChange: (venue: string) => void;
   onAddressChange: (address: string) => void;
+  onVenueSelect?: (venue: VenueResult | null) => void;
 }
 
 export const PromoDiscount = ({ 
   venue, 
-  address, 
+  address,
+  selectedVenueId,
   onVenueChange, 
-  onAddressChange 
+  onAddressChange,
+  onVenueSelect,
 }: PromoDiscountProps) => {
+  const handleVenueSelect = (v: VenueResult | null) => {
+    if (onVenueSelect) onVenueSelect(v);
+    if (v?.address) {
+      onAddressChange(v.address);
+    }
+  };
+
   return (
     <>
-      <div className="space-y-2">
-        <Label htmlFor="venue">Venue Name *</Label>
-        <Input
-          id="venue"
-          placeholder="Club/Bar/Restaurant name"
-          value={venue}
-          onChange={(e) => onVenueChange(e.target.value)}
-          required
-        />
-      </div>
+      <VenueAutocomplete
+        venue={venue}
+        onVenueChange={onVenueChange}
+        onVenueSelect={handleVenueSelect}
+        selectedVenueId={selectedVenueId}
+      />
 
       <div className="space-y-2">
         <Label htmlFor="address">Address</Label>

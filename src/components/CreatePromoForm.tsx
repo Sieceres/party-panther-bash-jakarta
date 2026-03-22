@@ -12,6 +12,7 @@ import { PromoDetails } from "./form-components/PromoDetails";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
 import { DuplicateWarning } from "./DuplicateWarning";
+import type { VenueResult } from "./form-components/VenueAutocomplete";
 
 export const CreatePromoForm = () => {
   const { toast } = useToast();
@@ -21,6 +22,7 @@ export const CreatePromoForm = () => {
   const [validUntilDate, setValidUntilDate] = useState<Date>();
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [duplicateConfirmed, setDuplicateConfirmed] = useState(false);
+  const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -34,7 +36,6 @@ export const CreatePromoForm = () => {
   });
   const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
 
-  // Duplicate detection
   const { duplicates, isChecking, hasChecked } = useDuplicateCheck({
     type: "promo",
     title: formData.title,
@@ -44,7 +45,6 @@ export const CreatePromoForm = () => {
     area: formData.area,
   });
 
-  // Reset confirmation when duplicates change
   useEffect(() => {
     setDuplicateConfirmed(false);
   }, [duplicates]);
@@ -52,9 +52,13 @@ export const CreatePromoForm = () => {
   const handleInputChange = (field: string, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setHasUnsavedChanges(true);
-    // Clear errors when user starts typing
-    if (formErrors.length > 0) {
-      setFormErrors([]);
+    if (formErrors.length > 0) setFormErrors([]);
+  };
+
+  const handleVenueSelect = (venue: VenueResult | null) => {
+    setSelectedVenueId(venue?.id || null);
+    if (venue?.address) {
+      setFormData(prev => ({ ...prev, address: venue.address! }));
     }
   };
 
@@ -65,19 +69,16 @@ export const CreatePromoForm = () => {
         e.returnValue = 'If you leave the page, your promo will not be saved. Are you sure you want to exit?';
       }
     };
-
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
   const validateForm = () => {
     const errors = [];
-    
     if (!formData.title.trim()) errors.push("Title is required");
     if (!formData.description.trim()) errors.push("Description is required");
     if (!formData.venue.trim()) errors.push("Venue name is required");
     if (!formData.promoType) errors.push("Promo type is required");
-    
     return errors;
   };
 
@@ -86,12 +87,7 @@ export const CreatePromoForm = () => {
            formData.description.trim() && 
            formData.venue.trim() && 
            formData.promoType;
-    
-    // If duplicates found, require confirmation
-    if (duplicates.length > 0 && !duplicateConfirmed) {
-      return false;
-    }
-    
+    if (duplicates.length > 0 && !duplicateConfirmed) return false;
     return baseValid;
   };
 
@@ -102,32 +98,50 @@ export const CreatePromoForm = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to create a promo.",
-          variant: "destructive"
-        });
+        toast({ title: "Authentication required", description: "Please log in to create a promo.", variant: "destructive" });
         setIsSubmitting(false);
         return;
       }
 
-      // Validate all required fields
       const validationErrors = validateForm();
       if (validationErrors.length > 0) {
         setFormErrors(validationErrors);
-        toast({
-          title: "Please fill in all required fields",
-          description: validationErrors.join(", "),
-          variant: "destructive"
-        });
+        toast({ title: "Please fill in all required fields", description: validationErrors.join(", "), variant: "destructive" });
         setIsSubmitting(false);
         return;
+      }
+
+      // Auto-create venue if no existing venue was selected
+      let venueId = selectedVenueId;
+      if (!venueId && formData.venue.trim()) {
+        const { data: newVenue, error: venueError } = await supabase
+          .from('venues')
+          .insert({
+            name: formData.venue.trim(),
+            address: formData.address || null,
+            latitude: location?.lat || null,
+            longitude: location?.lng || null,
+            created_by: user.id,
+          })
+          .select('id')
+          .single();
+
+        if (venueError) {
+          console.error('Error creating venue:', venueError);
+          // Continue without venue_id — non-blocking
+        } else if (newVenue) {
+          venueId = newVenue.id;
+          // Fire-and-forget: enrich venue from the web
+          supabase.functions.invoke('scrape-venue-images', {
+            body: { venue_id: newVenue.id, mode: 'all' }
+          }).catch(err => console.error('Venue enrichment failed:', err));
+        }
       }
 
       const { error } = await supabase.from('promos').insert({
         title: formData.title,
         description: formData.description,
-        discount_text: formData.promoType, // Use promo type as discount text
+        discount_text: formData.promoType,
         venue_name: formData.venue,
         venue_address: formData.address,
         venue_latitude: location?.lat,
@@ -139,12 +153,12 @@ export const CreatePromoForm = () => {
         area: formData.area,
         drink_type: formData.drinkType,
         image_url: formData.image,
-        created_by: user.id
+        created_by: user.id,
+        venue_id: venueId,
       });
 
       if (error) throw error;
 
-      // Notify admin (fire-and-forget)
       supabase.functions.invoke('notify-admin', {
         body: {
           type: 'new_promo',
@@ -153,22 +167,13 @@ export const CreatePromoForm = () => {
         }
       }).catch(err => console.error('Notify failed:', err));
 
-      toast({
-        title: "Promo Created! 🎉",
-        description: "Your promo has been submitted for review and will be live soon.",
-      });
+      toast({ title: "Promo Created! 🎉", description: "Your promo has been submitted for review and will be live soon." });
 
       setHasUnsavedChanges(false);
-      setTimeout(() => {
-        navigate('/?section=promos');
-      }, 1000);
+      setTimeout(() => navigate('/?section=promos'), 1000);
     } catch (error) {
       console.error('Error creating promo:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create promo. Please try again.",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: "Failed to create promo. Please try again.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -201,8 +206,10 @@ export const CreatePromoForm = () => {
             <PromoDiscount
               venue={formData.venue}
               address={formData.address}
+              selectedVenueId={selectedVenueId}
               onVenueChange={(value) => handleInputChange("venue", value)}
               onAddressChange={(value) => handleInputChange("address", value)}
+              onVenueSelect={handleVenueSelect}
             />
 
             <LocationAutocomplete
@@ -220,9 +227,7 @@ export const CreatePromoForm = () => {
               drinkType={formData.drinkType}
               onValidUntilChange={(date) => {
                 setValidUntilDate(date);
-                if (formErrors.length > 0) {
-                  setFormErrors([]);
-                }
+                if (formErrors.length > 0) setFormErrors([]);
               }}
               onPromoTypeChange={(value) => handleInputChange("promoType", value)}
               onDayOfWeekChange={(values) => handleInputChange("dayOfWeek", values)}
@@ -230,14 +235,14 @@ export const CreatePromoForm = () => {
               onDrinkTypeChange={(values) => handleInputChange("drinkType", values)}
             />
 
-              <ImageUpload
-                label="Promo Image/Poster"
-                imageUrl={formData.image}
-                onImageChange={(value) => handleInputChange("image", value)}
-                inputId="promo-image"
-                uploadToStorage={true}
-                storageFolder="promos"
-              />
+            <ImageUpload
+              label="Promo Image/Poster"
+              imageUrl={formData.image}
+              onImageChange={(value) => handleInputChange("image", value)}
+              inputId="promo-image"
+              uploadToStorage={true}
+              storageFolder="promos"
+            />
 
             {formErrors.length > 0 && (
               <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
@@ -250,7 +255,6 @@ export const CreatePromoForm = () => {
               </div>
             )}
 
-            {/* Duplicate Warning */}
             <DuplicateWarning
               type="promo"
               duplicates={duplicates}
