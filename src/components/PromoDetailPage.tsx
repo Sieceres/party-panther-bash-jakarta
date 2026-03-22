@@ -309,6 +309,11 @@ export const PromoDetailPage = () => {
                 />
               </CardContent>
             </Card>
+
+            <div className="flex items-start gap-2 p-4 rounded-lg bg-muted/50 border border-border text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              <span className="text-base mt-0.5">ℹ️</span>
+              <p>We gather promo info straight from the venue social media, but deals can change fast. Double‑check with the venue before heading out, and please report if anything is incorrect.</p>
+            </div>
           </div>
 
           {/* Sidebar */}
