@@ -327,7 +327,7 @@ export const PromosSection = ({
               Promo Type
             </label>
             <Select>
-              <SelectTrigger className="glass-control">
+              <SelectTrigger className={`glass-control ${!promoTypeFilter.includes("all") ? "glass-control-active" : ""}`}>
                 <SelectValue placeholder={getFilterDisplayText(promoTypeFilter, "All types")} />
               </SelectTrigger>
               <SelectContent>
