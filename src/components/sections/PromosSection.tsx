@@ -252,7 +252,7 @@ export const PromosSection = ({
               Area
             </label>
             <Select>
-              <SelectTrigger className="glass-control">
+              <SelectTrigger className={`glass-control ${!areaFilter.includes("all") ? "glass-control-active" : ""}`}>
                 <SelectValue placeholder={getFilterDisplayText(areaFilter, "All areas")} />
               </SelectTrigger>
               <SelectContent>
