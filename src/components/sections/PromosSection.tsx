@@ -206,7 +206,7 @@ export const PromosSection = ({
               Day
             </label>
             <Select>
-              <SelectTrigger className="glass-control">
+              <SelectTrigger className={`glass-control ${!dayFilter.includes("all") ? "glass-control-active" : ""}`}>
                 <SelectValue placeholder={getFilterDisplayText(dayFilter, "All days")} />
               </SelectTrigger>
               <SelectContent>
