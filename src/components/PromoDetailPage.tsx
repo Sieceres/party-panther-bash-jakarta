@@ -178,8 +178,8 @@ export const PromoDetailPage = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Title and Badges - Above Image */}
             <div className="space-y-4">
-              <div className="flex items-start justify-between flex-wrap gap-4">
-                <div className="space-y-2 flex-1 min-w-0">
+              <div className="flex flex-col gap-3">
+                <div className="space-y-2">
                   <h1 className="gradient-text leading-tight break-words" style={{ fontSize: 'clamp(1.5rem, 4vw + 0.5rem, 2.5rem)' }}>
                     {promo.title}
                   </h1>
