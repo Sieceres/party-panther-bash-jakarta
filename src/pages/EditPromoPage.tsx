@@ -11,6 +11,7 @@ import { LocationAutocomplete } from "@/components/form-components/LocationAutoc
 import { PromoDetails } from "@/components/form-components/PromoDetails";
 import { ImageUpload } from "@/components/form-components/ImageUpload";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
+import type { VenueResult } from "@/components/form-components/VenueAutocomplete";
 
 export const EditPromoPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +20,7 @@ export const EditPromoPage = () => {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validUntilDate, setValidUntilDate] = useState<Date>();
+  const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -39,11 +41,7 @@ export const EditPromoPage = () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-          toast({
-            title: "Authentication required",
-            description: "Please sign in to edit promos.",
-            variant: "destructive",
-          });
+          toast({ title: "Authentication required", description: "Please sign in to edit promos.", variant: "destructive" });
           navigate('/auth');
           return;
         }
@@ -57,18 +55,12 @@ export const EditPromoPage = () => {
 
         if (error) {
           console.error('Error fetching promo:', error);
-          toast({
-            title: "Error",
-            description: "Failed to load promo data.",
-            variant: "destructive",
-          });
+          toast({ title: "Error", description: "Failed to load promo data.", variant: "destructive" });
           navigate('/profile');
           return;
         }
 
         if (promo) {
-          console.log('Promo data:', promo); // Debug log
-          
           setFormData({
             title: promo.title || "",
             description: promo.description || "",
@@ -80,6 +72,8 @@ export const EditPromoPage = () => {
             drinkType: Array.isArray(promo.drink_type) ? promo.drink_type : (promo.drink_type ? [promo.drink_type] : []),
             image: promo.image_url || ""
           });
+
+          setSelectedVenueId(promo.venue_id || null);
 
           if (promo.venue_latitude && promo.venue_longitude) {
             setLocation({
@@ -95,11 +89,7 @@ export const EditPromoPage = () => {
         }
       } catch (error) {
         console.error('Error:', error);
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred.",
-          variant: "destructive",
-        });
+        toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
       } finally {
         setLoading(false);
       }
@@ -112,6 +102,13 @@ export const EditPromoPage = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleVenueSelect = (venue: VenueResult | null) => {
+    setSelectedVenueId(venue?.id || null);
+    if (venue?.address) {
+      setFormData(prev => ({ ...prev, address: venue.address! }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
@@ -121,12 +118,31 @@ export const EditPromoPage = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to update this promo.",
-          variant: "destructive"
-        });
+        toast({ title: "Authentication required", description: "Please log in to update this promo.", variant: "destructive" });
         return;
+      }
+
+      // Auto-create venue if needed
+      let venueId = selectedVenueId;
+      if (!venueId && formData.venue.trim()) {
+        const { data: newVenue, error: venueError } = await supabase
+          .from('venues')
+          .insert({
+            name: formData.venue.trim(),
+            address: formData.address || null,
+            latitude: location?.lat || null,
+            longitude: location?.lng || null,
+            created_by: user.id,
+          })
+          .select('id')
+          .single();
+
+        if (!venueError && newVenue) {
+          venueId = newVenue.id;
+          supabase.functions.invoke('scrape-venue-images', {
+            body: { venue_id: newVenue.id, mode: 'all' }
+          }).catch(err => console.error('Venue enrichment failed:', err));
+        }
       }
 
       const promoData = {
@@ -142,6 +158,7 @@ export const EditPromoPage = () => {
         area: formData.area,
         drink_type: formData.drinkType,
         image_url: formData.image || null,
+        venue_id: venueId,
         updated_at: new Date().toISOString()
       };
 
@@ -153,27 +170,15 @@ export const EditPromoPage = () => {
 
       if (error) {
         console.error('Error updating promo:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update promo. Please try again.",
-          variant: "destructive"
-        });
+        toast({ title: "Error", description: "Failed to update promo. Please try again.", variant: "destructive" });
         return;
       }
 
-      toast({
-        title: "Success! 🎉",
-        description: "Promo updated successfully!",
-      });
-
+      toast({ title: "Success! 🎉", description: "Promo updated successfully!" });
       navigate('/profile');
     } catch (error) {
       console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -195,11 +200,7 @@ export const EditPromoPage = () => {
   return (
     <div className="pt-20 px-4 pb-8">
       <div className="container mx-auto max-w-4xl">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/profile')}
-          className="mb-6"
-        >
+        <Button variant="ghost" onClick={() => navigate('/profile')} className="mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Profile
         </Button>
@@ -222,8 +223,10 @@ export const EditPromoPage = () => {
               <PromoDiscount
                 venue={formData.venue}
                 address={formData.address}
+                selectedVenueId={selectedVenueId}
                 onVenueChange={(value) => handleInputChange('venue', value)}
                 onAddressChange={(value) => handleInputChange('address', value)}
+                onVenueSelect={handleVenueSelect}
               />
 
               <LocationAutocomplete
@@ -252,18 +255,10 @@ export const EditPromoPage = () => {
               />
 
               <div className="flex justify-end space-x-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/profile')}
-                >
+                <Button type="button" variant="outline" onClick={() => navigate('/profile')}>
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-primary hover:bg-primary/90"
-                >
+                <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
                   <Save className="w-4 h-4 mr-2" />
                   {isSubmitting ? 'Updating...' : 'Update Promo'}
                 </Button>
