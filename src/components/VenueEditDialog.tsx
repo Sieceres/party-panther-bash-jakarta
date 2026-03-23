@@ -50,6 +50,7 @@ const EDITABLE_FIELDS = [
 
 export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }: VenueEditDialogProps) {
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [selectedArea, setSelectedArea] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
         data[f.key] = (venue as any)[f.key]?.toString() || "";
       });
       setFormData(data);
+      setSelectedArea((venue as any).area || "");
     }
   }, [open, venue]);
 
