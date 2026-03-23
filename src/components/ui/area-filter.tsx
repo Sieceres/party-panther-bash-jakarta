@@ -32,7 +32,7 @@ function CollapsibleRegion({
 
   return (
     <div className="space-y-1">
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 rounded px-1 py-0.5 transition-colors hover:bg-accent/60">
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
