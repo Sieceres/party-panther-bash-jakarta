@@ -216,6 +216,7 @@ export const VenueDetailPage = () => {
               claimed_by: null,
               claim_status: "unclaimed",
               created_at: "",
+              area: null,
             } as Venue);
             setPromos(matchingPromos || []);
             setEvents(matchingEvents || []);
