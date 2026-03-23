@@ -75,6 +75,12 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
         previousValues[f.key] = (venue as any)[f.key] ?? null;
       }
     });
+    // Check area change
+    const currentArea = (venue as any).area || "";
+    if (selectedArea !== currentArea) {
+      changes.area = selectedArea || null;
+      previousValues.area = (venue as any).area ?? null;
+    }
     return { changes, previousValues };
   };
 
