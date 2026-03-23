@@ -95,9 +95,10 @@ export const PromosSection = ({
     onAreaFilterChange(["all"]);
     onDrinkTypeFilterChange(["all"]);
     onPromoTypeFilterChange(["all"]);
+    onSearchChange("");
   };
 
-  const hasActiveFilters = !dayFilter.includes("all") || !areaFilter.includes("all") || !drinkTypeFilter.includes("all") || !promoTypeFilter.includes("all");
+  const hasActiveFilters = !dayFilter.includes("all") || !areaFilter.includes("all") || !drinkTypeFilter.includes("all") || !promoTypeFilter.includes("all") || searchQuery.length > 0;
 
   const getFilterDisplayText = (filters: string[], allLabel: string) => {
     if (filters.includes("all") || filters.length === 0) return allLabel;
