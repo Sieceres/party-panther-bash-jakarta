@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
+import { AreaFilterList } from "@/components/ui/area-filter";
+import { getAllNeighborhoods } from "@/lib/area-config";
 
 interface Venue {
   id: string;
@@ -21,6 +23,7 @@ interface Venue {
   opening_hours: string | null;
   image_url: string | null;
   google_maps_link?: string | null;
+  area?: string | null;
 }
 
 interface VenueEditDialogProps {
@@ -47,6 +50,7 @@ const EDITABLE_FIELDS = [
 
 export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }: VenueEditDialogProps) {
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [selectedArea, setSelectedArea] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -56,6 +60,7 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
         data[f.key] = (venue as any)[f.key]?.toString() || "";
       });
       setFormData(data);
+      setSelectedArea((venue as any).area || "");
     }
   }, [open, venue]);
 
@@ -70,6 +75,12 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
         previousValues[f.key] = (venue as any)[f.key] ?? null;
       }
     });
+    // Check area change
+    const currentArea = (venue as any).area || "";
+    if (selectedArea !== currentArea) {
+      changes.area = selectedArea || null;
+      previousValues.area = (venue as any).area ?? null;
+    }
     return { changes, previousValues };
   };
 
@@ -210,6 +221,17 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
               )}
             </div>
           ))}
+          {/* Area selector */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Area / Neighborhood</Label>
+            <div className="border rounded-md">
+              <AreaFilterList
+                selectedValues={selectedArea ? [selectedArea] : []}
+                onToggle={(val) => setSelectedArea(val === selectedArea ? "" : val)}
+                singleSelect
+              />
+            </div>
+          </div>
         </div>
 
         <DialogFooter>

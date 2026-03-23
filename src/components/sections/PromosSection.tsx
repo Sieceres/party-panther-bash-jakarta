@@ -95,9 +95,10 @@ export const PromosSection = ({
     onAreaFilterChange(["all"]);
     onDrinkTypeFilterChange(["all"]);
     onPromoTypeFilterChange(["all"]);
+    onSearchChange("");
   };
 
-  const hasActiveFilters = !dayFilter.includes("all") || !areaFilter.includes("all") || !drinkTypeFilter.includes("all") || !promoTypeFilter.includes("all");
+  const hasActiveFilters = !dayFilter.includes("all") || !areaFilter.includes("all") || !drinkTypeFilter.includes("all") || !promoTypeFilter.includes("all") || searchQuery.length > 0;
 
   const getFilterDisplayText = (filters: string[], allLabel: string) => {
     if (filters.includes("all") || filters.length === 0) return allLabel;
@@ -384,6 +385,17 @@ export const PromosSection = ({
               </SelectContent>
             </Select>
           </div>
+          {hasActiveFilters && (
+            <Button
+              onClick={resetAllFilters}
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground self-end mb-0.5"
+            >
+              <RotateCcw className="w-4 h-4 mr-1" />
+              Clear Filters
+            </Button>
+          )}
         </div>
 
         {/* Results */}

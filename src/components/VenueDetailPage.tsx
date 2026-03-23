@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getVenueBySlugOrId } from "@/lib/slug-utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { VenueEditDialog } from "./VenueEditDialog";
+import { getRegionLabelForArea } from "@/lib/area-config";
 
 interface Venue {
   id: string;
@@ -37,6 +38,7 @@ interface Venue {
   claimed_by: string | null;
   claim_status: string;
   created_at: string;
+  area: string | null;
 }
 
 const truncateAddress = (address: string) => {
@@ -214,6 +216,7 @@ export const VenueDetailPage = () => {
               claimed_by: null,
               claim_status: "unclaimed",
               created_at: "",
+              area: null,
             } as Venue);
             setPromos(matchingPromos || []);
             setEvents(matchingEvents || []);
@@ -356,6 +359,11 @@ export const VenueDetailPage = () => {
                 </div>
                 {venue.claim_status === "approved" && (
                   <Badge variant="secondary" className="text-xs">✓ Claimed Venue</Badge>
+                )}
+                {venue.area && (
+                  <Badge variant="outline" className="text-xs">
+                    📍 {venue.area}{getRegionLabelForArea(venue.area) ? ` · ${getRegionLabelForArea(venue.area)}` : ""}
+                  </Badge>
                 )}
                 {/* Claim button: show for logged-in users when venue is unclaimed and no existing claim */}
                 {isLoggedIn && venue.id && venue.claim_status !== "approved" && venue.claimed_by !== currentUserId && !existingClaim && (

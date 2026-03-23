@@ -15,7 +15,6 @@ export const NEIGHBORHOOD_COORDS: Record<string, { lat: number; lng: number }> =
   "Blok M & Melawai": { lat: -6.244, lng: 106.798 },
   "Sudirman & Thamrin": { lat: -6.200, lng: 106.822 },
   "Kuningan & Setiabudi": { lat: -6.220, lng: 106.830 },
-  "Mega Kuningan": { lat: -6.230, lng: 106.835 },
   "Menteng & Cikini": { lat: -6.190, lng: 106.840 },
   "Kota Tua": { lat: -6.135, lng: 106.813 },
   "PIK": { lat: -6.105, lng: 106.740 },
@@ -32,7 +31,7 @@ export const JAKARTA_AREAS: AreaRegion[] = [
     label: "South Jakarta",
     lat: -6.261,
     lng: 106.810,
-    neighborhoods: ["Kemang", "Senopati & Gunawarman", "SCBD", "Senayan", "Blok M & Melawai", "Kuningan & Setiabudi", "Mega Kuningan"],
+    neighborhoods: ["Kemang", "Senopati & Gunawarman", "SCBD", "Senayan", "Blok M & Melawai", "Kuningan & Setiabudi"],
   },
   {
     key: "central",
@@ -81,6 +80,8 @@ export function getNeighborhoodsForRegion(regionKey: string): string[] {
 /** Normalize an area string to canonical casing from the config */
 export function normalizeArea(area: string): string {
   const lower = area.toLowerCase();
+  // Legacy mapping: merge "Mega Kuningan" into "Kuningan & Setiabudi"
+  if (lower === "mega kuningan") return "Kuningan & Setiabudi";
   for (const region of JAKARTA_AREAS) {
     const match = region.neighborhoods.find((n) => n.toLowerCase() === lower);
     if (match) return match;
@@ -94,14 +95,29 @@ export function areaMatchesFilter(promoArea: string | null, filterValues: string
   if (!promoArea) return false;
   const lower = promoArea.toLowerCase();
 
+  // Normalize legacy area values before matching
+  const normalized = lower === "mega kuningan" ? "kuningan & setiabudi" : lower;
+
   for (const filterVal of filterValues) {
     // Check if filter is a region key
     const region = JAKARTA_AREAS.find((r) => r.key === filterVal);
     if (region) {
-      if (region.neighborhoods.some((n) => n.toLowerCase() === lower)) return true;
+      if (region.neighborhoods.some((n) => n.toLowerCase() === normalized)) return true;
     }
     // Check direct neighborhood match
-    if (filterVal.toLowerCase() === lower) return true;
+    if (filterVal.toLowerCase() === normalized) return true;
   }
   return false;
+}
+
+/** Get the region label for a given neighborhood */
+export function getRegionLabelForArea(area: string): string | null {
+  const normalized = normalizeArea(area);
+  const lower = normalized.toLowerCase();
+  for (const region of JAKARTA_AREAS) {
+    if (region.neighborhoods.some((n) => n.toLowerCase() === lower)) {
+      return region.label;
+    }
+  }
+  return null;
 }

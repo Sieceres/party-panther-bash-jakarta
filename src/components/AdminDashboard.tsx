@@ -1137,6 +1137,11 @@ export const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="venues" className="space-y-4">
+            <div className="flex gap-2 mb-4">
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin/review-venues")}>
+                <MapPin className="w-4 h-4 mr-1" /> Review Venue Areas
+              </Button>
+            </div>
             <AdminVenueManagement />
           </TabsContent>
 
