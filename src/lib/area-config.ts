@@ -80,6 +80,8 @@ export function getNeighborhoodsForRegion(regionKey: string): string[] {
 /** Normalize an area string to canonical casing from the config */
 export function normalizeArea(area: string): string {
   const lower = area.toLowerCase();
+  // Legacy mapping: merge "Mega Kuningan" into "Kuningan & Setiabudi"
+  if (lower === "mega kuningan") return "Kuningan & Setiabudi";
   for (const region of JAKARTA_AREAS) {
     const match = region.neighborhoods.find((n) => n.toLowerCase() === lower);
     if (match) return match;
