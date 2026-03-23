@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
+import { AreaFilterList } from "@/components/ui/area-filter";
+import { getAllNeighborhoods } from "@/lib/area-config";
 
 interface Venue {
   id: string;
