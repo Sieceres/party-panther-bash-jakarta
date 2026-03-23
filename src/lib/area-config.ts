@@ -31,7 +31,7 @@ export const JAKARTA_AREAS: AreaRegion[] = [
     label: "South Jakarta",
     lat: -6.261,
     lng: 106.810,
-    neighborhoods: ["Kemang", "Senopati & Gunawarman", "SCBD", "Senayan", "Blok M & Melawai", "Kuningan & Setiabudi", "Mega Kuningan"],
+    neighborhoods: ["Kemang", "Senopati & Gunawarman", "SCBD", "Senayan", "Blok M & Melawai", "Kuningan & Setiabudi"],
   },
   {
     key: "central",
