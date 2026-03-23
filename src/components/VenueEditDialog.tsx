@@ -23,6 +23,7 @@ interface Venue {
   opening_hours: string | null;
   image_url: string | null;
   google_maps_link?: string | null;
+  area?: string | null;
 }
 
 interface VenueEditDialogProps {
