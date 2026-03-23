@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getVenueBySlugOrId } from "@/lib/slug-utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { VenueEditDialog } from "./VenueEditDialog";
+import { getRegionLabelForArea } from "@/lib/area-config";
 
 interface Venue {
   id: string;
