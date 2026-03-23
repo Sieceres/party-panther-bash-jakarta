@@ -15,7 +15,6 @@ export const NEIGHBORHOOD_COORDS: Record<string, { lat: number; lng: number }> =
   "Blok M & Melawai": { lat: -6.244, lng: 106.798 },
   "Sudirman & Thamrin": { lat: -6.200, lng: 106.822 },
   "Kuningan & Setiabudi": { lat: -6.220, lng: 106.830 },
-  "Mega Kuningan": { lat: -6.230, lng: 106.835 },
   "Menteng & Cikini": { lat: -6.190, lng: 106.840 },
   "Kota Tua": { lat: -6.135, lng: 106.813 },
   "PIK": { lat: -6.105, lng: 106.740 },
