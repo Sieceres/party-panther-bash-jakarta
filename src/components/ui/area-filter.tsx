@@ -73,7 +73,7 @@ function CollapsibleRegion({
           return (
             <div
               key={hood}
-              className="flex items-center space-x-2 pl-7"
+              className="flex items-center space-x-2 pl-7 rounded px-1 py-0.5 transition-colors hover:bg-accent/60"
             >
               {!singleSelect && (
                 <Checkbox

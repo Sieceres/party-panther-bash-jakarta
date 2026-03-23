@@ -360,6 +360,11 @@ export const VenueDetailPage = () => {
                 {venue.claim_status === "approved" && (
                   <Badge variant="secondary" className="text-xs">✓ Claimed Venue</Badge>
                 )}
+                {venue.area && (
+                  <Badge variant="outline" className="text-xs">
+                    📍 {venue.area}{getRegionLabelForArea(venue.area) ? ` · ${getRegionLabelForArea(venue.area)}` : ""}
+                  </Badge>
+                )}
                 {/* Claim button: show for logged-in users when venue is unclaimed and no existing claim */}
                 {isLoggedIn && venue.id && venue.claim_status !== "approved" && venue.claimed_by !== currentUserId && !existingClaim && (
                   <Dialog open={showClaimDialog} onOpenChange={setShowClaimDialog}>

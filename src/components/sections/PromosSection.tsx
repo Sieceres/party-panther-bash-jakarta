@@ -385,6 +385,17 @@ export const PromosSection = ({
               </SelectContent>
             </Select>
           </div>
+          {hasActiveFilters && (
+            <Button
+              onClick={resetAllFilters}
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground self-end mb-0.5"
+            >
+              <RotateCcw className="w-4 h-4 mr-1" />
+              Clear Filters
+            </Button>
+          )}
         </div>
 
         {/* Results */}
