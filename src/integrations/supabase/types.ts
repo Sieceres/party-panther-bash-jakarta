@@ -1257,6 +1257,7 @@ export type Database = {
       venues: {
         Row: {
           address: string | null
+          area: string | null
           claim_status: string
           claimed_by: string | null
           created_at: string
@@ -1277,6 +1278,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          area?: string | null
           claim_status?: string
           claimed_by?: string | null
           created_at?: string
@@ -1297,6 +1299,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          area?: string | null
           claim_status?: string
           claimed_by?: string | null
           created_at?: string

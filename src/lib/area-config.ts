@@ -95,14 +95,29 @@ export function areaMatchesFilter(promoArea: string | null, filterValues: string
   if (!promoArea) return false;
   const lower = promoArea.toLowerCase();
 
+  // Normalize legacy area values before matching
+  const normalized = lower === "mega kuningan" ? "kuningan & setiabudi" : lower;
+
   for (const filterVal of filterValues) {
     // Check if filter is a region key
     const region = JAKARTA_AREAS.find((r) => r.key === filterVal);
     if (region) {
-      if (region.neighborhoods.some((n) => n.toLowerCase() === lower)) return true;
+      if (region.neighborhoods.some((n) => n.toLowerCase() === normalized)) return true;
     }
     // Check direct neighborhood match
-    if (filterVal.toLowerCase() === lower) return true;
+    if (filterVal.toLowerCase() === normalized) return true;
   }
   return false;
+}
+
+/** Get the region label for a given neighborhood */
+export function getRegionLabelForArea(area: string): string | null {
+  const normalized = normalizeArea(area);
+  const lower = normalized.toLowerCase();
+  for (const region of JAKARTA_AREAS) {
+    if (region.neighborhoods.some((n) => n.toLowerCase() === lower)) {
+      return region.label;
+    }
+  }
+  return null;
 }
