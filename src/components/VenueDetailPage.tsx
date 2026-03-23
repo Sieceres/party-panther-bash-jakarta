@@ -37,6 +37,7 @@ interface Venue {
   claimed_by: string | null;
   claim_status: string;
   created_at: string;
+  area: string | null;
 }
 
 const truncateAddress = (address: string) => {
