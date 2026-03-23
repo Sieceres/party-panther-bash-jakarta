@@ -221,6 +221,17 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
               )}
             </div>
           ))}
+          {/* Area selector */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Area / Neighborhood</Label>
+            <div className="border rounded-md">
+              <AreaFilterList
+                selectedValues={selectedArea ? [selectedArea] : []}
+                onToggle={(val) => setSelectedArea(val === selectedArea ? "" : val)}
+                singleSelect
+              />
+            </div>
+          </div>
         </div>
 
         <DialogFooter>

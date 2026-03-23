@@ -75,6 +75,7 @@ const App = () => (
           <Route path="/map" element={<MapExplorer />} />
           <Route path="/venues" element={<VenueDirectory />} />
           <Route path="/admin/review-promos" element={<PromoReview />} />
+          <Route path="/admin/review-venues" element={<VenueAreaReview />} />
           <Route path="/lexium" element={<Proofing />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
