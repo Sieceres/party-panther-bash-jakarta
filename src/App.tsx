@@ -28,6 +28,7 @@ import BatchImport from "./pages/BatchImport";
 import MapExplorer from "./pages/MapExplorer";
 import VenueDirectory from "./pages/VenueDirectory";
 import PromoReview from "./pages/PromoReview";
+import VenueAreaReview from "./pages/VenueAreaReview";
 
 const queryClient = new QueryClient();
 
