@@ -178,7 +178,7 @@ const VenueAreaReview = () => {
       }
       toast("Undone", { description: `Reverted to ${entry.previousArea || "None"}`, duration: 3000 });
     } catch (err: any) {
-      toast({ title: "Undo failed", description: err.message, variant: "destructive" });
+      toast.error("Undo failed", { description: err.message, duration: 3000 });
     }
   }, [venues, toast, scrollListItem, showUnassignedOnly]);
 
