@@ -180,7 +180,7 @@ const VenueAreaReview = () => {
     } catch (err: any) {
       toast.error("Undo failed", { description: err.message, duration: 3000 });
     }
-  }, [venues, toast, scrollListItem, showUnassignedOnly]);
+  }, [venues, scrollListItem, showUnassignedOnly]);
 
   // Keyboard shortcuts
   useEffect(() => {
