@@ -176,7 +176,7 @@ const VenueAreaReview = () => {
         setSelectedIndex(idx);
         scrollListItem(entry.venueId);
       }
-      toast({ title: "Undone", description: `Reverted to ${entry.previousArea || "None"}` });
+      toast("Undone", { description: `Reverted to ${entry.previousArea || "None"}`, duration: 3000 });
     } catch (err: any) {
       toast({ title: "Undo failed", description: err.message, variant: "destructive" });
     }
