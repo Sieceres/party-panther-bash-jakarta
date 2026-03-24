@@ -55,7 +55,7 @@ const NEIGHBORHOOD_SHORTCUTS: Record<string, string> = {
 const VenueAreaReview = () => {
   usePageTitle("Venue Area Review");
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
 
   const [venues, setVenues] = useState<VenueData[]>([]);
   const [loading, setLoading] = useState(true);
