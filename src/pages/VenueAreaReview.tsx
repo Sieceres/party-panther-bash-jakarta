@@ -137,7 +137,7 @@ const VenueAreaReview = () => {
       undoStackRef.current.push({ venueId: selectedVenue.id, previousArea });
       setUndoCount(undoStackRef.current.length);
       setVenues((prev) => prev.map((v) => v.id === selectedVenue.id ? { ...v, area } : v));
-      toast({ title: `Set to ${area}`, description: selectedVenue.name });
+      toast(`Set to ${area}`, { description: selectedVenue.name, duration: 3000 });
       // Auto-advance
       if (showUnassignedOnly) {
         // After filtering, the current index stays the same (next unassigned slides in)
