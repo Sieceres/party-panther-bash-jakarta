@@ -11,7 +11,7 @@ import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { Header } from "@/components/Header";
 import { ArrowLeft, Undo2, MapPin, Globe, Instagram, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import { JAKARTA_AREAS, getRegionLabelForArea } from "@/lib/area-config";
