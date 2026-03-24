@@ -11,7 +11,7 @@ import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { Header } from "@/components/Header";
 import { ArrowLeft, Undo2, MapPin, Globe, Instagram, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import { JAKARTA_AREAS, getRegionLabelForArea } from "@/lib/area-config";
@@ -55,7 +55,7 @@ const NEIGHBORHOOD_SHORTCUTS: Record<string, string> = {
 const VenueAreaReview = () => {
   usePageTitle("Venue Area Review");
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
 
   const [venues, setVenues] = useState<VenueData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,7 +95,7 @@ const VenueAreaReview = () => {
         .select("id, name, address, area, google_maps_link, instagram, website, slug")
         .order("name", { ascending: true });
       if (error) {
-        toast({ title: "Failed to load venues", description: error.message, variant: "destructive" });
+        toast.error("Failed to load venues", { description: error.message, duration: 3000 });
       } else {
         setVenues(data || []);
       }
@@ -137,7 +137,7 @@ const VenueAreaReview = () => {
       undoStackRef.current.push({ venueId: selectedVenue.id, previousArea });
       setUndoCount(undoStackRef.current.length);
       setVenues((prev) => prev.map((v) => v.id === selectedVenue.id ? { ...v, area } : v));
-      toast({ title: `Set to ${area}`, description: selectedVenue.name });
+      toast(`Set to ${area}`, { description: selectedVenue.name, duration: 3000 });
       // Auto-advance
       if (showUnassignedOnly) {
         // After filtering, the current index stays the same (next unassigned slides in)
@@ -151,11 +151,11 @@ const VenueAreaReview = () => {
         selectNext();
       }
     } catch (err: any) {
-      toast({ title: "Update failed", description: err.message, variant: "destructive" });
+      toast.error("Update failed", { description: err.message, duration: 3000 });
     } finally {
       setUpdating(false);
     }
-  }, [selectedVenue, updating, toast, selectNext, venues, showUnassignedOnly, selectedIndex]);
+  }, [selectedVenue, updating, selectNext, venues, showUnassignedOnly, selectedIndex]);
 
   const handleUndo = useCallback(async () => {
     const entry = undoStackRef.current.pop();
@@ -176,11 +176,11 @@ const VenueAreaReview = () => {
         setSelectedIndex(idx);
         scrollListItem(entry.venueId);
       }
-      toast({ title: "Undone", description: `Reverted to ${entry.previousArea || "None"}` });
+      toast("Undone", { description: `Reverted to ${entry.previousArea || "None"}`, duration: 3000 });
     } catch (err: any) {
-      toast({ title: "Undo failed", description: err.message, variant: "destructive" });
+      toast.error("Undo failed", { description: err.message, duration: 3000 });
     }
-  }, [venues, toast, scrollListItem, showUnassignedOnly]);
+  }, [venues, scrollListItem, showUnassignedOnly]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -305,7 +305,7 @@ const VenueAreaReview = () => {
             ))}
             <Separator orientation="vertical" className="h-4 mx-2" />
             <span className="text-xs text-muted-foreground mr-1">Quick:</span>
-            {Object.entries(NEIGHBORHOOD_SHORTCUTS).slice(0, 8).map(([key, area]) => (
+            {Object.entries(NEIGHBORHOOD_SHORTCUTS).slice(0, 9).map(([key, area]) => (
               <button
                 key={key}
                 onClick={() => assignArea(area)}
