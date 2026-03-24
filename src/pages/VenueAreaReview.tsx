@@ -151,7 +151,7 @@ const VenueAreaReview = () => {
         selectNext();
       }
     } catch (err: any) {
-      toast({ title: "Update failed", description: err.message, variant: "destructive" });
+      toast.error("Update failed", { description: err.message, duration: 3000 });
     } finally {
       setUpdating(false);
     }
