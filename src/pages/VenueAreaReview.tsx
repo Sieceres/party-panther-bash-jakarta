@@ -155,7 +155,7 @@ const VenueAreaReview = () => {
     } finally {
       setUpdating(false);
     }
-  }, [selectedVenue, updating, toast, selectNext, venues, showUnassignedOnly, selectedIndex]);
+  }, [selectedVenue, updating, selectNext, venues, showUnassignedOnly, selectedIndex]);
 
   const handleUndo = useCallback(async () => {
     const entry = undoStackRef.current.pop();
