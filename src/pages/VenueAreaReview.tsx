@@ -95,7 +95,7 @@ const VenueAreaReview = () => {
         .select("id, name, address, area, google_maps_link, instagram, website, slug")
         .order("name", { ascending: true });
       if (error) {
-        toast({ title: "Failed to load venues", description: error.message, variant: "destructive" });
+        toast.error("Failed to load venues", { description: error.message, duration: 3000 });
       } else {
         setVenues(data || []);
       }
