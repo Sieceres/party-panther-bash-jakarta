@@ -237,10 +237,12 @@ export const VenueDetailPage = () => {
         setPromos(venuePromos || []);
 
         // Fetch events linked to this venue
+        const today = new Date().toISOString().split('T')[0];
         const { data: venueEvents } = await supabase
           .from("events")
           .select("*")
           .or(`venue_id.eq.${data.id},venue_name.ilike.${data.name}`)
+          .gte("date", today)
           .order("date", { ascending: true });
         setEvents(venueEvents || []);
       } catch (error) {
