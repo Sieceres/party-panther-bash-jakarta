@@ -305,7 +305,7 @@ const VenueAreaReview = () => {
             ))}
             <Separator orientation="vertical" className="h-4 mx-2" />
             <span className="text-xs text-muted-foreground mr-1">Quick:</span>
-            {Object.entries(NEIGHBORHOOD_SHORTCUTS).slice(0, 8).map(([key, area]) => (
+            {Object.entries(NEIGHBORHOOD_SHORTCUTS).slice(0, 9).map(([key, area]) => (
               <button
                 key={key}
                 onClick={() => assignArea(area)}
