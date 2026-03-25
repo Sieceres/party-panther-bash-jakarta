@@ -37,6 +37,7 @@ interface Promo {
   drinkType: string[] | string;
   promoType?: string;
   created_by?: string;
+  venue_id?: string;
   // Optimized data fields
   creator_name?: string;
   creator_avatar?: string;
@@ -56,7 +57,7 @@ interface PromoCardProps {
 }
 
 import { format } from "date-fns";
-import { getPromoUrl, getEditPromoUrl } from "@/lib/slug-utils";
+import { getPromoUrl, getEditPromoUrl, getVenueUrl } from "@/lib/slug-utils";
 
 export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0, isSelected = false, isVenueOwner = false }: PromoCardProps) => {
   const navigate = useNavigate();
@@ -344,9 +345,20 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
         <div className="space-y-2">
           <p 
             className="text-sm sm:text-base font-semibold text-white truncate hover:text-primary cursor-pointer transition-colors"
-            onClick={(e) => {
+            onClick={async (e) => {
               e.stopPropagation();
-              navigate(`/?section=promos&venue=${encodeURIComponent(promo.venue)}`);
+              if (promo.venue_id) {
+                const { data: venue } = await supabase.from('venues').select('slug, id').eq('id', promo.venue_id).maybeSingle();
+                if (venue) {
+                  navigate(getVenueUrl(venue));
+                  return;
+                }
+              }
+              // Fallback: search by name
+              const { data: venue } = await supabase.from('venues').select('slug, id').ilike('name', promo.venue).maybeSingle();
+              if (venue) {
+                navigate(getVenueUrl(venue));
+              }
             }}
           >
             {promo.venue}
