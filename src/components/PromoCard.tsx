@@ -351,7 +351,17 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
           >
             {promo.venue}
           </p>
-          <p className="text-xs sm:text-sm text-muted-foreground">{promo.validUntil && promo.validUntil !== "Ongoing" ? `Valid until ${promo.validUntil}` : "No expiry"}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground truncate">
+            {(() => {
+              const days = Array.isArray(promo.day) ? promo.day : promo.day ? [promo.day] : [];
+              const dayAbbr: Record<string, string> = { Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun', Everyday: 'Everyday' };
+              const dayStr = days.length > 0
+                ? days.map(d => dayAbbr[d] || d).join(', ')
+                : null;
+              const expiry = promo.validUntil && promo.validUntil !== "Ongoing" ? `Until ${promo.validUntil}` : null;
+              return [dayStr, expiry].filter(Boolean).join(' · ') || 'No expiry';
+            })()}
+          </p>
           {creatorName && (
             <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
               <User className="w-3.5 h-3.5" />
