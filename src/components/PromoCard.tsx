@@ -374,12 +374,6 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
               return [dayStr, expiry].filter(Boolean).join(' · ') || 'No expiry';
             })()}
           </p>
-          {creatorName && (
-            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
-              <User className="w-3.5 h-3.5" />
-              <span className="truncate">by {creatorName}</span>
-            </div>
-          )}
         </div>
 
         {/* Rating/Reviews */}
