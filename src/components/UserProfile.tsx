@@ -41,6 +41,7 @@ import { EventWithSlug, PromoWithSlug } from "@/types/extended-types";
 import { getEventUrl, getPromoUrl, getEditEventUrl, getEditPromoUrl } from "@/lib/slug-utils";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { UserVouchers } from "./UserVouchers";
 
 interface Profile {
   id: string;
@@ -1870,7 +1871,11 @@ export const UserProfile = () => {
           </CardContent>
         </Card>
       </div>
-      
+
+      {/* Vouchers Section - only for own profile */}
+      {!isSharedProfile && !isAdminView && profile && (
+        <UserVouchers userId={profile.user_id} />
+      )}
       {/* Report Option for Shared Profiles */}
       {isSharedProfile && profile && (
         <div className="fixed bottom-4 right-4">

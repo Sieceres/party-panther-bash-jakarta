@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getVenueBySlugOrId } from "@/lib/slug-utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { VenueEditDialog } from "./VenueEditDialog";
+import { VenuePinSetup } from "./VenuePinSetup";
 import { getRegionLabelForArea } from "@/lib/area-config";
 
 interface Venue {
@@ -361,6 +362,10 @@ export const VenueDetailPage = () => {
                 </div>
                 {venue.claim_status === "approved" && (
                   <Badge variant="secondary" className="text-xs">✓ Claimed Venue</Badge>
+                )}
+                {/* Venue PIN Setup - for venue owners and admins */}
+                {venue.id && (venue.claimed_by === currentUserId || isAdmin) && (
+                  <VenuePinSetup venueId={venue.id} />
                 )}
                 {venue.area && (
                   <Badge variant="outline" className="text-xs">

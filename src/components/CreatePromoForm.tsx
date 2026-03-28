@@ -12,6 +12,7 @@ import { PromoDetails } from "./form-components/PromoDetails";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
 import { DuplicateWarning } from "./DuplicateWarning";
+import { VoucherSettings } from "./VoucherSettings";
 import type { VenueResult } from "./form-components/VenueAutocomplete";
 
 export const CreatePromoForm = () => {
@@ -23,6 +24,9 @@ export const CreatePromoForm = () => {
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [duplicateConfirmed, setDuplicateConfirmed] = useState(false);
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
+  const [voucherEnabled, setVoucherEnabled] = useState(false);
+  const [voucherMode, setVoucherMode] = useState("single");
+  const [voucherCooldownDays, setVoucherCooldownDays] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -155,6 +159,9 @@ export const CreatePromoForm = () => {
         image_url: formData.image,
         created_by: user.id,
         venue_id: venueId,
+        voucher_enabled: voucherEnabled,
+        voucher_mode: voucherMode,
+        voucher_cooldown_days: voucherMode === "multi" ? voucherCooldownDays : null,
       });
 
       if (error) throw error;
@@ -242,6 +249,15 @@ export const CreatePromoForm = () => {
               inputId="promo-image"
               uploadToStorage={true}
               storageFolder="promos"
+            />
+
+            <VoucherSettings
+              voucherEnabled={voucherEnabled}
+              voucherMode={voucherMode}
+              voucherCooldownDays={voucherCooldownDays}
+              onEnabledChange={setVoucherEnabled}
+              onModeChange={setVoucherMode}
+              onCooldownChange={setVoucherCooldownDays}
             />
 
             {formErrors.length > 0 && (
