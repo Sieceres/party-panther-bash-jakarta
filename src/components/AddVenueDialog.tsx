@@ -43,7 +43,7 @@ export function AddVenueDialog({ onVenueAdded }: AddVenueDialogProps) {
         return;
       }
 
-      const { error } = await supabase.from("venues").insert({
+      const { data: newVenue, error } = await supabase.from("venues").insert({
         name: form.name.trim(),
         address: form.address.trim() || null,
         description: form.description.trim() || null,
@@ -52,7 +52,7 @@ export function AddVenueDialog({ onVenueAdded }: AddVenueDialogProps) {
         whatsapp: form.whatsapp.trim() || null,
         google_maps_link: form.google_maps_link.trim() || null,
         created_by: user.id,
-      });
+      }).select('id, slug').single();
 
       if (error) throw error;
 
@@ -62,6 +62,7 @@ export function AddVenueDialog({ onVenueAdded }: AddVenueDialogProps) {
           type: 'new_venue',
           title: form.name.trim(),
           details: { Address: form.address.trim() || 'N/A', Instagram: form.instagram.trim() || 'N/A' },
+          link: `/venue/${newVenue?.slug || newVenue?.id}`,
         }
       }).catch(err => console.error('Notify failed:', err));
 

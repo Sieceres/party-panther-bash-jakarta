@@ -90,6 +90,7 @@ const Auth = () => {
             type: 'new_user',
             title: displayName || email,
             details: { Email: email },
+            link: '/admin',
           }
         }).catch(err => console.error('Notify failed:', err));
 
