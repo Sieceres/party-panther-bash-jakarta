@@ -128,8 +128,8 @@ export const CreatePromoForm = () => {
           .insert({
             name: formData.venue.trim(),
             address: formData.address || null,
-            latitude: location?.lat || null,
-            longitude: location?.lng || null,
+            latitude: null,
+            longitude: null,
             created_by: user.id,
           })
           .select('id')
@@ -153,8 +153,8 @@ export const CreatePromoForm = () => {
         discount_text: formData.promoType,
         venue_name: formData.venue,
         venue_address: formData.address,
-        venue_latitude: location?.lat,
-        venue_longitude: location?.lng,
+        venue_latitude: null,
+        venue_longitude: null,
         promo_type: formData.promoType,
         price_currency: "IDR",
         valid_until: validUntilDate?.toISOString(),

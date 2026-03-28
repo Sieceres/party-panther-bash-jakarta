@@ -82,13 +82,6 @@ export const EditPromoPage = () => {
           setVoucherMode((promo as any).voucher_mode || "single");
           setVoucherCooldownDays((promo as any).voucher_cooldown_days || null);
 
-          if (promo.venue_latitude && promo.venue_longitude) {
-            setLocation({
-              lat: promo.venue_latitude,
-              lng: promo.venue_longitude,
-              address: promo.venue_address || ""
-            });
-          }
 
           if (promo.valid_until) {
             setValidUntilDate(new Date(promo.valid_until));
@@ -142,8 +135,8 @@ export const EditPromoPage = () => {
           .insert({
             name: formData.venue.trim(),
             address: formData.address || null,
-            latitude: location?.lat || null,
-            longitude: location?.lng || null,
+            latitude: null,
+            longitude: null,
             created_by: user.id,
           })
           .select('id')
@@ -162,9 +155,9 @@ export const EditPromoPage = () => {
         description: formData.description,
         discount_text: formData.discount,
         venue_name: formData.venue,
-        venue_address: location?.address || formData.address,
-        venue_latitude: location?.lat || null,
-        venue_longitude: location?.lng || null,
+        venue_address: formData.address,
+        venue_latitude: null,
+        venue_longitude: null,
         valid_until: validUntilDate?.toISOString() || null,
         day_of_week: formData.dayOfWeek,
         area: formData.area,
