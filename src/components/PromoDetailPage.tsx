@@ -505,6 +505,40 @@ export const PromoDetailPage = () => {
           </div>
           </div>
         </div>
+
+        {/* Mobile sticky claim CTA */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 p-3 lg:hidden">
+          {claimedVoucher ? (
+            <Button
+              onClick={() => {
+                const voucherSection = document.getElementById('mobile-claimed-voucher');
+                voucherSection?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-[48px]"
+            >
+              <Ticket className="w-5 h-5 mr-2" /> View My Voucher
+            </Button>
+          ) : (promo as any).voucher_enabled ? (
+            <Button
+              onClick={handleClaimVoucher}
+              disabled={claimingVoucher || !currentUserId}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-[48px]"
+            >
+              {claimingVoucher ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Claiming...</>
+              ) : (
+                <><Ticket className="w-5 h-5 mr-2" /> Claim Voucher</>
+              )}
+            </Button>
+          ) : (
+            <Button
+              onClick={() => toast({ title: "Promo noted! 🎊", description: `Show "${promo.title}" at the venue.`, duration: 3000 })}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-[48px]"
+            >
+              <Ticket className="w-5 h-5 mr-2" /> Claim Promo
+            </Button>
+          )}
+        </div>
       </div>
     </>
   );
