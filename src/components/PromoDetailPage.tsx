@@ -225,7 +225,7 @@ export const PromoDetailPage = () => {
   return (
     <>
       <Header activeSection="promos" />
-      <div className="min-h-screen bg-background pt-20 px-4">
+      <div className="min-h-screen bg-background pt-20 px-4 pb-24 lg:pb-4">
         <div className="container mx-auto max-w-4xl">
           <Button
             variant="ghost"
@@ -282,16 +282,18 @@ export const PromoDetailPage = () => {
             {/* Claim Button - prominent placement */}
             <div className="md:hidden">
               {claimedVoucher ? (
-                <VoucherDisplay
-                  code={claimedVoucher.code}
-                  promoTitle={promo.title}
-                  redemptionMode={claimedVoucher.redemption_mode}
-                  isRedeemed={claimedVoucher.is_redeemed}
-                  redemptionCount={claimedVoucher.redemption_count}
-                  lastRedeemedAt={claimedVoucher.last_redeemed_at}
-                  cooldownDays={claimedVoucher.cooldown_days}
-                  expiresAt={claimedVoucher.expires_at}
-                />
+                <div id="mobile-claimed-voucher">
+                  <VoucherDisplay
+                    code={claimedVoucher.code}
+                    promoTitle={promo.title}
+                    redemptionMode={claimedVoucher.redemption_mode}
+                    isRedeemed={claimedVoucher.is_redeemed}
+                    redemptionCount={claimedVoucher.redemption_count}
+                    lastRedeemedAt={claimedVoucher.last_redeemed_at}
+                    cooldownDays={claimedVoucher.cooldown_days}
+                    expiresAt={claimedVoucher.expires_at}
+                  />
+                </div>
               ) : (promo as any).voucher_enabled ? (
                 <Button
                   onClick={handleClaimVoucher}
@@ -504,6 +506,40 @@ export const PromoDetailPage = () => {
             </Card>
           </div>
           </div>
+        </div>
+
+        {/* Mobile sticky claim CTA */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 p-3 lg:hidden">
+          {claimedVoucher ? (
+            <Button
+              onClick={() => {
+                const voucherSection = document.getElementById('mobile-claimed-voucher');
+                voucherSection?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-[48px]"
+            >
+              <Ticket className="w-5 h-5 mr-2" /> View My Voucher
+            </Button>
+          ) : (promo as any).voucher_enabled ? (
+            <Button
+              onClick={handleClaimVoucher}
+              disabled={claimingVoucher || !currentUserId}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-[48px]"
+            >
+              {claimingVoucher ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Claiming...</>
+              ) : (
+                <><Ticket className="w-5 h-5 mr-2" /> Claim Voucher</>
+              )}
+            </Button>
+          ) : (
+            <Button
+              onClick={() => toast({ title: "Promo noted! 🎊", description: `Show "${promo.title}" at the venue.`, duration: 3000 })}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-[48px]"
+            >
+              <Ticket className="w-5 h-5 mr-2" /> Claim Promo
+            </Button>
+          )}
         </div>
       </div>
     </>
