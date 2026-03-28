@@ -279,6 +279,41 @@ export const PromoDetailPage = () => {
               </div>
             )}
 
+            {/* Claim Button - prominent placement */}
+            <div className="md:hidden">
+              {claimedVoucher ? (
+                <VoucherDisplay
+                  code={claimedVoucher.code}
+                  promoTitle={promo.title}
+                  redemptionMode={claimedVoucher.redemption_mode}
+                  isRedeemed={claimedVoucher.is_redeemed}
+                  redemptionCount={claimedVoucher.redemption_count}
+                  lastRedeemedAt={claimedVoucher.last_redeemed_at}
+                  cooldownDays={claimedVoucher.cooldown_days}
+                  expiresAt={claimedVoucher.expires_at}
+                />
+              ) : (promo as any).voucher_enabled ? (
+                <Button
+                  onClick={handleClaimVoucher}
+                  disabled={claimingVoucher || !currentUserId}
+                  className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold min-h-[48px] text-base"
+                >
+                  {claimingVoucher ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Claiming...</>
+                  ) : (
+                    <><Ticket className="w-5 h-5 mr-2" /> Claim Voucher</>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => toast({ title: "Promo noted! 🎊", description: `Show "${promo.title}" at the venue.`, duration: 3000 })}
+                  className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold min-h-[48px] text-base"
+                >
+                  <Ticket className="w-5 h-5 mr-2" /> Claim Promo
+                </Button>
+              )}
+            </div>
+
             {/* Promo Details */}
             <Card>
               <CardHeader>
