@@ -9,7 +9,7 @@ const Lintang = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Header />
 
-      <main className="container mx-auto px-4 sm:px-6 py-12 max-w-3xl">
+      <main className="container mx-auto px-4 sm:px-6 pt-28 pb-12 max-w-3xl">
         {/* Hero Title */}
         <div className="text-center mb-16">
           <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-neon-cyan to-neon-blue bg-clip-text text-transparent mb-4">
@@ -19,7 +19,7 @@ const Lintang = () => {
 
         {/* Introduction */}
         <section className="mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Introduction</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-neon-cyan mb-4">Introduction</h2>
           <p className="text-muted-foreground leading-relaxed mb-6">
             With this page, I want to explain briefly(ish) why I would like to have you on the Party Panther team (which is mostly a one man team at the moment), and possibly more importantly, why I think it could be useful for you to join. I created a separate page for it to demonstrate how flexible the platform is. In line with your business idea, I have also created a prototype for a voucher system, where the creator of a promo can choose to enable voucher redemption:
           </p>
