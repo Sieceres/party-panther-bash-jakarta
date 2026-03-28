@@ -60,7 +60,7 @@ const Lintang = () => {
 
         {/* Benefits for Lintang */}
         <section className="mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-neon-cyan mb-4">
             What are the benefits for Lintang when it comes to joining the Party Panther team?
           </h2>
           <ul className="space-y-4 text-muted-foreground leading-relaxed list-disc list-outside pl-5">
@@ -100,7 +100,7 @@ const Lintang = () => {
 
         {/* Why Lintang */}
         <section className="mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-neon-cyan mb-4">
             Why do I want to have Lintang on my team?
           </h2>
           <ul className="space-y-4 text-muted-foreground leading-relaxed list-disc list-outside pl-5">
@@ -121,7 +121,7 @@ const Lintang = () => {
 
         {/* Future */}
         <section className="mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-neon-cyan mb-4">
             What's the future for Party Panther?
           </h2>
           <ul className="space-y-4 text-muted-foreground leading-relaxed list-disc list-outside pl-5">
@@ -141,7 +141,7 @@ const Lintang = () => {
 
         {/* Final words */}
         <section className="mb-16">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Final words</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-neon-cyan mb-4">Final words</h2>
           <p className="text-muted-foreground leading-relaxed mb-6">
             Thanks for reading, Lintang! I wanted to put something proper together because I wanted to show you that A) I can actually be a business oriented person, and B) I would really like to have you on board and writing this proposal is worth the effort.
           </p>
