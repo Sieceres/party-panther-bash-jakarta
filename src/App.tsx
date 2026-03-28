@@ -30,6 +30,7 @@ import VenueDirectory from "./pages/VenueDirectory";
 import PromoReview from "./pages/PromoReview";
 import VenueAreaReview from "./pages/VenueAreaReview";
 import VoucherVerify from "./pages/VoucherVerify";
+import Lintang from "./pages/Lintang";
 
 const queryClient = new QueryClient();
 
