@@ -111,8 +111,13 @@ export const EditPromoPage = () => {
 
   const handleVenueSelect = (venue: VenueResult | null) => {
     setSelectedVenueId(venue?.id || null);
-    if (venue?.address) {
-      setFormData(prev => ({ ...prev, address: venue.address! }));
+    if (venue) {
+      const updates: Record<string, string> = {};
+      if (venue.address) updates.address = venue.address;
+      if (venue.area) updates.area = venue.area;
+      if (Object.keys(updates).length > 0) {
+        setFormData(prev => ({ ...prev, ...updates }));
+      }
     }
   };
 
@@ -239,12 +244,6 @@ export const EditPromoPage = () => {
                 onVenueSelect={handleVenueSelect}
               />
 
-              <LocationAutocomplete
-                location={location}
-                onLocationSelect={setLocation}
-                label="Venue Location (Optional)"
-                placeholder="Search for venue address..."
-              />
 
               <PromoDetails
                 dayOfWeek={formData.dayOfWeek}

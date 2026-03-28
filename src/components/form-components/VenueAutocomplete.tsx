@@ -8,6 +8,7 @@ export interface VenueResult {
   id: string;
   name: string;
   address: string | null;
+  area: string | null;
 }
 
 interface VenueAutocompleteProps {
@@ -56,7 +57,7 @@ export const VenueAutocomplete = ({
       try {
         const { data, error } = await supabase
           .from("venues")
-          .select("id, name, address")
+          .select("id, name, address, area")
           .ilike("name", `%${venue}%`)
           .limit(8);
 
