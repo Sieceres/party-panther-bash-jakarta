@@ -294,10 +294,17 @@ export const PromoDetailPage = () => {
                     expiresAt={claimedVoucher.expires_at}
                   />
                 </div>
+              ) : !currentUserId ? (
+                <Button
+                  onClick={() => navigate('/auth')}
+                  className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold min-h-[48px] text-base"
+                >
+                  <Ticket className="w-5 h-5 mr-2" /> Log in to claim voucher
+                </Button>
               ) : (promo as any).voucher_enabled ? (
                 <Button
                   onClick={handleClaimVoucher}
-                  disabled={claimingVoucher || !currentUserId}
+                  disabled={claimingVoucher}
                   className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold min-h-[48px] text-base"
                 >
                   {claimingVoucher ? (
@@ -448,10 +455,18 @@ export const PromoDetailPage = () => {
                     cooldownDays={claimedVoucher.cooldown_days}
                     expiresAt={claimedVoucher.expires_at}
                   />
+                ) : !currentUserId ? (
+                  <Button
+                    onClick={() => navigate('/auth')}
+                    className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold min-h-[44px]"
+                    style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
+                  >
+                    <Ticket className="w-4 h-4 mr-2" /> Log in to claim voucher
+                  </Button>
                 ) : (promo as any).voucher_enabled ? (
                   <Button
                     onClick={handleClaimVoucher}
-                    disabled={claimingVoucher || !currentUserId}
+                    disabled={claimingVoucher}
                     className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold min-h-[44px]"
                     style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
                   >
@@ -520,10 +535,17 @@ export const PromoDetailPage = () => {
             >
               <Ticket className="w-5 h-5 mr-2" /> View My Voucher
             </Button>
+          ) : !currentUserId ? (
+            <Button
+              onClick={() => navigate('/auth')}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-[48px]"
+            >
+              <Ticket className="w-5 h-5 mr-2" /> Log in to claim voucher
+            </Button>
           ) : (promo as any).voucher_enabled ? (
             <Button
               onClick={handleClaimVoucher}
-              disabled={claimingVoucher || !currentUserId}
+              disabled={claimingVoucher}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-[48px]"
             >
               {claimingVoucher ? (
