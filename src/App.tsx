@@ -30,6 +30,7 @@ import VenueDirectory from "./pages/VenueDirectory";
 import PromoReview from "./pages/PromoReview";
 import VenueAreaReview from "./pages/VenueAreaReview";
 import VoucherVerify from "./pages/VoucherVerify";
+import Lintang from "./pages/Lintang";
 
 const queryClient = new QueryClient();
 
@@ -78,7 +79,9 @@ const App = () => (
           <Route path="/admin/review-promos" element={<PromoReview />} />
           <Route path="/admin/review-venues" element={<VenueAreaReview />} />
           <Route path="/lexium" element={<Proofing />} />
+          <Route path="/lintang" element={<Lintang />} />
           <Route path="/voucher/:code" element={<VoucherVerify />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
