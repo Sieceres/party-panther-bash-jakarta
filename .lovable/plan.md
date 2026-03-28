@@ -1,72 +1,95 @@
 
 
-## Plan: Area Filter Improvements, Kuningan Merge, Venue Area Review Page
+## Plan: Promo Voucher / Discount Code Redemption System
 
-### Summary of changes
+### What users will experience
 
-1. **Merge "Mega Kuningan" into "Kuningan & Setiabudi"** in area-config.ts
-2. **Add hover highlights** to area filter items
-3. **Add "Clear Filters" button** to PromosSection (visible when filters are active, above the filter row)
-4. **Add `area` column to venues table** via migration
-5. **Show area on VenueDetailPage** as a badge near the venue name
-6. **Add area field to VenueEditDialog** using AreaFilterList in single-select mode
-7. **Create Venue Area Review page** at `/admin/review-venues` mirroring PromoReview layout
-8. **Add links** to both review tools from AdminDashboard
+1. **Promo creators** get a new toggle: "Enable voucher redemption" with a choice of single-use or multi-use (with cooldown)
+2. **Users** tap "Claim Voucher" on a promo → a unique QR code + alphanumeric code appears in a "My Vouchers" section accessible from their profile
+3. **At the venue**, user shows the QR code. Staff scans it with any phone camera → opens a public verification page showing promo name, validity status, and a "Redeem" button
+4. **Redemption requires the venue's 4-digit PIN** (set once by the venue owner/admin) to prevent users from self-redeeming
+5. After redemption, the voucher is marked as used (single-use) or timestamped for cooldown tracking (multi-use)
 
----
+### Database changes (migration)
 
-### 1. `src/lib/area-config.ts`
-- Merge "Mega Kuningan" into "Kuningan & Setiabudi" -- keep the name as "Kuningan & Setiabudi"
-- Remove "Mega Kuningan" from South Jakarta neighborhoods array
-- Remove "Mega Kuningan" coords entry; keep "Kuningan & Setiabudi" coords
-- Update `normalizeArea` to map "Mega Kuningan" to "Kuningan & Setiabudi"
+**New table: `promo_vouchers`**
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid PK | |
+| promo_id | uuid FK → promos | |
+| user_id | uuid | claimer |
+| code | text UNIQUE | 8-char alphanumeric |
+| redemption_mode | text | 'single' or 'multi' |
+| cooldown_days | integer | null for single-use |
+| is_redeemed | boolean | for single-use |
+| last_redeemed_at | timestamptz | for multi-use cooldown |
+| redemption_count | integer | default 0 |
+| created_at | timestamptz | |
+| expires_at | timestamptz | matches promo valid_until |
 
-### 2. `src/components/ui/area-filter.tsx`
-- Add `hover:bg-accent/60 rounded px-1 py-0.5 transition-colors` to region row div and neighborhood row div
+**New table: `venue_pins`**
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid PK | |
+| venue_id | uuid FK → venues | unique |
+| pin_hash | text | bcrypt hash of 4-digit PIN |
+| created_by | uuid | venue owner or admin |
+| created_at | timestamptz | |
 
-### 3. `src/components/sections/PromosSection.tsx`
-- Add a "Clear Filters" button with RotateCcw icon next to the search bar or filter row, visible only when `hasActiveFilters || searchQuery`
-- The `resetAllFilters` function already exists; extend it to also call `onSearchChange("")`
+**New column on `promos`:**
+- `voucher_enabled` boolean default false
+- `voucher_mode` text default 'single' (single / multi)
+- `voucher_cooldown_days` integer default null
 
-### 4. Database migration
-```sql
-ALTER TABLE venues ADD COLUMN IF NOT EXISTS area text;
-```
+**RLS policies:**
+- `promo_vouchers`: users can INSERT (own user_id), SELECT own vouchers; public can SELECT by code (for verification page); admins can see all
+- `venue_pins`: only venue owners + admins can INSERT/UPDATE/SELECT
 
-### 5. `src/components/VenueDetailPage.tsx`
-- Add `area` to the Venue interface (already fetches `*` so column will be included)
-- Display area as a Badge below the venue name using `getRegionForArea()` to show "Kemang · South Jakarta" style
-- Import `getRegionForArea`, `JAKARTA_AREAS` from area-config
+### New edge function: `redeem-voucher`
 
-### 6. `src/components/VenueEditDialog.tsx`
-- Add `area` to the Venue interface
-- Replace the simple EDITABLE_FIELDS text approach for area with an AreaFilterList in single-select mode
-- The area field renders as a special case in the form: a collapsible area picker instead of a text input
+Handles the verification page's "Redeem" action:
+1. Accepts `{ code, venue_pin }`
+2. Looks up the voucher + linked promo + venue
+3. Verifies the PIN against `venue_pins` (bcrypt compare)
+4. Checks validity (not expired, not already redeemed / cooldown not elapsed)
+5. Marks as redeemed, increments count
+6. Returns success/failure with promo details
 
-### 7. New file: `src/pages/VenueAreaReview.tsx`
-Split-pane layout matching PromoReview.tsx:
-- **Left pane**: Scrollable venue list (name + current area badge or "—")
-- **Right pane**: Venue detail (name, address with Google Maps link, instagram, website, current area)
-- **Keyboard shortcuts**:
-  - `Q` prev, `A` next, `Ctrl+Z` undo
-  - Region keys: `1` South, `2` Central, `3` North, `4` West -- enters sub-mode showing neighborhood numbers
-  - Direct neighborhood keys: `K` Kemang, `S` Senopati & Gunawarman, `C` SCBD, `M` Menteng & Cikini, `P` PIK, `G` Kelapa Gading, `B` Blok M & Melawai, `T` Sudirman & Thamrin
-- **Filter toggle**: Show only unassigned venues (area IS NULL)
-- **Undo stack**: Same pattern as PromoReview
-- On assignment: update venue's `area` column, auto-advance to next
+### Frontend changes
 
-### 8. `src/App.tsx`
-- Add route: `<Route path="/admin/review-venues" element={<VenueAreaReview />} />`
+**File: `src/components/CreatePromoForm.tsx` + `EditPromoPage.tsx`**
+- Add "Enable Voucher" toggle + mode selector (single/multi) + cooldown input (if multi)
 
-### 9. `src/components/AdminDashboard.tsx`
-- Add two link buttons (not tabs) near the top of the dashboard or in a "Tools" section:
-  - "Review Promo Categories" linking to `/admin/review-promos`
-  - "Review Venue Areas" linking to `/admin/review-venues`
-- Place these as `Button variant="outline"` with `onClick={() => navigate(...)}` in the promos TabsContent and venues TabsContent respectively
+**New file: `src/components/VoucherDisplay.tsx`**
+- Shows QR code (using `qrcode.react` library) encoding the verification URL: `{site}/voucher/{code}`
+- Shows alphanumeric code as fallback
+- Shows redemption status and history
+
+**New file: `src/components/UserVouchers.tsx`**
+- "My Vouchers" section in user profile, listing all claimed vouchers with status
+
+**New file: `src/pages/VoucherVerify.tsx`**
+- Public page at `/voucher/:code`
+- Shows promo name, venue, validity, discount details
+- PIN input field + "Redeem" button
+- Calls the `redeem-voucher` edge function
+- Shows success/error state clearly
+
+**File: `src/components/PromoDetailPage.tsx`**
+- Replace current dummy "Claim Promo" button with actual voucher claim logic
+- On claim: generates a voucher row in `promo_vouchers`, shows the QR code
+
+**File: `src/components/VenueDetailPage.tsx`**
+- For venue owners: "Set Redemption PIN" button that lets them set/update their 4-digit PIN
+
+**File: `src/App.tsx`**
+- Add route `/voucher/:code` → `VoucherVerify`
 
 ### Technical notes
-- The venues table currently has no `area` column -- migration adds it
-- VenueDetailPage fetches with `select("*")` via `getVenueBySlugOrId`, so the new column will be automatically available
-- The AreaFilterList component already supports `singleSelect` mode
-- Legacy "Mega Kuningan" values in existing promo data will be handled by `normalizeArea` and `areaMatchesFilter`
+
+- QR code library: `qrcode.react` (lightweight, no server needed)
+- Code generation: 8-char alphanumeric (base36), generated client-side with uniqueness enforced by DB unique constraint + retry
+- PIN hashing done in the edge function using Web Crypto API (not bcrypt in Deno -- use PBKDF2 or store as simple hash since it's a 4-digit PIN with rate limiting)
+- Cooldown check: `last_redeemed_at + cooldown_days > now()` in the edge function
+- No payments integration for now -- all claims are free
 
