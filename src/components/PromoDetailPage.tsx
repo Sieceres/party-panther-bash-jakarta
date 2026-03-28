@@ -282,16 +282,18 @@ export const PromoDetailPage = () => {
             {/* Claim Button - prominent placement */}
             <div className="md:hidden">
               {claimedVoucher ? (
-                <VoucherDisplay
-                  code={claimedVoucher.code}
-                  promoTitle={promo.title}
-                  redemptionMode={claimedVoucher.redemption_mode}
-                  isRedeemed={claimedVoucher.is_redeemed}
-                  redemptionCount={claimedVoucher.redemption_count}
-                  lastRedeemedAt={claimedVoucher.last_redeemed_at}
-                  cooldownDays={claimedVoucher.cooldown_days}
-                  expiresAt={claimedVoucher.expires_at}
-                />
+                <div id="mobile-claimed-voucher">
+                  <VoucherDisplay
+                    code={claimedVoucher.code}
+                    promoTitle={promo.title}
+                    redemptionMode={claimedVoucher.redemption_mode}
+                    isRedeemed={claimedVoucher.is_redeemed}
+                    redemptionCount={claimedVoucher.redemption_count}
+                    lastRedeemedAt={claimedVoucher.last_redeemed_at}
+                    cooldownDays={claimedVoucher.cooldown_days}
+                    expiresAt={claimedVoucher.expires_at}
+                  />
+                </div>
               ) : (promo as any).voucher_enabled ? (
                 <Button
                   onClick={handleClaimVoucher}
