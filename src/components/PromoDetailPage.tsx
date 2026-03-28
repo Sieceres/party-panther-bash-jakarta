@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Star, Share2, User as UserIcon, BadgeCheck, Pencil } from "lucide-react";
+import { MapPin, ArrowLeft, Star, Share2, User as UserIcon, BadgeCheck, Pencil, Ticket, Loader2 } from "lucide-react";
+import { VoucherDisplay } from "./VoucherDisplay";
 import { GoogleMap } from "./GoogleMap";
 import { ReviewsList } from "./ReviewsList";
 import { ReportDialog } from "./ReportDialog";
@@ -53,6 +54,8 @@ export const PromoDetailPage = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [venueOwnerId, setVenueOwnerId] = useState<string | null>(null);
+  const [claimedVoucher, setClaimedVoucher] = useState<any>(null);
+  const [claimingVoucher, setClaimingVoucher] = useState(false);
 
   usePageTitle(promo?.title ? `${promo.title}` : "Promo");
 
@@ -118,11 +121,71 @@ export const PromoDetailPage = () => {
     fetchPromo();
   }, [id, toast]);
 
-  const handleClaimPromo = () => {
-    toast({
-      title: "Promo claimed! 🎊",
-      description: `"${promo?.title}" has been added to your account. Show this at the venue.`,
-    });
+  // Check if user already has a voucher for this promo
+  useEffect(() => {
+    if (!currentUserId || !promo?.id) return;
+    supabase
+      .from("promo_vouchers")
+      .select("*")
+      .eq("promo_id", promo.id)
+      .eq("user_id", currentUserId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setClaimedVoucher(data);
+      });
+  }, [currentUserId, promo?.id]);
+
+  const generateCode = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "";
+    for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  };
+
+  const handleClaimVoucher = async () => {
+    if (!promo || !currentUserId) {
+      toast({ title: "Please log in", description: "You need to be logged in to claim a voucher.", variant: "destructive" });
+      return;
+    }
+    setClaimingVoucher(true);
+    try {
+      const code = generateCode();
+      const { data, error } = await supabase.from("promo_vouchers").insert({
+        promo_id: promo.id,
+        user_id: currentUserId,
+        code,
+        redemption_mode: (promo as any).voucher_mode || "single",
+        cooldown_days: (promo as any).voucher_cooldown_days || null,
+        expires_at: promo.valid_until ? new Date(promo.valid_until).toISOString() : null,
+      }).select().single();
+
+      if (error) {
+        if (error.code === "23505") {
+          // Unique constraint violation on code, retry once
+          const retryCode = generateCode();
+          const { data: retryData, error: retryErr } = await supabase.from("promo_vouchers").insert({
+            promo_id: promo.id,
+            user_id: currentUserId,
+            code: retryCode,
+            redemption_mode: (promo as any).voucher_mode || "single",
+            cooldown_days: (promo as any).voucher_cooldown_days || null,
+            expires_at: promo.valid_until ? new Date(promo.valid_until).toISOString() : null,
+          }).select().single();
+          if (retryErr) throw retryErr;
+          setClaimedVoucher(retryData);
+        } else {
+          throw error;
+        }
+      } else {
+        setClaimedVoucher(data);
+      }
+      toast({ title: "Voucher claimed! 🎫", description: "Show the QR code at the venue to redeem.", duration: 3000 });
+    } catch (err: any) {
+      console.error("Claim error:", err);
+      toast({ title: "Error", description: err.message || "Failed to claim voucher", variant: "destructive" });
+    } finally {
+      setClaimingVoucher(false);
+    }
   };
 
   const handleReviewsChange = (avgRating: number, total: number) => {
@@ -337,13 +400,39 @@ export const PromoDetailPage = () => {
                   </div>
                 )}
 
-                <Button
-                  onClick={handleClaimPromo}
-                  className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold min-h-[44px]"
-                  style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
-                >
-                  Claim Promo
-                </Button>
+                {claimedVoucher ? (
+                  <VoucherDisplay
+                    code={claimedVoucher.code}
+                    promoTitle={promo.title}
+                    redemptionMode={claimedVoucher.redemption_mode}
+                    isRedeemed={claimedVoucher.is_redeemed}
+                    redemptionCount={claimedVoucher.redemption_count}
+                    lastRedeemedAt={claimedVoucher.last_redeemed_at}
+                    cooldownDays={claimedVoucher.cooldown_days}
+                    expiresAt={claimedVoucher.expires_at}
+                  />
+                ) : (promo as any).voucher_enabled ? (
+                  <Button
+                    onClick={handleClaimVoucher}
+                    disabled={claimingVoucher || !currentUserId}
+                    className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold min-h-[44px]"
+                    style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
+                  >
+                    {claimingVoucher ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Claiming...</>
+                    ) : (
+                      <><Ticket className="w-4 h-4 mr-2" /> Claim Voucher</>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => toast({ title: "Promo noted! 🎊", description: `Show "${promo.title}" at the venue.`, duration: 3000 })}
+                    className="w-full bg-neon-pink hover:bg-neon-pink/90 text-black font-semibold min-h-[44px]"
+                    style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
+                  >
+                    Claim Promo
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   className="w-full min-h-[44px]"
