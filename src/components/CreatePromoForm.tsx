@@ -147,7 +147,7 @@ export const CreatePromoForm = () => {
         }
       }
 
-      const { error } = await supabase.from('promos').insert({
+      const { data: newPromo, error } = await supabase.from('promos').insert({
         title: formData.title,
         description: formData.description,
         discount_text: formData.promoType,
@@ -167,7 +167,7 @@ export const CreatePromoForm = () => {
         voucher_enabled: voucherEnabled,
         voucher_mode: voucherMode,
         voucher_cooldown_days: voucherMode === "multi" ? voucherCooldownDays : null,
-      });
+      }).select('id, slug').single();
 
       if (error) throw error;
 
@@ -176,6 +176,7 @@ export const CreatePromoForm = () => {
           type: 'new_promo',
           title: formData.title,
           details: { Venue: formData.venue, Type: formData.promoType, Area: formData.area || 'N/A' },
+          link: `/promo/${newPromo?.slug || newPromo?.id}`,
         }
       }).catch(err => console.error('Notify failed:', err));
 
