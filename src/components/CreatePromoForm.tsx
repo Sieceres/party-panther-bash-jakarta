@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BasicPromoInfo } from "./form-components/BasicPromoInfo";
 import { PromoDiscount } from "./form-components/PromoDiscount";
-import { LocationAutocomplete } from "./form-components/LocationAutocomplete";
+
 import { PromoDetails } from "./form-components/PromoDetails";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
@@ -38,7 +38,7 @@ export const CreatePromoForm = () => {
     drinkType: [] as string[],
     image: ""
   });
-  const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  
 
   const { duplicates, isChecking, hasChecked } = useDuplicateCheck({
     type: "promo",
@@ -61,8 +61,13 @@ export const CreatePromoForm = () => {
 
   const handleVenueSelect = (venue: VenueResult | null) => {
     setSelectedVenueId(venue?.id || null);
-    if (venue?.address) {
-      setFormData(prev => ({ ...prev, address: venue.address! }));
+    if (venue) {
+      const updates: Record<string, string> = {};
+      if (venue.address) updates.address = venue.address;
+      if (venue.area) updates.area = venue.area;
+      if (Object.keys(updates).length > 0) {
+        setFormData(prev => ({ ...prev, ...updates }));
+      }
     }
   };
 
@@ -123,8 +128,8 @@ export const CreatePromoForm = () => {
           .insert({
             name: formData.venue.trim(),
             address: formData.address || null,
-            latitude: location?.lat || null,
-            longitude: location?.lng || null,
+            latitude: null,
+            longitude: null,
             created_by: user.id,
           })
           .select('id')
@@ -148,8 +153,8 @@ export const CreatePromoForm = () => {
         discount_text: formData.promoType,
         venue_name: formData.venue,
         venue_address: formData.address,
-        venue_latitude: location?.lat,
-        venue_longitude: location?.lng,
+        venue_latitude: null,
+        venue_longitude: null,
         promo_type: formData.promoType,
         price_currency: "IDR",
         valid_until: validUntilDate?.toISOString(),
@@ -219,12 +224,6 @@ export const CreatePromoForm = () => {
               onVenueSelect={handleVenueSelect}
             />
 
-            <LocationAutocomplete
-              location={location}
-              onLocationSelect={setLocation}
-              label="Promo Venue Location"
-              placeholder="Search for venue address..."
-            />
 
             <PromoDetails
               validUntilDate={validUntilDate}

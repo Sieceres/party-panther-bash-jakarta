@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BasicPromoInfo } from "@/components/form-components/BasicPromoInfo";
 import { PromoDiscount } from "@/components/form-components/PromoDiscount";
-import { LocationAutocomplete } from "@/components/form-components/LocationAutocomplete";
+
 import { PromoDetails } from "@/components/form-components/PromoDetails";
 import { ImageUpload } from "@/components/form-components/ImageUpload";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
@@ -36,7 +36,7 @@ export const EditPromoPage = () => {
     drinkType: [] as string[],
     image: ""
   });
-  const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  
 
   useEffect(() => {
     const fetchPromo = async () => {
@@ -82,13 +82,6 @@ export const EditPromoPage = () => {
           setVoucherMode((promo as any).voucher_mode || "single");
           setVoucherCooldownDays((promo as any).voucher_cooldown_days || null);
 
-          if (promo.venue_latitude && promo.venue_longitude) {
-            setLocation({
-              lat: promo.venue_latitude,
-              lng: promo.venue_longitude,
-              address: promo.venue_address || ""
-            });
-          }
 
           if (promo.valid_until) {
             setValidUntilDate(new Date(promo.valid_until));
@@ -111,8 +104,13 @@ export const EditPromoPage = () => {
 
   const handleVenueSelect = (venue: VenueResult | null) => {
     setSelectedVenueId(venue?.id || null);
-    if (venue?.address) {
-      setFormData(prev => ({ ...prev, address: venue.address! }));
+    if (venue) {
+      const updates: Record<string, string> = {};
+      if (venue.address) updates.address = venue.address;
+      if (venue.area) updates.area = venue.area;
+      if (Object.keys(updates).length > 0) {
+        setFormData(prev => ({ ...prev, ...updates }));
+      }
     }
   };
 
@@ -137,8 +135,8 @@ export const EditPromoPage = () => {
           .insert({
             name: formData.venue.trim(),
             address: formData.address || null,
-            latitude: location?.lat || null,
-            longitude: location?.lng || null,
+            latitude: null,
+            longitude: null,
             created_by: user.id,
           })
           .select('id')
@@ -157,9 +155,9 @@ export const EditPromoPage = () => {
         description: formData.description,
         discount_text: formData.discount,
         venue_name: formData.venue,
-        venue_address: location?.address || formData.address,
-        venue_latitude: location?.lat || null,
-        venue_longitude: location?.lng || null,
+        venue_address: formData.address,
+        venue_latitude: null,
+        venue_longitude: null,
         valid_until: validUntilDate?.toISOString() || null,
         day_of_week: formData.dayOfWeek,
         area: formData.area,
@@ -239,12 +237,6 @@ export const EditPromoPage = () => {
                 onVenueSelect={handleVenueSelect}
               />
 
-              <LocationAutocomplete
-                location={location}
-                onLocationSelect={setLocation}
-                label="Venue Location (Optional)"
-                placeholder="Search for venue address..."
-              />
 
               <PromoDetails
                 dayOfWeek={formData.dayOfWeek}
