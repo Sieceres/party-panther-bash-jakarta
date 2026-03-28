@@ -843,6 +843,56 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_vouchers: {
+        Row: {
+          code: string
+          cooldown_days: number | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_redeemed: boolean
+          last_redeemed_at: string | null
+          promo_id: string
+          redemption_count: number
+          redemption_mode: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          cooldown_days?: number | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_redeemed?: boolean
+          last_redeemed_at?: string | null
+          promo_id: string
+          redemption_count?: number
+          redemption_mode?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          cooldown_days?: number | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_redeemed?: boolean
+          last_redeemed_at?: string | null
+          promo_id?: string
+          redemption_count?: number
+          redemption_mode?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_vouchers_promo_id_fkey"
+            columns: ["promo_id"]
+            isOneToOne: false
+            referencedRelation: "promos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       promos: {
         Row: {
           area: string | null
@@ -868,6 +918,9 @@ export type Database = {
           venue_latitude: number | null
           venue_longitude: number | null
           venue_name: string
+          voucher_cooldown_days: number | null
+          voucher_enabled: boolean
+          voucher_mode: string
         }
         Insert: {
           area?: string | null
@@ -893,6 +946,9 @@ export type Database = {
           venue_latitude?: number | null
           venue_longitude?: number | null
           venue_name: string
+          voucher_cooldown_days?: number | null
+          voucher_enabled?: boolean
+          voucher_mode?: string
         }
         Update: {
           area?: string | null
@@ -918,6 +974,9 @@ export type Database = {
           venue_latitude?: number | null
           venue_longitude?: number | null
           venue_name?: string
+          voucher_cooldown_days?: number | null
+          voucher_enabled?: boolean
+          voucher_mode?: string
         }
         Relationships: [
           {
@@ -1249,6 +1308,38 @@ export type Database = {
             foreignKeyName: "venue_edits_venue_id_fkey"
             columns: ["venue_id"]
             isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venue_pins: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          pin_hash: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          pin_hash: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          pin_hash?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_pins_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: true
             referencedRelation: "venues"
             referencedColumns: ["id"]
           },
