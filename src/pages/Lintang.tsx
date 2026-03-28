@@ -9,7 +9,7 @@ const Lintang = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Header />
 
-      <main className="container mx-auto px-4 sm:px-6 pt-32 pb-12 max-w-3xl">
+      <main className="container mx-auto px-4 sm:px-6 pt-28 pb-12 max-w-3xl">
         {/* Hero Title */}
         <div className="text-center mb-16">
           <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-neon-cyan to-neon-blue bg-clip-text text-transparent mb-4">
