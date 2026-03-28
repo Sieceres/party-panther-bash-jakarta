@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BasicPromoInfo } from "./form-components/BasicPromoInfo";
 import { PromoDiscount } from "./form-components/PromoDiscount";
-import { LocationAutocomplete } from "./form-components/LocationAutocomplete";
+
 import { PromoDetails } from "./form-components/PromoDetails";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
@@ -38,7 +38,7 @@ export const CreatePromoForm = () => {
     drinkType: [] as string[],
     image: ""
   });
-  const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  
 
   const { duplicates, isChecking, hasChecked } = useDuplicateCheck({
     type: "promo",

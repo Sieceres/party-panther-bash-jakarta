@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BasicPromoInfo } from "@/components/form-components/BasicPromoInfo";
 import { PromoDiscount } from "@/components/form-components/PromoDiscount";
-import { LocationAutocomplete } from "@/components/form-components/LocationAutocomplete";
+
 import { PromoDetails } from "@/components/form-components/PromoDetails";
 import { ImageUpload } from "@/components/form-components/ImageUpload";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
@@ -36,7 +36,7 @@ export const EditPromoPage = () => {
     drinkType: [] as string[],
     image: ""
   });
-  const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  
 
   useEffect(() => {
     const fetchPromo = async () => {
