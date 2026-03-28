@@ -11,6 +11,7 @@ import { LocationAutocomplete } from "@/components/form-components/LocationAutoc
 import { PromoDetails } from "@/components/form-components/PromoDetails";
 import { ImageUpload } from "@/components/form-components/ImageUpload";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
+import { VoucherSettings } from "@/components/VoucherSettings";
 import type { VenueResult } from "@/components/form-components/VenueAutocomplete";
 
 export const EditPromoPage = () => {
@@ -21,6 +22,9 @@ export const EditPromoPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validUntilDate, setValidUntilDate] = useState<Date>();
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
+  const [voucherEnabled, setVoucherEnabled] = useState(false);
+  const [voucherMode, setVoucherMode] = useState("single");
+  const [voucherCooldownDays, setVoucherCooldownDays] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -74,6 +78,9 @@ export const EditPromoPage = () => {
           });
 
           setSelectedVenueId(promo.venue_id || null);
+          setVoucherEnabled((promo as any).voucher_enabled || false);
+          setVoucherMode((promo as any).voucher_mode || "single");
+          setVoucherCooldownDays((promo as any).voucher_cooldown_days || null);
 
           if (promo.venue_latitude && promo.venue_longitude) {
             setLocation({
@@ -159,6 +166,9 @@ export const EditPromoPage = () => {
         drink_type: formData.drinkType,
         image_url: formData.image || null,
         venue_id: venueId,
+        voucher_enabled: voucherEnabled,
+        voucher_mode: voucherMode,
+        voucher_cooldown_days: voucherMode === "multi" ? voucherCooldownDays : null,
         updated_at: new Date().toISOString()
       };
 
@@ -252,6 +262,15 @@ export const EditPromoPage = () => {
                 imageUrl={formData.image}
                 onImageChange={(value) => handleInputChange('image', value)}
                 inputId="promo-image-upload"
+              />
+
+              <VoucherSettings
+                voucherEnabled={voucherEnabled}
+                voucherMode={voucherMode}
+                voucherCooldownDays={voucherCooldownDays}
+                onEnabledChange={setVoucherEnabled}
+                onModeChange={setVoucherMode}
+                onCooldownChange={setVoucherCooldownDays}
               />
 
               <div className="flex justify-end space-x-4">
