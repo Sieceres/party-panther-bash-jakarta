@@ -225,7 +225,7 @@ export const PromoDetailPage = () => {
   return (
     <>
       <Header activeSection="promos" />
-      <div className="min-h-screen bg-background pt-20 px-4">
+      <div className="min-h-screen bg-background pt-20 px-4 pb-24 lg:pb-4">
         <div className="container mx-auto max-w-4xl">
           <Button
             variant="ghost"
