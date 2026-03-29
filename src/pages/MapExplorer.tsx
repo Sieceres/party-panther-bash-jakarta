@@ -133,8 +133,8 @@ export default function MapExplorer() {
   const radiusCircleRef = useRef<L.Circle | null>(null);
 
   const [items, setItems] = useState<MapItem[]>([]);
-  const [showPromos, setShowPromos] = useState(true);
-  const [showEvents, setShowEvents] = useState(true);
+  const [showPromos, setShowPromos] = useState(false);
+  const [showEvents, setShowEvents] = useState(false);
   const [showVenues, setShowVenues] = useState(true);
   const [loading, setLoading] = useState(true);
 
