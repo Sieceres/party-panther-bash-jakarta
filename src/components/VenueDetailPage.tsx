@@ -280,7 +280,7 @@ export const VenueDetailPage = () => {
   return (
     <>
       <Helmet>
-        <title>{venue.name}${venue.area ? ` — ${venue.area}` : ''} — Jakarta Bar & Club | Party Panther</title>
+        <title>{`${venue.name}${venue.area ? ` — ${venue.area}` : ''} — Jakarta Bar & Club | Party Panther`}</title>
         <meta name="description" content={`${venue.name}${venue.area ? ` in ${venue.area}` : ''}, Jakarta. ${venue.description?.slice(0, 120) || 'Discover drink promos, events and more at this Jakarta venue.'}`} />
       </Helmet>
       <Header activeSection="venues" />
