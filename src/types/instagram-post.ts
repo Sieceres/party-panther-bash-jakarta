@@ -223,6 +223,7 @@ export const DEFAULT_POST_CONTENT: PostContent = {
     opacity: 30,
   },
   showLogo: true,
+  logoSettings: { ...DEFAULT_LOGO_SETTINGS },
   fonts: {
     headline: "Poppins",
     subheadline: "Poppins",
