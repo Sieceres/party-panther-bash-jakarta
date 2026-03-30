@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getVenueBySlugOrId } from "@/lib/slug-utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { Helmet } from "react-helmet-async";
 import { VenueEditDialog } from "./VenueEditDialog";
 import { VenuePinSetup } from "./VenuePinSetup";
 import { getRegionLabelForArea } from "@/lib/area-config";
@@ -278,6 +279,10 @@ export const VenueDetailPage = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{`${venue.name}${venue.area ? ` — ${venue.area}` : ''} — Jakarta Bar & Club | Party Panther`}</title>
+        <meta name="description" content={`${venue.name}${venue.area ? ` in ${venue.area}` : ''}, Jakarta. ${venue.description?.slice(0, 120) || 'Discover drink promos, events and more at this Jakarta venue.'}`} />
+      </Helmet>
       <Header activeSection="venues" />
       <div className="min-h-screen bg-background pt-20 px-4">
         <div className="container mx-auto max-w-5xl">

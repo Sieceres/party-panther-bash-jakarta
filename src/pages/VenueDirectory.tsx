@@ -11,6 +11,7 @@ import { Header } from "@/components/Header";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { supabase } from "@/integrations/supabase/client";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { Helmet } from "react-helmet-async";
 import { JAKARTA_AREAS, areaMatchesFilter, getAllNeighborhoods } from "@/lib/area-config";
 import { MapPin, Search, Store, Grid3X3, Map as MapIcon, Instagram, Globe, ArrowUpDown } from "lucide-react";
 import { AddVenueDialog } from "@/components/AddVenueDialog";
@@ -116,6 +117,10 @@ export default function VenueDirectory() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Jakarta Bars & Clubs Directory — Find Venues | Party Panther</title>
+        <meta name="description" content="Browse Jakarta's best bars, clubs and nightlife venues. Find addresses, opening hours, drink promos and events at each venue." />
+      </Helmet>
       <Header activeSection="venues" />
       <div className="pt-20 px-4 pb-12">
         <div className="container mx-auto max-w-6xl">

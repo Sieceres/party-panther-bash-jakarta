@@ -17,6 +17,7 @@ import { getPromoBySlugOrId } from "@/lib/slug-utils";
 import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import Linkify from "linkify-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { Helmet } from "react-helmet-async";
 
 interface Promo {
   id: string;
@@ -224,6 +225,10 @@ export const PromoDetailPage = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{promo.title} at {promo.venue_name} — Jakarta Drink Promo | Party Panther</title>
+        <meta name="description" content={`${promo.discount_text} — ${promo.title} at ${promo.venue_name}${promo.area ? ` in ${promo.area}` : ''}, Jakarta. ${promo.description?.slice(0, 120)}`} />
+      </Helmet>
       <Header activeSection="promos" />
       <div className="min-h-screen bg-background pt-20 px-4 pb-24 lg:pb-4">
         <div className="container mx-auto max-w-4xl">

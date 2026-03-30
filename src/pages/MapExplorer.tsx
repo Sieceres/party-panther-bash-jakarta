@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/
 import { MapPin, Calendar, Zap, X, LocateFixed, Loader2, Store } from "lucide-react";
 import { NEIGHBORHOOD_COORDS, JAKARTA_AREAS } from "@/lib/area-config";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { Helmet } from "react-helmet-async";
 import { NearbyPanel } from "@/components/map/NearbyPanel";
 import { toast } from "sonner";
 
@@ -443,6 +444,10 @@ export default function MapExplorer() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Helmet>
+        <title>Jakarta Nightlife Map — Find Bars, Clubs & Promos Near You | Party Panther</title>
+        <meta name="description" content="Explore Jakarta's nightlife on an interactive map. Find bars, clubs, drink promos and events near you." />
+      </Helmet>
       <Header activeSection="map" />
 
       <div className="flex-1 relative pt-16">

@@ -11,6 +11,7 @@ import { Footer } from "@/components/Footer";
 import { useOptimizedData } from "@/hooks/useOptimizedData";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { areaMatchesFilter } from "@/lib/area-config";
+import { Helmet } from "react-helmet-async";
 
 interface IndexProps {
   initialSection?: string;
@@ -375,8 +376,19 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
     }
   };
 
+  const seoMeta: Record<string, { title: string; description: string }> = {
+    home: { title: "Party Panther Jakarta — Best Drink Promos & Nightlife Events", description: "Discover the best Jakarta drink promos, free flow deals, happy hour specials, ladies night offers and nightlife events." },
+    events: { title: "Jakarta Nightlife Events — Parties, Club Nights & Live Music | Party Panther", description: "Find the hottest Jakarta nightlife events, parties, club nights and live music. Never miss a party in Jakarta." },
+    promos: { title: "Jakarta Drink Promos — Free Flow, Happy Hour & Ladies Night | Party Panther", description: "Browse Jakarta's best drink promos including free flow deals, happy hour specials and ladies night offers at top bars and clubs." },
+  };
+  const meta = seoMeta[activeSection] || seoMeta.home;
+
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{meta.title}</title>
+        <meta name="description" content={meta.description} />
+      </Helmet>
       <Header activeSection={activeSection} onSectionChange={handleSectionChange} />
       {renderContent()}
       <Footer onSectionChange={handleSectionChange} />

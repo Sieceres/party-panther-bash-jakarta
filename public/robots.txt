@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://party-panther-bash-jakarta.lovable.app/sitemap.xml
