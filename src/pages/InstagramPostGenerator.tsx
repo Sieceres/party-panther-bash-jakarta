@@ -579,6 +579,7 @@ const InstagramPostGenerator = () => {
                 content={content} 
                 onHeadlinePositionChange={handleHeadlinePositionChange}
                 onSectionPositionChange={handleSectionPositionChange}
+                onLogoPositionChange={handleLogoPositionChange}
               />
             </div>
           </div>
