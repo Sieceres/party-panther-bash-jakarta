@@ -103,8 +103,9 @@ export const ImageUpload = ({
   const isUploading = uploadProgress.status === 'optimizing' || uploadProgress.status === 'uploading';
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" ref={containerRef}>
       <Label htmlFor={inputId}>{label}</Label>
+      <p className="text-xs text-muted-foreground">You can also paste an image from your clipboard (Ctrl+V / ⌘+V)</p>
       <div className="space-y-3">
         <div className="flex items-center space-x-4">
           <Input
