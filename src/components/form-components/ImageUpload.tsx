@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Upload, Loader2, Clipboard } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { uploadImage, UploadProgress } from "@/lib/supabase-storage";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
