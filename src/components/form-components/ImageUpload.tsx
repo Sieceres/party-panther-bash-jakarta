@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Upload, Loader2, Clipboard } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { uploadImage, UploadProgress } from "@/lib/supabase-storage";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -30,11 +30,29 @@ export const ImageUpload = ({
     status: 'idle'
   });
   const [previewUrl, setPreviewUrl] = useState<string>(imageUrl);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Listen for paste events globally when this component is mounted
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of Array.from(items)) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            processFile(file);
+          }
+          return;
+        }
+      }
+    };
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [uploadToStorage, storageFolder]);
 
+  const processFile = async (file: File) => {
     // Show preview immediately
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -43,40 +61,28 @@ export const ImageUpload = ({
     };
     reader.readAsDataURL(file);
 
-    // If uploadToStorage is false, use base64 (for receipts via Cloudinary)
     if (!uploadToStorage) {
-      reader.onload = (e) => {
+      const r2 = new FileReader();
+      r2.onload = (e) => {
         const result = e.target?.result as string;
         onImageChange(result);
       };
+      r2.readAsDataURL(file);
       return;
     }
 
-    // Upload to Supabase Storage
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error("You must be logged in to upload images");
         return;
       }
-
       const originalSize = (file.size / 1024).toFixed(0);
-      
-      const publicUrl = await uploadImage(
-        file,
-        storageFolder,
-        user.id,
-        setUploadProgress
-      );
-
-      // Calculate size saved (rough estimate)
-      const storageUrl = publicUrl;
-      const savedKB = Math.max(0, parseInt(originalSize) - 150); // ~150KB optimized JPEG
-      
+      const publicUrl = await uploadImage(file, storageFolder, user.id, setUploadProgress);
+      const savedKB = Math.max(0, parseInt(originalSize) - 150);
       toast.success(`Image uploaded! Saved ~${savedKB}KB`, {
         description: "Your image has been optimized and uploaded"
       });
-
       onImageChange(publicUrl);
     } catch (error) {
       console.error("Upload error:", error);
@@ -87,11 +93,19 @@ export const ImageUpload = ({
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    processFile(file);
+  };
+
   const isUploading = uploadProgress.status === 'optimizing' || uploadProgress.status === 'uploading';
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" ref={containerRef}>
       <Label htmlFor={inputId}>{label}</Label>
+      <p className="text-xs text-muted-foreground">You can also paste an image from your clipboard (Ctrl+V / ⌘+V)</p>
       <div className="space-y-3">
         <div className="flex items-center space-x-4">
           <Input

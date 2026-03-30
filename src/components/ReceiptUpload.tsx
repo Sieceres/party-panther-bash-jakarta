@@ -222,18 +222,31 @@ export const ReceiptUpload = ({
 
             {!selectedFile ? (
               <div
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                   dragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'
                 }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
+                onPaste={(e) => {
+                  const items = e.clipboardData?.items;
+                  if (!items) return;
+                  for (const item of Array.from(items)) {
+                    if (item.type.startsWith('image/')) {
+                      e.preventDefault();
+                      const file = item.getAsFile();
+                      if (file) handleFileSelection(file);
+                      return;
+                    }
+                  }
+                }}
+                tabIndex={0}
               >
                 <FileImage className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">Drop your receipt here</p>
-                  <p className="text-xs text-muted-foreground">or click to browse</p>
+                  <p className="text-sm font-medium">Drop or paste your receipt here</p>
+                  <p className="text-xs text-muted-foreground">or click to browse • Ctrl+V to paste</p>
                 </div>
                 <input
                   type="file"
