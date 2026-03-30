@@ -96,12 +96,23 @@ export interface TextPosition {
   y: number;
 }
 
+export interface LogoSettings {
+  position: ElementPosition;
+  scale: number; // 0.5 - 3
+}
+
+export const DEFAULT_LOGO_SETTINGS: LogoSettings = {
+  position: { x: 10, y: 5 },
+  scale: 1,
+};
+
 export interface PostContent {
   headline: string;
   sections: ContentSection[];
   format: PostFormat;
   background: BackgroundSettings;
   showLogo: boolean;
+  logoSettings?: LogoSettings;
   fonts: FontSettings;
   fontSizes: FontSizeSettings;
   positions: PositionSettings;
@@ -212,6 +223,7 @@ export const DEFAULT_POST_CONTENT: PostContent = {
     opacity: 30,
   },
   showLogo: true,
+  logoSettings: { ...DEFAULT_LOGO_SETTINGS },
   fonts: {
     headline: "Poppins",
     subheadline: "Poppins",

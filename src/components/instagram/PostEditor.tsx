@@ -380,13 +380,59 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
             </div>
 
             {/* Show Logo Toggle */}
-            <div className="flex items-center justify-between p-3 border rounded-lg">
-              <Label htmlFor="showLogo">Show Logo & Brand Name</Label>
-              <Switch
-                id="showLogo"
-                checked={content.showLogo ?? true}
-                onCheckedChange={(checked) => updateField("showLogo", checked)}
-              />
+            <div className="space-y-3 p-3 border rounded-lg">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="showLogo">Show Logo & Brand Name</Label>
+                <Switch
+                  id="showLogo"
+                  checked={content.showLogo ?? true}
+                  onCheckedChange={(checked) => updateField("showLogo", checked)}
+                />
+              </div>
+              {(content.showLogo ?? true) && (
+                <div className="space-y-3 pt-2 border-t">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Logo Scale: {((content.logoSettings?.scale ?? 1) * 100).toFixed(0)}%</Label>
+                    <Slider
+                      value={[(content.logoSettings?.scale ?? 1) * 100]}
+                      min={50}
+                      max={300}
+                      step={10}
+                      onValueChange={([v]) => updateField("logoSettings", { ...content.logoSettings, position: content.logoSettings?.position ?? { x: 10, y: 5 }, scale: v / 100 })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">X Position: {(content.logoSettings?.position?.x ?? 10).toFixed(0)}%</Label>
+                      <Slider
+                        value={[content.logoSettings?.position?.x ?? 10]}
+                        min={0}
+                        max={90}
+                        step={1}
+                        onValueChange={([v]) => updateField("logoSettings", { ...content.logoSettings, scale: content.logoSettings?.scale ?? 1, position: { x: v, y: content.logoSettings?.position?.y ?? 5 } })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Y Position: {(content.logoSettings?.position?.y ?? 5).toFixed(0)}%</Label>
+                      <Slider
+                        value={[content.logoSettings?.position?.y ?? 5]}
+                        min={0}
+                        max={90}
+                        step={1}
+                        onValueChange={([v]) => updateField("logoSettings", { ...content.logoSettings, scale: content.logoSettings?.scale ?? 1, position: { x: content.logoSettings?.position?.x ?? 10, y: v } })}
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-xs"
+                    onClick={() => updateField("logoSettings", { position: { x: 10, y: 5 }, scale: 1 })}
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" /> Reset Logo Position
+                  </Button>
+                </div>
+              )}
             </div>
           </TabsContent>
 
