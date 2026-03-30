@@ -39,7 +39,7 @@ const getBackgroundConfig = (style: BackgroundStyle) => {
   }
 };
 
-export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositionChange }: PostPreviewProps) => {
+export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositionChange, onLogoPositionChange }: PostPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [draggingElement, setDraggingElement] = useState<string | null>(null);
