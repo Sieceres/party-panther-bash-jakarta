@@ -117,6 +117,10 @@ export default function VenueDirectory() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Jakarta Bars & Clubs Directory — Find Venues | Party Panther</title>
+        <meta name="description" content="Browse Jakarta's best bars, clubs and nightlife venues. Find addresses, opening hours, drink promos and events at each venue." />
+      </Helmet>
       <Header activeSection="venues" />
       <div className="pt-20 px-4 pb-12">
         <div className="container mx-auto max-w-6xl">

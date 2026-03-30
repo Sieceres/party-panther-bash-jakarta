@@ -444,6 +444,10 @@ export default function MapExplorer() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Helmet>
+        <title>Jakarta Nightlife Map — Find Bars, Clubs & Promos Near You | Party Panther</title>
+        <meta name="description" content="Explore Jakarta's nightlife on an interactive map. Find bars, clubs, drink promos and events near you." />
+      </Helmet>
       <Header activeSection="map" />
 
       <div className="flex-1 relative pt-16">

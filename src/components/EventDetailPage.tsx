@@ -993,6 +993,10 @@ export const EventDetailPage = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{event.title} at {event.venue_name} — Jakarta Event | Party Panther</title>
+        <meta name="description" content={`${event.title} at ${event.venue_name}, Jakarta on ${event.date}. ${event.description?.slice(0, 120)}`} />
+      </Helmet>
       <Header activeSection="events" />
       <div className="min-h-screen bg-background pt-20 px-4">
         <div className="container mx-auto max-w-6xl">
