@@ -11,6 +11,7 @@ interface PostPreviewProps {
   content: PostContent;
   onHeadlinePositionChange?: (position: ElementPosition) => void;
   onSectionPositionChange?: (index: number, position: ElementPosition) => void;
+  onLogoPositionChange?: (position: ElementPosition) => void;
 }
 
 const getBackgroundConfig = (style: BackgroundStyle) => {
