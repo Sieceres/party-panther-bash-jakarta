@@ -383,6 +383,13 @@ const InstagramPostGenerator = () => {
     });
   };
 
+  const handleLogoPositionChange = (pos: ElementPosition) => {
+    setContent(prev => ({
+      ...prev,
+      logoSettings: { ...prev.logoSettings, scale: prev.logoSettings?.scale ?? 1, position: pos }
+    }));
+  };
+
   // Apply template settings
   const handleApplyTemplate = (settings: PostContent) => {
     setSlides([{ ...migratePostContent(settings) }]);
