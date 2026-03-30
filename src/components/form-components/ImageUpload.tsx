@@ -97,56 +97,7 @@ export const ImageUpload = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Show preview immediately
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setPreviewUrl(result);
-    };
-    reader.readAsDataURL(file);
-
-    // If uploadToStorage is false, use base64 (for receipts via Cloudinary)
-    if (!uploadToStorage) {
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        onImageChange(result);
-      };
-      return;
-    }
-
-    // Upload to Supabase Storage
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("You must be logged in to upload images");
-        return;
-      }
-
-      const originalSize = (file.size / 1024).toFixed(0);
-      
-      const publicUrl = await uploadImage(
-        file,
-        storageFolder,
-        user.id,
-        setUploadProgress
-      );
-
-      // Calculate size saved (rough estimate)
-      const storageUrl = publicUrl;
-      const savedKB = Math.max(0, parseInt(originalSize) - 150); // ~150KB optimized JPEG
-      
-      toast.success(`Image uploaded! Saved ~${savedKB}KB`, {
-        description: "Your image has been optimized and uploaded"
-      });
-
-      onImageChange(publicUrl);
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Failed to upload image", {
-        description: error instanceof Error ? error.message : "Please try again"
-      });
-      setUploadProgress({ progress: 0, status: 'error' });
-    }
+    processFile(file);
   };
 
   const isUploading = uploadProgress.status === 'optimizing' || uploadProgress.status === 'uploading';
