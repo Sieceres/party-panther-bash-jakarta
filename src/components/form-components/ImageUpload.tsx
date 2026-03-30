@@ -30,6 +30,68 @@ export const ImageUpload = ({
     status: 'idle'
   });
   const [previewUrl, setPreviewUrl] = useState<string>(imageUrl);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Listen for paste events globally when this component is mounted
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of Array.from(items)) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            processFile(file);
+          }
+          return;
+        }
+      }
+    };
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [uploadToStorage, storageFolder]);
+
+  const processFile = async (file: File) => {
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      setPreviewUrl(result);
+    };
+    reader.readAsDataURL(file);
+
+    if (!uploadToStorage) {
+      const r2 = new FileReader();
+      r2.onload = (e) => {
+        const result = e.target?.result as string;
+        onImageChange(result);
+      };
+      r2.readAsDataURL(file);
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to upload images");
+        return;
+      }
+      const originalSize = (file.size / 1024).toFixed(0);
+      const publicUrl = await uploadImage(file, storageFolder, user.id, setUploadProgress);
+      const savedKB = Math.max(0, parseInt(originalSize) - 150);
+      toast.success(`Image uploaded! Saved ~${savedKB}KB`, {
+        description: "Your image has been optimized and uploaded"
+      });
+      onImageChange(publicUrl);
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload image", {
+        description: error instanceof Error ? error.message : "Please try again"
+      });
+      setUploadProgress({ progress: 0, status: 'error' });
+    }
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
