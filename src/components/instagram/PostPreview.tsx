@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ExternalLink, Move, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
-import type { PostContent, BackgroundStyle, ElementPosition } from "@/types/instagram-post";
+import type { PostContent, BackgroundStyle, ElementPosition, LogoSettings } from "@/types/instagram-post";
 import partyPantherLogo from "@/assets/party-panther-logo.png";
 
 interface PostPreviewProps {
