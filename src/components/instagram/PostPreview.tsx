@@ -98,6 +98,8 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
       if (elementId === "headline" && onHeadlinePositionChange) {
         onHeadlinePositionChange({ x, y });
+      } else if (elementId === "logo" && onLogoPositionChange) {
+        onLogoPositionChange({ x, y });
       } else if (elementId.startsWith("section-") && onSectionPositionChange) {
         const index = parseInt(elementId.split("-")[1]);
         onSectionPositionChange(index, { x, y });
