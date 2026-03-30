@@ -1,95 +1,61 @@
 
 
-## Plan: Promo Voucher / Discount Code Redemption System
+## Plan: SEO Optimization for Jakarta Nightlife Keywords
 
-### What users will experience
+### The Problem
 
-1. **Promo creators** get a new toggle: "Enable voucher redemption" with a choice of single-use or multi-use (with cooldown)
-2. **Users** tap "Claim Voucher" on a promo → a unique QR code + alphanumeric code appears in a "My Vouchers" section accessible from their profile
-3. **At the venue**, user shows the QR code. Staff scans it with any phone camera → opens a public verification page showing promo name, validity status, and a "Redeem" button
-4. **Redemption requires the venue's 4-digit PIN** (set once by the venue owner/admin) to prevent users from self-redeeming
-5. After redemption, the voucher is marked as used (single-use) or timestamped for cooldown tracking (multi-use)
+Your site is a single-page React app (SPA). Google can render SPAs but struggles with them because:
+- There's only one `index.html` with generic meta tags
+- No sitemap, no structured data, no keyword-rich content in the HTML
+- Page titles update via JS but crawlers may not see them
+- No per-page meta descriptions for `/events`, `/promos`, `/venues/*`, `/promos/*`
 
-### Database changes (migration)
+### What We'll Do
 
-**New table: `promo_vouchers`**
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid PK | |
-| promo_id | uuid FK → promos | |
-| user_id | uuid | claimer |
-| code | text UNIQUE | 8-char alphanumeric |
-| redemption_mode | text | 'single' or 'multi' |
-| cooldown_days | integer | null for single-use |
-| is_redeemed | boolean | for single-use |
-| last_redeemed_at | timestamptz | for multi-use cooldown |
-| redemption_count | integer | default 0 |
-| created_at | timestamptz | |
-| expires_at | timestamptz | matches promo valid_until |
+**1. Keyword-rich meta tags in `index.html`**
+- Update `<title>` to: `Party Panther Jakarta — Drink Promos, Free Flow Deals & Nightlife Events`
+- Update `<meta name="description">` to include target phrases: "Jakarta party", "Jakarta free flow", "Jakarta drink promo", "happy hour Jakarta", "ladies night Jakarta"
+- Add `<meta name="keywords">` with those phrases
+- Update OG tags to match
 
-**New table: `venue_pins`**
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid PK | |
-| venue_id | uuid FK → venues | unique |
-| pin_hash | text | bcrypt hash of 4-digit PIN |
-| created_by | uuid | venue owner or admin |
-| created_at | timestamptz | |
+**2. Per-page dynamic meta tags with `react-helmet-async`**
+- Install `react-helmet-async`
+- Add `<HelmetProvider>` wrapper in `App.tsx`
+- Add `<Helmet>` to key pages with unique titles and descriptions:
+  - **Home**: "Party Panther Jakarta — Best Drink Promos & Nightlife Events"
+  - **Events** (`/events`): "Jakarta Nightlife Events — Parties, Club Nights & Live Music"
+  - **Promos** (`/promos`): "Jakarta Drink Promos — Free Flow, Happy Hour & Ladies Night Deals"
+  - **Promo detail** (`/promos/:slug`): dynamic title with promo name + venue
+  - **Event detail** (`/events/:slug`): dynamic title with event name + venue
+  - **Venue detail** (`/venues/:slug`): dynamic title with venue name + area
+  - **Map** (`/map`): "Jakarta Nightlife Map — Find Bars & Clubs Near You"
+  - **Venue Directory** (`/venues`): "Jakarta Bars & Clubs Directory"
 
-**New column on `promos`:**
-- `voucher_enabled` boolean default false
-- `voucher_mode` text default 'single' (single / multi)
-- `voucher_cooldown_days` integer default null
+**3. Sitemap + robots.txt update**
+- Create `public/sitemap.xml` with static routes (`/`, `/events`, `/promos`, `/venues`, `/map`, `/about`, `/contact`)
+- Add `Sitemap: https://party-panther-bash-jakarta.lovable.app/sitemap.xml` to `robots.txt`
 
-**RLS policies:**
-- `promo_vouchers`: users can INSERT (own user_id), SELECT own vouchers; public can SELECT by code (for verification page); admins can see all
-- `venue_pins`: only venue owners + admins can INSERT/UPDATE/SELECT
+**4. Semantic HTML & structured data**
+- Add JSON-LD structured data (`Organization` schema) to `index.html`
+- Add an SEO-friendly `<h1>` in the Hero component that includes target keywords (can be visually styled however you want)
 
-### New edge function: `redeem-voucher`
+### Files to Change
 
-Handles the verification page's "Redeem" action:
-1. Accepts `{ code, venue_pin }`
-2. Looks up the voucher + linked promo + venue
-3. Verifies the PIN against `venue_pins` (bcrypt compare)
-4. Checks validity (not expired, not already redeemed / cooldown not elapsed)
-5. Marks as redeemed, increments count
-6. Returns success/failure with promo details
+| File | Change |
+|------|--------|
+| `index.html` | Meta tags, JSON-LD script |
+| `src/App.tsx` | Add `HelmetProvider` |
+| `src/pages/Index.tsx` | Add `<Helmet>` per section |
+| `src/components/PromoDetailPage.tsx` | Dynamic `<Helmet>` |
+| `src/components/EventDetailPage.tsx` | Dynamic `<Helmet>` |
+| `src/components/VenueDetailPage.tsx` | Dynamic `<Helmet>` |
+| `src/pages/MapExplorer.tsx` | `<Helmet>` |
+| `src/pages/VenueDirectory.tsx` | `<Helmet>` |
+| `public/sitemap.xml` | New static sitemap |
+| `public/robots.txt` | Add sitemap reference |
+| `src/components/Hero.tsx` | Keyword-rich `<h1>` |
 
-### Frontend changes
+### Limitations
 
-**File: `src/components/CreatePromoForm.tsx` + `EditPromoPage.tsx`**
-- Add "Enable Voucher" toggle + mode selector (single/multi) + cooldown input (if multi)
-
-**New file: `src/components/VoucherDisplay.tsx`**
-- Shows QR code (using `qrcode.react` library) encoding the verification URL: `{site}/voucher/{code}`
-- Shows alphanumeric code as fallback
-- Shows redemption status and history
-
-**New file: `src/components/UserVouchers.tsx`**
-- "My Vouchers" section in user profile, listing all claimed vouchers with status
-
-**New file: `src/pages/VoucherVerify.tsx`**
-- Public page at `/voucher/:code`
-- Shows promo name, venue, validity, discount details
-- PIN input field + "Redeem" button
-- Calls the `redeem-voucher` edge function
-- Shows success/error state clearly
-
-**File: `src/components/PromoDetailPage.tsx`**
-- Replace current dummy "Claim Promo" button with actual voucher claim logic
-- On claim: generates a voucher row in `promo_vouchers`, shows the QR code
-
-**File: `src/components/VenueDetailPage.tsx`**
-- For venue owners: "Set Redemption PIN" button that lets them set/update their 4-digit PIN
-
-**File: `src/App.tsx`**
-- Add route `/voucher/:code` → `VoucherVerify`
-
-### Technical notes
-
-- QR code library: `qrcode.react` (lightweight, no server needed)
-- Code generation: 8-char alphanumeric (base36), generated client-side with uniqueness enforced by DB unique constraint + retry
-- PIN hashing done in the edge function using Web Crypto API (not bcrypt in Deno -- use PBKDF2 or store as simple hash since it's a 4-digit PIN with rate limiting)
-- Cooldown check: `last_redeemed_at + cooldown_days > now()` in the edge function
-- No payments integration for now -- all claims are free
+Since this is a client-side SPA without server-side rendering, Google will need to execute JS to see per-page meta tags. The `react-helmet-async` approach works for social sharing previews (Twitter/Facebook use headless browsers) and improves Google's ability to index pages. For maximum SEO, you'd eventually want SSR (Next.js) or a prerendering service, but this plan gets you 80% of the benefit with no architecture change.
 
