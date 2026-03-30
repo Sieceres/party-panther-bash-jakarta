@@ -608,34 +608,66 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
               )}
 
               {/* Logo & Brand */}
-              {(content.showLogo ?? true) && (
+              {(content.showLogo ?? true) && (() => {
+                const logoScale = content.logoSettings?.scale ?? 1;
+                const logoX = content.logoSettings?.position?.x ?? 10;
+                const logoY = content.logoSettings?.position?.y ?? 5;
+                const baseLogoSize = 56;
+                const scaledLogoSize = baseLogoSize * logoScale;
+                const scaledFontSize = 28 * logoScale;
+                return (
                 <div
                   data-brand-container
                   style={{
                     position: "absolute",
-                    top: 48,
-                    left: 48,
+                    left: `${logoX}%`,
+                    top: `${logoY}%`,
                     zIndex: 10,
                     display: "flex",
                     flexDirection: "row",
                     alignItems: "center",
-                    gap: 8,
+                    gap: 8 * logoScale,
+                    cursor: onLogoPositionChange
+                      ? draggingElement === "logo" ? "grabbing" : "grab"
+                      : "default",
+                    userSelect: "none",
                   }}
+                  onMouseDown={(e) => onLogoPositionChange && handleDrag("logo", e)}
                 >
+                  {onLogoPositionChange && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: -24,
+                        left: 0,
+                        background: "rgba(0,0,0,0.6)",
+                        padding: "2px 8px",
+                        borderRadius: 4,
+                        fontSize: 12,
+                        color: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                        opacity: draggingElement === "logo" ? 1 : 0.5,
+                      }}
+                    >
+                      <Move size={10} /> Logo
+                    </div>
+                  )}
                   <img
                     data-brand-logo
                     src={partyPantherLogo}
                     alt="Party Panther logo"
-                    width={56}
-                    height={56}
+                    width={scaledLogoSize}
+                    height={scaledLogoSize}
                     crossOrigin="anonymous"
                     loading="eager"
                     decoding="async"
                     style={{
-                      width: 56,
-                      height: 56,
-                      minWidth: 56,
-                      minHeight: 56,
+                      width: scaledLogoSize,
+                      height: scaledLogoSize,
+                      minWidth: scaledLogoSize,
+                      minHeight: scaledLogoSize,
                       objectFit: "contain",
                       filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
                       display: "block",
@@ -645,7 +677,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                   <span
                     data-brand-text
                     style={{
-                      fontSize: 28,
+                      fontSize: scaledFontSize,
                       fontWeight: 800,
                       background: "linear-gradient(to right, #00CFFF, #4F8EFF)",
                       WebkitBackgroundClip: "text",
@@ -653,11 +685,9 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       backgroundClip: "text",
                       whiteSpace: "nowrap",
                       filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
-
-                      // Critical for vertical alignment: keep a normal line box and center via flex.
                       display: "flex",
                       alignItems: "center",
-                      height: 56,
+                      height: scaledLogoSize,
                       lineHeight: 1,
                       transform: "translateY(0px)",
                     }}
@@ -665,7 +695,8 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     Party Panther
                   </span>
                 </div>
-              )}
+                );
+              })()}
 
               {/* Headline - Draggable */}
               {content.headline && (
