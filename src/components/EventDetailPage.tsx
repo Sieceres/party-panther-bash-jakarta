@@ -41,6 +41,7 @@ import { EventInviteCodes } from "./EventInviteCodes";
 import { LoginDialog } from "./LoginDialog";
 import InstagramEmbed from "./InstagramEmbed";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { Helmet } from "react-helmet-async";
 
 interface Event {
   id: string;

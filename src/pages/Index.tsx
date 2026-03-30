@@ -11,6 +11,7 @@ import { Footer } from "@/components/Footer";
 import { useOptimizedData } from "@/hooks/useOptimizedData";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { areaMatchesFilter } from "@/lib/area-config";
+import { Helmet } from "react-helmet-async";
 
 interface IndexProps {
   initialSection?: string;

@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getVenueBySlugOrId } from "@/lib/slug-utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { Helmet } from "react-helmet-async";
 import { VenueEditDialog } from "./VenueEditDialog";
 import { VenuePinSetup } from "./VenuePinSetup";
 import { getRegionLabelForArea } from "@/lib/area-config";

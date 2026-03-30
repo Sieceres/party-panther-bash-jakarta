@@ -135,7 +135,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
               textShadow: '0 2px 8px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 207, 255, 0.3)'
             }}
           >
-            Jakarta's Ultimate Party & Promo Hub
+            Jakarta's Best Drink Promos, Free Flow Deals & Nightlife Events
           </p>
           <p 
             className="text-white/90 max-w-2xl mx-auto animate-slide-up hero-subtitle break-words px-2" 

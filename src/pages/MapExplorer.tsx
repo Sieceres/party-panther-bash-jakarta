@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/
 import { MapPin, Calendar, Zap, X, LocateFixed, Loader2, Store } from "lucide-react";
 import { NEIGHBORHOOD_COORDS, JAKARTA_AREAS } from "@/lib/area-config";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { Helmet } from "react-helmet-async";
 import { NearbyPanel } from "@/components/map/NearbyPanel";
 import { toast } from "sonner";
 

@@ -17,6 +17,7 @@ import { getPromoBySlugOrId } from "@/lib/slug-utils";
 import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import Linkify from "linkify-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { Helmet } from "react-helmet-async";
 
 interface Promo {
   id: string;

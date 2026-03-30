@@ -11,6 +11,7 @@ import { Header } from "@/components/Header";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { supabase } from "@/integrations/supabase/client";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { Helmet } from "react-helmet-async";
 import { JAKARTA_AREAS, areaMatchesFilter, getAllNeighborhoods } from "@/lib/area-config";
 import { MapPin, Search, Store, Grid3X3, Map as MapIcon, Instagram, Globe, ArrowUpDown } from "lucide-react";
 import { AddVenueDialog } from "@/components/AddVenueDialog";
