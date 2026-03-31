@@ -655,6 +655,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                         gap: 4,
                         opacity: draggingElement === "logo" ? 1 : 0.5,
                       }}
+                      data-drag-label
                     >
                       <Move size={10} /> Logo
                     </div>
