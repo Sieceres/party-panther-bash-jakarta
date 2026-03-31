@@ -814,6 +814,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                         color: colors.subheadline,
                         lineHeight: 1.3,
                         marginBottom: 12,
+                        whiteSpace: "pre-line",
                         ...getTextStyle("subheadline"),
                       }}
                     >
