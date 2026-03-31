@@ -755,6 +755,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       color: colors.headline,
                       ...getTextStyle("headline"),
                     }}
+                    whiteSpace: "pre-line",
                   >
                     {content.headline}
                   </div>
