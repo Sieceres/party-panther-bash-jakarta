@@ -613,7 +613,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
               )}
 
               {/* Logo & Brand */}
-              {(content.showLogo ?? true) && (() => {
+              {((content.showLogo ?? true) || (content.showBrandName ?? true)) && (() => {
                 const logoScale = content.logoSettings?.scale ?? 1;
                 const logoX = content.logoSettings?.position?.x ?? 10;
                 const logoY = content.logoSettings?.position?.y ?? 5;
@@ -660,46 +660,50 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       <Move size={10} /> Logo
                     </div>
                   )}
-                  <img
-                    data-brand-logo
-                    src={partyPantherLogo}
-                    alt="Party Panther logo"
-                    width={scaledLogoSize}
-                    height={scaledLogoSize}
-                    crossOrigin="anonymous"
-                    loading="eager"
-                    decoding="async"
-                    style={{
-                      width: scaledLogoSize,
-                      height: scaledLogoSize,
-                      minWidth: scaledLogoSize,
-                      minHeight: scaledLogoSize,
-                      objectFit: "contain",
-                      filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
-                      display: "block",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span
-                    data-brand-text
-                    style={{
-                      fontSize: scaledFontSize,
-                      fontWeight: 800,
-                      background: "linear-gradient(to right, #00CFFF, #4F8EFF)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                      whiteSpace: "nowrap",
-                      filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
-                      display: "flex",
-                      alignItems: "center",
-                      height: scaledLogoSize,
-                      lineHeight: 1,
-                      transform: "translateY(0px)",
-                    }}
-                  >
-                    Party Panther
-                  </span>
+                  {(content.showLogo ?? true) && (
+                    <img
+                      data-brand-logo
+                      src={partyPantherLogo}
+                      alt="Party Panther logo"
+                      width={scaledLogoSize}
+                      height={scaledLogoSize}
+                      crossOrigin="anonymous"
+                      loading="eager"
+                      decoding="async"
+                      style={{
+                        width: scaledLogoSize,
+                        height: scaledLogoSize,
+                        minWidth: scaledLogoSize,
+                        minHeight: scaledLogoSize,
+                        objectFit: "contain",
+                        filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
+                        display: "block",
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
+                  {(content.showBrandName ?? true) && (
+                    <span
+                      data-brand-text
+                      style={{
+                        fontSize: scaledFontSize,
+                        fontWeight: 800,
+                        background: "linear-gradient(to right, #00CFFF, #4F8EFF)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                        whiteSpace: "nowrap",
+                        filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
+                        display: "flex",
+                        alignItems: "center",
+                        height: scaledLogoSize,
+                        lineHeight: 1,
+                        transform: "translateY(0px)",
+                      }}
+                    >
+                      Party Panther
+                    </span>
+                  )}
                 </div>
                 );
               })()}

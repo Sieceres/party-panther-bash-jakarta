@@ -112,6 +112,7 @@ export interface PostContent {
   format: PostFormat;
   background: BackgroundSettings;
   showLogo: boolean;
+  showBrandName: boolean;
   logoSettings?: LogoSettings;
   fonts: FontSettings;
   fontSizes: FontSizeSettings;
@@ -223,6 +224,7 @@ export const DEFAULT_POST_CONTENT: PostContent = {
     opacity: 30,
   },
   showLogo: true,
+  showBrandName: true,
   logoSettings: { ...DEFAULT_LOGO_SETTINGS },
   fonts: {
     headline: "Poppins",
@@ -292,6 +294,7 @@ export function migratePostContent(content: any): PostContent {
       opacity: 30,
     },
     showLogo: content.showLogo ?? true,
+    showBrandName: content.showBrandName ?? true,
     fonts: content.fonts || DEFAULT_POST_CONTENT.fonts,
     fontSizes: content.fontSizes || DEFAULT_POST_CONTENT.fontSizes,
     positions: {

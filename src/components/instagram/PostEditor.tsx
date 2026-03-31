@@ -382,14 +382,22 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
             {/* Show Logo Toggle */}
             <div className="space-y-3 p-3 border rounded-lg">
               <div className="flex items-center justify-between">
-                <Label htmlFor="showLogo">Show Logo & Brand Name</Label>
+                <Label htmlFor="showLogo">Show Logo</Label>
                 <Switch
                   id="showLogo"
                   checked={content.showLogo ?? true}
                   onCheckedChange={(checked) => updateField("showLogo", checked)}
                 />
               </div>
-              {(content.showLogo ?? true) && (
+              <div className="flex items-center justify-between">
+                <Label htmlFor="showBrandName">Show Brand Name</Label>
+                <Switch
+                  id="showBrandName"
+                  checked={content.showBrandName ?? true}
+                  onCheckedChange={(checked) => updateField("showBrandName", checked)}
+                />
+              </div>
+              {((content.showLogo ?? true) || (content.showBrandName ?? true)) && (
                 <div className="space-y-3 pt-2 border-t">
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">Logo Scale: {((content.logoSettings?.scale ?? 1) * 100).toFixed(0)}%</Label>
