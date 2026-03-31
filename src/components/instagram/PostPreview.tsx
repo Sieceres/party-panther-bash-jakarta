@@ -753,9 +753,9 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       fontFamily: `'${content.fonts?.headline || "Poppins"}', sans-serif`,
                       lineHeight: 1.2,
                       color: colors.headline,
+                      whiteSpace: "pre-line",
                       ...getTextStyle("headline"),
                     }}
-                    whiteSpace: "pre-line",
                   >
                     {content.headline}
                   </div>
