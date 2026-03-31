@@ -397,7 +397,7 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                   onCheckedChange={(checked) => updateField("showBrandName", checked)}
                 />
               </div>
-              {(content.showLogo ?? true) && (
+              {((content.showLogo ?? true) || (content.showBrandName ?? true)) && (
                 <div className="space-y-3 pt-2 border-t">
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">Logo Scale: {((content.logoSettings?.scale ?? 1) * 100).toFixed(0)}%</Label>

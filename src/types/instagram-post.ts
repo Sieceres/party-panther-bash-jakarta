@@ -294,6 +294,7 @@ export function migratePostContent(content: any): PostContent {
       opacity: 30,
     },
     showLogo: content.showLogo ?? true,
+    showBrandName: content.showBrandName ?? true,
     fonts: content.fonts || DEFAULT_POST_CONTENT.fonts,
     fontSizes: content.fontSizes || DEFAULT_POST_CONTENT.fontSizes,
     positions: {
