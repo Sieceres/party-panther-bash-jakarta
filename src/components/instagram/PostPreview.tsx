@@ -829,6 +829,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                         lineHeight: 1.5,
                         color: colors.body,
                         textAlign: alignments.body,
+                        whiteSpace: "pre-line",
                         ...getTextStyle("body"),
                       }}
                     >

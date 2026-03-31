@@ -543,12 +543,15 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                       <Label htmlFor={`subheadline-${index}`} className="text-xs">Sub-headline</Label>
                       <EmojiPicker onSelect={(emoji) => insertEmoji(emoji, "subheadline", index)} />
                     </div>
-                    <Input
+                    <Textarea
                       id={`subheadline-${index}`}
                       value={section.subheadline}
                       onChange={(e) => updateSection(index, "subheadline", e.target.value)}
                       placeholder="Secondary text..."
                       maxLength={150}
+                      autoResize
+                      maxHeight={100}
+                      className="min-h-[36px]"
                     />
                   </div>
 
