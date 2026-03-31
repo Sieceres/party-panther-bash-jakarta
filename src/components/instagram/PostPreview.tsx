@@ -136,6 +136,11 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       brandLogo.style.transform = "none";
     }
 
+    // Remove all drag labels from export
+    clone.querySelectorAll("[data-drag-label]").forEach((el) => {
+      (el as HTMLElement).style.display = "none";
+    });
+
     if (brandText) {
       // Replace gradient text with a solid color + shadow (gradient via background-clip isn't reliable)
       brandText.style.background = "none";
@@ -650,6 +655,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                         gap: 4,
                         opacity: draggingElement === "logo" ? 1 : 0.5,
                       }}
+                      data-drag-label
                     >
                       <Move size={10} /> Logo
                     </div>
@@ -735,6 +741,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                         gap: 4,
                         opacity: draggingElement === "headline" ? 1 : 0.5,
                       }}
+                      data-drag-label
                     >
                       <Move size={10} /> Headline
                     </div>
@@ -792,6 +799,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                         gap: 4,
                         opacity: draggingElement === `section-${index}` ? 1 : 0.5,
                       }}
+                      data-drag-label
                     >
                       <Move size={10} /> Section {index + 1}
                     </div>
