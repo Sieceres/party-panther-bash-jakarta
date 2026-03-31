@@ -799,6 +799,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                         gap: 4,
                         opacity: draggingElement === `section-${index}` ? 1 : 0.5,
                       }}
+                      data-drag-label
                     >
                       <Move size={10} /> Section {index + 1}
                     </div>
