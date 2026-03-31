@@ -613,7 +613,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
               )}
 
               {/* Logo & Brand */}
-              {(content.showLogo ?? true) && (() => {
+              {((content.showLogo ?? true) || (content.showBrandName ?? true)) && (() => {
                 const logoScale = content.logoSettings?.scale ?? 1;
                 const logoX = content.logoSettings?.position?.x ?? 10;
                 const logoY = content.logoSettings?.position?.y ?? 5;
