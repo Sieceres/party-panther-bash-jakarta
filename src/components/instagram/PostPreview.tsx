@@ -741,6 +741,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                         gap: 4,
                         opacity: draggingElement === "headline" ? 1 : 0.5,
                       }}
+                      data-drag-label
                     >
                       <Move size={10} /> Headline
                     </div>
