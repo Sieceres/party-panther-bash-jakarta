@@ -136,6 +136,11 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       brandLogo.style.transform = "none";
     }
 
+    // Remove all drag labels from export
+    clone.querySelectorAll("[data-drag-label]").forEach((el) => {
+      (el as HTMLElement).style.display = "none";
+    });
+
     if (brandText) {
       // Replace gradient text with a solid color + shadow (gradient via background-clip isn't reliable)
       brandText.style.background = "none";
