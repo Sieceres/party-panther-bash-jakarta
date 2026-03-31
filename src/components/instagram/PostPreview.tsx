@@ -753,6 +753,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       fontFamily: `'${content.fonts?.headline || "Poppins"}', sans-serif`,
                       lineHeight: 1.2,
                       color: colors.headline,
+                      whiteSpace: "pre-line",
                       ...getTextStyle("headline"),
                     }}
                   >
@@ -813,6 +814,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                         color: colors.subheadline,
                         lineHeight: 1.3,
                         marginBottom: 12,
+                        whiteSpace: "pre-line",
                         ...getTextStyle("subheadline"),
                       }}
                     >
@@ -827,6 +829,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                         lineHeight: 1.5,
                         color: colors.body,
                         textAlign: alignments.body,
+                        whiteSpace: "pre-line",
                         ...getTextStyle("body"),
                       }}
                     >

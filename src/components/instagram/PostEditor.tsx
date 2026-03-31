@@ -444,12 +444,15 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                 <Label htmlFor="headline">Headline</Label>
                 <EmojiPicker onSelect={(emoji) => insertEmoji(emoji, "headline")} />
               </div>
-              <Input
+              <Textarea
                 id="headline"
                 value={content.headline}
                 onChange={(e) => updateField("headline", e.target.value)}
                 placeholder="Main headline text..."
                 maxLength={100}
+                autoResize
+                maxHeight={120}
+                className="min-h-[40px]"
               />
               <p className="text-xs text-muted-foreground">{content.headline.length}/100</p>
               
@@ -540,12 +543,15 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                       <Label htmlFor={`subheadline-${index}`} className="text-xs">Sub-headline</Label>
                       <EmojiPicker onSelect={(emoji) => insertEmoji(emoji, "subheadline", index)} />
                     </div>
-                    <Input
+                    <Textarea
                       id={`subheadline-${index}`}
                       value={section.subheadline}
                       onChange={(e) => updateSection(index, "subheadline", e.target.value)}
                       placeholder="Secondary text..."
                       maxLength={150}
+                      autoResize
+                      maxHeight={100}
+                      className="min-h-[36px]"
                     />
                   </div>
 
