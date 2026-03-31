@@ -10,6 +10,7 @@ const createTemplate = (overrides: Partial<PostContent>): PostContent => ({
     opacity: 30,
   },
   showLogo: true,
+  showBrandName: true,
   fonts: {
     headline: "Playfair Display",
     subheadline: "Inter",
