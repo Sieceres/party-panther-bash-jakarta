@@ -444,12 +444,15 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                 <Label htmlFor="headline">Headline</Label>
                 <EmojiPicker onSelect={(emoji) => insertEmoji(emoji, "headline")} />
               </div>
-              <Input
+              <Textarea
                 id="headline"
                 value={content.headline}
                 onChange={(e) => updateField("headline", e.target.value)}
                 placeholder="Main headline text..."
                 maxLength={100}
+                autoResize
+                maxHeight={120}
+                className="min-h-[40px]"
               />
               <p className="text-xs text-muted-foreground">{content.headline.length}/100</p>
               
