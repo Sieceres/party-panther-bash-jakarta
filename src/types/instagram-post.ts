@@ -125,6 +125,7 @@ export interface PostContent {
   qrCode?: QRCodeSettings;
   showDividers?: boolean;
   dividerColor?: string;
+  dividerThickness?: number;
   // Legacy compatibility
   backgroundStyle?: BackgroundStyle;
   backgroundImage?: string;
