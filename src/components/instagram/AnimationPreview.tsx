@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Play, Pause, RotateCcw } from "lucide-react";
 import type { PostContent } from "@/types/instagram-post";
 
-type AnimationType = "fade" | "slide-up" | "scale" | "typewriter";
+type AnimationType = "fade" | "slide-up" | "slide-left" | "scale" | "typewriter" | "blur-in" | "flip";
 
 interface AnimationPreviewProps {
   open: boolean;
@@ -16,13 +17,18 @@ interface AnimationPreviewProps {
 
 export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPreviewProps) => {
   const [animation, setAnimation] = useState<AnimationType>("fade");
+  const [speed, setSpeed] = useState(1); // 0.5x to 3x
   const [playing, setPlaying] = useState(false);
-  const [key, setKey] = useState(0); // Force re-render for animation restart
+  const [key, setKey] = useState(0);
+
+  const baseDuration = 0.8; // seconds
+  const duration = baseDuration / speed;
+  const totalTime = (duration + 0.3 * content.sections.length / speed) * 1000 + 500;
 
   const playAnimation = () => {
     setPlaying(true);
     setKey((k) => k + 1);
-    setTimeout(() => setPlaying(false), 2000);
+    setTimeout(() => setPlaying(false), totalTime);
   };
 
   const resetAnimation = () => {
@@ -39,28 +45,12 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
   const getAnimationStyle = (delay: number = 0): React.CSSProperties => {
     if (!playing) return { opacity: 1 };
 
-    const baseDelay = delay * 0.2;
-    
-    switch (animation) {
-      case "fade":
-        return {
-          animation: `fadeIn 0.6s ease-out ${baseDelay}s both`,
-        };
-      case "slide-up":
-        return {
-          animation: `slideUp 0.6s ease-out ${baseDelay}s both`,
-        };
-      case "scale":
-        return {
-          animation: `scaleIn 0.5s ease-out ${baseDelay}s both`,
-        };
-      case "typewriter":
-        return {
-          animation: `fadeIn 0.3s ease-out ${baseDelay}s both`,
-        };
-      default:
-        return { opacity: 1 };
-    }
+    const baseDelay = delay * 0.3 / speed;
+    const animName = `anim-${animation}`;
+
+    return {
+      animation: `${animName} ${duration}s ease-out ${baseDelay}s both`,
+    };
   };
 
   const colors = content.textStyles?.colors || {
@@ -77,17 +67,35 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
         </DialogHeader>
 
         <style>{`
-          @keyframes fadeIn {
+          @keyframes anim-fade {
             from { opacity: 0; }
             to { opacity: 1; }
           }
-          @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
+          @keyframes anim-slide-up {
+            from { opacity: 0; transform: translateY(60px); }
             to { opacity: 1; transform: translateY(0); }
           }
-          @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
+          @keyframes anim-slide-left {
+            from { opacity: 0; transform: translateX(-80px); }
+            to { opacity: 1; transform: translateX(0); }
+          }
+          @keyframes anim-scale {
+            0% { opacity: 0; transform: scale(0.3); }
+            70% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+          }
+          @keyframes anim-typewriter {
+            0% { opacity: 0; clip-path: inset(0 100% 0 0); }
+            30% { opacity: 1; }
+            100% { opacity: 1; clip-path: inset(0 0% 0 0); }
+          }
+          @keyframes anim-blur-in {
+            from { opacity: 0; filter: blur(20px); transform: scale(1.1); }
+            to { opacity: 1; filter: blur(0px); transform: scale(1); }
+          }
+          @keyframes anim-flip {
+            from { opacity: 0; transform: perspective(400px) rotateX(-90deg); }
+            to { opacity: 1; transform: perspective(400px) rotateX(0deg); }
           }
         `}</style>
 
@@ -103,8 +111,11 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                 <SelectContent>
                   <SelectItem value="fade">Fade In</SelectItem>
                   <SelectItem value="slide-up">Slide Up</SelectItem>
-                  <SelectItem value="scale">Scale</SelectItem>
+                  <SelectItem value="slide-left">Slide Left</SelectItem>
+                  <SelectItem value="scale">Scale Bounce</SelectItem>
                   <SelectItem value="typewriter">Typewriter</SelectItem>
+                  <SelectItem value="blur-in">Blur In</SelectItem>
+                  <SelectItem value="flip">Flip In</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -115,6 +126,18 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
             <Button variant="outline" onClick={resetAnimation}>
               <RotateCcw className="w-4 h-4" />
             </Button>
+          </div>
+
+          {/* Speed control */}
+          <div className="space-y-1">
+            <Label className="text-xs">Speed: {speed}x</Label>
+            <Slider
+              value={[speed]}
+              onValueChange={([v]) => setSpeed(v)}
+              min={0.3}
+              max={3}
+              step={0.1}
+            />
           </div>
 
           {/* Preview area */}
