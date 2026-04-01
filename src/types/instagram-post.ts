@@ -126,6 +126,15 @@ export interface PostContent {
   showDividers?: boolean;
   dividerColor?: string;
   dividerThickness?: number;
+  dividerWidth?: number; // percentage 10-100
+  dividerGlow?: boolean;
+  dividerGlowIntensity?: number; // 1-20
+  dividerStyle?: "line" | "dashed" | "dotted" | "double";
+  sectionBoxes?: boolean;
+  sectionBoxColor?: string;
+  sectionBoxRadius?: number; // border radius 0-30
+  sectionBoxPadding?: number; // padding 10-60
+  sectionBoxOpacity?: number; // 0-100 background opacity
   // Legacy compatibility
   backgroundStyle?: BackgroundStyle;
   backgroundImage?: string;
