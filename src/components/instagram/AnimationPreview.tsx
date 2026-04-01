@@ -164,6 +164,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                     fontWeight: 700,
                     marginBottom: 16,
                     textShadow: "0 0 20px currentColor",
+                    whiteSpace: "pre-line",
                   }}
                 >
                   {content.headline}
@@ -181,6 +182,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                         fontSize: 16,
                         fontWeight: 600,
                         marginBottom: 8,
+                        whiteSpace: "pre-line",
                       }}
                     >
                       {section.subheadline}
@@ -192,6 +194,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                         ...getAnimationStyle(idx + 2),
                         color: colors.body,
                         fontSize: 14,
+                        whiteSpace: "pre-line",
                       }}
                     >
                       {section.body}
