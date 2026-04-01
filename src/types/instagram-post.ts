@@ -123,6 +123,8 @@ export interface PostContent {
     sections: number[];
   };
   qrCode?: QRCodeSettings;
+  showDividers?: boolean;
+  dividerColor?: string;
   // Legacy compatibility
   backgroundStyle?: BackgroundStyle;
   backgroundImage?: string;

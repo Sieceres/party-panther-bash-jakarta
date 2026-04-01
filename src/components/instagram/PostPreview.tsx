@@ -809,6 +809,18 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       <Move size={10} /> Section {index + 1}
                     </div>
                   )}
+                  {/* Divider line above section (if enabled and not the first section after headline) */}
+                  {content.showDividers && (
+                    <div
+                      style={{
+                        width: "60%",
+                        height: 1,
+                        background: `linear-gradient(90deg, transparent 0%, ${content.dividerColor || "#ffffff"}40 20%, ${content.dividerColor || "#ffffff"}80 50%, ${content.dividerColor || "#ffffff"}40 80%, transparent 100%)`,
+                        margin: "0 auto",
+                        marginBottom: 20,
+                      }}
+                    />
+                  )}
                   {section.subheadline && (
                     <div
                       style={{
