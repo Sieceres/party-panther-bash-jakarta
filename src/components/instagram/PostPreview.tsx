@@ -814,7 +814,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     <div
                       style={{
                         width: "60%",
-                        height: 1,
+                        height: content.dividerThickness ?? 1,
                         background: `linear-gradient(90deg, transparent 0%, ${content.dividerColor || "#ffffff"}40 20%, ${content.dividerColor || "#ffffff"}80 50%, ${content.dividerColor || "#ffffff"}40 80%, transparent 100%)`,
                         margin: "0 auto",
                         marginBottom: 20,

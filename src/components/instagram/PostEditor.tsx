@@ -783,15 +783,35 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                 />
               </div>
               {content.showDividers && (
-                <div className="flex gap-2 items-center">
-                  <Label className="text-xs w-14">Color</Label>
-                  <Input
-                    type="color"
-                    value={content.dividerColor || "#ffffff"}
-                    onChange={(e) => updateField("dividerColor", e.target.value)}
-                    className="w-10 h-6 p-0.5"
-                  />
-                  <span className="text-xs text-muted-foreground">{content.dividerColor || "#ffffff"}</span>
+                <div className="space-y-3">
+                  <div className="flex gap-2 items-center">
+                    <Label className="text-xs w-14">Color</Label>
+                    <Input
+                      type="color"
+                      value={content.dividerColor || "#ffffff"}
+                      onChange={(e) => updateField("dividerColor", e.target.value)}
+                      className="w-10 h-6 p-0.5"
+                    />
+                    <Input
+                      type="text"
+                      value={content.dividerColor || "#ffffff"}
+                      onChange={(e) => updateField("dividerColor", e.target.value)}
+                      placeholder="#ffffff"
+                      className="w-24 h-6 text-xs font-mono"
+                    />
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <Label className="text-xs w-14">Thickness</Label>
+                    <Slider
+                      value={[content.dividerThickness ?? 1]}
+                      onValueChange={([v]) => updateField("dividerThickness", v)}
+                      min={1}
+                      max={8}
+                      step={1}
+                      className="flex-1"
+                    />
+                    <span className="text-xs text-muted-foreground w-6 text-right">{content.dividerThickness ?? 1}px</span>
+                  </div>
                 </div>
               )}
             </div>
