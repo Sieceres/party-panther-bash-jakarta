@@ -773,6 +773,29 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
 
           {/* EXTRAS TAB */}
           <TabsContent value="extras" className="space-y-4 mt-0">
+            {/* Section Dividers */}
+            <div className="space-y-3 p-3 border rounded-lg">
+              <div className="flex items-center justify-between">
+                <Label className="font-medium">Section Dividers</Label>
+                <Switch
+                  checked={content.showDividers ?? false}
+                  onCheckedChange={(checked) => updateField("showDividers", checked)}
+                />
+              </div>
+              {content.showDividers && (
+                <div className="flex gap-2 items-center">
+                  <Label className="text-xs w-14">Color</Label>
+                  <Input
+                    type="color"
+                    value={content.dividerColor || "#ffffff"}
+                    onChange={(e) => updateField("dividerColor", e.target.value)}
+                    className="w-10 h-6 p-0.5"
+                  />
+                  <span className="text-xs text-muted-foreground">{content.dividerColor || "#ffffff"}</span>
+                </div>
+              )}
+            </div>
+
             {/* Event Auto-fill */}
             <div className="space-y-2 p-3 border rounded-lg">
               <Label className="font-medium">Auto-fill from Event</Label>
