@@ -809,49 +809,97 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       <Move size={10} /> Section {index + 1}
                     </div>
                   )}
-                  {/* Divider line above section (if enabled and not the first section after headline) */}
-                  {content.showDividers && (
-                    <div
-                      style={{
-                        width: "60%",
-                        height: content.dividerThickness ?? 1,
-                        background: `linear-gradient(90deg, transparent 0%, ${content.dividerColor || "#ffffff"}40 20%, ${content.dividerColor || "#ffffff"}80 50%, ${content.dividerColor || "#ffffff"}40 80%, transparent 100%)`,
-                        margin: "0 auto",
-                        marginBottom: 20,
-                      }}
-                    />
-                  )}
-                  {section.subheadline && (
-                    <div
-                      style={{
-                        fontSize: content.fontSizes?.subheadline || 48,
-                        fontWeight: 600,
-                        fontFamily: `'${content.fonts?.subheadline || "Poppins"}', sans-serif`,
-                        color: colors.subheadline,
-                        lineHeight: 1.3,
-                        marginBottom: 12,
-                        whiteSpace: "pre-line",
-                        ...getTextStyle("subheadline"),
-                      }}
-                    >
-                      {section.subheadline}
-                    </div>
-                  )}
-                  {section.body && (
-                    <div
-                      style={{
-                        fontSize: content.fontSizes?.body || 32,
-                        fontFamily: `'${content.fonts?.body || "Poppins"}', sans-serif`,
-                        lineHeight: 1.5,
-                        color: colors.body,
-                        textAlign: alignments.body,
-                        whiteSpace: "pre-line",
-                        ...getTextStyle("body"),
-                      }}
-                    >
-                      {section.body}
-                    </div>
-                  )}
+                  {/* Divider line above section (if enabled) */}
+                  {content.showDividers && (() => {
+                    const dColor = content.dividerColor || "#ffffff";
+                    const dWidth = `${content.dividerWidth ?? 60}%`;
+                    const dThickness = content.dividerThickness ?? 1;
+                    const dStyle = content.dividerStyle || "line";
+                    const dGlow = content.dividerGlow ?? false;
+                    const dGlowIntensity = content.dividerGlowIntensity ?? 8;
+
+                    if (dStyle === "dashed" || dStyle === "dotted" || dStyle === "double") {
+                      return (
+                        <div
+                          style={{
+                            width: dWidth,
+                            borderTop: `${dThickness}px ${dStyle === "double" ? "double" : dStyle} ${dColor}80`,
+                            margin: "0 auto",
+                            marginBottom: 20,
+                            ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
+                          }}
+                        />
+                      );
+                    }
+                    return (
+                      <div
+                        style={{
+                          width: dWidth,
+                          height: dThickness,
+                          background: `linear-gradient(90deg, transparent 0%, ${dColor}40 20%, ${dColor}80 50%, ${dColor}40 80%, transparent 100%)`,
+                          margin: "0 auto",
+                          marginBottom: 20,
+                          ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
+                        }}
+                      />
+                    );
+                  })()}
+                  {/* Section box wrapper */}
+                  {(() => {
+                    const boxEnabled = content.sectionBoxes ?? false;
+                    const boxColor = content.sectionBoxColor || "#ffffff";
+                    const boxOpacity = (content.sectionBoxOpacity ?? 15) / 100;
+                    const boxRadius = content.sectionBoxRadius ?? 12;
+                    const boxPadding = content.sectionBoxPadding ?? 24;
+                    const hexToRgba = (hex: string, alpha: number) => {
+                      const r = parseInt(hex.slice(1, 3), 16) || 255;
+                      const g = parseInt(hex.slice(3, 5), 16) || 255;
+                      const b = parseInt(hex.slice(5, 7), 16) || 255;
+                      return `rgba(${r},${g},${b},${alpha})`;
+                    };
+                    const wrapperStyle: React.CSSProperties = boxEnabled ? {
+                      background: hexToRgba(boxColor, boxOpacity * 0.5),
+                      border: `1px solid ${hexToRgba(boxColor, boxOpacity)}`,
+                      borderRadius: boxRadius,
+                      padding: boxPadding,
+                      backdropFilter: "blur(4px)",
+                    } : {};
+                    return (
+                      <div style={wrapperStyle}>
+                        {section.subheadline && (
+                          <div
+                            style={{
+                              fontSize: content.fontSizes?.subheadline || 48,
+                              fontWeight: 600,
+                              fontFamily: `'${content.fonts?.subheadline || "Poppins"}', sans-serif`,
+                              color: colors.subheadline,
+                              lineHeight: 1.3,
+                              marginBottom: 12,
+                              whiteSpace: "pre-line",
+                              ...getTextStyle("subheadline"),
+                            }}
+                          >
+                            {section.subheadline}
+                          </div>
+                        )}
+                        {section.body && (
+                          <div
+                            style={{
+                              fontSize: content.fontSizes?.body || 32,
+                              fontFamily: `'${content.fonts?.body || "Poppins"}', sans-serif`,
+                              lineHeight: 1.5,
+                              color: colors.body,
+                              textAlign: alignments.body,
+                              whiteSpace: "pre-line",
+                              ...getTextStyle("body"),
+                            }}
+                          >
+                            {section.body}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
             </div>

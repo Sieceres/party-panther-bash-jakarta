@@ -730,6 +730,165 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                 </div>
               </div>
             </div>
+            {/* Section Dividers & Boxes */}
+            <div className="space-y-3 p-3 border rounded-lg">
+              <div className="flex items-center justify-between">
+                <Label className="font-medium">Section Dividers</Label>
+                <Switch
+                  checked={content.showDividers ?? false}
+                  onCheckedChange={(checked) => updateField("showDividers", checked)}
+                />
+              </div>
+              {content.showDividers && (
+                <div className="space-y-3">
+                  <div className="flex gap-2 items-center">
+                    <Label className="text-xs w-14">Style</Label>
+                    <Select
+                      value={content.dividerStyle || "line"}
+                      onValueChange={(v) => updateField("dividerStyle", v as any)}
+                    >
+                      <SelectTrigger className="h-7 text-xs flex-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="line">Solid</SelectItem>
+                        <SelectItem value="dashed">Dashed</SelectItem>
+                        <SelectItem value="dotted">Dotted</SelectItem>
+                        <SelectItem value="double">Double</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <Label className="text-xs w-14">Color</Label>
+                    <Input
+                      type="color"
+                      value={content.dividerColor || "#ffffff"}
+                      onChange={(e) => updateField("dividerColor", e.target.value)}
+                      className="w-10 h-6 p-0.5"
+                    />
+                    <Input
+                      type="text"
+                      value={content.dividerColor || "#ffffff"}
+                      onChange={(e) => updateField("dividerColor", e.target.value)}
+                      placeholder="#ffffff"
+                      className="w-24 h-6 text-xs font-mono"
+                    />
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <Label className="text-xs w-14">Width</Label>
+                    <Slider
+                      value={[content.dividerWidth ?? 60]}
+                      onValueChange={([v]) => updateField("dividerWidth", v)}
+                      min={10}
+                      max={100}
+                      step={5}
+                      className="flex-1"
+                    />
+                    <span className="text-xs text-muted-foreground w-8 text-right">{content.dividerWidth ?? 60}%</span>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <Label className="text-xs w-14">Thickness</Label>
+                    <Slider
+                      value={[content.dividerThickness ?? 1]}
+                      onValueChange={([v]) => updateField("dividerThickness", v)}
+                      min={1}
+                      max={8}
+                      step={1}
+                      className="flex-1"
+                    />
+                    <span className="text-xs text-muted-foreground w-6 text-right">{content.dividerThickness ?? 1}px</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">Glow Effect</Label>
+                    <Switch
+                      checked={content.dividerGlow ?? false}
+                      onCheckedChange={(checked) => updateField("dividerGlow", checked)}
+                    />
+                  </div>
+                  {content.dividerGlow && (
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-14">Intensity</Label>
+                      <Slider
+                        value={[content.dividerGlowIntensity ?? 8]}
+                        onValueChange={([v]) => updateField("dividerGlowIntensity", v)}
+                        min={1}
+                        max={20}
+                        step={1}
+                        className="flex-1"
+                      />
+                      <span className="text-xs text-muted-foreground w-6 text-right">{content.dividerGlowIntensity ?? 8}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Section Boxes */}
+            <div className="space-y-3 p-3 border rounded-lg">
+              <div className="flex items-center justify-between">
+                <Label className="font-medium">Section Boxes</Label>
+                <Switch
+                  checked={content.sectionBoxes ?? false}
+                  onCheckedChange={(checked) => updateField("sectionBoxes", checked)}
+                />
+              </div>
+              {content.sectionBoxes && (
+                <div className="space-y-3">
+                  <div className="flex gap-2 items-center">
+                    <Label className="text-xs w-14">Color</Label>
+                    <Input
+                      type="color"
+                      value={content.sectionBoxColor || "#ffffff"}
+                      onChange={(e) => updateField("sectionBoxColor", e.target.value)}
+                      className="w-10 h-6 p-0.5"
+                    />
+                    <Input
+                      type="text"
+                      value={content.sectionBoxColor || "#ffffff"}
+                      onChange={(e) => updateField("sectionBoxColor", e.target.value)}
+                      placeholder="#ffffff"
+                      className="w-24 h-6 text-xs font-mono"
+                    />
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <Label className="text-xs w-14">Opacity</Label>
+                    <Slider
+                      value={[content.sectionBoxOpacity ?? 15]}
+                      onValueChange={([v]) => updateField("sectionBoxOpacity", v)}
+                      min={0}
+                      max={100}
+                      step={5}
+                      className="flex-1"
+                    />
+                    <span className="text-xs text-muted-foreground w-8 text-right">{content.sectionBoxOpacity ?? 15}%</span>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <Label className="text-xs w-14">Radius</Label>
+                    <Slider
+                      value={[content.sectionBoxRadius ?? 12]}
+                      onValueChange={([v]) => updateField("sectionBoxRadius", v)}
+                      min={0}
+                      max={30}
+                      step={2}
+                      className="flex-1"
+                    />
+                    <span className="text-xs text-muted-foreground w-8 text-right">{content.sectionBoxRadius ?? 12}px</span>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <Label className="text-xs w-14">Padding</Label>
+                    <Slider
+                      value={[content.sectionBoxPadding ?? 24]}
+                      onValueChange={([v]) => updateField("sectionBoxPadding", v)}
+                      min={10}
+                      max={60}
+                      step={2}
+                      className="flex-1"
+                    />
+                    <span className="text-xs text-muted-foreground w-8 text-right">{content.sectionBoxPadding ?? 24}px</span>
+                  </div>
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           {/* EFFECTS TAB */}
@@ -773,49 +932,6 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
 
           {/* EXTRAS TAB */}
           <TabsContent value="extras" className="space-y-4 mt-0">
-            {/* Section Dividers */}
-            <div className="space-y-3 p-3 border rounded-lg">
-              <div className="flex items-center justify-between">
-                <Label className="font-medium">Section Dividers</Label>
-                <Switch
-                  checked={content.showDividers ?? false}
-                  onCheckedChange={(checked) => updateField("showDividers", checked)}
-                />
-              </div>
-              {content.showDividers && (
-                <div className="space-y-3">
-                  <div className="flex gap-2 items-center">
-                    <Label className="text-xs w-14">Color</Label>
-                    <Input
-                      type="color"
-                      value={content.dividerColor || "#ffffff"}
-                      onChange={(e) => updateField("dividerColor", e.target.value)}
-                      className="w-10 h-6 p-0.5"
-                    />
-                    <Input
-                      type="text"
-                      value={content.dividerColor || "#ffffff"}
-                      onChange={(e) => updateField("dividerColor", e.target.value)}
-                      placeholder="#ffffff"
-                      className="w-24 h-6 text-xs font-mono"
-                    />
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label className="text-xs w-14">Thickness</Label>
-                    <Slider
-                      value={[content.dividerThickness ?? 1]}
-                      onValueChange={([v]) => updateField("dividerThickness", v)}
-                      min={1}
-                      max={8}
-                      step={1}
-                      className="flex-1"
-                    />
-                    <span className="text-xs text-muted-foreground w-6 text-right">{content.dividerThickness ?? 1}px</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* Event Auto-fill */}
             <div className="space-y-2 p-3 border rounded-lg">
               <Label className="font-medium">Auto-fill from Event</Label>
