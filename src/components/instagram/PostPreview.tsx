@@ -858,11 +858,10 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       return `rgba(${r},${g},${b},${alpha})`;
                     };
                     const wrapperStyle: React.CSSProperties = boxEnabled ? {
-                      background: hexToRgba(boxColor, boxOpacity * 0.5),
-                      border: `1px solid ${hexToRgba(boxColor, boxOpacity)}`,
+                      background: "transparent",
+                      border: `2px solid ${hexToRgba(boxColor, boxOpacity)}`,
                       borderRadius: boxRadius,
                       padding: boxPadding,
-                      backdropFilter: "blur(4px)",
                     } : {};
                     return (
                       <div style={wrapperStyle}>
