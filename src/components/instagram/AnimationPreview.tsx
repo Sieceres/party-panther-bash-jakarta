@@ -154,6 +154,50 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                   : "linear-gradient(180deg, #1a1a2e 0%, #0d1b3e 50%, #1a1a2e 100%)",
             }}
           >
+            {/* Background image */}
+            {content.background?.image && (
+              <div
+                style={{
+                  ...getAnimationStyle(0),
+                  position: "absolute",
+                  inset: 0,
+                }}
+              >
+                <img
+                  src={content.background.image}
+                  alt=""
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    opacity: 1 - (content.background.opacity || 30) / 100,
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Logo */}
+            {content.showLogo && (
+              <div
+                style={{
+                  ...getAnimationStyle(0),
+                  position: "absolute",
+                  top: "5%",
+                  left: "5%",
+                  zIndex: 10,
+                }}
+              >
+                <img
+                  src={partyPantherLogo}
+                  alt="Logo"
+                  style={{
+                    width: 40 * (content.logoSettings?.scale || 1),
+                    height: "auto",
+                  }}
+                />
+              </div>
+            )}
+
             <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
               {/* Headline */}
               {content.headline && (
