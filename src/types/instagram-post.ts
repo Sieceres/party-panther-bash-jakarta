@@ -135,6 +135,10 @@ export interface PostContent {
   sectionBoxRadius?: number; // border radius 0-30
   sectionBoxPadding?: number; // padding 10-60
   sectionBoxOpacity?: number; // 0-100 background opacity
+  sectionBoxGlow?: boolean;
+  sectionBoxGlowIntensity?: number; // 1-30
+  sectionBoxStyle?: "border-only" | "frosted" | "solid";
+  sectionBoxBorderWidth?: number; // 0-5
   // Legacy compatibility
   backgroundStyle?: BackgroundStyle;
   backgroundImage?: string;
