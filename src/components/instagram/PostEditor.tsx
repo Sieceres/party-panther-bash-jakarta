@@ -835,6 +835,22 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
               {content.sectionBoxes && (
                 <div className="space-y-3">
                   <div className="flex gap-2 items-center">
+                    <Label className="text-xs w-14">Style</Label>
+                    <Select
+                      value={content.sectionBoxStyle || "border-only"}
+                      onValueChange={(v) => updateField("sectionBoxStyle", v as "border-only" | "frosted" | "solid")}
+                    >
+                      <SelectTrigger className="h-7 text-xs flex-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="border-only">Border Only</SelectItem>
+                        <SelectItem value="frosted">Frosted Glass</SelectItem>
+                        <SelectItem value="solid">Solid Fill</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex gap-2 items-center">
                     <Label className="text-xs w-14">Color</Label>
                     <Input
                       type="color"
@@ -863,6 +879,18 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                     <span className="text-xs text-muted-foreground w-8 text-right">{content.sectionBoxOpacity ?? 15}%</span>
                   </div>
                   <div className="flex gap-2 items-center">
+                    <Label className="text-xs w-14">Border</Label>
+                    <Slider
+                      value={[content.sectionBoxBorderWidth ?? 2]}
+                      onValueChange={([v]) => updateField("sectionBoxBorderWidth", v)}
+                      min={0}
+                      max={5}
+                      step={0.5}
+                      className="flex-1"
+                    />
+                    <span className="text-xs text-muted-foreground w-8 text-right">{content.sectionBoxBorderWidth ?? 2}px</span>
+                  </div>
+                  <div className="flex gap-2 items-center">
                     <Label className="text-xs w-14">Radius</Label>
                     <Slider
                       value={[content.sectionBoxRadius ?? 12]}
@@ -886,6 +914,27 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                     />
                     <span className="text-xs text-muted-foreground w-8 text-right">{content.sectionBoxPadding ?? 24}px</span>
                   </div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">Glow Effect</Label>
+                    <Switch
+                      checked={content.sectionBoxGlow ?? false}
+                      onCheckedChange={(checked) => updateField("sectionBoxGlow", checked)}
+                    />
+                  </div>
+                  {content.sectionBoxGlow && (
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-14">Intensity</Label>
+                      <Slider
+                        value={[content.sectionBoxGlowIntensity ?? 10]}
+                        onValueChange={([v]) => updateField("sectionBoxGlowIntensity", v)}
+                        min={1}
+                        max={30}
+                        step={1}
+                        className="flex-1"
+                      />
+                      <span className="text-xs text-muted-foreground w-8 text-right">{content.sectionBoxGlowIntensity ?? 10}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -851,17 +851,31 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     const boxOpacity = (content.sectionBoxOpacity ?? 15) / 100;
                     const boxRadius = content.sectionBoxRadius ?? 12;
                     const boxPadding = content.sectionBoxPadding ?? 24;
+                    const boxStyle = content.sectionBoxStyle || "border-only";
+                    const borderWidth = content.sectionBoxBorderWidth ?? 2;
+                    const showGlow = content.sectionBoxGlow ?? false;
+                    const glowIntensity = content.sectionBoxGlowIntensity ?? 10;
                     const hexToRgba = (hex: string, alpha: number) => {
                       const r = parseInt(hex.slice(1, 3), 16) || 255;
                       const g = parseInt(hex.slice(3, 5), 16) || 255;
                       const b = parseInt(hex.slice(5, 7), 16) || 255;
                       return `rgba(${r},${g},${b},${alpha})`;
                     };
+                    const bgMap = {
+                      "border-only": "transparent",
+                      "frosted": "rgba(0,0,0,0.3)",
+                      "solid": hexToRgba(boxColor, boxOpacity * 0.5),
+                    };
+                    const glowShadow = showGlow
+                      ? `0 0 ${glowIntensity}px ${hexToRgba(boxColor, 0.6)}, inset 0 0 ${glowIntensity * 0.5}px ${hexToRgba(boxColor, 0.15)}`
+                      : "none";
                     const wrapperStyle: React.CSSProperties = boxEnabled ? {
-                      background: "transparent",
-                      border: `2px solid ${hexToRgba(boxColor, boxOpacity)}`,
+                      background: bgMap[boxStyle],
+                      border: `${borderWidth}px solid ${hexToRgba(boxColor, boxOpacity)}`,
                       borderRadius: boxRadius,
                       padding: boxPadding,
+                      boxShadow: glowShadow,
+                      backdropFilter: boxStyle === "frosted" ? "blur(4px)" : "none",
                     } : {};
                     return (
                       <div style={wrapperStyle}>
