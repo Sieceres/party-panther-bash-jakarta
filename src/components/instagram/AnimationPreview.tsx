@@ -177,14 +177,14 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     }, totalTime + 200);
   }, [totalTime]);
 
-  const getAnimationStyle = (delay: number = 0): React.CSSProperties => {
+  const getAnimationStyle = (delaySec: number): React.CSSProperties => {
     if (!playing) return { opacity: 1 };
 
-    const baseDelay = delay * 0.3 / speed;
     const animName = `anim-${animation}`;
 
     return {
-      animation: `${animName} ${duration}s ease-out ${baseDelay}s both`,
+      opacity: 0,
+      animation: `${animName} ${duration}s ease-out ${delaySec}s both`,
     };
   };
 
