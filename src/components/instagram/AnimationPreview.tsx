@@ -29,7 +29,10 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
 
   const baseDuration = 0.8;
   const duration = baseDuration / speed;
-  const totalTime = (duration + 0.3 * content.sections.length / speed) * 1000 + 500;
+  // Headline appears first, then each section group (subheadline+body+divider) with a pause
+  const sectionPause = 0.6 / speed; // pause between section groups
+  const sectionGroupDelay = (idx: number) => duration + idx * (duration + sectionPause);
+  const totalTime = (sectionGroupDelay(content.sections.length) + duration) * 1000 + 500;
 
   const playAnimation = useCallback(() => {
     setPlaying(true);
