@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Play, Pause, RotateCcw, Download, Video, Loader2 } from "lucide-react";
 import type { PostContent } from "@/types/instagram-post";
 import partyPantherLogo from "@/assets/party-panther-logo.png";
-import html2canvas from "html2canvas";
+import domtoimage from "dom-to-image-more";
 
 type AnimationType = "fade" | "slide-up" | "slide-left" | "scale" | "typewriter" | "blur-in" | "flip";
 
