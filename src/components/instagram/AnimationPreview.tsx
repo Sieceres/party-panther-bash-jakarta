@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Play, Pause, RotateCcw, Download, Video, Loader2 } from "lucide-react";
 import type { PostContent } from "@/types/instagram-post";
 import partyPantherLogo from "@/assets/party-panther-logo.png";
-import domtoimage from "dom-to-image-more";
+import html2canvas from "html2canvas";
 
 type AnimationType = "fade" | "slide-up" | "slide-left" | "scale" | "typewriter" | "blur-in" | "flip";
 
@@ -24,13 +24,13 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
   const [playing, setPlaying] = useState(false);
   const [key, setKey] = useState(0);
   const [recording, setRecording] = useState(false);
-  const [recordingFormat, setRecordingFormat] = useState<"webm" | "gif" | null>(null);
+  const [recordingFormat, setRecordingFormat] = useState<"webm" | "gif" | "mp4" | null>(null);
+  const [capturedFrames, setCapturedFrames] = useState(0);
   const previewRef = useRef<HTMLDivElement>(null);
 
   const baseDuration = 0.8;
   const duration = baseDuration / speed;
-  // Headline appears first, then each section group (subheadline+body+divider) with a pause
-  const sectionPause = 0.6 / speed; // pause between section groups
+  const sectionPause = 0.6 / speed;
   const sectionGroupDelay = (idx: number) => duration + idx * (duration + sectionPause);
   const totalTime = (sectionGroupDelay(content.sections.length) + duration) * 1000 + 500;
 
@@ -51,31 +51,78 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     }
   }, [open]);
 
+  // Capture a single frame using html2canvas
+  const captureFrame = async (el: HTMLElement): Promise<HTMLCanvasElement | null> => {
+    try {
+      const canvas = await html2canvas(el, {
+        backgroundColor: null,
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        // Don't remove the element from flow
+        foreignObjectRendering: false,
+      });
+      return canvas;
+    } catch (err) {
+      console.error("Frame capture error:", err);
+      return null;
+    }
+  };
+
+  // Core frame capture loop shared between formats
+  const captureFrames = async (
+    el: HTMLElement,
+    fps: number,
+    onFrame: (canvas: HTMLCanvasElement, frameIdx: number) => void,
+    onProgress?: (count: number) => void,
+  ): Promise<number> => {
+    const frameDuration = 1000 / fps;
+    const endTime = Date.now() + totalTime;
+    let frameCount = 0;
+
+    while (Date.now() < endTime) {
+      const frameStart = Date.now();
+      const frameCanvas = await captureFrame(el);
+      if (frameCanvas) {
+        onFrame(frameCanvas, frameCount);
+        frameCount++;
+        onProgress?.(frameCount);
+      }
+      const elapsed = Date.now() - frameStart;
+      if (elapsed < frameDuration) {
+        await new Promise((r) => setTimeout(r, frameDuration - elapsed));
+      }
+    }
+    return frameCount;
+  };
+
   const recordWebM = useCallback(async () => {
     if (!previewRef.current) return;
     setRecording(true);
     setRecordingFormat("webm");
+    setCapturedFrames(0);
 
     const el = previewRef.current;
     const rect = el.getBoundingClientRect();
-    const scale = 1; // Use 1x for faster frame capture during recording
-    const canvas = document.createElement("canvas");
-    canvas.width = rect.width * scale;
-    canvas.height = rect.height * scale;
-    const ctx = canvas.getContext("2d")!;
+    const w = Math.round(rect.width);
+    const h = Math.round(rect.height);
 
-    // Fill initial frame so the canvas isn't empty
+    // Create an offscreen canvas for the stream
+    const streamCanvas = document.createElement("canvas");
+    streamCanvas.width = w;
+    streamCanvas.height = h;
+    const ctx = streamCanvas.getContext("2d")!;
     ctx.fillStyle = "#0d1b3e";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, w, h);
 
-    // Check supported mimeType
     const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
       ? "video/webm;codecs=vp9"
       : MediaRecorder.isTypeSupported("video/webm;codecs=vp8")
       ? "video/webm;codecs=vp8"
       : "video/webm";
 
-    const stream = canvas.captureStream(30); // auto capture at 30fps
+    const stream = streamCanvas.captureStream(0); // manual frame push
     const recorder = new MediaRecorder(stream, {
       mimeType,
       videoBitsPerSecond: 5_000_000,
@@ -84,9 +131,6 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
     recorder.onstop = () => {
       const blob = new Blob(chunks, { type: "video/webm" });
-      if (blob.size < 1000) {
-        console.warn("WebM recording produced very small file:", blob.size);
-      }
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -95,55 +139,96 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
       URL.revokeObjectURL(url);
       setRecording(false);
       setRecordingFormat(null);
+      setCapturedFrames(0);
     };
 
     // Start animation
     setPlaying(true);
     setKey((k) => k + 1);
+    await new Promise((r) => setTimeout(r, 150));
 
-    // Wait a tick for React to render the new key
-    await new Promise((r) => setTimeout(r, 100));
+    recorder.start();
 
-    recorder.start(); // collect all data, stop triggers onstop
+    const track = stream.getVideoTracks()[0] as any;
 
-    // Sequential frame capture — one at a time to avoid overlap
-    const fps = 10; // html2canvas is slow, 10fps is realistic
-    const frameDuration = 1000 / fps;
-    const endTime = Date.now() + totalTime;
+    await captureFrames(el, 12, (frameCanvas) => {
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(frameCanvas, 0, 0, w, h);
+      // Manually request a frame on the stream if supported
+      if (track?.requestFrame) track.requestFrame();
+    }, setCapturedFrames);
 
-    let frameCount = 0;
-    const captureLoop = async () => {
-      while (Date.now() < endTime) {
-        const frameStart = Date.now();
-        try {
-          const dataUrl = await domtoimage.toPng(el, {
-            width: rect.width,
-            height: rect.height,
-            style: { transform: `scale(${scale})`, transformOrigin: 'top left' },
-            filter: (node: Node) => {
-              // Skip hidden radix portal overlays
-              if (node instanceof HTMLElement && node.getAttribute('data-radix-portal') !== null) return false;
-              return true;
-            },
-          });
-          const img = new Image();
-          img.src = dataUrl;
-          await new Promise<void>((resolve) => { img.onload = () => resolve(); img.onerror = () => resolve(); });
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          frameCount++;
-        } catch (err) {
-          console.error("dom-to-image frame error:", err);
-        }
-        const elapsed = Date.now() - frameStart;
-        if (elapsed < frameDuration) {
-          await new Promise((r) => setTimeout(r, frameDuration - elapsed));
-        }
-      }
-      console.log("WebM capture finished, frames captured:", frameCount);
+    // Hold last frame for a moment
+    await new Promise((r) => setTimeout(r, 300));
+    if (track?.requestFrame) track.requestFrame();
+
+    recorder.stop();
+    setPlaying(false);
+  }, [totalTime]);
+
+  const recordMP4 = useCallback(async () => {
+    if (!previewRef.current) return;
+    setRecording(true);
+    setRecordingFormat("mp4");
+    setCapturedFrames(0);
+
+    const el = previewRef.current;
+    const rect = el.getBoundingClientRect();
+    const w = Math.round(rect.width);
+    const h = Math.round(rect.height);
+
+    const streamCanvas = document.createElement("canvas");
+    streamCanvas.width = w;
+    streamCanvas.height = h;
+    const ctx = streamCanvas.getContext("2d")!;
+    ctx.fillStyle = "#0d1b3e";
+    ctx.fillRect(0, 0, w, h);
+
+    // Try MP4 first, fall back to WebM
+    const mp4Supported = MediaRecorder.isTypeSupported("video/mp4");
+    const mimeType = mp4Supported
+      ? "video/mp4"
+      : MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+      ? "video/webm;codecs=vp9"
+      : "video/webm";
+
+    const stream = streamCanvas.captureStream(0);
+    const recorder = new MediaRecorder(stream, {
+      mimeType,
+      videoBitsPerSecond: 8_000_000,
+    });
+    const chunks: Blob[] = [];
+    recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = () => {
+      const ext = mp4Supported ? "mp4" : "webm";
+      const blob = new Blob(chunks, { type: mp4Supported ? "video/mp4" : "video/webm" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `animation-${Date.now()}.${ext}`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setRecording(false);
+      setRecordingFormat(null);
+      setCapturedFrames(0);
     };
 
-    await captureLoop();
+    setPlaying(true);
+    setKey((k) => k + 1);
+    await new Promise((r) => setTimeout(r, 150));
+
+    recorder.start();
+    const track = stream.getVideoTracks()[0] as any;
+
+    await captureFrames(el, 12, (frameCanvas) => {
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(frameCanvas, 0, 0, w, h);
+      if (track?.requestFrame) track.requestFrame();
+    }, setCapturedFrames);
+
+    await new Promise((r) => setTimeout(r, 300));
+    if (track?.requestFrame) track.requestFrame();
+
     recorder.stop();
     setPlaying(false);
   }, [totalTime]);
@@ -152,64 +237,42 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     if (!previewRef.current) return;
     setRecording(true);
     setRecordingFormat("gif");
+    setCapturedFrames(0);
 
     const el = previewRef.current;
     const rect = el.getBoundingClientRect();
-    const scale = 1; // Use 1x for faster frame capture
-    const width = Math.round(rect.width * scale);
-    const height = Math.round(rect.height * scale);
+    const w = Math.round(rect.width);
+    const h = Math.round(rect.height);
 
     const GIF = (await import("gif.js")).default;
     const gif = new GIF({
       workers: 2,
       quality: 10,
-      width,
-      height,
+      width: w,
+      height: h,
       workerScript: "/gif.worker.js",
     });
 
-    // Start animation
     setPlaying(true);
     setKey((k) => k + 1);
-
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 150));
 
     const fps = 10;
     const frameDuration = 1000 / fps;
     const frames: HTMLCanvasElement[] = [];
-    const endTime = Date.now() + totalTime;
 
-    // Sequential capture
-    while (Date.now() < endTime) {
-      const frameStart = Date.now();
-      try {
-        const dataUrl = await domtoimage.toPng(el, {
-          width: rect.width,
-          height: rect.height,
-          style: { transform: `scale(${scale})`, transformOrigin: 'top left' },
-          filter: (node: Node) => {
-            if (node instanceof HTMLElement && node.getAttribute('data-radix-portal') !== null) return false;
-            return true;
-          },
-        });
-        // Convert dataUrl to canvas for gif.js
-        const img = new Image();
-        img.src = dataUrl;
-        await new Promise<void>((resolve) => { img.onload = () => resolve(); img.onerror = () => resolve(); });
-        const frameCanvas = document.createElement('canvas');
-        frameCanvas.width = width;
-        frameCanvas.height = height;
-        const fCtx = frameCanvas.getContext('2d')!;
-        fCtx.drawImage(img, 0, 0, width, height);
-        frames.push(frameCanvas);
-      } catch { /* skip */ }
-      const elapsed = Date.now() - frameStart;
-      if (elapsed < frameDuration) {
-        await new Promise((r) => setTimeout(r, frameDuration - elapsed));
-      }
-    }
+    await captureFrames(el, fps, (frameCanvas) => {
+      frames.push(frameCanvas);
+    }, setCapturedFrames);
 
     setPlaying(false);
+
+    if (frames.length === 0) {
+      console.warn("No frames captured for GIF");
+      setRecording(false);
+      setRecordingFormat(null);
+      return;
+    }
 
     frames.forEach((frame) => {
       gif.addFrame(frame, { delay: frameDuration, copy: true });
@@ -224,6 +287,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
       URL.revokeObjectURL(url);
       setRecording(false);
       setRecordingFormat(null);
+      setCapturedFrames(0);
     });
 
     gif.render();
@@ -231,9 +295,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
 
   const getAnimationStyle = (delaySec: number): React.CSSProperties => {
     if (!playing) return { opacity: 1 };
-
     const animName = `anim-${animation}`;
-
     return {
       opacity: 0,
       animation: `${animName} ${duration}s ease-out ${delaySec}s both`,
@@ -332,6 +394,10 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="z-[1300]">
+                  <DropdownMenuItem onClick={recordMP4}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Download as MP4 (video)
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={recordWebM}>
                     <Download className="w-4 h-4 mr-2" />
                     Download as WebM (video)
@@ -348,7 +414,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
             {recording && (
               <div className="flex items-center gap-2 text-sm text-red-400">
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                Recording — animation will auto-download when done
+                Recording — {capturedFrames} frames captured
               </div>
             )}
 
@@ -445,7 +511,6 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                 {content.sections.map((section, idx) => {
                   const groupDelay = sectionGroupDelay(idx);
                   
-                  // Divider settings
                   const showDivider = content.showDividers ?? false;
                   const dColor = content.dividerColor || "#ffffff";
                   const dWidth = `${content.dividerWidth ?? 60}%`;
@@ -454,13 +519,12 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                   const dGlow = content.dividerGlow ?? false;
                   const dGlowIntensity = content.dividerGlowIntensity ?? 8;
 
-                  // Box settings
                   const boxEnabled = content.sectionBoxes ?? false;
                   const boxColor = content.sectionBoxColor || "#ffffff";
                   const boxOpacity = (content.sectionBoxOpacity ?? 15) / 100;
                   const boxRadius = content.sectionBoxRadius ?? 12;
                   const boxPadding = content.sectionBoxPadding ?? 16;
-                  const boxStyle = content.sectionBoxStyle || "border-only";
+                  const boxStyleVal = content.sectionBoxStyle || "border-only";
                   const borderWidth = content.sectionBoxBorderWidth ?? 2;
                   const showGlow = content.sectionBoxGlow ?? false;
                   const glowIntensity = content.sectionBoxGlowIntensity ?? 10;
@@ -481,12 +545,12 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                     ? `0 0 ${glowIntensity}px ${hexToRgba(boxColor, 0.6)}, inset 0 0 ${glowIntensity * 0.5}px ${hexToRgba(boxColor, 0.15)}`
                     : "none";
                   const wrapperStyle: React.CSSProperties = boxEnabled ? {
-                    background: bgMap[boxStyle],
+                    background: bgMap[boxStyleVal],
                     border: `${borderWidth}px solid ${hexToRgba(boxColor, boxOpacity)}`,
                     borderRadius: boxRadius,
                     padding: boxPadding,
                     boxShadow: glowShadow,
-                    backdropFilter: boxStyle === "frosted" ? "blur(4px)" : "none",
+                    backdropFilter: boxStyleVal === "frosted" ? "blur(4px)" : "none",
                     width: "100%",
                   } : {};
 
