@@ -58,7 +58,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
 
     const el = previewRef.current;
     const rect = el.getBoundingClientRect();
-    const scale = 2;
+    const scale = 1; // Use 1x for faster frame capture during recording
     const canvas = document.createElement("canvas");
     canvas.width = rect.width * scale;
     canvas.height = rect.height * scale;
