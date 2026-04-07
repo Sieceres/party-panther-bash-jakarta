@@ -1,37 +1,28 @@
 
 
-## Plan: Enhanced Section Boxes with Glow Effect
+## Plan: Fix Animation Z-Index + Dual Video Export Options
 
-### What the reference image shows
+### 1. Fix dialog z-index (`AnimationPreview.tsx`)
+- Override `DialogContent` className to `z-[1200]`
+- Override `DialogOverlay` to match, so the animation preview renders above the header (`z-[1100]`)
 
-The uploaded image has section boxes with:
-- **Subtle glow/neon border** (cyan/blue glow around the edges)
-- **Semi-transparent dark fill** (not fully transparent — dark frosted glass effect)
-- **Rounded corners** with soft edges
-- **Consistent spacing** between boxes
+### 2. Add video export with format choice (`AnimationPreview.tsx`)
+Add a "Record Video" button that:
+1. Shows a format picker (WebM or GIF) before recording
+2. Plays the animation and records the preview area
+3. Downloads the result when done
 
-### Changes
+**WebM option** — uses `MediaRecorder` + `captureStream()` on a canvas. Lightweight, fast, no dependencies. Good for stories.
 
-**1. Add glow effect to section boxes** (`PostPreview.tsx`)
-- Apply `boxShadow` with the box color as a neon glow: `0 0 Npx Mpx rgba(color, intensity)`
-- Use `inset` shadow too for inner glow subtlety
+**GIF option** — uses `html2canvas` (already available) to capture frames at intervals, then assembles with `gif.js` (new dependency). Universally shareable but larger file size.
 
-**2. Change box style from border-only to frosted glass** (`PostPreview.tsx`)
-- Add semi-transparent dark background: `rgba(0,0,0,0.3)` blended with the box color at low opacity
-- Re-add `backdropFilter: "blur(4px)"` for depth
-- Keep the border but make it more subtle (1px instead of 2px)
-
-**3. Add new editor controls** (`PostEditor.tsx`, `instagram-post.ts`)
-- **Box glow toggle** (`sectionBoxGlow: boolean`)
-- **Glow intensity slider** (`sectionBoxGlowIntensity: number`, 1-30)
-- **Box style selector**: "border-only" | "frosted" | "solid" (`sectionBoxStyle`)
-- **Border width slider** (`sectionBoxBorderWidth: number`, 0-5)
-
-**4. Update type definitions** (`instagram-post.ts`)
-- Add `sectionBoxGlow`, `sectionBoxGlowIntensity`, `sectionBoxStyle`, `sectionBoxBorderWidth`
+UI flow:
+- "Record Video" button next to Play/Reset
+- Clicking it opens a small dropdown: "Download as WebM" / "Download as GIF"
+- Shows a recording indicator (red dot + "Recording...") while active
+- Auto-downloads when the animation completes
 
 ### Files to edit
-- `src/types/instagram-post.ts` — new fields
-- `src/components/instagram/PostEditor.tsx` — new controls in Styling tab
-- `src/components/instagram/PostPreview.tsx` — render glow + frosted glass style
+- `src/components/instagram/AnimationPreview.tsx` — z-index fix, recording logic, format picker UI
+- `package.json` — add `gif.js` dependency for GIF export
 
