@@ -75,7 +75,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
       ? "video/webm;codecs=vp8"
       : "video/webm";
 
-    const stream = canvas.captureStream(0); // manual frame push
+    const stream = canvas.captureStream(30); // auto capture at 30fps
     const recorder = new MediaRecorder(stream, {
       mimeType,
       videoBitsPerSecond: 5_000_000,
@@ -104,16 +104,15 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     // Wait a tick for React to render the new key
     await new Promise((r) => setTimeout(r, 100));
 
-    recorder.start(100); // collect data every 100ms
+    recorder.start(); // collect all data, stop triggers onstop
 
     // Sequential frame capture — one at a time to avoid overlap
     const fps = 10; // html2canvas is slow, 10fps is realistic
     const frameDuration = 1000 / fps;
     const endTime = Date.now() + totalTime;
-    let capturing = true;
 
     const captureLoop = async () => {
-      while (capturing && Date.now() < endTime) {
+      while (Date.now() < endTime) {
         const frameStart = Date.now();
         try {
           const frameCanvas = await html2canvas(el, {
@@ -124,9 +123,6 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
           });
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(frameCanvas, 0, 0, canvas.width, canvas.height);
-          // Request a frame on the stream
-          const track = stream.getVideoTracks()[0] as any;
-          if (track && track.requestFrame) track.requestFrame();
         } catch { /* skip frame */ }
         // Wait remainder of frame budget
         const elapsed = Date.now() - frameStart;
@@ -137,7 +133,6 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     };
 
     await captureLoop();
-    capturing = false;
     recorder.stop();
     setPlaying(false);
   }, [totalTime]);
