@@ -424,7 +424,6 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
             </p>
           </div>
         </DialogContent>
-      </DialogPortal>
     </Dialog>
   );
 };
