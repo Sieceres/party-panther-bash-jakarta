@@ -155,7 +155,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
 
     const el = previewRef.current;
     const rect = el.getBoundingClientRect();
-    const scale = 1.5;
+    const scale = 1; // Use 1x for faster frame capture
     const width = Math.round(rect.width * scale);
     const height = Math.round(rect.height * scale);
 
