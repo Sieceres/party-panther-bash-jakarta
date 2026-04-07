@@ -111,6 +111,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     const frameDuration = 1000 / fps;
     const endTime = Date.now() + totalTime;
 
+    let frameCount = 0;
     const captureLoop = async () => {
       while (Date.now() < endTime) {
         const frameStart = Date.now();
@@ -123,13 +124,17 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
           });
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(frameCanvas, 0, 0, canvas.width, canvas.height);
-        } catch { /* skip frame */ }
+          frameCount++;
+        } catch (err) {
+          console.error("html2canvas frame error:", err);
+        }
         // Wait remainder of frame budget
         const elapsed = Date.now() - frameStart;
         if (elapsed < frameDuration) {
           await new Promise((r) => setTimeout(r, frameDuration - elapsed));
         }
       }
+      console.log("WebM capture finished, frames captured:", frameCount);
     };
 
     await captureLoop();
