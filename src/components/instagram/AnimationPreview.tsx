@@ -183,12 +183,24 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     while (Date.now() < endTime) {
       const frameStart = Date.now();
       try {
-        const frameCanvas = await html2canvas(el, {
-          scale,
-          useCORS: true,
-          backgroundColor: null,
-          logging: false,
+        const dataUrl = await domtoimage.toPng(el, {
+          width: rect.width,
+          height: rect.height,
+          style: { transform: `scale(${scale})`, transformOrigin: 'top left' },
+          filter: (node: Node) => {
+            if (node instanceof HTMLElement && node.getAttribute('data-radix-portal') !== null) return false;
+            return true;
+          },
         });
+        // Convert dataUrl to canvas for gif.js
+        const img = new Image();
+        img.src = dataUrl;
+        await new Promise<void>((resolve) => { img.onload = () => resolve(); img.onerror = () => resolve(); });
+        const frameCanvas = document.createElement('canvas');
+        frameCanvas.width = width;
+        frameCanvas.height = height;
+        const fCtx = frameCanvas.getContext('2d')!;
+        fCtx.drawImage(img, 0, 0, width, height);
         frames.push(frameCanvas);
       } catch { /* skip */ }
       const elapsed = Date.now() - frameStart;
