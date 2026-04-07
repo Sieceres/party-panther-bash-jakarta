@@ -66,28 +66,22 @@ const InstagramPostGenerator = () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         
-        if (!user) {
-          toast({
-            title: "Access Denied",
-            description: "Please log in to access this page",
-            variant: "destructive"
-          });
-          navigate('/auth');
-          return;
+        if (user) {
+          setUserId(user.id);
         }
-
-        setUserId(user.id);
+        // Allow access for all users (logged in or not)
         setIsAuthorized(true);
       } catch (error) {
         console.error('Error checking authentication:', error);
-        navigate('/auth');
+        // Still allow access even if auth check fails
+        setIsAuthorized(true);
       } finally {
         setAuthLoading(false);
       }
     };
 
     checkAuth();
-  }, [navigate, toast]);
+  }, []);
 
   // Load saved posts
   const loadSavedPosts = useCallback(async () => {
