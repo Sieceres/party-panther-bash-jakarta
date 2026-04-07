@@ -379,6 +379,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                       color: colors.headline,
                       fontSize: 24,
                       fontWeight: 700,
+                      fontFamily: `'${content.fonts?.headline || "Poppins"}', sans-serif`,
                       marginBottom: 16,
                       textShadow: "0 0 20px currentColor",
                       whiteSpace: "pre-line",
@@ -388,37 +389,117 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                   </div>
                 )}
 
-                {/* Sections */}
-                {content.sections.map((section, idx) => (
-                  <div key={idx} style={{ marginBottom: 12 }}>
-                    {section.subheadline && (
-                      <div
-                        style={{
-                          ...getAnimationStyle(idx + 1),
-                          color: colors.subheadline,
-                          fontSize: 16,
-                          fontWeight: 600,
-                          marginBottom: 8,
-                          whiteSpace: "pre-line",
-                        }}
-                      >
-                        {section.subheadline}
+                {/* Sections with dividers and boxes */}
+                {content.sections.map((section, idx) => {
+                  const groupDelay = sectionGroupDelay(idx);
+                  
+                  // Divider settings
+                  const showDivider = content.showDividers ?? false;
+                  const dColor = content.dividerColor || "#ffffff";
+                  const dWidth = `${content.dividerWidth ?? 60}%`;
+                  const dThickness = content.dividerThickness ?? 1;
+                  const dStyle = content.dividerStyle || "line";
+                  const dGlow = content.dividerGlow ?? false;
+                  const dGlowIntensity = content.dividerGlowIntensity ?? 8;
+
+                  // Box settings
+                  const boxEnabled = content.sectionBoxes ?? false;
+                  const boxColor = content.sectionBoxColor || "#ffffff";
+                  const boxOpacity = (content.sectionBoxOpacity ?? 15) / 100;
+                  const boxRadius = content.sectionBoxRadius ?? 12;
+                  const boxPadding = content.sectionBoxPadding ?? 16;
+                  const boxStyle = content.sectionBoxStyle || "border-only";
+                  const borderWidth = content.sectionBoxBorderWidth ?? 2;
+                  const showGlow = content.sectionBoxGlow ?? false;
+                  const glowIntensity = content.sectionBoxGlowIntensity ?? 10;
+
+                  const hexToRgba = (hex: string, alpha: number) => {
+                    const r = parseInt(hex.slice(1, 3), 16) || 255;
+                    const g = parseInt(hex.slice(3, 5), 16) || 255;
+                    const b = parseInt(hex.slice(5, 7), 16) || 255;
+                    return `rgba(${r},${g},${b},${alpha})`;
+                  };
+
+                  const bgMap: Record<string, string> = {
+                    "border-only": "transparent",
+                    "frosted": "rgba(0,0,0,0.3)",
+                    "solid": hexToRgba(boxColor, boxOpacity * 0.5),
+                  };
+                  const glowShadow = showGlow
+                    ? `0 0 ${glowIntensity}px ${hexToRgba(boxColor, 0.6)}, inset 0 0 ${glowIntensity * 0.5}px ${hexToRgba(boxColor, 0.15)}`
+                    : "none";
+                  const wrapperStyle: React.CSSProperties = boxEnabled ? {
+                    background: bgMap[boxStyle],
+                    border: `${borderWidth}px solid ${hexToRgba(boxColor, boxOpacity)}`,
+                    borderRadius: boxRadius,
+                    padding: boxPadding,
+                    boxShadow: glowShadow,
+                    backdropFilter: boxStyle === "frosted" ? "blur(4px)" : "none",
+                    width: "100%",
+                  } : {};
+
+                  return (
+                    <div key={idx} style={{ marginBottom: 12, width: "100%", ...getAnimationStyle(groupDelay) }}>
+                      {/* Divider */}
+                      {showDivider && (() => {
+                        if (dStyle === "dashed" || dStyle === "dotted" || dStyle === "double") {
+                          return (
+                            <div
+                              style={{
+                                width: dWidth,
+                                borderTop: `${dThickness}px ${dStyle === "double" ? "double" : dStyle} ${dColor}80`,
+                                margin: "0 auto",
+                                marginBottom: 12,
+                                ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
+                              }}
+                            />
+                          );
+                        }
+                        return (
+                          <div
+                            style={{
+                              width: dWidth,
+                              height: dThickness,
+                              background: `linear-gradient(90deg, transparent 0%, ${dColor}40 20%, ${dColor}80 50%, ${dColor}40 80%, transparent 100%)`,
+                              margin: "0 auto",
+                              marginBottom: 12,
+                              ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
+                            }}
+                          />
+                        );
+                      })()}
+                      {/* Section content in box */}
+                      <div style={wrapperStyle}>
+                        {section.subheadline && (
+                          <div
+                            style={{
+                              color: colors.subheadline,
+                              fontSize: 16,
+                              fontWeight: 600,
+                              fontFamily: `'${content.fonts?.subheadline || "Poppins"}', sans-serif`,
+                              marginBottom: 8,
+                              whiteSpace: "pre-line",
+                            }}
+                          >
+                            {section.subheadline}
+                          </div>
+                        )}
+                        {section.body && (
+                          <div
+                            style={{
+                              color: colors.body,
+                              fontSize: 14,
+                              fontFamily: `'${content.fonts?.body || "Poppins"}', sans-serif`,
+                              whiteSpace: "pre-line",
+                            }}
+                          >
+                            {section.body}
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {section.body && (
-                      <div
-                        style={{
-                          ...getAnimationStyle(idx + 2),
-                          color: colors.body,
-                          fontSize: 14,
-                          whiteSpace: "pre-line",
-                        }}
-                      >
-                        {section.body}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
