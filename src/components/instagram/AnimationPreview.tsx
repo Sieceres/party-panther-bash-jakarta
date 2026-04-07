@@ -153,7 +153,6 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     const width = Math.round(rect.width * scale);
     const height = Math.round(rect.height * scale);
 
-    // Dynamic import gif.js
     const GIF = (await import("gif.js")).default;
     const gif = new GIF({
       workers: 2,
@@ -167,11 +166,16 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     setPlaying(true);
     setKey((k) => k + 1);
 
-    const fps = 15;
-    const interval = 1000 / fps;
-    const frames: HTMLCanvasElement[] = [];
+    await new Promise((r) => setTimeout(r, 100));
 
-    const captureInterval = setInterval(async () => {
+    const fps = 10;
+    const frameDuration = 1000 / fps;
+    const frames: HTMLCanvasElement[] = [];
+    const endTime = Date.now() + totalTime;
+
+    // Sequential capture
+    while (Date.now() < endTime) {
+      const frameStart = Date.now();
       try {
         const frameCanvas = await html2canvas(el, {
           scale,
@@ -181,30 +185,30 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
         });
         frames.push(frameCanvas);
       } catch { /* skip */ }
-    }, interval);
+      const elapsed = Date.now() - frameStart;
+      if (elapsed < frameDuration) {
+        await new Promise((r) => setTimeout(r, frameDuration - elapsed));
+      }
+    }
 
-    setTimeout(() => {
-      clearInterval(captureInterval);
-      setPlaying(false);
+    setPlaying(false);
 
-      // Add all frames to GIF
-      frames.forEach((frame) => {
-        gif.addFrame(frame, { delay: interval, copy: true });
-      });
+    frames.forEach((frame) => {
+      gif.addFrame(frame, { delay: frameDuration, copy: true });
+    });
 
-      gif.on("finished", (blob: Blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "animation.gif";
-        a.click();
-        URL.revokeObjectURL(url);
-        setRecording(false);
-        setRecordingFormat(null);
-      });
+    gif.on("finished", (blob: Blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `animation-${Date.now()}.gif`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setRecording(false);
+      setRecordingFormat(null);
+    });
 
-      gif.render();
-    }, totalTime + 200);
+    gif.render();
   }, [totalTime]);
 
   const getAnimationStyle = (delaySec: number): React.CSSProperties => {
