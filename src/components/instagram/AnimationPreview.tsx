@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogOverlay } from "@/components/ui/dialog";
-import { DialogPortal } from "@radix-ui/react-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -194,9 +193,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogPortal>
-        <DialogOverlay className="z-[1200]" />
-        <DialogContent className="max-w-lg z-[1200]">
+        <DialogContent className="max-w-lg z-[1200] [&~*]:z-[1200]">
           <DialogHeader>
             <DialogTitle>Animation Preview</DialogTitle>
           </DialogHeader>
