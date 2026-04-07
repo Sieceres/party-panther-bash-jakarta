@@ -277,7 +277,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[1300]">
                     <SelectItem value="fade">Fade In</SelectItem>
                     <SelectItem value="slide-up">Slide Up</SelectItem>
                     <SelectItem value="slide-left">Slide Left</SelectItem>
