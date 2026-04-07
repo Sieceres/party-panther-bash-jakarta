@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Play, Pause, RotateCcw, Download, Video, Loader2 } from "lucide-react";
 import type { PostContent } from "@/types/instagram-post";
 import partyPantherLogo from "@/assets/party-panther-logo.png";
-import html2canvas from "html2canvas";
+import domtoimage from "dom-to-image-more";
 
 type AnimationType = "fade" | "slide-up" | "slide-left" | "scale" | "typewriter" | "blur-in" | "flip";
 
@@ -58,7 +58,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
 
     const el = previewRef.current;
     const rect = el.getBoundingClientRect();
-    const scale = 2;
+    const scale = 1; // Use 1x for faster frame capture during recording
     const canvas = document.createElement("canvas");
     canvas.width = rect.width * scale;
     canvas.height = rect.height * scale;
@@ -75,7 +75,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
       ? "video/webm;codecs=vp8"
       : "video/webm";
 
-    const stream = canvas.captureStream(0); // manual frame push
+    const stream = canvas.captureStream(30); // auto capture at 30fps
     const recorder = new MediaRecorder(stream, {
       mimeType,
       videoBitsPerSecond: 5_000_000,
@@ -104,40 +104,46 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     // Wait a tick for React to render the new key
     await new Promise((r) => setTimeout(r, 100));
 
-    recorder.start(100); // collect data every 100ms
+    recorder.start(); // collect all data, stop triggers onstop
 
     // Sequential frame capture — one at a time to avoid overlap
     const fps = 10; // html2canvas is slow, 10fps is realistic
     const frameDuration = 1000 / fps;
     const endTime = Date.now() + totalTime;
-    let capturing = true;
 
+    let frameCount = 0;
     const captureLoop = async () => {
-      while (capturing && Date.now() < endTime) {
+      while (Date.now() < endTime) {
         const frameStart = Date.now();
         try {
-          const frameCanvas = await html2canvas(el, {
-            scale,
-            useCORS: true,
-            backgroundColor: null,
-            logging: false,
+          const dataUrl = await domtoimage.toPng(el, {
+            width: rect.width,
+            height: rect.height,
+            style: { transform: `scale(${scale})`, transformOrigin: 'top left' },
+            filter: (node: Node) => {
+              // Skip hidden radix portal overlays
+              if (node instanceof HTMLElement && node.getAttribute('data-radix-portal') !== null) return false;
+              return true;
+            },
           });
+          const img = new Image();
+          img.src = dataUrl;
+          await new Promise<void>((resolve) => { img.onload = () => resolve(); img.onerror = () => resolve(); });
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(frameCanvas, 0, 0, canvas.width, canvas.height);
-          // Request a frame on the stream
-          const track = stream.getVideoTracks()[0] as any;
-          if (track && track.requestFrame) track.requestFrame();
-        } catch { /* skip frame */ }
-        // Wait remainder of frame budget
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          frameCount++;
+        } catch (err) {
+          console.error("dom-to-image frame error:", err);
+        }
         const elapsed = Date.now() - frameStart;
         if (elapsed < frameDuration) {
           await new Promise((r) => setTimeout(r, frameDuration - elapsed));
         }
       }
+      console.log("WebM capture finished, frames captured:", frameCount);
     };
 
     await captureLoop();
-    capturing = false;
     recorder.stop();
     setPlaying(false);
   }, [totalTime]);
@@ -149,7 +155,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
 
     const el = previewRef.current;
     const rect = el.getBoundingClientRect();
-    const scale = 1.5;
+    const scale = 1; // Use 1x for faster frame capture
     const width = Math.round(rect.width * scale);
     const height = Math.round(rect.height * scale);
 
@@ -177,12 +183,24 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     while (Date.now() < endTime) {
       const frameStart = Date.now();
       try {
-        const frameCanvas = await html2canvas(el, {
-          scale,
-          useCORS: true,
-          backgroundColor: null,
-          logging: false,
+        const dataUrl = await domtoimage.toPng(el, {
+          width: rect.width,
+          height: rect.height,
+          style: { transform: `scale(${scale})`, transformOrigin: 'top left' },
+          filter: (node: Node) => {
+            if (node instanceof HTMLElement && node.getAttribute('data-radix-portal') !== null) return false;
+            return true;
+          },
         });
+        // Convert dataUrl to canvas for gif.js
+        const img = new Image();
+        img.src = dataUrl;
+        await new Promise<void>((resolve) => { img.onload = () => resolve(); img.onerror = () => resolve(); });
+        const frameCanvas = document.createElement('canvas');
+        frameCanvas.width = width;
+        frameCanvas.height = height;
+        const fCtx = frameCanvas.getContext('2d')!;
+        fCtx.drawImage(img, 0, 0, width, height);
         frames.push(frameCanvas);
       } catch { /* skip */ }
       const elapsed = Date.now() - frameStart;
