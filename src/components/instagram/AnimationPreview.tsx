@@ -116,19 +116,25 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
       while (Date.now() < endTime) {
         const frameStart = Date.now();
         try {
-          const frameCanvas = await html2canvas(el, {
-            scale,
-            useCORS: true,
-            backgroundColor: null,
-            logging: false,
+          const dataUrl = await domtoimage.toPng(el, {
+            width: rect.width,
+            height: rect.height,
+            style: { transform: `scale(${scale})`, transformOrigin: 'top left' },
+            filter: (node: Node) => {
+              // Skip hidden radix portal overlays
+              if (node instanceof HTMLElement && node.getAttribute('data-radix-portal') !== null) return false;
+              return true;
+            },
           });
+          const img = new Image();
+          img.src = dataUrl;
+          await new Promise<void>((resolve) => { img.onload = () => resolve(); img.onerror = () => resolve(); });
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(frameCanvas, 0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           frameCount++;
         } catch (err) {
-          console.error("html2canvas frame error:", err);
+          console.error("dom-to-image frame error:", err);
         }
-        // Wait remainder of frame budget
         const elapsed = Date.now() - frameStart;
         if (elapsed < frameDuration) {
           await new Promise((r) => setTimeout(r, frameDuration - elapsed));
