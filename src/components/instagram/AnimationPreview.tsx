@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Play, Pause, RotateCcw, Download, Video, Loader2 } from "lucide-react";
 import type { PostContent } from "@/types/instagram-post";
 import partyPantherLogo from "@/assets/party-panther-logo.png";
-import html2canvas from "html2canvas";
+import domtoimage from "dom-to-image-more";
 
 type AnimationType = "fade" | "slide-up" | "slide-left" | "scale" | "typewriter" | "blur-in" | "flip";
 
@@ -51,19 +51,29 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     }
   }, [open]);
 
-  // Capture a single frame using html2canvas
+  // Capture a single frame using dom-to-image-more
   const captureFrame = async (el: HTMLElement): Promise<HTMLCanvasElement | null> => {
     try {
-      const canvas = await html2canvas(el, {
-        backgroundColor: null,
-        scale: 1,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        // Don't remove the element from flow
-        foreignObjectRendering: false,
+      const dataUrl = await domtoimage.toPng(el, {
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+        style: {},
+        cacheBust: true,
       });
-      return canvas;
+      // Convert data URL to canvas
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas);
+        };
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+      });
     } catch (err) {
       console.error("Frame capture error:", err);
       return null;
