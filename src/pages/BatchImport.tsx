@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Loader2, FileImage, CheckCircle, ArrowLeft, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { BatchImportReview, ExtractedPromo, ExtractedEvent, ExtractedContact, ExtractedVenue } from "@/components/BatchImportReview";
+import { BatchImportReview, ExtractedPromo, ExtractedEvent, ExtractedContact, ExtractedVenue, DuplicateInfo } from "@/components/BatchImportReview";
 import { detectDrinkCategory, getPlaceholderImage, enrichDrinkTypes } from "@/lib/drink-categories";
 import { isSpreadsheetFile, parseSpreadsheetFile } from "@/lib/spreadsheet-parser";
 import { normalizePromoType } from "@/lib/promo-types";
@@ -126,6 +126,92 @@ const BatchImport = () => {
     });
   }, []);
 
+  // Fuzzy string similarity (Dice coefficient)
+  const similarity = (a: string, b: string): number => {
+    const sa = a.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const sb = b.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (sa === sb) return 100;
+    if (sa.length < 2 || sb.length < 2) return 0;
+    const bigrams = (s: string) => {
+      const set: Record<string, number> = {};
+      for (let i = 0; i < s.length - 1; i++) {
+        const bi = s.slice(i, i + 2);
+        set[bi] = (set[bi] || 0) + 1;
+      }
+      return set;
+    };
+    const bg1 = bigrams(sa);
+    const bg2 = bigrams(sb);
+    let intersection = 0;
+    for (const bi in bg1) {
+      if (bg2[bi]) intersection += Math.min(bg1[bi], bg2[bi]);
+    }
+    return Math.round((2 * intersection) / (sa.length - 1 + sb.length - 1) * 100);
+  };
+
+  const checkBatchDuplicates = useCallback(async (extractedItems: ImportItem[], type: ImportType): Promise<ImportItem[]> => {
+    if (type === "contact") return extractedItems; // contacts update existing, no duplicate concern
+
+    try {
+      let existingEntries: { id: string; name: string; slug?: string; venue?: string }[] = [];
+
+      if (type === "venue") {
+        const { data } = await supabase.from("venues").select("id, name, slug").limit(500);
+        existingEntries = (data || []).map(v => ({ id: v.id, name: v.name, slug: v.slug || undefined }));
+      } else if (type === "promo") {
+        const { data } = await supabase.from("promos").select("id, title, venue_name, slug").limit(500);
+        existingEntries = (data || []).map(p => ({ id: p.id, name: p.title, slug: p.slug || undefined, venue: p.venue_name }));
+      } else if (type === "event") {
+        const { data } = await supabase.from("events").select("id, title, venue_name, slug")
+          .gte("date", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0])
+          .limit(500);
+        existingEntries = (data || []).map(e => ({ id: e.id, name: e.title, slug: e.slug || undefined, venue: e.venue_name || undefined }));
+      }
+
+      if (existingEntries.length === 0) return extractedItems;
+
+      return extractedItems.map(item => {
+        const itemName = type === "venue" ? (item as ExtractedVenue).name : (item as ExtractedPromo | ExtractedEvent).title;
+        const itemVenue = type === "venue" ? undefined : (item as ExtractedPromo).venue_name;
+
+        let bestMatch: DuplicateInfo | undefined;
+        let bestScore = 0;
+
+        for (const existing of existingEntries) {
+          let nameSim = similarity(itemName || "", existing.name);
+          // Boost if venue also matches
+          if (itemVenue && existing.venue) {
+            const venueSim = similarity(itemVenue, existing.venue);
+            if (venueSim >= 70) nameSim = Math.min(100, nameSim + 15);
+          }
+          if (nameSim >= 75 && nameSim > bestScore) {
+            bestScore = nameSim;
+            const reason = nameSim >= 95
+              ? "Nearly identical name"
+              : itemVenue && existing.venue && similarity(itemVenue, existing.venue) >= 70
+                ? "Similar name at same venue"
+                : "Similar name";
+            bestMatch = {
+              existingId: existing.id,
+              existingName: existing.name,
+              existingSlug: existing.slug,
+              confidence: nameSim,
+              reason,
+            };
+          }
+        }
+
+        if (bestMatch) {
+          return { ...item, duplicateOf: bestMatch, selected: false } as ImportItem;
+        }
+        return item;
+      });
+    } catch (err) {
+      console.error("Duplicate check failed:", err);
+      return extractedItems; // proceed without duplicate info on error
+    }
+  }, []);
+
   const handleTextExtract = useCallback(async () => {
     if (!textInput.trim()) {
       toast({ title: "Please enter some text", variant: "destructive" });
@@ -164,11 +250,15 @@ const BatchImport = () => {
         return;
       }
 
-      const extracted = await processExtractedItems(data, importType);
+      let extracted = await processExtractedItems(data, importType);
+
+      setExtractionStatus("Checking for duplicates...");
+      extracted = await checkBatchDuplicates(extracted, importType);
+      const dupCount = extracted.filter((i: any) => i.duplicateOf).length;
 
       if (progressInterval.current) clearInterval(progressInterval.current);
       setExtractionProgress(100);
-      setExtractionStatus(`Found ${extracted.length} ${getTypeLabel(importType)}!`);
+      setExtractionStatus(`Found ${extracted.length} ${getTypeLabel(importType)}!${dupCount ? ` (${dupCount} possible duplicates)` : ""}`);
       setItems(extracted);
       setTimeout(() => setStep("review"), 500);
       toast({ title: `Found ${extracted.length} ${getTypeLabel(importType)}`, description: "Review and edit before importing." });
@@ -208,11 +298,12 @@ const BatchImport = () => {
             );
             return { ...c, matched_venue_id: matched?.id, matched_venue_name: matched?.name };
           });
+          setExtractionProgress(90);
+          setExtractionStatus("Checking for duplicates...");
           setExtractionProgress(100);
           setExtractionStatus(`Found ${enriched.length} contacts!`);
           setItems(enriched);
         } else if (importType === "venue") {
-          // Convert contact-parsed data to venue format
           const venueItems = (parsed as ExtractedContact[]).map((c) => ({
             id: c.id,
             selected: true,
@@ -226,13 +317,19 @@ const BatchImport = () => {
             google_maps_link: c.google_maps_link || "",
             opening_hours: c.opening_hours || "",
           } as ExtractedVenue));
+          setExtractionStatus("Checking for duplicates...");
+          const checked = await checkBatchDuplicates(venueItems, importType);
+          const dupCount = checked.filter((i: any) => i.duplicateOf).length;
           setExtractionProgress(100);
-          setExtractionStatus(`Found ${venueItems.length} venues!`);
-          setItems(venueItems);
+          setExtractionStatus(`Found ${venueItems.length} venues!${dupCount ? ` (${dupCount} possible duplicates)` : ""}`);
+          setItems(checked);
         } else {
+          setExtractionStatus("Checking for duplicates...");
+          const checked = await checkBatchDuplicates(parsed, importType);
+          const dupCount = checked.filter((i: any) => i.duplicateOf).length;
           setExtractionProgress(100);
-          setExtractionStatus(`Found ${parsed.length} ${getTypeLabel(importType)}!`);
-          setItems(parsed);
+          setExtractionStatus(`Found ${parsed.length} ${getTypeLabel(importType)}!${dupCount ? ` (${dupCount} possible duplicates)` : ""}`);
+          setItems(checked);
         }
 
         setTimeout(() => setStep("review"), 500);
@@ -289,14 +386,18 @@ const BatchImport = () => {
         return;
       }
 
-      const extracted = await processExtractedItems(data, importType);
+      let extracted = await processExtractedItems(data, importType);
+
+      setExtractionStatus("Checking for duplicates...");
+      extracted = await checkBatchDuplicates(extracted, importType);
+      const dupCount = extracted.filter((i: any) => i.duplicateOf).length;
 
       if (progressInterval.current) clearInterval(progressInterval.current);
       setExtractionProgress(100);
-      setExtractionStatus(`Found ${extracted.length} ${getTypeLabel(importType)}!`);
+      setExtractionStatus(`Found ${extracted.length} ${getTypeLabel(importType)}!${dupCount ? ` (${dupCount} possible duplicates)` : ""}`);
       setItems(extracted);
       setTimeout(() => setStep("review"), 500);
-      toast({ title: `Found ${extracted.length} ${getTypeLabel(importType)}`, description: "Review and edit before importing." });
+      toast({ title: `Found ${extracted.length} ${getTypeLabel(importType)}`, description: dupCount ? `${dupCount} possible duplicates auto-deselected.` : "Review and edit before importing." });
     } catch (err) {
       console.error("Extraction error:", err);
       toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to extract data", variant: "destructive" });

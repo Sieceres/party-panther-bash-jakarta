@@ -4,15 +4,24 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trash2, Plus, ChevronDown, ChevronUp, Beer, Wine, Coffee, UtensilsCrossed, GlassWater, Martini } from "lucide-react";
+import { Trash2, Plus, ChevronDown, ChevronUp, Beer, Wine, Coffee, UtensilsCrossed, GlassWater, Martini, AlertTriangle, ExternalLink } from "lucide-react";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PLACEHOLDER_IMAGES, type DrinkCategory } from "@/lib/drink-categories";
 import { JAKARTA_AREAS } from "@/lib/area-config";
 import { PROMO_TYPES as PROMO_TYPE_OPTIONS, normalizePromoType } from "@/lib/promo-types";
 
+export interface DuplicateInfo {
+  existingId: string;
+  existingName: string;
+  existingSlug?: string;
+  confidence: number;
+  reason: string;
+}
+
 export interface ExtractedPromo {
   id: string;
   selected: boolean;
+  duplicateOf?: DuplicateInfo;
   title: string;
   description: string;
   venue_name: string;
@@ -31,6 +40,7 @@ export interface ExtractedPromo {
 export interface ExtractedEvent {
   id: string;
   selected: boolean;
+  duplicateOf?: DuplicateInfo;
   title: string;
   description: string;
   date: string;
@@ -58,6 +68,7 @@ export interface ExtractedContact {
 export interface ExtractedVenue {
   id: string;
   selected: boolean;
+  duplicateOf?: DuplicateInfo;
   name: string;
   address: string;
   area: string;
@@ -136,13 +147,38 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
           const hasTitle = itemTitle?.trim();
           const hasVenue = isPromo ? (item as ExtractedPromo).venue_name?.trim() : true;
           const isValid = isVenue ? hasTitle : isContact ? hasTitle : hasTitle && (isPromo ? (item as ExtractedPromo).discount_text?.trim() && hasVenue : true);
+          const dupInfo = (item as any).duplicateOf as DuplicateInfo | undefined;
+          const isDuplicate = !!dupInfo;
 
           return (
             <Card
               key={item.id}
-              className={`transition-all ${!item.selected ? "opacity-50" : ""} ${!isValid ? "border-destructive/50" : ""}`}
+              className={`transition-all ${!item.selected ? "opacity-50" : ""} ${!isValid ? "border-destructive/50" : ""} ${isDuplicate && item.selected ? "border-warning/60 bg-warning/5" : ""}`}
             >
               <CardContent className="p-4 space-y-3">
+                {/* Duplicate warning */}
+                {isDuplicate && (
+                  <div className="flex items-start gap-2 p-2.5 bg-warning/10 border border-warning/30 rounded-md text-sm">
+                    <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-warning">Possible duplicate ({dupInfo.confidence}% match)</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{dupInfo.reason}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Existing: <strong>{dupInfo.existingName}</strong>
+                      </p>
+                    </div>
+                    {dupInfo.existingSlug && (
+                      <a
+                        href={`/${type === "venue" ? "venue" : type === "promo" ? "promo" : "event"}/${dupInfo.existingSlug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0"
+                      >
+                        <ExternalLink className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                      </a>
+                    )}
+                  </div>
+                )}
                 {/* Header row */}
                 <div className="flex items-center gap-3">
                   <Checkbox
