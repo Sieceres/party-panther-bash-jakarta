@@ -298,11 +298,12 @@ const BatchImport = () => {
             );
             return { ...c, matched_venue_id: matched?.id, matched_venue_name: matched?.name };
           });
+          setExtractionProgress(90);
+          setExtractionStatus("Checking for duplicates...");
           setExtractionProgress(100);
           setExtractionStatus(`Found ${enriched.length} contacts!`);
           setItems(enriched);
         } else if (importType === "venue") {
-          // Convert contact-parsed data to venue format
           const venueItems = (parsed as ExtractedContact[]).map((c) => ({
             id: c.id,
             selected: true,
@@ -316,13 +317,19 @@ const BatchImport = () => {
             google_maps_link: c.google_maps_link || "",
             opening_hours: c.opening_hours || "",
           } as ExtractedVenue));
+          setExtractionStatus("Checking for duplicates...");
+          const checked = await checkBatchDuplicates(venueItems, importType);
+          const dupCount = checked.filter((i: any) => i.duplicateOf).length;
           setExtractionProgress(100);
-          setExtractionStatus(`Found ${venueItems.length} venues!`);
-          setItems(venueItems);
+          setExtractionStatus(`Found ${venueItems.length} venues!${dupCount ? ` (${dupCount} possible duplicates)` : ""}`);
+          setItems(checked);
         } else {
+          setExtractionStatus("Checking for duplicates...");
+          const checked = await checkBatchDuplicates(parsed, importType);
+          const dupCount = checked.filter((i: any) => i.duplicateOf).length;
           setExtractionProgress(100);
-          setExtractionStatus(`Found ${parsed.length} ${getTypeLabel(importType)}!`);
-          setItems(parsed);
+          setExtractionStatus(`Found ${parsed.length} ${getTypeLabel(importType)}!${dupCount ? ` (${dupCount} possible duplicates)` : ""}`);
+          setItems(checked);
         }
 
         setTimeout(() => setStep("review"), 500);
