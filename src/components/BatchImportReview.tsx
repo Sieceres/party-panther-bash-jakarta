@@ -113,6 +113,7 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
 
   const isPromo = type === "promo";
   const isContact = type === "contact";
+  const isVenue = type === "venue";
 
   return (
     <div className="space-y-4">
@@ -131,10 +132,10 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
       <div className="space-y-3">
         {items.map((item) => {
           const isExpanded = expandedId === item.id;
-          const itemTitle = isContact ? (item as ExtractedContact).venue_name : (item as ExtractedPromo | ExtractedEvent).title;
+          const itemTitle = isVenue ? (item as ExtractedVenue).name : isContact ? (item as ExtractedContact).venue_name : (item as ExtractedPromo | ExtractedEvent).title;
           const hasTitle = itemTitle?.trim();
           const hasVenue = isPromo ? (item as ExtractedPromo).venue_name?.trim() : true;
-          const isValid = isContact ? hasTitle : hasTitle && (isPromo ? (item as ExtractedPromo).discount_text?.trim() && hasVenue : true);
+          const isValid = isVenue ? hasTitle : isContact ? hasTitle : hasTitle && (isPromo ? (item as ExtractedPromo).discount_text?.trim() && hasVenue : true);
 
           return (
             <Card
@@ -151,8 +152,8 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
                   <div className="flex-1 min-w-0">
                     <Input
                       value={itemTitle || ""}
-                      onChange={(e) => updateItem(item.id, isContact ? "venue_name" : "title", e.target.value)}
-                      placeholder={isContact ? "Venue name *" : "Title *"}
+                      onChange={(e) => updateItem(item.id, isVenue ? "name" : isContact ? "venue_name" : "title", e.target.value)}
+                      placeholder={isVenue ? "Venue name *" : isContact ? "Venue name *" : "Title *"}
                       className="font-medium"
                     />
                   </div>
