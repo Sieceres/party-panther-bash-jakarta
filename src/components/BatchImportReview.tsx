@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trash2, Plus, ChevronDown, ChevronUp, Beer, Wine, Coffee, UtensilsCrossed, GlassWater, Martini } from "lucide-react";
+import { Trash2, Plus, ChevronDown, ChevronUp, Beer, Wine, Coffee, UtensilsCrossed, GlassWater, Martini, AlertTriangle, ExternalLink } from "lucide-react";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PLACEHOLDER_IMAGES, type DrinkCategory } from "@/lib/drink-categories";
 import { JAKARTA_AREAS } from "@/lib/area-config";
