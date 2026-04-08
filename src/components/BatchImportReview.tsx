@@ -10,9 +10,18 @@ import { PLACEHOLDER_IMAGES, type DrinkCategory } from "@/lib/drink-categories";
 import { JAKARTA_AREAS } from "@/lib/area-config";
 import { PROMO_TYPES as PROMO_TYPE_OPTIONS, normalizePromoType } from "@/lib/promo-types";
 
+export interface DuplicateInfo {
+  existingId: string;
+  existingName: string;
+  existingSlug?: string;
+  confidence: number;
+  reason: string;
+}
+
 export interface ExtractedPromo {
   id: string;
   selected: boolean;
+  duplicateOf?: DuplicateInfo;
   title: string;
   description: string;
   venue_name: string;
@@ -31,6 +40,7 @@ export interface ExtractedPromo {
 export interface ExtractedEvent {
   id: string;
   selected: boolean;
+  duplicateOf?: DuplicateInfo;
   title: string;
   description: string;
   date: string;
@@ -58,6 +68,7 @@ export interface ExtractedContact {
 export interface ExtractedVenue {
   id: string;
   selected: boolean;
+  duplicateOf?: DuplicateInfo;
   name: string;
   address: string;
   area: string;
