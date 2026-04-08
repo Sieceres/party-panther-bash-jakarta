@@ -248,7 +248,67 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
                 {/* Expanded edit form */}
                 {isExpanded && (
                   <div className="pl-9 space-y-3">
-                    {isContact ? (
+                    {isVenue ? (
+                      <>
+                        <Input
+                          value={(item as ExtractedVenue).description}
+                          onChange={(e) => updateItem(item.id, "description", e.target.value)}
+                          placeholder="Description"
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <Input
+                            value={(item as ExtractedVenue).address}
+                            onChange={(e) => updateItem(item.id, "address", e.target.value)}
+                            placeholder="Address"
+                          />
+                          <Select
+                            value={(item as ExtractedVenue).area || ""}
+                            onValueChange={(v) => updateItem(item.id, "area", v)}
+                          >
+                            <SelectTrigger><SelectValue placeholder="Area" /></SelectTrigger>
+                            <SelectContent>
+                              {JAKARTA_AREAS.map((region) => (
+                                <SelectGroup key={region.key}>
+                                  <SelectLabel>{region.label}</SelectLabel>
+                                  {region.neighborhoods.map((hood) => (
+                                    <SelectItem key={hood} value={hood}>{hood}</SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <Input
+                            value={(item as ExtractedVenue).instagram}
+                            onChange={(e) => updateItem(item.id, "instagram", e.target.value)}
+                            placeholder="Instagram handle (without @)"
+                          />
+                          <Input
+                            value={(item as ExtractedVenue).whatsapp}
+                            onChange={(e) => updateItem(item.id, "whatsapp", e.target.value)}
+                            placeholder="WhatsApp number (+62...)"
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <Input
+                            value={(item as ExtractedVenue).website}
+                            onChange={(e) => updateItem(item.id, "website", e.target.value)}
+                            placeholder="Website URL"
+                          />
+                          <Input
+                            value={(item as ExtractedVenue).google_maps_link}
+                            onChange={(e) => updateItem(item.id, "google_maps_link", e.target.value)}
+                            placeholder="Google Maps link"
+                          />
+                        </div>
+                        <Input
+                          value={(item as ExtractedVenue).opening_hours}
+                          onChange={(e) => updateItem(item.id, "opening_hours", e.target.value)}
+                          placeholder="Opening hours"
+                        />
+                      </>
+                    ) : isContact ? (
                       <>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <Input
