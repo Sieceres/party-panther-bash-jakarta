@@ -259,7 +259,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
           if (!isVisible(`section-${index}`)) return null;
           const dColor = content.dividerColor || "#ffffff";
           const dWidth = `${content.dividerWidth ?? 60}%`;
-          const dThickness = content.dividerThickness ?? 1;
+          const dThickness = content.dividerThickness ?? 2;
           const dStyle = content.dividerStyle || "line";
           const dGlow = content.dividerGlow ?? false;
           const dGlowIntensity = content.dividerGlowIntensity ?? 8;
