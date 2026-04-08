@@ -823,7 +823,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                         <div
                           style={{
                             width: dWidth,
-                            borderTop: `${dThickness}px ${dStyle === "double" ? "double" : dStyle} ${dColor}80`,
+                            borderTop: `${dThickness}px ${dStyle === "double" ? "double" : dStyle} ${dColor}`,
                             margin: "0 auto",
                             marginBottom: 20,
                             ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
