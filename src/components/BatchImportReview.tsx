@@ -55,10 +55,26 @@ export interface ExtractedContact {
   matched_venue_name?: string;
 }
 
+export interface ExtractedVenue {
+  id: string;
+  selected: boolean;
+  name: string;
+  address: string;
+  area: string;
+  description: string;
+  instagram: string;
+  whatsapp: string;
+  website: string;
+  google_maps_link: string;
+  opening_hours: string;
+}
+
+type ImportItem = ExtractedPromo | ExtractedEvent | ExtractedContact | ExtractedVenue;
+
 interface BatchImportReviewProps {
-  type: "promo" | "event" | "contact";
-  items: (ExtractedPromo | ExtractedEvent | ExtractedContact)[];
-  onItemsChange: (items: (ExtractedPromo | ExtractedEvent | ExtractedContact)[]) => void;
+  type: "promo" | "event" | "contact" | "venue";
+  items: ImportItem[];
+  onItemsChange: (items: ImportItem[]) => void;
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
