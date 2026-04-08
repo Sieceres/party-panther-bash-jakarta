@@ -325,7 +325,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                     style={{
                       width: dWidth,
                       height: dThickness,
-                      background: `linear-gradient(90deg, transparent 0%, ${dColor}40 20%, ${dColor}80 50%, ${dColor}40 80%, transparent 100%)`,
+                      background: `linear-gradient(90deg, transparent 0%, ${dColor}80 20%, ${dColor} 50%, ${dColor}80 80%, transparent 100%)`,
                       margin: "0 auto",
                       marginBottom: 20,
                       ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
