@@ -250,11 +250,15 @@ const BatchImport = () => {
         return;
       }
 
-      const extracted = await processExtractedItems(data, importType);
+      let extracted = await processExtractedItems(data, importType);
+
+      setExtractionStatus("Checking for duplicates...");
+      extracted = await checkBatchDuplicates(extracted, importType);
+      const dupCount = extracted.filter((i: any) => i.duplicateOf).length;
 
       if (progressInterval.current) clearInterval(progressInterval.current);
       setExtractionProgress(100);
-      setExtractionStatus(`Found ${extracted.length} ${getTypeLabel(importType)}!`);
+      setExtractionStatus(`Found ${extracted.length} ${getTypeLabel(importType)}!${dupCount ? ` (${dupCount} possible duplicates)` : ""}`);
       setItems(extracted);
       setTimeout(() => setStep("review"), 500);
       toast({ title: `Found ${extracted.length} ${getTypeLabel(importType)}`, description: "Review and edit before importing." });
@@ -375,14 +379,18 @@ const BatchImport = () => {
         return;
       }
 
-      const extracted = await processExtractedItems(data, importType);
+      let extracted = await processExtractedItems(data, importType);
+
+      setExtractionStatus("Checking for duplicates...");
+      extracted = await checkBatchDuplicates(extracted, importType);
+      const dupCount = extracted.filter((i: any) => i.duplicateOf).length;
 
       if (progressInterval.current) clearInterval(progressInterval.current);
       setExtractionProgress(100);
-      setExtractionStatus(`Found ${extracted.length} ${getTypeLabel(importType)}!`);
+      setExtractionStatus(`Found ${extracted.length} ${getTypeLabel(importType)}!${dupCount ? ` (${dupCount} possible duplicates)` : ""}`);
       setItems(extracted);
       setTimeout(() => setStep("review"), 500);
-      toast({ title: `Found ${extracted.length} ${getTypeLabel(importType)}`, description: "Review and edit before importing." });
+      toast({ title: `Found ${extracted.length} ${getTypeLabel(importType)}`, description: dupCount ? `${dupCount} possible duplicates auto-deselected.` : "Review and edit before importing." });
     } catch (err) {
       console.error("Extraction error:", err);
       toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to extract data", variant: "destructive" });
