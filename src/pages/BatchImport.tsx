@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Clipboard } from "lucide-react";
+import { Clipboard, Type } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -7,16 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Loader2, FileImage, CheckCircle, ArrowLeft, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { BatchImportReview, ExtractedPromo, ExtractedEvent, ExtractedContact } from "@/components/BatchImportReview";
+import { BatchImportReview, ExtractedPromo, ExtractedEvent, ExtractedContact, ExtractedVenue } from "@/components/BatchImportReview";
 import { detectDrinkCategory, getPlaceholderImage, enrichDrinkTypes } from "@/lib/drink-categories";
 import { isSpreadsheetFile, parseSpreadsheetFile } from "@/lib/spreadsheet-parser";
 import { normalizePromoType } from "@/lib/promo-types";
 
-type ImportType = "promo" | "event" | "contact";
+type ImportType = "promo" | "event" | "contact" | "venue";
 type Step = "upload" | "review" | "done";
+type ImportItem = ExtractedPromo | ExtractedEvent | ExtractedContact | ExtractedVenue;
 
 const BatchImport = () => {
   const [activeSection, setActiveSection] = useState("import");
@@ -24,76 +27,118 @@ const BatchImport = () => {
   const [importType, setImportType] = useState<ImportType>("promo");
   const [isExtracting, setIsExtracting] = useState(false);
   const [isInserting, setIsInserting] = useState(false);
-  const [items, setItems] = useState<(ExtractedPromo | ExtractedEvent | ExtractedContact)[]>([]);
+  const [items, setItems] = useState<ImportItem[]>([]);
   const [insertedCount, setInsertedCount] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [extractionProgress, setExtractionProgress] = useState(0);
   const [extractionStatus, setExtractionStatus] = useState("Uploading image...");
+  const [textInput, setTextInput] = useState("");
+  const [inputMode, setInputMode] = useState<"file" | "text">("file");
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleFileUpload = useCallback(async (file: File) => {
-    // Handle spreadsheet files (CSV/XLSX) client-side
-    if (isSpreadsheetFile(file)) {
-      setIsExtracting(true);
-      setExtractionProgress(0);
-      setExtractionStatus("Parsing spreadsheet...");
-      setPreviewUrl(null);
+  const getTypeLabel = (type: ImportType) => {
+    switch (type) {
+      case "promo": return "promos";
+      case "event": return "events";
+      case "contact": return "venue contacts";
+      case "venue": return "venues";
+    }
+  };
 
-      try {
-        setExtractionProgress(30);
-        setExtractionStatus("Reading columns...");
-        const parsed = await parseSpreadsheetFile(file, importType);
-        setExtractionProgress(60);
+  const processExtractedItems = useCallback(async (data: any, type: ImportType): Promise<ImportItem[]> => {
+    const rawItems = data?.items || [];
 
-        if (importType === "contact") {
-          // Fuzzy match venues
-          setExtractionStatus("Matching venues...");
-          const { data: venues } = await supabase.from("venues").select("id, name");
-          const venueList = venues || [];
-          const enriched = (parsed as ExtractedContact[]).map((c) => {
-            const matched = venueList.find(v =>
-              v.name.toLowerCase() === c.venue_name.toLowerCase() ||
-              v.name.toLowerCase().includes(c.venue_name.toLowerCase()) ||
-              c.venue_name.toLowerCase().includes(v.name.toLowerCase())
-            );
-            return { ...c, matched_venue_id: matched?.id, matched_venue_name: matched?.name };
-          });
-          setExtractionProgress(100);
-          setExtractionStatus(`Found ${enriched.length} contacts!`);
-          setItems(enriched);
-        } else {
-          setExtractionProgress(100);
-          setExtractionStatus(`Found ${parsed.length} ${importType === "promo" ? "promos" : "events"}!`);
-          setItems(parsed);
-        }
+    if (type === "venue") {
+      return rawItems.map((item: any, idx: number) => ({
+        id: `item-${idx}-${Date.now()}`,
+        selected: true,
+        name: item.name || "",
+        address: item.address || "",
+        area: item.area || "",
+        description: item.description || "",
+        instagram: (item.instagram || "").replace(/^@/, ""),
+        whatsapp: item.whatsapp || "",
+        website: item.website || "",
+        google_maps_link: item.google_maps_link || "",
+        opening_hours: item.opening_hours || "",
+      } as ExtractedVenue));
+    }
 
-        setTimeout(() => setStep("review"), 500);
-        const typeLabel = importType === "contact" ? "venue contacts" : importType === "promo" ? "promos" : "events";
-        toast({ title: `Found ${(importType === "contact" ? (parsed as any[]) : parsed).length} ${typeLabel}`, description: "Review and edit before importing." });
-      } catch (err) {
-        console.error("Spreadsheet parse error:", err);
-        toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to parse spreadsheet", variant: "destructive" });
-      } finally {
-        setIsExtracting(false);
-      }
+    if (type === "contact") {
+      const { data: venues } = await supabase.from("venues").select("id, name");
+      const venueList = venues || [];
+      return rawItems.map((item: any, idx: number) => {
+        const venueName = (item.venue_name || "").trim();
+        const matched = venueList.find(v =>
+          v.name.toLowerCase() === venueName.toLowerCase() ||
+          v.name.toLowerCase().includes(venueName.toLowerCase()) ||
+          venueName.toLowerCase().includes(v.name.toLowerCase())
+        );
+        return {
+          id: `item-${idx}-${Date.now()}`,
+          selected: true,
+          venue_name: venueName,
+          instagram: (item.instagram || "").replace(/^@/, ""),
+          whatsapp: item.whatsapp || "",
+          website: item.website || "",
+          google_maps_link: item.google_maps_link || "",
+          opening_hours: item.opening_hours || "",
+          address: item.address || "",
+          matched_venue_id: matched?.id || undefined,
+          matched_venue_name: matched?.name || undefined,
+        } as ExtractedContact;
+      });
+    }
+
+    return rawItems.map((item: any, idx: number) => {
+      const drinkTypes = item.drink_type || [];
+      const title = item.title || "";
+      const description = item.description || "";
+      const discountText = item.discount_text || "";
+      const drinkCategory = detectDrinkCategory(title, description, discountText, drinkTypes);
+      const enrichedDrinkTypes = enrichDrinkTypes(drinkTypes, drinkCategory);
+      const placeholderImage = getPlaceholderImage(drinkCategory);
+
+      return {
+        ...item,
+        id: `item-${idx}-${Date.now()}`,
+        selected: true,
+        description,
+        day_of_week: item.day_of_week || [],
+        drink_type: enrichedDrinkTypes,
+        venue_name: item.venue_name || "",
+        venue_address: item.venue_address || "",
+        area: item.area || "",
+        promo_type: normalizePromoType(item.promo_type),
+        category: item.category || "",
+        discount_text: discountText,
+        price_currency: item.price_currency || "IDR",
+        original_price_amount: item.original_price_amount ?? null,
+        discounted_price_amount: item.discounted_price_amount ?? null,
+        date: item.date || "",
+        time: item.time || "",
+        organizer_name: item.organizer_name || "",
+        image_url: placeholderImage,
+        _drinkCategory: drinkCategory,
+      };
+    });
+  }, []);
+
+  const handleTextExtract = useCallback(async () => {
+    if (!textInput.trim()) {
+      toast({ title: "Please enter some text", variant: "destructive" });
       return;
     }
 
-    // Image/PDF flow — show preview
-    const reader = new FileReader();
-    reader.onload = (e) => setPreviewUrl(e.target?.result as string);
-    reader.readAsDataURL(file);
-
     setIsExtracting(true);
     setExtractionProgress(0);
-    setExtractionStatus("Uploading image...");
+    setExtractionStatus("Sending text to AI...");
 
-    // Simulate progress
     const statuses = [
-      { at: 15, text: "Analyzing image content..." },
-      { at: 35, text: "Identifying promos and deals..." },
+      { at: 15, text: "Analyzing text content..." },
+      { at: 35, text: `Identifying ${getTypeLabel(importType)}...` },
       { at: 55, text: "Extracting details..." },
       { at: 75, text: "Parsing extracted data..." },
       { at: 90, text: "Almost done..." },
@@ -108,7 +153,125 @@ const BatchImport = () => {
     }, 500);
 
     try {
-      // Convert to base64 data URL
+      const { data, error } = await supabase.functions.invoke("extract-from-image", {
+        body: { text: textInput, type: importType },
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast({ title: "Extraction failed", description: data.error, variant: "destructive" });
+        setIsExtracting(false);
+        return;
+      }
+
+      const extracted = await processExtractedItems(data, importType);
+
+      if (progressInterval.current) clearInterval(progressInterval.current);
+      setExtractionProgress(100);
+      setExtractionStatus(`Found ${extracted.length} ${getTypeLabel(importType)}!`);
+      setItems(extracted);
+      setTimeout(() => setStep("review"), 500);
+      toast({ title: `Found ${extracted.length} ${getTypeLabel(importType)}`, description: "Review and edit before importing." });
+    } catch (err) {
+      console.error("Text extraction error:", err);
+      toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to extract data", variant: "destructive" });
+    } finally {
+      if (progressInterval.current) clearInterval(progressInterval.current);
+      setIsExtracting(false);
+    }
+  }, [textInput, importType, toast, processExtractedItems]);
+
+  const handleFileUpload = useCallback(async (file: File) => {
+    if (isSpreadsheetFile(file)) {
+      setIsExtracting(true);
+      setExtractionProgress(0);
+      setExtractionStatus("Parsing spreadsheet...");
+      setPreviewUrl(null);
+
+      try {
+        setExtractionProgress(30);
+        setExtractionStatus("Reading columns...");
+        // Spreadsheet parser doesn't support "venue" yet, treat as contact for now
+        const parseType = importType === "venue" ? "contact" : importType;
+        const parsed = await parseSpreadsheetFile(file, parseType as "promo" | "event" | "contact");
+        setExtractionProgress(60);
+
+        if (importType === "contact") {
+          setExtractionStatus("Matching venues...");
+          const { data: venues } = await supabase.from("venues").select("id, name");
+          const venueList = venues || [];
+          const enriched = (parsed as ExtractedContact[]).map((c) => {
+            const matched = venueList.find(v =>
+              v.name.toLowerCase() === c.venue_name.toLowerCase() ||
+              v.name.toLowerCase().includes(c.venue_name.toLowerCase()) ||
+              c.venue_name.toLowerCase().includes(v.name.toLowerCase())
+            );
+            return { ...c, matched_venue_id: matched?.id, matched_venue_name: matched?.name };
+          });
+          setExtractionProgress(100);
+          setExtractionStatus(`Found ${enriched.length} contacts!`);
+          setItems(enriched);
+        } else if (importType === "venue") {
+          // Convert contact-parsed data to venue format
+          const venueItems = (parsed as ExtractedContact[]).map((c) => ({
+            id: c.id,
+            selected: true,
+            name: c.venue_name,
+            address: c.address || "",
+            area: "",
+            description: "",
+            instagram: c.instagram || "",
+            whatsapp: c.whatsapp || "",
+            website: c.website || "",
+            google_maps_link: c.google_maps_link || "",
+            opening_hours: c.opening_hours || "",
+          } as ExtractedVenue));
+          setExtractionProgress(100);
+          setExtractionStatus(`Found ${venueItems.length} venues!`);
+          setItems(venueItems);
+        } else {
+          setExtractionProgress(100);
+          setExtractionStatus(`Found ${parsed.length} ${getTypeLabel(importType)}!`);
+          setItems(parsed);
+        }
+
+        setTimeout(() => setStep("review"), 500);
+        toast({ title: `Found ${parsed.length} ${getTypeLabel(importType)}`, description: "Review and edit before importing." });
+      } catch (err) {
+        console.error("Spreadsheet parse error:", err);
+        toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to parse spreadsheet", variant: "destructive" });
+      } finally {
+        setIsExtracting(false);
+      }
+      return;
+    }
+
+    // Image/PDF flow
+    const reader = new FileReader();
+    reader.onload = (e) => setPreviewUrl(e.target?.result as string);
+    reader.readAsDataURL(file);
+
+    setIsExtracting(true);
+    setExtractionProgress(0);
+    setExtractionStatus("Uploading image...");
+
+    const statuses = [
+      { at: 15, text: "Analyzing image content..." },
+      { at: 35, text: `Identifying ${getTypeLabel(importType)}...` },
+      { at: 55, text: "Extracting details..." },
+      { at: 75, text: "Parsing extracted data..." },
+      { at: 90, text: "Almost done..." },
+    ];
+    let currentProgress = 0;
+    progressInterval.current = setInterval(() => {
+      currentProgress += Math.random() * 8 + 2;
+      if (currentProgress > 95) currentProgress = 95;
+      setExtractionProgress(Math.round(currentProgress));
+      const status = [...statuses].reverse().find(s => currentProgress >= s.at);
+      if (status) setExtractionStatus(status.text);
+    }, 500);
+
+    try {
       const base64 = await new Promise<string>((resolve) => {
         const r = new FileReader();
         r.onload = (e) => resolve(e.target?.result as string);
@@ -120,109 +283,28 @@ const BatchImport = () => {
       });
 
       if (error) throw error;
-
       if (data?.error) {
-        toast({
-          title: "Extraction failed",
-          description: data.error,
-          variant: "destructive",
-        });
+        toast({ title: "Extraction failed", description: data.error, variant: "destructive" });
         setIsExtracting(false);
         return;
       }
 
-      if (importType === "contact") {
-        // For contacts, fetch venues to match
-        const { data: venues } = await supabase.from("venues").select("id, name");
-        const venueList = venues || [];
+      const extracted = await processExtractedItems(data, importType);
 
-        const extracted = (data?.items || []).map((item: any, idx: number) => {
-          const venueName = (item.venue_name || "").trim();
-          // Fuzzy match: find venue whose name matches (case-insensitive)
-          const matched = venueList.find(v =>
-            v.name.toLowerCase() === venueName.toLowerCase() ||
-            v.name.toLowerCase().includes(venueName.toLowerCase()) ||
-            venueName.toLowerCase().includes(v.name.toLowerCase())
-          );
-
-          return {
-            id: `item-${idx}-${Date.now()}`,
-            selected: true,
-            venue_name: venueName,
-            instagram: (item.instagram || "").replace(/^@/, ""),
-            whatsapp: item.whatsapp || "",
-            website: item.website || "",
-            google_maps_link: item.google_maps_link || "",
-            opening_hours: item.opening_hours || "",
-            address: item.address || "",
-            matched_venue_id: matched?.id || undefined,
-            matched_venue_name: matched?.name || undefined,
-          } as ExtractedContact;
-        });
-
-        if (progressInterval.current) clearInterval(progressInterval.current);
-        setExtractionProgress(100);
-        setExtractionStatus(`Found ${extracted.length} contacts!`);
-        setItems(extracted);
-        setTimeout(() => setStep("review"), 500);
-        toast({ title: `Found ${extracted.length} venue contacts`, description: "Review and edit before updating venues." });
-      } else {
-        const extracted = (data?.items || []).map((item: any, idx: number) => {
-          const drinkTypes = item.drink_type || [];
-          const title = item.title || "";
-          const description = item.description || "";
-          const discountText = item.discount_text || "";
-
-          const drinkCategory = detectDrinkCategory(title, description, discountText, drinkTypes);
-          const enrichedDrinkTypes = enrichDrinkTypes(drinkTypes, drinkCategory);
-          const placeholderImage = getPlaceholderImage(drinkCategory);
-
-          return {
-            ...item,
-            id: `item-${idx}-${Date.now()}`,
-            selected: true,
-            description,
-            day_of_week: item.day_of_week || [],
-            drink_type: enrichedDrinkTypes,
-            venue_name: item.venue_name || "",
-            venue_address: item.venue_address || "",
-            area: item.area || "",
-            promo_type: normalizePromoType(item.promo_type),
-            category: item.category || "",
-            discount_text: discountText,
-            price_currency: item.price_currency || "IDR",
-            original_price_amount: item.original_price_amount ?? null,
-            discounted_price_amount: item.discounted_price_amount ?? null,
-            date: item.date || "",
-            time: item.time || "",
-            organizer_name: item.organizer_name || "",
-            image_url: placeholderImage,
-            _drinkCategory: drinkCategory,
-          };
-        });
-
-        if (progressInterval.current) clearInterval(progressInterval.current);
-        setExtractionProgress(100);
-        setExtractionStatus(`Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}!`);
-        setItems(extracted);
-        setTimeout(() => setStep("review"), 500);
-        toast({
-          title: `Found ${extracted.length} ${importType === "promo" ? "promos" : "events"}`,
-          description: "Review and edit before importing.",
-        });
-      }
+      if (progressInterval.current) clearInterval(progressInterval.current);
+      setExtractionProgress(100);
+      setExtractionStatus(`Found ${extracted.length} ${getTypeLabel(importType)}!`);
+      setItems(extracted);
+      setTimeout(() => setStep("review"), 500);
+      toast({ title: `Found ${extracted.length} ${getTypeLabel(importType)}`, description: "Review and edit before importing." });
     } catch (err) {
       console.error("Extraction error:", err);
-      toast({
-        title: "Error",
-        description: err instanceof Error ? err.message : "Failed to extract data",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to extract data", variant: "destructive" });
     } finally {
       if (progressInterval.current) clearInterval(progressInterval.current);
       setIsExtracting(false);
     }
-  }, [importType, toast]);
+  }, [importType, toast, processExtractedItems]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -230,10 +312,11 @@ const BatchImport = () => {
     if (file) handleFileUpload(file);
   }, [handleFileUpload]);
 
-  // Listen for paste events (Ctrl+V / Cmd+V) on the page
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
       if (step !== "upload" || isExtracting) return;
+      // Don't intercept paste if user is in text input mode and focused on textarea
+      if (inputMode === "text") return;
       const clipItems = e.clipboardData?.items;
       if (!clipItems) return;
       for (const item of Array.from(clipItems)) {
@@ -247,7 +330,7 @@ const BatchImport = () => {
     };
     document.addEventListener("paste", handlePaste);
     return () => document.removeEventListener("paste", handlePaste);
-  }, [step, isExtracting, handleFileUpload]);
+  }, [step, isExtracting, handleFileUpload, inputMode]);
 
   const handleBulkInsert = async () => {
     const selected = items.filter(i => i.selected);
@@ -267,7 +350,34 @@ const BatchImport = () => {
     let successCount = 0;
     const errors: string[] = [];
 
-    if (importType === "contact") {
+    if (importType === "venue") {
+      const venues = selected as ExtractedVenue[];
+      for (const v of venues) {
+        if (!v.name.trim()) {
+          errors.push("Venue with empty name skipped");
+          continue;
+        }
+        const insertData: Record<string, any> = {
+          name: v.name.trim(),
+          created_by: user.id,
+        };
+        if (v.address) insertData.address = v.address;
+        if (v.area) insertData.area = v.area;
+        if (v.description) insertData.description = v.description;
+        if (v.instagram) insertData.instagram = v.instagram;
+        if (v.whatsapp) insertData.whatsapp = v.whatsapp;
+        if (v.website) insertData.website = v.website;
+        if (v.google_maps_link) insertData.google_maps_link = v.google_maps_link;
+        if (v.opening_hours) insertData.opening_hours = v.opening_hours;
+
+        const { error } = await supabase.from("venues").insert(insertData as any);
+        if (error) {
+          errors.push(`${v.name}: ${error.message}`);
+        } else {
+          successCount++;
+        }
+      }
+    } else if (importType === "contact") {
       const contacts = selected as ExtractedContact[];
       for (const c of contacts) {
         if (!c.matched_venue_id) {
@@ -360,11 +470,11 @@ const BatchImport = () => {
     setInsertedCount(successCount);
     setIsInserting(false);
 
-    const typeLabel = importType === "contact" ? "venues" : importType === "promo" ? "promos" : "events";
+    const typeLabel = getTypeLabel(importType);
 
     if (errors.length > 0) {
       toast({
-        title: `Updated ${successCount}, ${errors.length} failed`,
+        title: `${importType === "contact" ? "Updated" : "Imported"} ${successCount}, ${errors.length} failed`,
         description: errors[0],
         variant: "destructive",
       });
@@ -381,6 +491,16 @@ const BatchImport = () => {
     setItems([]);
     setPreviewUrl(null);
     setInsertedCount(0);
+    setTextInput("");
+  };
+
+  const getViewRoute = () => {
+    switch (importType) {
+      case "venue": return "/venues";
+      case "contact": return "/venues";
+      case "promo": return "/promos";
+      case "event": return "/events";
+    }
   };
 
   return (
@@ -393,7 +513,7 @@ const BatchImport = () => {
             Batch Import
           </h1>
           <p className="text-muted-foreground mt-1">
-            Upload a flyer, schedule, or screenshot and AI will extract all promos or events.
+            Upload a flyer, spreadsheet, or paste text and AI will extract all items.
           </p>
         </div>
 
@@ -421,9 +541,9 @@ const BatchImport = () => {
         {step === "upload" && (
           <Card>
             <CardHeader>
-              <CardTitle>Upload Image or Document</CardTitle>
+              <CardTitle>Import Data</CardTitle>
               <CardDescription>
-                Upload a flyer, weekly schedule, menu, or screenshot. The AI will extract all items.
+                Upload a file or paste text. The AI will extract all items automatically.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -436,52 +556,94 @@ const BatchImport = () => {
                   <SelectContent>
                     <SelectItem value="promo">Promos / Deals</SelectItem>
                     <SelectItem value="event">Events</SelectItem>
+                    <SelectItem value="venue">Venues</SelectItem>
                     <SelectItem value="contact">Venue Contacts</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div
-                className="border-2 border-dashed border-border rounded-xl p-12 text-center cursor-pointer hover:border-primary/50 transition-colors"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleDrop}
-                onClick={() => document.getElementById("batch-file-input")?.click()}
-              >
-                <input
-                  id="batch-file-input"
-                  type="file"
-                  accept="image/*,.pdf,.csv,.xlsx,.xls"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleFileUpload(file);
-                  }}
-                />
-                {isExtracting ? (
-                  <div className="space-y-4 py-4">
-                    <Loader2 className="w-12 h-12 mx-auto text-primary animate-spin" />
-                    <p className="text-lg font-medium">AI is extracting {importType === "promo" ? "promos" : "events"}...</p>
-                    <Progress value={extractionProgress} className="max-w-xs mx-auto h-2" />
-                    <p className="text-sm text-muted-foreground">{extractionStatus}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <FileImage className="w-12 h-12 mx-auto text-muted-foreground" />
-                    <p className="text-lg font-medium">Drop your image here or click to browse</p>
-                    <p className="text-sm text-muted-foreground">Supports JPG, PNG, PDF, CSV, XLSX</p>
-                    <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/70">
-                      <Clipboard className="w-3.5 h-3.5" />
-                      <span>You can also paste an image from your clipboard (Ctrl+V / ⌘V)</span>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as "file" | "text")}>
+                <TabsList className="w-full">
+                  <TabsTrigger value="file" className="flex-1 gap-2">
+                    <FileImage className="w-4 h-4" /> File Upload
+                  </TabsTrigger>
+                  <TabsTrigger value="text" className="flex-1 gap-2">
+                    <Type className="w-4 h-4" /> Paste Text
+                  </TabsTrigger>
+                </TabsList>
 
-              {previewUrl && !isExtracting && (
-                <div className="flex justify-center">
-                  <img src={previewUrl} alt="Uploaded preview" className="max-h-48 rounded-lg border" />
-                </div>
-              )}
+                <TabsContent value="file" className="mt-4">
+                  <div
+                    className="border-2 border-dashed border-border rounded-xl p-12 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={handleDrop}
+                    onClick={() => document.getElementById("batch-file-input")?.click()}
+                  >
+                    <input
+                      id="batch-file-input"
+                      type="file"
+                      accept="image/*,.pdf,.csv,.xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file);
+                      }}
+                    />
+                    {isExtracting ? (
+                      <div className="space-y-4 py-4">
+                        <Loader2 className="w-12 h-12 mx-auto text-primary animate-spin" />
+                        <p className="text-lg font-medium">AI is extracting {getTypeLabel(importType)}...</p>
+                        <Progress value={extractionProgress} className="max-w-xs mx-auto h-2" />
+                        <p className="text-sm text-muted-foreground">{extractionStatus}</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <FileImage className="w-12 h-12 mx-auto text-muted-foreground" />
+                        <p className="text-lg font-medium">Drop your image here or click to browse</p>
+                        <p className="text-sm text-muted-foreground">Supports JPG, PNG, PDF, CSV, XLSX</p>
+                        <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/70">
+                          <Clipboard className="w-3.5 h-3.5" />
+                          <span>You can also paste an image from your clipboard (Ctrl+V / ⌘V)</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {previewUrl && !isExtracting && (
+                    <div className="flex justify-center mt-4">
+                      <img src={previewUrl} alt="Uploaded preview" className="max-h-48 rounded-lg border" />
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="text" className="mt-4 space-y-4">
+                  {isExtracting ? (
+                    <div className="space-y-4 py-8 text-center">
+                      <Loader2 className="w-12 h-12 mx-auto text-primary animate-spin" />
+                      <p className="text-lg font-medium">AI is extracting {getTypeLabel(importType)}...</p>
+                      <Progress value={extractionProgress} className="max-w-xs mx-auto h-2" />
+                      <p className="text-sm text-muted-foreground">{extractionStatus}</p>
+                    </div>
+                  ) : (
+                    <>
+                      <Textarea
+                        value={textInput}
+                        onChange={(e) => setTextInput(e.target.value)}
+                        placeholder={`Paste your ${getTypeLabel(importType)} info here...\n\nExamples:\n- A list of venue names and addresses\n- Promo descriptions from a website\n- Event schedule text\n- Any unstructured text containing ${getTypeLabel(importType)} data`}
+                        className="min-h-[200px]"
+                      />
+                      <Button
+                        onClick={handleTextExtract}
+                        disabled={!textInput.trim()}
+                        className="w-full"
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Extract {getTypeLabel(importType)} from text
+                      </Button>
+                    </>
+                  )}
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         )}
@@ -500,7 +662,7 @@ const BatchImport = () => {
                 {isInserting ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {importType === "contact" ? "Updating..." : "Importing..."}</>
                 ) : (
-                  <>{importType === "contact" ? "Update" : "Import"} {items.filter(i => i.selected).length} {importType === "contact" ? "venues" : importType === "promo" ? "promos" : "events"} <ArrowRight className="w-4 h-4 ml-2" /></>
+                  <>{importType === "contact" ? "Update" : "Import"} {items.filter(i => i.selected).length} {getTypeLabel(importType)} <ArrowRight className="w-4 h-4 ml-2" /></>
                 )}
               </Button>
             </div>
@@ -520,14 +682,14 @@ const BatchImport = () => {
               <CheckCircle className="w-16 h-16 mx-auto text-primary" />
               <h2 className="text-2xl font-bold">{importType === "contact" ? "Update" : "Import"} Complete!</h2>
               <p className="text-muted-foreground">
-                Successfully {importType === "contact" ? "updated" : "imported"} {insertedCount} {importType === "contact" ? "venues" : importType === "promo" ? "promos" : "events"}.
+                Successfully {importType === "contact" ? "updated" : "imported"} {insertedCount} {getTypeLabel(importType)}.
               </p>
               <div className="flex justify-center gap-3 pt-4">
                 <Button variant="outline" onClick={resetFlow}>
                   Import More
                 </Button>
-                <Button onClick={() => navigate(importType === "contact" ? "/venues" : importType === "promo" ? "/promos" : "/events")}>
-                  View {importType === "contact" ? "Venues" : importType === "promo" ? "Promos" : "Events"}
+                <Button onClick={() => navigate(getViewRoute())}>
+                  View {getTypeLabel(importType)}
                 </Button>
               </div>
             </CardContent>

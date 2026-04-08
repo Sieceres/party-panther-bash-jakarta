@@ -10,7 +10,7 @@ const promoTool = {
   type: "function" as const,
   function: {
     name: "extract_promos",
-    description: "Extract all promotional offers found in the image/document. Each promo should be a separate item.",
+    description: "Extract all promotional offers found in the content. Each promo should be a separate item.",
     parameters: {
       type: "object",
       properties: {
@@ -24,7 +24,7 @@ const promoTool = {
               venue_name: { type: "string", description: "Name of the venue/bar/restaurant" },
               venue_address: { type: "string", description: "Address if visible" },
               discount_text: { type: "string", description: "The discount/deal text, e.g. '2-for-1 cocktails' or '50% off'" },
-              promo_type: { type: "string", enum: ["Happy Hour", "Ladies Night", "Free Flow", "Bottle Promo", "Beer Deal", "Brunch Deal", "Food Special", "Drink Special", "Live Music", "Other"], description: "MUST be one of the enum values. Use 'Free Flow' ONLY for unlimited/all-you-can-drink deals. Use 'Beer Deal' for buy-X-get-Y or multi-drink bundle deals. Use 'Bottle Promo' for bottle service discounts. Use 'Happy Hour' for time-limited discount periods." },
+              promo_type: { type: "string", enum: ["Happy Hour", "Ladies Night", "Free Flow", "Bottle Promo", "Beer Deal", "Brunch Deal", "Food Special", "Drink Special", "Live Music", "Other"], description: "MUST be one of the enum values." },
               day_of_week: { type: "array", items: { type: "string" }, description: "Days this promo is active" },
               area: { type: "string", description: "Specific neighborhood/area." },
               drink_type: { type: "array", items: { type: "string" }, description: "Types of drinks if applicable" },
@@ -48,7 +48,7 @@ const eventTool = {
   type: "function" as const,
   function: {
     name: "extract_events",
-    description: "Extract all events found in the image/document. Each event should be a separate item.",
+    description: "Extract all events found in the content. Each event should be a separate item.",
     parameters: {
       type: "object",
       properties: {
@@ -81,7 +81,7 @@ const contactTool = {
   type: "function" as const,
   function: {
     name: "extract_contacts",
-    description: "Extract all venue/business contact information found in the image/document. Each venue should be a separate item.",
+    description: "Extract all venue/business contact information found in the content. Each venue should be a separate item.",
     parameters: {
       type: "object",
       properties: {
@@ -91,14 +91,48 @@ const contactTool = {
             type: "object",
             properties: {
               venue_name: { type: "string", description: "Name of the venue/bar/restaurant/business" },
-              instagram: { type: "string", description: "Instagram handle (without @), e.g. 'barname_jkt'" },
-              whatsapp: { type: "string", description: "WhatsApp number in international format, e.g. '+6281234567890'" },
+              instagram: { type: "string", description: "Instagram handle (without @)" },
+              whatsapp: { type: "string", description: "WhatsApp number in international format" },
               website: { type: "string", description: "Website URL if visible" },
               google_maps_link: { type: "string", description: "Google Maps link if visible" },
               opening_hours: { type: "string", description: "Opening hours text if visible" },
               address: { type: "string", description: "Address if visible" },
             },
             required: ["venue_name"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["items"],
+      additionalProperties: false,
+    },
+  },
+};
+
+const venueTool = {
+  type: "function" as const,
+  function: {
+    name: "extract_venues",
+    description: "Extract all venue/bar/restaurant/club information found in the content. Each venue should be a separate item.",
+    parameters: {
+      type: "object",
+      properties: {
+        items: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string", description: "Name of the venue/bar/restaurant/club" },
+              address: { type: "string", description: "Full address if available" },
+              area: { type: "string", description: "Neighborhood/area (e.g. Kemang, Senopati, SCBD, Menteng)" },
+              description: { type: "string", description: "Brief description of the venue" },
+              instagram: { type: "string", description: "Instagram handle (without @)" },
+              whatsapp: { type: "string", description: "WhatsApp number in international format (+62...)" },
+              website: { type: "string", description: "Website URL" },
+              google_maps_link: { type: "string", description: "Google Maps link" },
+              opening_hours: { type: "string", description: "Opening hours text" },
+            },
+            required: ["name"],
             additionalProperties: false,
           },
         },
@@ -122,60 +156,36 @@ function extractJsonFromText(text: string): any | null {
   return null;
 }
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+function getToolConfig(type: string) {
+  switch (type) {
+    case "venue": return { tool: venueTool, name: "extract_venues" };
+    case "contact": return { tool: contactTool, name: "extract_contacts" };
+    case "promo": return { tool: promoTool, name: "extract_promos" };
+    default: return { tool: eventTool, name: "extract_events" };
   }
+}
 
-  try {
-    // Validate JWT
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
-    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
-    const { image, type } = await req.json();
-
-    if (!image) {
-      return new Response(JSON.stringify({ error: "No image provided" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY is not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const isPromo = type === "promo";
-    const isContact = type === "contact";
-    const tool = isContact ? contactTool : isPromo ? promoTool : eventTool;
-    const toolName = isContact ? "extract_contacts" : isPromo ? "extract_promos" : "extract_events";
-
-    const systemPrompt = isContact
-      ? `You are an expert at extracting contact information for venues, bars, restaurants, and businesses from images and documents.
+function getSystemPrompt(type: string): string {
+  switch (type) {
+    case "venue":
+      return `You are an expert at extracting venue/bar/restaurant/club information from images and text.
+Extract ALL venues you can find. Each venue should be a separate item.
+Look for venue names, addresses, neighborhoods/areas, Instagram handles, WhatsApp numbers, websites, Google Maps links, and opening hours.
+For Instagram, remove the @ symbol and just return the handle.
+For WhatsApp/phone numbers, convert to international format (+62...) if they start with 0.
+For area, try to identify the Jakarta neighborhood (e.g. Kemang, Senopati, SCBD, Menteng, Kuningan, PIK, Kelapa Gading).
+Be thorough — extract everything visible.
+You MUST use the extract_venues tool to return the results.`;
+    case "contact":
+      return `You are an expert at extracting contact information for venues, bars, restaurants, and businesses from images and documents.
 Extract ALL venue contact details you can find. Each venue should be a separate item.
 Look for Instagram handles (with or without @), WhatsApp numbers, phone numbers (especially Indonesian +62 format), websites, Google Maps links, addresses, and opening hours.
 For Instagram, remove the @ symbol and just return the handle.
 For WhatsApp/phone numbers, convert to international format (+62...) if they start with 0.
 Be thorough — extract everything visible.
-You MUST use the extract_contacts tool to return the results.`
-      : isPromo
-      ? `You are an expert at extracting promotional offers from images and documents. 
+You MUST use the extract_contacts tool to return the results.`;
+    case "promo":
+      return `You are an expert at extracting promotional offers from images and documents. 
 Extract ALL promos/deals you can find. Each venue+deal combination should be a separate item.
 If a venue has promos on different days, create separate items for each day or group days together.
 If you see a weekly schedule grid, extract every cell that contains a promo.
@@ -193,13 +203,68 @@ For drink_type, categorize drinks specifically:
 - If multiple types, list all applicable categories.
 - If it's a food deal, use ["Food"].
 
-You MUST use the extract_promos tool to return the results.`
-      : `You are an expert at extracting event information from images and documents.
+You MUST use the extract_promos tool to return the results.`;
+    default:
+      return `You are an expert at extracting event information from images and documents.
 Extract ALL events you can find. Each event should be a separate item.
 Be thorough — extract everything visible. Use ISO date format (YYYY-MM-DD) for dates and 24h format (HH:MM) for times.
 You MUST use the extract_events tool to return the results.`;
+  }
+}
 
-    console.log(`Starting extraction for type: ${type}`);
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    const { image, text, type } = await req.json();
+
+    if (!image && !text) {
+      return new Response(JSON.stringify({ error: "No image or text provided" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY is not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { tool, name: toolName } = getToolConfig(type);
+    const systemPrompt = getSystemPrompt(type);
+    const typeLabel = type === "venue" ? "venues" : type === "contact" ? "venue contact details" : type === "promo" ? "promos/deals" : "events";
+
+    console.log(`Starting extraction for type: ${type}, mode: ${image ? "image" : "text"}`);
+
+    // Build user message content based on whether it's image or text
+    const userContent = image
+      ? [
+          { type: "text", text: `Extract all ${typeLabel} from this image.` },
+          { type: "image_url", image_url: { url: image } },
+        ]
+      : [
+          { type: "text", text: `Extract all ${typeLabel} from the following text:\n\n${text}` },
+        ];
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -211,13 +276,7 @@ You MUST use the extract_events tool to return the results.`;
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: `Extract all ${isContact ? "venue contact details (Instagram, WhatsApp, etc.)" : isPromo ? "promos/deals" : "events"} from this image.` },
-              { type: "image_url", image_url: { url: image } },
-            ],
-          },
+          { role: "user", content: userContent },
         ],
         tools: [tool],
         tool_choice: { type: "function", function: { name: toolName } },
@@ -226,8 +285,8 @@ You MUST use the extract_events tool to return the results.`;
 
     if (!response.ok) {
       const status = response.status;
-      const text = await response.text();
-      console.error("AI gateway error:", status, text);
+      const respText = await response.text();
+      console.error("AI gateway error:", status, respText);
       if (status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }

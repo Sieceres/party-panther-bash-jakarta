@@ -55,10 +55,26 @@ export interface ExtractedContact {
   matched_venue_name?: string;
 }
 
+export interface ExtractedVenue {
+  id: string;
+  selected: boolean;
+  name: string;
+  address: string;
+  area: string;
+  description: string;
+  instagram: string;
+  whatsapp: string;
+  website: string;
+  google_maps_link: string;
+  opening_hours: string;
+}
+
+type ImportItem = ExtractedPromo | ExtractedEvent | ExtractedContact | ExtractedVenue;
+
 interface BatchImportReviewProps {
-  type: "promo" | "event" | "contact";
-  items: (ExtractedPromo | ExtractedEvent | ExtractedContact)[];
-  onItemsChange: (items: (ExtractedPromo | ExtractedEvent | ExtractedContact)[]) => void;
+  type: "promo" | "event" | "contact" | "venue";
+  items: ImportItem[];
+  onItemsChange: (items: ImportItem[]) => void;
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -97,6 +113,7 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
 
   const isPromo = type === "promo";
   const isContact = type === "contact";
+  const isVenue = type === "venue";
 
   return (
     <div className="space-y-4">
@@ -115,10 +132,10 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
       <div className="space-y-3">
         {items.map((item) => {
           const isExpanded = expandedId === item.id;
-          const itemTitle = isContact ? (item as ExtractedContact).venue_name : (item as ExtractedPromo | ExtractedEvent).title;
+          const itemTitle = isVenue ? (item as ExtractedVenue).name : isContact ? (item as ExtractedContact).venue_name : (item as ExtractedPromo | ExtractedEvent).title;
           const hasTitle = itemTitle?.trim();
           const hasVenue = isPromo ? (item as ExtractedPromo).venue_name?.trim() : true;
-          const isValid = isContact ? hasTitle : hasTitle && (isPromo ? (item as ExtractedPromo).discount_text?.trim() && hasVenue : true);
+          const isValid = isVenue ? hasTitle : isContact ? hasTitle : hasTitle && (isPromo ? (item as ExtractedPromo).discount_text?.trim() && hasVenue : true);
 
           return (
             <Card
@@ -135,8 +152,8 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
                   <div className="flex-1 min-w-0">
                     <Input
                       value={itemTitle || ""}
-                      onChange={(e) => updateItem(item.id, isContact ? "venue_name" : "title", e.target.value)}
-                      placeholder={isContact ? "Venue name *" : "Title *"}
+                      onChange={(e) => updateItem(item.id, isVenue ? "name" : isContact ? "venue_name" : "title", e.target.value)}
+                      placeholder={isVenue ? "Venue name *" : isContact ? "Venue name *" : "Title *"}
                       className="font-medium"
                     />
                   </div>
@@ -188,6 +205,24 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
                   </div>
                 )}
 
+                {/* Summary when collapsed - venues */}
+                {!isExpanded && isVenue && (
+                  <div className="flex flex-wrap items-center gap-1.5 pl-9">
+                    {(item as ExtractedVenue).area && (
+                      <Badge variant="secondary" className="text-xs">📍 {(item as ExtractedVenue).area}</Badge>
+                    )}
+                    {(item as ExtractedVenue).address && (
+                      <Badge variant="outline" className="text-xs truncate max-w-[200px]">{(item as ExtractedVenue).address}</Badge>
+                    )}
+                    {(item as ExtractedVenue).instagram && (
+                      <Badge variant="outline" className="text-xs">@{(item as ExtractedVenue).instagram}</Badge>
+                    )}
+                    {(item as ExtractedVenue).whatsapp && (
+                      <Badge variant="outline" className="text-xs">📱</Badge>
+                    )}
+                  </div>
+                )}
+
                 {/* Summary when collapsed - promos */}
                 {!isExpanded && isPromo && (
                   <div className="flex flex-wrap items-center gap-1.5 pl-9">
@@ -213,7 +248,67 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
                 {/* Expanded edit form */}
                 {isExpanded && (
                   <div className="pl-9 space-y-3">
-                    {isContact ? (
+                    {isVenue ? (
+                      <>
+                        <Input
+                          value={(item as ExtractedVenue).description}
+                          onChange={(e) => updateItem(item.id, "description", e.target.value)}
+                          placeholder="Description"
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <Input
+                            value={(item as ExtractedVenue).address}
+                            onChange={(e) => updateItem(item.id, "address", e.target.value)}
+                            placeholder="Address"
+                          />
+                          <Select
+                            value={(item as ExtractedVenue).area || ""}
+                            onValueChange={(v) => updateItem(item.id, "area", v)}
+                          >
+                            <SelectTrigger><SelectValue placeholder="Area" /></SelectTrigger>
+                            <SelectContent>
+                              {JAKARTA_AREAS.map((region) => (
+                                <SelectGroup key={region.key}>
+                                  <SelectLabel>{region.label}</SelectLabel>
+                                  {region.neighborhoods.map((hood) => (
+                                    <SelectItem key={hood} value={hood}>{hood}</SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <Input
+                            value={(item as ExtractedVenue).instagram}
+                            onChange={(e) => updateItem(item.id, "instagram", e.target.value)}
+                            placeholder="Instagram handle (without @)"
+                          />
+                          <Input
+                            value={(item as ExtractedVenue).whatsapp}
+                            onChange={(e) => updateItem(item.id, "whatsapp", e.target.value)}
+                            placeholder="WhatsApp number (+62...)"
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <Input
+                            value={(item as ExtractedVenue).website}
+                            onChange={(e) => updateItem(item.id, "website", e.target.value)}
+                            placeholder="Website URL"
+                          />
+                          <Input
+                            value={(item as ExtractedVenue).google_maps_link}
+                            onChange={(e) => updateItem(item.id, "google_maps_link", e.target.value)}
+                            placeholder="Google Maps link"
+                          />
+                        </div>
+                        <Input
+                          value={(item as ExtractedVenue).opening_hours}
+                          onChange={(e) => updateItem(item.id, "opening_hours", e.target.value)}
+                          placeholder="Opening hours"
+                        />
+                      </>
+                    ) : isContact ? (
                       <>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <Input
