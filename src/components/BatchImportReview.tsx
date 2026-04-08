@@ -205,6 +205,24 @@ export const BatchImportReview = ({ type, items, onItemsChange }: BatchImportRev
                   </div>
                 )}
 
+                {/* Summary when collapsed - venues */}
+                {!isExpanded && isVenue && (
+                  <div className="flex flex-wrap items-center gap-1.5 pl-9">
+                    {(item as ExtractedVenue).area && (
+                      <Badge variant="secondary" className="text-xs">📍 {(item as ExtractedVenue).area}</Badge>
+                    )}
+                    {(item as ExtractedVenue).address && (
+                      <Badge variant="outline" className="text-xs truncate max-w-[200px]">{(item as ExtractedVenue).address}</Badge>
+                    )}
+                    {(item as ExtractedVenue).instagram && (
+                      <Badge variant="outline" className="text-xs">@{(item as ExtractedVenue).instagram}</Badge>
+                    )}
+                    {(item as ExtractedVenue).whatsapp && (
+                      <Badge variant="outline" className="text-xs">📱</Badge>
+                    )}
+                  </div>
+                )}
+
                 {/* Summary when collapsed - promos */}
                 {!isExpanded && isPromo && (
                   <div className="flex flex-wrap items-center gap-1.5 pl-9">
