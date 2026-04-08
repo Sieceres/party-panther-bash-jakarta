@@ -370,7 +370,7 @@ const BatchImport = () => {
         if (v.google_maps_link) insertData.google_maps_link = v.google_maps_link;
         if (v.opening_hours) insertData.opening_hours = v.opening_hours;
 
-        const { error } = await supabase.from("venues").insert(insertData);
+        const { error } = await supabase.from("venues").insert(insertData as any);
         if (error) {
           errors.push(`${v.name}: ${error.message}`);
         } else {
