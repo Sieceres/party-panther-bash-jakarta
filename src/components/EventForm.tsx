@@ -251,6 +251,31 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         }
       }
 
+      // Auto-create venue if not in directory
+      let venueId = selectedVenueId;
+      if (!venueId && formData.venue.trim()) {
+        const { data: newVenue, error: venueError } = await supabase
+          .from('venues')
+          .insert({
+            name: formData.venue.trim(),
+            area: venueArea || null,
+            address: location?.address || venueArea || null,
+            latitude: location?.lat || null,
+            longitude: location?.lng || null,
+            created_by: user.id,
+          })
+          .select('id')
+          .single();
+        
+        if (!venueError && newVenue) {
+          venueId = newVenue.id;
+          // Fire-and-forget: enrich venue with scraper
+          supabase.functions.invoke('scrape-venue-images', {
+            body: { venueId: newVenue.id, venueName: formData.venue.trim() }
+          }).catch(err => console.error('Venue scrape failed:', err));
+        }
+      }
+
       const baseEventData = {
         title: formData.title,
         description: formData.description,
@@ -260,7 +285,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         venue_address: venueArea || null,
         venue_latitude: location?.lat,
         venue_longitude: location?.lng,
-        venue_id: selectedVenueId,
+        venue_id: venueId,
         organizer_name: formData.organizer,
         organizer_whatsapp: formData.whatsapp,
         image_url: formData.image,
