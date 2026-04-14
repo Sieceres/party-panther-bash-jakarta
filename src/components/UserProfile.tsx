@@ -1024,7 +1024,7 @@ export const UserProfile = () => {
                               />
                             </div>
                             <div>
-                              <Label htmlFor="venue_whatsapp_rejected" className="text-sm font-medium">Venue WhatsApp *</Label>
+                              <Label htmlFor="venue_whatsapp_rejected" className="text-sm font-medium">Venue WhatsApp</Label>
                               <Input
                                 id="venue_whatsapp_rejected"
                                 value={editForm.venue_whatsapp}
@@ -1201,7 +1201,7 @@ export const UserProfile = () => {
                                     />
                                   </div>
                                   <div>
-                                    <Label htmlFor="venue_whatsapp_dialog" className="text-sm font-medium">Venue WhatsApp *</Label>
+                                    <Label htmlFor="venue_whatsapp_dialog" className="text-sm font-medium">Venue WhatsApp</Label>
                                     <Input
                                       id="venue_whatsapp_dialog"
                                       value={editForm.venue_whatsapp}
