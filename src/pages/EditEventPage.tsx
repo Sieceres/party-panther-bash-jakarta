@@ -42,7 +42,7 @@ export const EditEventPage = () => {
           description: "Failed to load event for editing.",
           variant: "destructive"
         });
-        navigate('/?section=events'); // Redirect if event not found or error
+        navigate('/events'); // Redirect if event not found or error
       } finally {
         setLoading(false);
       }
@@ -95,7 +95,7 @@ export const EditEventPage = () => {
         <div className="container mx-auto max-w-2xl">
           <Button
             variant="ghost"
-            onClick={() => navigate('/?section=events')}
+            onClick={() => navigate('/events')}
             className="mb-6"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />

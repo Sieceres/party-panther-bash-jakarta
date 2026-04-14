@@ -724,7 +724,7 @@ export const EventDetailPage = () => {
         description: "Event deleted successfully!",
       });
 
-      navigate("/?section=events");
+      navigate("/events");
     } catch (error: any) {
       console.error("Error deleting event:", error);
       toast({
@@ -1002,7 +1002,7 @@ export const EventDetailPage = () => {
         <div className="container mx-auto max-w-6xl">
           <Button
             variant="ghost"
-            onClick={() => navigate("/?section=events")}
+            onClick={() => navigate("/events")}
             className="mb-6 hover:bg-gradient-to-r hover:from-neon-blue hover:to-neon-cyan hover:text-white transition-all"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
