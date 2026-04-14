@@ -15,6 +15,7 @@ import { EventOrganizer } from "./form-components/EventOrganizer";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { EventTagSelector } from "./form-components/EventTagSelector";
 import { EventPrivacySettings } from "./form-components/EventPrivacySettings";
+import { EventAIExtract } from "./form-components/EventAIExtract";
 import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
 import { DuplicateWarning } from "./DuplicateWarning";
 
@@ -135,6 +136,34 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
     if (!initialData?.id) {
       setHasUnsavedChanges(true);
     }
+  };
+
+  const handleAIExtracted = (extracted: {
+    title?: string;
+    description?: string;
+    date?: string;
+    time?: string;
+    venue_name?: string;
+    venue_address?: string;
+    organizer_name?: string;
+    price_currency?: string;
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      title: extracted.title || prev.title,
+      description: extracted.description || prev.description,
+      time: extracted.time || prev.time,
+      venue: extracted.venue_name || prev.venue,
+      address: extracted.venue_address || prev.address,
+      organizer: extracted.organizer_name || prev.organizer,
+    }));
+    if (extracted.date) {
+      const [year, month, day] = extracted.date.split('-').map(Number);
+      if (year && month && day) {
+        setEventDate(new Date(year, month - 1, day));
+      }
+    }
+    setHasUnsavedChanges(true);
   };
 
   useEffect(() => {
@@ -367,6 +396,11 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* AI Extract - only for new events */}
+            {!initialData?.id && (
+              <EventAIExtract onExtracted={handleAIExtracted} />
+            )}
+
             <BasicEventInfo
               title={formData.title}
               description={formData.description}
