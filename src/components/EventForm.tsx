@@ -50,12 +50,13 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [enableCheckIn, setEnableCheckIn] = useState(initialData?.enable_check_in || false);
   const [enablePhotos, setEnablePhotos] = useState(initialData?.enable_photos ?? true);
   const [instagramPostUrl, setInstagramPostUrl] = useState(initialData?.instagram_post_url || "");
+  const [selectedVenueId, setSelectedVenueId] = useState<string | null>(initialData?.venue_id || null);
+  const [venueArea, setVenueArea] = useState(initialData?.venue_address || ""); // area stored in venue_address for now
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
     time: initialData?.time || "",
     venue: initialData?.venue_name || "",
-    address: initialData?.venue_address || "",
     organizer: initialData?.organizer_name || "",
     whatsapp: initialData?.organizer_whatsapp || "",
     image: initialData?.image_url || ""
