@@ -63,6 +63,7 @@ interface Profile {
   profile_type: string | null;
   business_name: string | null;
   venue_whatsapp: string | null;
+  venue_instagram: string | null;
   venue_address: string | null;
   venue_opening_hours: string | null;
   venue_status: string;
@@ -111,8 +112,7 @@ export const UserProfile = () => {
     custom_party_style: '',
     business_name: '',
     venue_whatsapp: '',
-    venue_address: '',
-    venue_opening_hours: '',
+    venue_instagram: '',
   });
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -238,8 +238,7 @@ export const UserProfile = () => {
           custom_party_style: isCustomPartyStyle ? profile.party_style : '',
           business_name: profile.business_name || '',
           venue_whatsapp: profile.venue_whatsapp || '',
-          venue_address: profile.venue_address || '',
-          venue_opening_hours: profile.venue_opening_hours || '',
+          venue_instagram: (profile as any).venue_instagram || '',
         });
       }
 
@@ -426,8 +425,7 @@ export const UserProfile = () => {
         party_style: editForm.party_style === 'custom' ? editForm.custom_party_style : editForm.party_style || null,
         business_name: editForm.business_name || null,
         venue_whatsapp: editForm.venue_whatsapp || null,
-        venue_address: editForm.venue_address || null,
-        venue_opening_hours: editForm.venue_opening_hours || null,
+        venue_instagram: editForm.venue_instagram || null,
         updated_at: new Date().toISOString()
       };
 
@@ -435,7 +433,7 @@ export const UserProfile = () => {
       const currentStatus = profile?.venue_status || 'none';
       const isFirstVenueApplication = currentStatus === 'none' || !profile?.venue_status;
       const isReapplication = currentStatus === 'rejected';
-      const hasRequiredVenueInfo = editForm.business_name && editForm.venue_whatsapp;
+      const hasRequiredVenueInfo = editForm.business_name && (editForm.venue_whatsapp || editForm.venue_instagram);
       
       if ((isFirstVenueApplication || isReapplication) && hasRequiredVenueInfo) {
         profileData.venue_status = 'pending';
@@ -482,8 +480,7 @@ export const UserProfile = () => {
           venue_applied_at: new Date().toISOString(),
           business_name: editForm.business_name,
           venue_whatsapp: editForm.venue_whatsapp,
-          venue_address: editForm.venue_address || profile.venue_address,
-          venue_opening_hours: editForm.venue_opening_hours || profile.venue_opening_hours,
+          venue_instagram: editForm.venue_instagram,
         });
       }
 
