@@ -138,6 +138,34 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
     }
   };
 
+  const handleAIExtracted = (extracted: {
+    title?: string;
+    description?: string;
+    date?: string;
+    time?: string;
+    venue_name?: string;
+    venue_address?: string;
+    organizer_name?: string;
+    price_currency?: string;
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      title: extracted.title || prev.title,
+      description: extracted.description || prev.description,
+      time: extracted.time || prev.time,
+      venue: extracted.venue_name || prev.venue,
+      address: extracted.venue_address || prev.address,
+      organizer: extracted.organizer_name || prev.organizer,
+    }));
+    if (extracted.date) {
+      const [year, month, day] = extracted.date.split('-').map(Number);
+      if (year && month && day) {
+        setEventDate(new Date(year, month - 1, day));
+      }
+    }
+    setHasUnsavedChanges(true);
+  };
+
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges && !initialData?.id) {
