@@ -42,6 +42,7 @@ import { getEventUrl, getPromoUrl, getEditEventUrl, getEditPromoUrl } from "@/li
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { UserVouchers } from "./UserVouchers";
+import { TelegramLinkSection } from "./TelegramLinkSection";
 
 interface Profile {
   id: string;
@@ -866,6 +867,11 @@ export const UserProfile = () => {
                       )}
                     </div>
                   </div>
+
+                  {/* Telegram Notifications Linking */}
+                  {!isSharedProfile && (
+                    <TelegramLinkSection userId={user?.id} />
+                  )}
 
                   {/* Hidden file input for avatar upload */}
                   <Input
