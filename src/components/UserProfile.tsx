@@ -1034,25 +1034,16 @@ export const UserProfile = () => {
                               />
                             </div>
                             <div>
-                              <Label htmlFor="venue_address_rejected" className="text-sm font-medium">Venue Address</Label>
+                              <Label htmlFor="venue_instagram_rejected" className="text-sm font-medium">Venue Instagram</Label>
                               <Input
-                                id="venue_address_rejected"
-                                value={editForm.venue_address}
-                                onChange={(e) => setEditForm({ ...editForm, venue_address: e.target.value })}
-                                placeholder="Full address of your venue"
+                                id="venue_instagram_rejected"
+                                value={editForm.venue_instagram}
+                                onChange={(e) => setEditForm({ ...editForm, venue_instagram: e.target.value })}
+                                placeholder="@yourvenue"
                                 className="mt-1"
                               />
                             </div>
-                            <div>
-                              <Label htmlFor="venue_opening_hours_rejected" className="text-sm font-medium">Opening Hours</Label>
-                              <Input
-                                id="venue_opening_hours_rejected"
-                                value={editForm.venue_opening_hours}
-                                onChange={(e) => setEditForm({ ...editForm, venue_opening_hours: e.target.value })}
-                                placeholder="e.g., Mon-Sat 6PM-2AM"
-                                className="mt-1"
-                              />
-                            </div>
+                            <p className="text-xs text-muted-foreground">* Either WhatsApp or Instagram is required</p>
                           </div>
                         </div>
                       </div>
@@ -1220,25 +1211,16 @@ export const UserProfile = () => {
                                     />
                                   </div>
                                   <div>
-                                    <Label htmlFor="venue_address_dialog" className="text-sm font-medium">Venue Address</Label>
+                                    <Label htmlFor="venue_instagram_dialog" className="text-sm font-medium">Venue Instagram</Label>
                                     <Input
-                                      id="venue_address_dialog"
-                                      value={editForm.venue_address}
-                                      onChange={(e) => setEditForm({ ...editForm, venue_address: e.target.value })}
-                                      placeholder="Full address of your venue"
+                                      id="venue_instagram_dialog"
+                                      value={editForm.venue_instagram}
+                                      onChange={(e) => setEditForm({ ...editForm, venue_instagram: e.target.value })}
+                                      placeholder="@yourvenue"
                                       className="mt-1"
                                     />
                                   </div>
-                                  <div>
-                                    <Label htmlFor="venue_opening_hours_dialog" className="text-sm font-medium">Opening Hours</Label>
-                                    <Input
-                                      id="venue_opening_hours_dialog"
-                                      value={editForm.venue_opening_hours}
-                                      onChange={(e) => setEditForm({ ...editForm, venue_opening_hours: e.target.value })}
-                                      placeholder="e.g., Mon-Sat 6PM-2AM"
-                                      className="mt-1"
-                                    />
-                                  </div>
+                                  <p className="text-xs text-muted-foreground">* Either WhatsApp or Instagram is required</p>
                                 </div>
                                 <DialogFooter>
                                   <Button variant="outline" onClick={() => setShowVenueDialog(false)}>
