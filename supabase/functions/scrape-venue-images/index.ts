@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
     // 'details' = google maps link + opening hours
     const ids = venue_ids || (venue_id ? [venue_id] : []);
 
-    const selectFields = 'id, name, instagram, website, image_url, whatsapp, opening_hours, google_maps_link';
+    const selectFields = 'id, name, instagram, website, image_url, whatsapp, opening_hours, google_maps_link, latitude, longitude, address, area';
 
     let venues: any[];
     if (ids.length > 0) {
@@ -141,6 +141,7 @@ Deno.serve(async (req) => {
         const needWhatsApp = !venue.whatsapp && (mode === 'contacts' || mode === 'all');
         const needGMaps = !venue.google_maps_link && (mode === 'details' || mode === 'all');
         const needHours = !venue.opening_hours && (mode === 'details' || mode === 'all');
+        const needGeocode = !venue.latitude && !venue.longitude;
 
         const needAnythingFromWebsite = needImage || needInstagram || needWhatsApp || needGMaps || needHours;
 
@@ -294,6 +295,41 @@ Deno.serve(async (req) => {
           }
         }
 
+        // Geocode venue if missing coordinates
+        if (needGeocode) {
+          try {
+            const searchQuery = venue.address
+              ? `${venue.name} ${venue.address}`
+              : venue.area
+                ? `${venue.name} ${venue.area} Jakarta`
+                : `${venue.name} Jakarta`;
+            const photonParams = new URLSearchParams({
+              q: searchQuery,
+              limit: '1',
+              lat: '-6.2088',
+              lon: '106.8456',
+            });
+            const geoRes = await fetch(`https://photon.komoot.io/api/?${photonParams}`);
+            if (geoRes.ok) {
+              const geoData = await geoRes.json();
+              if (geoData.features?.length > 0) {
+                const feature = geoData.features[0];
+                const [lng, lat] = feature.geometry.coordinates;
+                venue._geocoded = { lat, lng };
+                const props = feature.properties;
+                const addressParts: string[] = [];
+                if (props.name) addressParts.push(props.name);
+                if (props.street) addressParts.push(props.street);
+                if (props.city) addressParts.push(props.city);
+                venue._geocodedAddress = addressParts.join(', ') || null;
+                console.log(`Geocoded ${venue.name}: ${lat}, ${lng}`);
+              }
+            }
+          } catch (geoErr) {
+            console.error(`Geocoding failed for ${venue.name}:`, geoErr);
+          }
+        }
+
         // Build update object
         const updateData: Record<string, any> = {};
         if (imageUrl && !venue.image_url) { updateData.image_url = imageUrl; foundItems.push('image'); }
@@ -301,6 +337,15 @@ Deno.serve(async (req) => {
         if (whatsappNumber && !venue.whatsapp) { updateData.whatsapp = whatsappNumber; foundItems.push('whatsapp'); }
         if (googleMapsLink && !venue.google_maps_link) { updateData.google_maps_link = googleMapsLink; foundItems.push('gmaps'); }
         if (openingHours && !venue.opening_hours) { updateData.opening_hours = openingHours; foundItems.push('hours'); }
+        if (venue._geocoded && !venue.latitude) {
+          updateData.latitude = venue._geocoded.lat;
+          updateData.longitude = venue._geocoded.lng;
+          foundItems.push('coordinates');
+        }
+        if (venue._geocodedAddress && !venue.address) {
+          updateData.address = venue._geocodedAddress;
+          foundItems.push('address');
+        }
 
         if (Object.keys(updateData).length > 0) {
           await supabase.from('venues').update(updateData).eq('id', venue.id);
@@ -324,14 +369,15 @@ Deno.serve(async (req) => {
     const waCount = results.filter(r => r.found.includes('whatsapp')).length;
     const gmapsCount = results.filter(r => r.found.includes('gmaps')).length;
     const hoursCount = results.filter(r => r.found.includes('hours')).length;
+    const coordsCount = results.filter(r => r.found.includes('coordinates')).length;
 
-    console.log(`Done: ${foundCount}/${results.length} venues enriched (${imageCount} images, ${igCount} instagram, ${waCount} whatsapp, ${gmapsCount} gmaps, ${hoursCount} hours)`);
+    console.log(`Done: ${foundCount}/${results.length} venues enriched (${imageCount} images, ${igCount} instagram, ${waCount} whatsapp, ${gmapsCount} gmaps, ${hoursCount} hours, ${coordsCount} coordinates)`);
 
     return new Response(
       JSON.stringify({
         success: true,
         results,
-        summary: { total: results.length, found: foundCount, images: imageCount, instagram: igCount, whatsapp: waCount, gmaps: gmapsCount, hours: hoursCount },
+        summary: { total: results.length, found: foundCount, images: imageCount, instagram: igCount, whatsapp: waCount, gmaps: gmapsCount, hours: hoursCount, coordinates: coordsCount },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
