@@ -93,11 +93,12 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         description: initialData.description || "",
         time: initialData.time || "",
         venue: initialData.venue_name || "",
-        address: initialData.venue_address || "",
         organizer: initialData.organizer_name || "",
         whatsapp: initialData.organizer_whatsapp || "",
         image: initialData.image_url || ""
       });
+      setSelectedVenueId(initialData.venue_id || null);
+      setVenueArea(initialData.venue_address || "");
       setEventDate(
         initialData.date 
           ? (() => {
@@ -155,9 +156,11 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       description: extracted.description || prev.description,
       time: extracted.time || prev.time,
       venue: extracted.venue_name || prev.venue,
-      address: extracted.venue_address || prev.address,
       organizer: extracted.organizer_name || prev.organizer,
     }));
+    if (extracted.venue_address) {
+      setVenueArea(extracted.venue_address);
+    }
     if (extracted.date) {
       const [year, month, day] = extracted.date.split('-').map(Number);
       if (year && month && day) {
@@ -254,9 +257,10 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         date: `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}`,
         time: formData.time,
         venue_name: formData.venue,
-        venue_address: formData.address,
+        venue_address: venueArea || null,
         venue_latitude: location?.lat,
         venue_longitude: location?.lng,
+        venue_id: selectedVenueId,
         organizer_name: formData.organizer,
         organizer_whatsapp: formData.whatsapp,
         image_url: formData.image,
@@ -419,11 +423,13 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
 
             <EventVenue
               venue={formData.venue}
-              address={formData.address}
+              area={venueArea}
               location={location}
+              selectedVenueId={selectedVenueId}
               onVenueChange={(value) => handleInputChange("venue", value)}
-              onAddressChange={(value) => handleInputChange("address", value)}
+              onAreaChange={setVenueArea}
               onLocationChange={handleSetLocation}
+              onVenueIdChange={setSelectedVenueId}
             />
 
             <EventOrganizer
