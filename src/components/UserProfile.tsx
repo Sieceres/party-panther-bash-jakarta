@@ -986,25 +986,16 @@ export const UserProfile = () => {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="venue_address" className="text-sm font-medium">Venue Address</Label>
+                          <Label htmlFor="venue_instagram" className="text-sm font-medium">Venue Instagram</Label>
                           <Input
-                            id="venue_address"
-                            value={editForm.venue_address}
-                            onChange={(e) => setEditForm({ ...editForm, venue_address: e.target.value })}
-                            placeholder="Full address of your venue"
+                            id="venue_instagram"
+                            value={editForm.venue_instagram}
+                            onChange={(e) => setEditForm({ ...editForm, venue_instagram: e.target.value })}
+                            placeholder="@yourvenue"
                             className="mt-1"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="venue_opening_hours" className="text-sm font-medium">Opening Hours</Label>
-                          <Input
-                            id="venue_opening_hours"
-                            value={editForm.venue_opening_hours}
-                            onChange={(e) => setEditForm({ ...editForm, venue_opening_hours: e.target.value })}
-                            placeholder="e.g., Mon-Sat 6PM-2AM"
-                            className="mt-1"
-                          />
-                        </div>
+                        <p className="text-xs text-muted-foreground">* Either WhatsApp or Instagram is required</p>
                       </div>
                     </div>
                   )}
