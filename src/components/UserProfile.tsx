@@ -515,8 +515,7 @@ export const UserProfile = () => {
         custom_party_style: isCustomPartyStyle ? profile.party_style : '',
         business_name: profile.business_name || '',
         venue_whatsapp: profile.venue_whatsapp || '',
-        venue_address: profile.venue_address || '',
-        venue_opening_hours: profile.venue_opening_hours || '',
+        venue_instagram: (profile as any).venue_instagram || '',
       });
     }
     setIsEditing(false);
