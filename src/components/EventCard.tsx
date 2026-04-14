@@ -237,7 +237,7 @@ export const EventCard = ({ event, onJoin, userAdminStatus, isVenueOwner = false
             onClick={(e) => {
               e.stopPropagation();
               const venueName = event.venue || event.venue_name;
-              if (venueName) navigate(`/?section=events&venue=${encodeURIComponent(venueName)}`);
+              if (venueName) navigate(`/events?venue=${encodeURIComponent(venueName)}`);
             }}
           >
             {event.venue || event.venue_name}
