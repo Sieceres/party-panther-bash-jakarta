@@ -396,6 +396,11 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* AI Extract - only for new events */}
+            {!initialData?.id && (
+              <EventAIExtract onExtracted={handleAIExtracted} />
+            )}
+
             <BasicEventInfo
               title={formData.title}
               description={formData.description}
