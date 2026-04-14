@@ -13,6 +13,7 @@ interface VenueProfile {
   display_name: string;
   business_name: string | null;
   venue_whatsapp: string | null;
+  venue_instagram: string | null;
   venue_address: string | null;
   venue_opening_hours: string | null;
   venue_status: string;
@@ -60,6 +61,11 @@ export const AdminVenueManagement = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Get the venue profile data
+      const venueProfile = [...pendingVenues, ...verifiedVenues].find(v => v.user_id === userId);
+      if (!venueProfile) throw new Error("Venue profile not found");
+
+      // Update profile status
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -71,7 +77,58 @@ export const AdminVenueManagement = () => {
 
       if (error) throw error;
 
-      toast.success("Venue verified successfully");
+      // Auto-create or link venue in directory
+      const businessName = venueProfile.business_name;
+      if (businessName) {
+        // Check if venue already exists (fuzzy match)
+        const { data: existingVenues } = await supabase
+          .from("venues")
+          .select("id, name")
+          .ilike("name", businessName);
+
+        if (existingVenues && existingVenues.length > 0) {
+          // Link to existing venue via claimed_by
+          const matchedVenue = existingVenues[0];
+          await supabase
+            .from("venues")
+            .update({ claimed_by: userId, claim_status: "approved" })
+            .eq("id", matchedVenue.id);
+          toast.success(`Venue verified and linked to existing directory entry "${matchedVenue.name}"`);
+        } else {
+          // Create new venue entry
+          const { data: newVenue, error: venueError } = await supabase
+            .from("venues")
+            .insert({
+              name: businessName,
+              whatsapp: venueProfile.venue_whatsapp || null,
+              instagram: venueProfile.venue_instagram || null,
+              claimed_by: userId,
+              claim_status: "approved",
+              created_by: userId,
+            })
+            .select("id")
+            .single();
+
+          if (venueError) {
+            console.error("Error creating venue:", venueError);
+            toast.error("Venue verified but failed to create directory entry");
+          } else if (newVenue) {
+            // Trigger scraper to enrich venue data
+            try {
+              await supabase.functions.invoke("scrape-venue-images", {
+                body: { venue_id: newVenue.id, mode: "all" },
+              });
+              toast.success("Venue verified, added to directory, and scraper triggered for enrichment");
+            } catch (scrapeErr) {
+              console.error("Scraper trigger failed:", scrapeErr);
+              toast.success("Venue verified and added to directory (scraper will run later)");
+            }
+          }
+        }
+      } else {
+        toast.success("Venue verified successfully");
+      }
+
       fetchVenues();
     } catch (error) {
       console.error("Error verifying venue:", error);
@@ -130,13 +187,9 @@ export const AdminVenueManagement = () => {
             <span className="font-medium">WhatsApp:</span>
             <p className="text-muted-foreground">{venue.venue_whatsapp || "Not provided"}</p>
           </div>
-          <div className="col-span-2">
-            <span className="font-medium">Address:</span>
-            <p className="text-muted-foreground">{venue.venue_address || "Not provided"}</p>
-          </div>
-          <div className="col-span-2">
-            <span className="font-medium">Opening Hours:</span>
-            <p className="text-muted-foreground">{venue.venue_opening_hours || "Not provided"}</p>
+          <div>
+            <span className="font-medium">Instagram:</span>
+            <p className="text-muted-foreground">{venue.venue_instagram || "Not provided"}</p>
           </div>
         </div>
 

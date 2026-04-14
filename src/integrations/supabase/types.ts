@@ -669,6 +669,7 @@ export type Database = {
           user_id: string
           venue_address: string | null
           venue_applied_at: string | null
+          venue_instagram: string | null
           venue_opening_hours: string | null
           venue_status: string | null
           venue_verified_at: string | null
@@ -694,6 +695,7 @@ export type Database = {
           user_id: string
           venue_address?: string | null
           venue_applied_at?: string | null
+          venue_instagram?: string | null
           venue_opening_hours?: string | null
           venue_status?: string | null
           venue_verified_at?: string | null
@@ -719,6 +721,7 @@ export type Database = {
           user_id?: string
           venue_address?: string | null
           venue_applied_at?: string | null
+          venue_instagram?: string | null
           venue_opening_hours?: string | null
           venue_status?: string | null
           venue_verified_at?: string | null
