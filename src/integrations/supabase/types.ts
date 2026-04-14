@@ -664,6 +664,7 @@ export type Database = {
           is_verified: boolean | null
           party_style: string | null
           profile_type: string | null
+          telegram_chat_id: string | null
           updated_at: string
           user_id: string
           venue_address: string | null
@@ -688,6 +689,7 @@ export type Database = {
           is_verified?: boolean | null
           party_style?: string | null
           profile_type?: string | null
+          telegram_chat_id?: string | null
           updated_at?: string
           user_id: string
           venue_address?: string | null
@@ -712,6 +714,7 @@ export type Database = {
           is_verified?: boolean | null
           party_style?: string | null
           profile_type?: string | null
+          telegram_chat_id?: string | null
           updated_at?: string
           user_id?: string
           venue_address?: string | null
@@ -1096,6 +1099,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      telegram_link_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          used: boolean
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          used?: boolean
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          used?: boolean
+          user_id?: string
+        }
+        Relationships: []
       }
       user_favorite_promos: {
         Row: {
