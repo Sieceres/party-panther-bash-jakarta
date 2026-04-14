@@ -15,6 +15,7 @@ import { EventOrganizer } from "./form-components/EventOrganizer";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { EventTagSelector } from "./form-components/EventTagSelector";
 import { EventPrivacySettings } from "./form-components/EventPrivacySettings";
+import { EventAIExtract } from "./form-components/EventAIExtract";
 import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
 import { DuplicateWarning } from "./DuplicateWarning";
 
