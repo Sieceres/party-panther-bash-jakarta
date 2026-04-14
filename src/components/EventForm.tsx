@@ -271,7 +271,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
           venueId = newVenue.id;
           // Fire-and-forget: enrich venue with scraper
           supabase.functions.invoke('scrape-venue-images', {
-            body: { venue_id: newVenue.id }
+            body: { venue_id: newVenue.id, mode: 'all' }
           }).catch(err => console.error('Venue scrape failed:', err));
         }
       }
