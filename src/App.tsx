@@ -61,14 +61,19 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/event/:id" element={<EventDetailPage />} />
+          <Route path="/e/:id" element={<EventDetailPage />} />
           <Route path="/promo/:id" element={<PromoDetailPage />} />
+          <Route path="/p/:id" element={<PromoDetailPage />} />
           <Route path="/venue/:id" element={<VenueDetailPage />} />
+          <Route path="/v/:id" element={<VenueDetailPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/instagram-generator" element={<InstagramPostGenerator />} />
           <Route path="/instagram-generator" element={<InstagramPostGenerator />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/edit-event/:id" element={<EditEventPage />} />
           <Route path="/edit-promo/:id" element={<EditPromoPage />} />
+          <Route path="/ee/:id" element={<EditEventPage />} />
+          <Route path="/ep/:id" element={<EditPromoPage />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/profile/:userId" element={<UserProfile />} />
           <Route path="/admin/user/:userId" element={<UserProfile />} />

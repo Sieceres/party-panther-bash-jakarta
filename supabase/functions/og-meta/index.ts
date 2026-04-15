@@ -65,8 +65,12 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     // Expected path: /og-meta/{type}/{slug}
     const pathParts = url.pathname.replace(/^\/og-meta\/?/, "").split("/").filter(Boolean);
-    const type = pathParts[0]; // event, promo, venue
+    const typeRaw = pathParts[0]; // event/e, promo/p, venue/v
     const slug = pathParts.slice(1).join("/");
+
+    // Normalise short aliases
+    const typeMap: Record<string, string> = { e: "event", p: "promo", v: "venue", event: "event", promo: "promo", venue: "venue" };
+    const type = typeMap[typeRaw];
 
     if (!type || !slug) {
       return new Response("Missing type or slug", { status: 400 });
@@ -104,8 +108,8 @@ Deno.serve(async (req) => {
           title: `${data.title} at ${data.venue_name} — Jakarta Event | Party Panther`,
           description: `${data.title} at ${data.venue_name}, Jakarta on ${data.date}. ${(data.description || "").slice(0, 120)}`,
           image: data.image_url || DEFAULT_IMAGE,
-          url: `${SITE_URL}/event/${data.slug || slug}`,
-          redirectUrl: `${SITE_URL}/event/${data.slug || slug}`,
+          url: `${SITE_URL}/e/${data.slug || slug}`,
+          redirectUrl: `${SITE_URL}/e/${data.slug || slug}`,
         };
       }
     } else if (type === "promo") {
@@ -129,8 +133,8 @@ Deno.serve(async (req) => {
           title: `${data.title} at ${data.venue_name} — Jakarta Drink Promo | Party Panther`,
           description: `${data.discount_text} — ${data.title} at ${data.venue_name}${data.area ? ` in ${data.area}` : ""}, Jakarta. ${(data.description || "").slice(0, 120)}`,
           image: data.image_url || DEFAULT_IMAGE,
-          url: `${SITE_URL}/promo/${data.slug || slug}`,
-          redirectUrl: `${SITE_URL}/promo/${data.slug || slug}`,
+          url: `${SITE_URL}/p/${data.slug || slug}`,
+          redirectUrl: `${SITE_URL}/p/${data.slug || slug}`,
         };
       }
     } else if (type === "venue") {
@@ -154,8 +158,8 @@ Deno.serve(async (req) => {
           title: `${data.name}${data.area ? ` — ${data.area}` : ""} — Jakarta Bar & Club | Party Panther`,
           description: `${data.name}${data.area ? ` in ${data.area}` : ""}, Jakarta. ${(data.description || "").slice(0, 120) || "Discover drink promos, events and more at this Jakarta venue."}`,
           image: data.image_url || DEFAULT_IMAGE,
-          url: `${SITE_URL}/venue/${data.slug || slug}`,
-          redirectUrl: `${SITE_URL}/venue/${data.slug || slug}`,
+          url: `${SITE_URL}/v/${data.slug || slug}`,
+          redirectUrl: `${SITE_URL}/v/${data.slug || slug}`,
         };
       }
     }
