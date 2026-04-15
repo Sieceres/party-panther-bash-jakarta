@@ -136,7 +136,17 @@ export const EventDetailPage = () => {
 
         setEvent(eventData);
 
-        // console.log("fetched event instagram_post_url:", eventData.instagram_post_url);
+        // Fetch venue slug if venue_id exists
+        if (eventData.venue_id) {
+          const { data: venueData } = await supabase
+            .from("venues")
+            .select("slug")
+            .eq("id", eventData.venue_id)
+            .maybeSingle();
+          if (venueData?.slug) {
+            setVenueSlug(venueData.slug);
+          }
+        }
 
         // Get current user and check admin status
         const {
