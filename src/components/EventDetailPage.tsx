@@ -100,6 +100,7 @@ export const EventDetailPage = () => {
   const [eventTags, setEventTags] = useState<any[]>([]);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [joinAnonymously, setJoinAnonymously] = useState(false);
+  const [venueSlug, setVenueSlug] = useState<string | null>(null);
 
   usePageTitle(event?.title ? `${event.title}` : "Event");
   const memoizedCenter = useMemo(() => {
