@@ -1083,7 +1083,13 @@ export const EventDetailPage = () => {
                       <div className="flex items-start gap-2">
                         <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-sm sm:text-base font-medium">{event.venue_name}</p>
+                          {venueSlug ? (
+                            <Link to={`/venue/${venueSlug}`} className="text-sm sm:text-base font-medium text-primary hover:underline">
+                              {event.venue_name}
+                            </Link>
+                          ) : (
+                            <p className="text-sm sm:text-base font-medium">{event.venue_name}</p>
+                          )}
                           <p className="text-xs sm:text-sm text-muted-foreground">{event.venue_address}</p>
                         </div>
                       </div>
