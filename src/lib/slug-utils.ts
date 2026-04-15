@@ -26,7 +26,8 @@ export const getEventBySlugOrId = async (identifier: string) => {
     access_level,
     max_attendees,
     enable_check_in,
-    enable_photos
+    enable_photos,
+    venue_id
   `;
 
   // Try slug first

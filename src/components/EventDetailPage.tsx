@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +69,7 @@ interface Event {
   max_attendees?: number;
   enable_check_in?: boolean;
   enable_photos?: boolean;
+  venue_id?: string;
 }
 
 export const EventDetailPage = () => {
@@ -99,6 +100,7 @@ export const EventDetailPage = () => {
   const [eventTags, setEventTags] = useState<any[]>([]);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [joinAnonymously, setJoinAnonymously] = useState(false);
+  const [venueSlug, setVenueSlug] = useState<string | null>(null);
 
   usePageTitle(event?.title ? `${event.title}` : "Event");
   const memoizedCenter = useMemo(() => {
@@ -134,7 +136,17 @@ export const EventDetailPage = () => {
 
         setEvent(eventData);
 
-        // console.log("fetched event instagram_post_url:", eventData.instagram_post_url);
+        // Fetch venue slug if venue_id exists
+        if (eventData.venue_id) {
+          const { data: venueData } = await supabase
+            .from("venues")
+            .select("slug")
+            .eq("id", eventData.venue_id)
+            .maybeSingle();
+          if (venueData?.slug) {
+            setVenueSlug(venueData.slug);
+          }
+        }
 
         // Get current user and check admin status
         const {
@@ -1071,7 +1083,13 @@ export const EventDetailPage = () => {
                       <div className="flex items-start gap-2">
                         <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-sm sm:text-base font-medium">{event.venue_name}</p>
+                          {venueSlug ? (
+                            <Link to={`/venue/${venueSlug}`} className="text-sm sm:text-base font-medium text-primary hover:underline">
+                              {event.venue_name}
+                            </Link>
+                          ) : (
+                            <p className="text-sm sm:text-base font-medium">{event.venue_name}</p>
+                          )}
                           <p className="text-xs sm:text-sm text-muted-foreground">{event.venue_address}</p>
                         </div>
                       </div>
