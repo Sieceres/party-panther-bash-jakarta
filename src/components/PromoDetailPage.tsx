@@ -41,6 +41,7 @@ interface Promo {
   created_at: string;
   created_by: string;
   venue_id: string | null;
+  slug?: string;
 }
 
 export const PromoDetailPage = () => {
