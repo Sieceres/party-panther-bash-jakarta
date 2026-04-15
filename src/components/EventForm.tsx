@@ -522,7 +522,6 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
                     : (initialData?.id ? "Save Changes" : "Create Event")}
               </Button>
             </div>
-            </Button>
           </form>
         </CardContent>
       </Card>
