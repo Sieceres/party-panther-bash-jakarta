@@ -77,3 +77,9 @@ export const getPromoUrl = (promo: any) => `/promo/${promo?.slug || promo?.id}`;
 export const getVenueUrl = (venue: any) => `/venue/${venue?.slug || venue?.id}`;
 export const getEditEventUrl = (event: any) => `/edit-event/${event?.slug || event?.id}`;
 export const getEditPromoUrl = (promo: any) => `/edit-promo/${promo?.slug || promo?.id}`;
+
+// OG-meta share URLs — these go through the edge function so WhatsApp/social crawlers get proper previews
+const OG_META_BASE = "https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/og-meta";
+export const getEventShareUrl = (event: any) => `${OG_META_BASE}/event/${event?.slug || event?.id}`;
+export const getPromoShareUrl = (promo: any) => `${OG_META_BASE}/promo/${promo?.slug || promo?.id}`;
+export const getVenueShareUrl = (venue: any) => `${OG_META_BASE}/venue/${venue?.slug || venue?.id}`;

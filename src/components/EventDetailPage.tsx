@@ -30,7 +30,7 @@ import { Header } from "./Header";
 import { EventTags } from "./EventTags";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { getEventBySlugOrId, getEditEventUrl } from "@/lib/slug-utils";
+import { getEventBySlugOrId, getEditEventUrl, getEventShareUrl } from "@/lib/slug-utils";
 import Linkify from "linkify-react";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import defaultAvatar from "@/assets/default-avatar.png";
@@ -1008,6 +1008,12 @@ export const EventDetailPage = () => {
       <Helmet>
         <title>{event.title} at {event.venue_name} — Jakarta Event | Party Panther</title>
         <meta name="description" content={`${event.title} at ${event.venue_name}, Jakarta on ${event.date}. ${event.description?.slice(0, 120)}`} />
+        <meta property="og:title" content={`${event.title} at ${event.venue_name} — Jakarta Event | Party Panther`} />
+        <meta property="og:description" content={`${event.title} at ${event.venue_name}, Jakarta on ${event.date}. ${event.description?.slice(0, 120)}`} />
+        <meta property="og:image" content={event.image_url || 'https://lovable.dev/opengraph-image-p98pqg.png'} />
+        <meta property="og:url" content={`https://partypanther.net/event/${event.slug || id}`} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <Header activeSection="events" />
       <div className="min-h-screen bg-background pt-20 px-4">
@@ -1500,7 +1506,8 @@ export const EventDetailPage = () => {
                     variant="outline"
                     className="w-full"
                     onClick={() => {
-                      navigator.clipboard.writeText(window.location.href);
+                      const shareUrl = getEventShareUrl(event);
+                      navigator.clipboard.writeText(shareUrl);
                       toast({
                         title: "Link Copied!",
                         description: "Event link copied to clipboard.",

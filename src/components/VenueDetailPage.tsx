@@ -282,6 +282,12 @@ export const VenueDetailPage = () => {
       <Helmet>
         <title>{`${venue.name}${venue.area ? ` — ${venue.area}` : ''} — Jakarta Bar & Club | Party Panther`}</title>
         <meta name="description" content={`${venue.name}${venue.area ? ` in ${venue.area}` : ''}, Jakarta. ${venue.description?.slice(0, 120) || 'Discover drink promos, events and more at this Jakarta venue.'}`} />
+        <meta property="og:title" content={`${venue.name}${venue.area ? ` — ${venue.area}` : ''} — Jakarta Bar & Club | Party Panther`} />
+        <meta property="og:description" content={`${venue.name}${venue.area ? ` in ${venue.area}` : ''}, Jakarta. ${venue.description?.slice(0, 120) || 'Discover drink promos, events and more.'}`} />
+        <meta property="og:image" content={venue.image_url || 'https://lovable.dev/opengraph-image-p98pqg.png'} />
+        <meta property="og:url" content={`https://partypanther.net/venue/${venue.slug || venue.id}`} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <Header activeSection="venues" />
       <div className="min-h-screen bg-background pt-20 px-4">

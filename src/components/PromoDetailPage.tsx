@@ -41,6 +41,7 @@ interface Promo {
   created_at: string;
   created_by: string;
   venue_id: string | null;
+  slug?: string;
 }
 
 export const PromoDetailPage = () => {
@@ -228,6 +229,12 @@ export const PromoDetailPage = () => {
       <Helmet>
         <title>{promo.title} at {promo.venue_name} — Jakarta Drink Promo | Party Panther</title>
         <meta name="description" content={`${promo.discount_text} — ${promo.title} at ${promo.venue_name}${promo.area ? ` in ${promo.area}` : ''}, Jakarta. ${promo.description?.slice(0, 120)}`} />
+        <meta property="og:title" content={`${promo.title} at ${promo.venue_name} — Jakarta Drink Promo | Party Panther`} />
+        <meta property="og:description" content={`${promo.discount_text} — ${promo.title} at ${promo.venue_name}${promo.area ? ` in ${promo.area}` : ''}, Jakarta.`} />
+        <meta property="og:image" content={promo.image_url || 'https://lovable.dev/opengraph-image-p98pqg.png'} />
+        <meta property="og:url" content={`https://partypanther.net/promo/${promo.slug || promo.id}`} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <Header activeSection="promos" />
       <div className="min-h-screen bg-background pt-20 px-4 pb-24 lg:pb-4">
@@ -495,7 +502,8 @@ export const PromoDetailPage = () => {
                   className="w-full min-h-[44px]"
                   style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
                   onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
+                    const shareUrl = `https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/og-meta/promo/${promo.slug || promo.id}`;
+                    navigator.clipboard.writeText(shareUrl);
                     toast({
                       title: "Link Copied!",
                       description: "Promo link copied to clipboard.",
