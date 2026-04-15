@@ -1081,7 +1081,7 @@ export const EventDetailPage = () => {
                       <h4 className="text-base sm:text-lg font-semibold">Organizer</h4>
                       <div className="flex items-center gap-2 flex-wrap">
                         <UserIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <span className="text-sm sm:text-base">{event.organizer_name}</span>
+                        <span className="text-sm sm:text-base">{event.organizer_name || creatorProfile?.display_name || "Anonymous"}</span>
                         {creatorProfile?.venue_status === "verified" && (
                           <Badge variant="secondary" className="text-xs flex items-center gap-1">
                             <BadgeCheck className="w-3 h-3" />
