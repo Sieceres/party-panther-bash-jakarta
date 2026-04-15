@@ -13,6 +13,7 @@ import { ImageUpload } from "./form-components/ImageUpload";
 import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
 import { DuplicateWarning } from "./DuplicateWarning";
 import { VoucherSettings } from "./VoucherSettings";
+import { PromoPreviewDialog } from "./PromoPreviewDialog";
 import type { VenueResult } from "./form-components/VenueAutocomplete";
 
 export const CreatePromoForm = () => {
@@ -280,13 +281,16 @@ export const CreatePromoForm = () => {
               confirmed={duplicateConfirmed}
             />
 
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 neon-glow disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isSubmitting || !isFormValid() || isChecking}
-            >
-              {isSubmitting ? "Creating Promo..." : showDuplicateWarning ? "Confirm & Create Promo" : "Create Promo"}
-            </Button>
+            <div className="flex gap-3">
+              <PromoPreviewDialog formData={formData} validUntilDate={validUntilDate} />
+              <Button
+                type="submit"
+                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 neon-glow disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting || !isFormValid() || isChecking}
+              >
+                {isSubmitting ? "Creating Promo..." : showDuplicateWarning ? "Confirm & Create Promo" : "Create Promo"}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

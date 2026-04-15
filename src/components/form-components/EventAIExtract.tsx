@@ -159,21 +159,41 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
               onValueChange={(v) => setAiStyle(v as typeof aiStyle)}
               className="grid grid-cols-2 gap-2"
             >
-              <label className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${aiStyle === "playful" ? "border-primary bg-primary/5" : "border-input hover:bg-muted/50"}`}>
-                <RadioGroupItem value="playful" id="style-playful" />
-                <span>🎉 Playful</span>
+              <label className={`flex flex-col rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${aiStyle === "playful" ? "border-primary bg-primary/5" : "border-input hover:bg-muted/50"}`}>
+                <span className="flex items-center gap-2">
+                  <RadioGroupItem value="playful" id="style-playful" />
+                  <span>🎉 Playful</span>
+                </span>
+                {aiStyle === "playful" && (
+                  <p className="text-[11px] text-muted-foreground mt-1 ml-6">Fun tone with emojis and bullet points — great for social events</p>
+                )}
               </label>
-              <label className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${aiStyle === "compact" ? "border-primary bg-primary/5" : "border-input hover:bg-muted/50"}`}>
-                <RadioGroupItem value="compact" id="style-compact" />
-                <span>📋 Compact</span>
+              <label className={`flex flex-col rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${aiStyle === "compact" ? "border-primary bg-primary/5" : "border-input hover:bg-muted/50"}`}>
+                <span className="flex items-center gap-2">
+                  <RadioGroupItem value="compact" id="style-compact" />
+                  <span>📋 Compact</span>
+                </span>
+                {aiStyle === "compact" && (
+                  <p className="text-[11px] text-muted-foreground mt-1 ml-6">Short &amp; factual — just the essentials, no fluff</p>
+                )}
               </label>
-              <label className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${aiStyle === "exact" ? "border-primary bg-primary/5" : "border-input hover:bg-muted/50"}`}>
-                <RadioGroupItem value="exact" id="style-exact" />
-                <span>📌 Exact</span>
+              <label className={`flex flex-col rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${aiStyle === "exact" ? "border-primary bg-primary/5" : "border-input hover:bg-muted/50"}`}>
+                <span className="flex items-center gap-2">
+                  <RadioGroupItem value="exact" id="style-exact" />
+                  <span>📌 Exact</span>
+                </span>
+                {aiStyle === "exact" && (
+                  <p className="text-[11px] text-muted-foreground mt-1 ml-6">Copies the original text as closely as possible</p>
+                )}
               </label>
-              <label className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${aiStyle === "custom" ? "border-primary bg-primary/5" : "border-input hover:bg-muted/50"}`}>
-                <RadioGroupItem value="custom" id="style-custom" />
-                <span><Pencil className="w-3 h-3 inline mr-1" />Custom</span>
+              <label className={`flex flex-col rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${aiStyle === "custom" ? "border-primary bg-primary/5" : "border-input hover:bg-muted/50"}`}>
+                <span className="flex items-center gap-2">
+                  <RadioGroupItem value="custom" id="style-custom" />
+                  <span><Pencil className="w-3 h-3 inline mr-1" />Custom</span>
+                </span>
+                {aiStyle === "custom" && (
+                  <p className="text-[11px] text-muted-foreground mt-1 ml-6">Write your own instructions for the AI</p>
+                )}
               </label>
             </RadioGroup>
             {aiStyle === "custom" && (

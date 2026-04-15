@@ -16,6 +16,7 @@ import { ImageUpload } from "./form-components/ImageUpload";
 import { EventTagSelector } from "./form-components/EventTagSelector";
 import { EventPrivacySettings } from "./form-components/EventPrivacySettings";
 import { EventAIExtract } from "./form-components/EventAIExtract";
+import { EventPreviewDialog } from "./EventPreviewDialog";
 import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
 import { DuplicateWarning } from "./DuplicateWarning";
 
@@ -507,17 +508,20 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               />
             )}
 
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 neon-glow"
-              disabled={!canSubmit()}
-            >
-              {isSubmitting 
-                ? (initialData?.id ? "Saving Changes..." : "Creating Event...") 
-                : showDuplicateWarning 
-                  ? "Confirm & Create Event" 
-                  : (initialData?.id ? "Save Changes" : "Create Event")}
-            </Button>
+            <div className="flex gap-3">
+              <EventPreviewDialog formData={formData} eventDate={eventDate} />
+              <Button
+                type="submit"
+                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 neon-glow"
+                disabled={!canSubmit()}
+              >
+                {isSubmitting 
+                  ? (initialData?.id ? "Saving Changes..." : "Creating Event...") 
+                  : showDuplicateWarning 
+                    ? "Confirm & Create Event" 
+                    : (initialData?.id ? "Save Changes" : "Create Event")}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
