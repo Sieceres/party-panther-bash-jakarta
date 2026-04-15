@@ -21,7 +21,7 @@ interface PromoPreviewDialogProps {
 
 export const PromoPreviewDialog = ({ formData, validUntilDate }: PromoPreviewDialogProps) => {
   const hasMinData = formData.title.trim();
-  const drinkCategory = detectDrinkCategory(formData.title + " " + formData.description);
+  const drinkCategory = detectDrinkCategory(formData.title, formData.description, formData.promoType, formData.drinkType);
   const placeholderImage = getPlaceholderImage(drinkCategory);
 
   return (
