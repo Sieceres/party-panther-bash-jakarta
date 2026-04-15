@@ -69,6 +69,7 @@ interface Event {
   max_attendees?: number;
   enable_check_in?: boolean;
   enable_photos?: boolean;
+  venue_id?: string;
 }
 
 export const EventDetailPage = () => {
