@@ -4,8 +4,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Upload, FileText, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, Upload, FileText, Loader2, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { toast } from "sonner";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ExtractedEvent {
   title?: string;
@@ -27,6 +28,8 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
   const [mode, setMode] = useState<"poster" | "text">("poster");
   const [isExtracting, setIsExtracting] = useState(false);
   const [textInput, setTextInput] = useState("");
+  const [aiStyle, setAiStyle] = useState<"playful" | "compact" | "exact" | "custom">("exact");
+  const [customInstructions, setCustomInstructions] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,7 +49,7 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
     setIsExtracting(true);
     try {
       const { data, error } = await supabase.functions.invoke("extract-from-image", {
-        body: { image: imageData, type: "event" },
+        body: { image: imageData, type: "event", style: aiStyle, customInstructions: aiStyle === "custom" ? customInstructions : undefined },
       });
 
       if (error) throw error;
@@ -82,7 +85,7 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
     setIsExtracting(true);
     try {
       const { data, error } = await supabase.functions.invoke("extract-from-image", {
-        body: { text: textInput, type: "event" },
+        body: { text: textInput, type: "event", style: aiStyle, customInstructions: aiStyle === "custom" ? customInstructions : undefined },
       });
 
       if (error) throw error;
@@ -147,6 +150,41 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
               <FileText className="w-3.5 h-3.5 mr-1.5" />
               Paste Text
             </Button>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">AI Style</Label>
+            <RadioGroup
+              value={aiStyle}
+              onValueChange={(v) => setAiStyle(v as typeof aiStyle)}
+              className="grid grid-cols-2 gap-2"
+            >
+              <label className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${aiStyle === "playful" ? "border-primary bg-primary/5" : "border-input hover:bg-muted/50"}`}>
+                <RadioGroupItem value="playful" id="style-playful" />
+                <span>🎉 Playful</span>
+              </label>
+              <label className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${aiStyle === "compact" ? "border-primary bg-primary/5" : "border-input hover:bg-muted/50"}`}>
+                <RadioGroupItem value="compact" id="style-compact" />
+                <span>📋 Compact</span>
+              </label>
+              <label className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${aiStyle === "exact" ? "border-primary bg-primary/5" : "border-input hover:bg-muted/50"}`}>
+                <RadioGroupItem value="exact" id="style-exact" />
+                <span>📌 Exact</span>
+              </label>
+              <label className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${aiStyle === "custom" ? "border-primary bg-primary/5" : "border-input hover:bg-muted/50"}`}>
+                <RadioGroupItem value="custom" id="style-custom" />
+                <span><Pencil className="w-3 h-3 inline mr-1" />Custom</span>
+              </label>
+            </RadioGroup>
+            {aiStyle === "custom" && (
+              <Textarea
+                value={customInstructions}
+                onChange={(e) => setCustomInstructions(e.target.value)}
+                placeholder="e.g. Write the description in Bahasa Indonesia, use bullet points..."
+                rows={2}
+                className="text-xs"
+              />
+            )}
           </div>
 
           {mode === "poster" && (

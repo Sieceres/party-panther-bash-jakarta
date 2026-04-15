@@ -232,7 +232,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { image, text, type } = await req.json();
+    const { image, text, type, style, customInstructions } = await req.json();
 
     if (!image && !text) {
       return new Response(JSON.stringify({ error: "No image or text provided" }), {
@@ -250,7 +250,20 @@ serve(async (req) => {
     }
 
     const { tool, name: toolName } = getToolConfig(type);
-    const systemPrompt = getSystemPrompt(type);
+    let systemPrompt = getSystemPrompt(type);
+    
+    // Append style instructions for event extraction
+    if (type === "event" || !type) {
+      if (style === "playful") {
+        systemPrompt += `\n\nSTYLE INSTRUCTIONS: Write the description in a fun, playful tone with emojis. Use bullet points with emojis for key details. Make it sound exciting and inviting.`;
+      } else if (style === "compact") {
+        systemPrompt += `\n\nSTYLE INSTRUCTIONS: Keep the description very brief and factual — just the essential info (what, when, where). No emojis, no filler. One or two sentences max.`;
+      } else if (style === "exact") {
+        systemPrompt += `\n\nSTYLE INSTRUCTIONS: Use the exact wording from the source material as closely as possible. Do not rephrase or embellish.`;
+      } else if (style === "custom" && customInstructions) {
+        systemPrompt += `\n\nSTYLE INSTRUCTIONS: ${customInstructions}`;
+      }
+    }
     const typeLabel = type === "venue" ? "venues" : type === "contact" ? "venue contact details" : type === "promo" ? "promos/deals" : "events";
 
     console.log(`Starting extraction for type: ${type}, mode: ${image ? "image" : "text"}`);
