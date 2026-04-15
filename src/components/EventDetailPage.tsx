@@ -1008,6 +1008,12 @@ export const EventDetailPage = () => {
       <Helmet>
         <title>{event.title} at {event.venue_name} — Jakarta Event | Party Panther</title>
         <meta name="description" content={`${event.title} at ${event.venue_name}, Jakarta on ${event.date}. ${event.description?.slice(0, 120)}`} />
+        <meta property="og:title" content={`${event.title} at ${event.venue_name} — Jakarta Event | Party Panther`} />
+        <meta property="og:description" content={`${event.title} at ${event.venue_name}, Jakarta on ${event.date}. ${event.description?.slice(0, 120)}`} />
+        <meta property="og:image" content={event.image_url || 'https://lovable.dev/opengraph-image-p98pqg.png'} />
+        <meta property="og:url" content={`https://partypanther.net/event/${event.slug || id}`} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <Header activeSection="events" />
       <div className="min-h-screen bg-background pt-20 px-4">
