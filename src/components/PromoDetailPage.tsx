@@ -228,6 +228,12 @@ export const PromoDetailPage = () => {
       <Helmet>
         <title>{promo.title} at {promo.venue_name} — Jakarta Drink Promo | Party Panther</title>
         <meta name="description" content={`${promo.discount_text} — ${promo.title} at ${promo.venue_name}${promo.area ? ` in ${promo.area}` : ''}, Jakarta. ${promo.description?.slice(0, 120)}`} />
+        <meta property="og:title" content={`${promo.title} at ${promo.venue_name} — Jakarta Drink Promo | Party Panther`} />
+        <meta property="og:description" content={`${promo.discount_text} — ${promo.title} at ${promo.venue_name}${promo.area ? ` in ${promo.area}` : ''}, Jakarta.`} />
+        <meta property="og:image" content={promo.image_url || 'https://lovable.dev/opengraph-image-p98pqg.png'} />
+        <meta property="og:url" content={`https://partypanther.net/promo/${promo.slug || promo.id}`} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <Header activeSection="promos" />
       <div className="min-h-screen bg-background pt-20 px-4 pb-24 lg:pb-4">
