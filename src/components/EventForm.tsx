@@ -150,6 +150,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
     venue_address?: string;
     organizer_name?: string;
     price_currency?: string;
+    image_url?: string;
   }) => {
     setFormData(prev => ({
       ...prev,
@@ -158,6 +159,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       time: extracted.time || prev.time,
       venue: extracted.venue_name || prev.venue,
       organizer: extracted.organizer_name || prev.organizer,
+      // Use the poster image if no image has been set yet
+      image: (extracted.image_url && !prev.image) ? extracted.image_url : prev.image,
     }));
     if (extracted.venue_address) {
       setVenueArea(extracted.venue_address);
