@@ -502,7 +502,8 @@ export const PromoDetailPage = () => {
                   className="w-full min-h-[44px]"
                   style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
                   onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
+                    const shareUrl = `https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/og-meta/promo/${promo.slug || promo.id}`;
+                    navigator.clipboard.writeText(shareUrl);
                     toast({
                       title: "Link Copied!",
                       description: "Promo link copied to clipboard.",

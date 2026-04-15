@@ -30,7 +30,7 @@ import { Header } from "./Header";
 import { EventTags } from "./EventTags";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { getEventBySlugOrId, getEditEventUrl } from "@/lib/slug-utils";
+import { getEventBySlugOrId, getEditEventUrl, getEventShareUrl } from "@/lib/slug-utils";
 import Linkify from "linkify-react";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import defaultAvatar from "@/assets/default-avatar.png";
@@ -1506,7 +1506,8 @@ export const EventDetailPage = () => {
                     variant="outline"
                     className="w-full"
                     onClick={() => {
-                      navigator.clipboard.writeText(window.location.href);
+                      const shareUrl = getEventShareUrl(event);
+                      navigator.clipboard.writeText(shareUrl);
                       toast({
                         title: "Link Copied!",
                         description: "Event link copied to clipboard.",
