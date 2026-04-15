@@ -17,6 +17,7 @@ interface ExtractedEvent {
   venue_address?: string;
   organizer_name?: string;
   price_currency?: string;
+  image_url?: string;
 }
 
 interface EventAIExtractProps {
@@ -61,6 +62,8 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
       }
 
       const event = items[0] as ExtractedEvent;
+      // Use the uploaded poster as the event image
+      event.image_url = imageData;
       onExtracted(event);
       toast.success("Event details extracted!", {
         description: `Found: ${event.title || "event info"}`,
