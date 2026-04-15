@@ -1159,6 +1159,9 @@ export const AdminDashboard = () => {
             <AdminVenueAudit />
           </TabsContent>
 
+          <TabsContent value="venue-merge" className="space-y-4">
+            <AdminVenueMerge />
+
           <TabsContent value="database" className="space-y-4">
             <Card>
               <CardHeader>
