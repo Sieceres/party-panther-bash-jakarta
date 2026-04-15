@@ -78,9 +78,9 @@ export const getVenueUrl = (venue: any) => `/venue/${venue?.slug || venue?.id}`;
 export const getEditEventUrl = (event: any) => `/edit-event/${event?.slug || event?.id}`;
 export const getEditPromoUrl = (promo: any) => `/edit-promo/${promo?.slug || promo?.id}`;
 
-// Share URLs route through the OG meta edge function so crawlers (WhatsApp, Facebook, etc.)
-// receive proper dynamic meta tags. The og:url tag still shows partypanther.net.
-const OG_META_BASE = "https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/og-meta";
-export const getEventShareUrl = (event: any) => `${OG_META_BASE}/e/${event?.slug || event?.id}`;
-export const getPromoShareUrl = (promo: any) => `${OG_META_BASE}/p/${promo?.slug || promo?.id}`;
-export const getVenueShareUrl = (venue: any) => `${OG_META_BASE}/v/${venue?.slug || venue?.id}`;
+// Short share URLs on the main domain — Cloudflare Worker handles
+// crawler detection and proxies to the og-meta edge function for rich previews.
+const SITE_URL = "https://partypanther.net";
+export const getEventShareUrl = (event: any) => `${SITE_URL}/e/${event?.slug || event?.id}`;
+export const getPromoShareUrl = (promo: any) => `${SITE_URL}/p/${promo?.slug || promo?.id}`;
+export const getVenueShareUrl = (venue: any) => `${SITE_URL}/v/${venue?.slug || venue?.id}`;
