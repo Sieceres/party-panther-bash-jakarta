@@ -215,6 +215,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                     alignItems: "center",
                     height: scaledLogoSize,
                     lineHeight: 1,
+                    transform: "translateY(0px)",
                   }}
                 >
                   Party Panther
