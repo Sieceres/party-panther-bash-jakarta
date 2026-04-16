@@ -534,11 +534,10 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
           <div
             style={{
               transform: `scale(${previewScale})`,
-              transformOrigin: "top left",
+              transformOrigin: "top center",
               width: dimensions.width,
               height: dimensions.height,
               marginBottom: -(dimensions.height * (1 - previewScale)),
-              marginRight: -(dimensions.width * (1 - previewScale)),
             }}
           >
             <div
