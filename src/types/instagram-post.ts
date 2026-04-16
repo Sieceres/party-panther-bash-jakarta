@@ -127,6 +127,7 @@ export interface PostContent {
   dividerColor?: string;
   dividerThickness?: number;
   dividerWidth?: number; // percentage 10-100
+  dividerOffsetY?: number; // vertical offset in px, -50 to 50
   dividerGlow?: boolean;
   dividerGlowIntensity?: number; // 1-20
   dividerStyle?: "line" | "dashed" | "dotted" | "double";
