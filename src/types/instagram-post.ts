@@ -129,7 +129,6 @@ export interface PostContent {
   dividerWidth?: number; // percentage 10-100
   dividerGlow?: boolean;
   dividerGlowIntensity?: number; // 1-20
-  dividerOffsetY?: number; // -80 to 80
   dividerStyle?: "line" | "dashed" | "dotted" | "double";
   sectionBoxes?: boolean;
   sectionBoxColor?: string;
@@ -288,7 +287,6 @@ export const DEFAULT_POST_CONTENT: PostContent = {
     sections: [1],
   },
   qrCode: DEFAULT_QR_CODE,
-  dividerOffsetY: 0,
   // Legacy
   textPosition: { x: 50, y: 50 },
 };

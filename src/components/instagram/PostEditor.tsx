@@ -798,18 +798,6 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                     />
                     <span className="text-xs text-muted-foreground w-6 text-right">{content.dividerThickness ?? 3}px</span>
                   </div>
-                  <div className="flex gap-2 items-center">
-                    <Label className="text-xs w-14">Y Offset</Label>
-                    <Slider
-                      value={[content.dividerOffsetY ?? 0]}
-                      onValueChange={([v]) => updateField("dividerOffsetY", v)}
-                      min={-80}
-                      max={80}
-                      step={1}
-                      className="flex-1"
-                    />
-                    <span className="text-xs text-muted-foreground w-10 text-right">{content.dividerOffsetY ?? 0}px</span>
-                  </div>
                   <div className="flex items-center justify-between">
                     <Label className="text-xs">Glow Effect</Label>
                     <Switch

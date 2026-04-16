@@ -6,7 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import type { PostContent, BackgroundStyle, ElementPosition, LogoSettings } from "@/types/instagram-post";
 import partyPantherLogo from "@/assets/party-panther-logo.png";
-import { InstagramPostScene } from "./InstagramPostScene";
 
 interface PostPreviewProps {
   content: PostContent;
@@ -531,7 +530,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
         </div>
       </CardHeader>
       <CardContent className="p-3">
-        <div className="flex justify-center" style={{ maxHeight: 600, overflow: "auto" }}>
+        <div className="overflow-auto max-h-[600px] flex justify-center">
           <div
             style={{
               transform: `scale(${previewScale})`,
@@ -547,31 +546,100 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                 width: dimensions.width,
                 height: dimensions.height,
                 position: "relative",
+                overflow: "hidden",
+                fontFamily: "'Poppins', sans-serif",
               }}
             >
-              <InstagramPostScene
-                content={content}
-                width={dimensions.width}
-                height={dimensions.height}
-              />
+              {/* Starfield background for middle coverage */}
+              {bgStyle === "custom-image" && bgImage && bgCoverage === "middle" && (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "linear-gradient(180deg, #0d1b3e 0%, #1a1a2e 50%, #0d1b3e 100%)",
+                  }}
+                >
+                  {stars.map((star) => (
+                    <div
+                      key={star.id}
+                      style={{
+                        position: "absolute",
+                        left: `${star.x}%`,
+                        top: `${star.y}%`,
+                        width: star.size,
+                        height: star.size,
+                        borderRadius: "50%",
+                        backgroundColor: "#ffffff",
+                        opacity: star.opacity,
+                        boxShadow: `0 0 ${star.size * 2}px rgba(255, 255, 255, 0.5)`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
 
-              {((content.showLogo ?? true) || (content.showBrandName ?? true)) && onLogoPositionChange && (() => {
-                const logoX = content.logoSettings?.position?.x ?? 10;
-                const logoY = content.logoSettings?.position?.y ?? 5;
-                return (
+              {/* Custom Background Image */}
+              {bgStyle === "custom-image" && bgImage && (
+                <>
                   <div
                     style={{
                       position: "absolute",
-                      left: `${logoX}%`,
-                      top: `${logoY}%`,
-                      zIndex: 30,
-                      width: 260,
-                      height: 72,
-                      cursor: draggingElement === "logo" ? "grabbing" : "grab",
-                      userSelect: "none",
+                      ...getBackgroundImageStyle(),
+                      backgroundImage: `url(${bgImage})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
                     }}
-                    onMouseDown={(e) => handleDrag("logo", e)}
-                  >
+                  />
+                  {bgOpacity > 0 && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        ...getBackgroundImageStyle(),
+                        backgroundColor: `rgba(0,0,0,${bgOpacity / 100})`,
+                      }}
+                    />
+                  )}
+                </>
+              )}
+
+              {/* Background gradient */}
+              {bgStyle !== "custom-image" && (
+                <div style={{ position: "absolute", inset: 0, background: bgConfig.mainGradient }} />
+              )}
+
+              {/* Overlay (for custom images, overlay is controlled ONLY by “Overlay Darkness”) */}
+              {bgStyle !== "custom-image" && (
+                <div style={{ position: "absolute", inset: 0, background: bgConfig.overlay }} />
+              )}
+
+              {/* Logo & Brand */}
+              {((content.showLogo ?? true) || (content.showBrandName ?? true)) && (() => {
+                const logoScale = content.logoSettings?.scale ?? 1;
+                const logoX = content.logoSettings?.position?.x ?? 10;
+                const logoY = content.logoSettings?.position?.y ?? 5;
+                const baseLogoSize = 56;
+                const scaledLogoSize = baseLogoSize * logoScale;
+                const scaledFontSize = 28 * logoScale;
+                return (
+                <div
+                  data-brand-container
+                  style={{
+                    position: "absolute",
+                    left: `${logoX}%`,
+                    top: `${logoY}%`,
+                    zIndex: 10,
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 8 * logoScale,
+                    cursor: onLogoPositionChange
+                      ? draggingElement === "logo" ? "grabbing" : "grab"
+                      : "default",
+                    userSelect: "none",
+                  }}
+                  onMouseDown={(e) => onLogoPositionChange && handleDrag("logo", e)}
+                >
+                  {onLogoPositionChange && (
                     <div
                       style={{
                         position: "absolute",
@@ -591,11 +659,57 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     >
                       <Move size={10} /> Logo
                     </div>
-                  </div>
+                  )}
+                  {(content.showLogo ?? true) && (
+                    <img
+                      data-brand-logo
+                      src={partyPantherLogo}
+                      alt="Party Panther logo"
+                      width={scaledLogoSize}
+                      height={scaledLogoSize}
+                      crossOrigin="anonymous"
+                      loading="eager"
+                      decoding="async"
+                      style={{
+                        width: scaledLogoSize,
+                        height: scaledLogoSize,
+                        minWidth: scaledLogoSize,
+                        minHeight: scaledLogoSize,
+                        objectFit: "contain",
+                        filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
+                        display: "block",
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
+                  {(content.showBrandName ?? true) && (
+                    <span
+                      data-brand-text
+                      style={{
+                        fontSize: scaledFontSize,
+                        fontWeight: 800,
+                        background: "linear-gradient(to right, #00CFFF, #4F8EFF)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                        whiteSpace: "nowrap",
+                        filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
+                        display: "flex",
+                        alignItems: "center",
+                        height: scaledLogoSize,
+                        lineHeight: 1,
+                        transform: "translateY(0px)",
+                      }}
+                    >
+                      Party Panther
+                    </span>
+                  )}
+                </div>
                 );
               })()}
 
-              {content.headline && onHeadlinePositionChange && (
+              {/* Headline - Draggable */}
+              {content.headline && (
                 <div
                   style={{
                     position: "absolute",
@@ -603,36 +717,56 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     left: `${content.positions?.headline?.x || 50}%`,
                     transform: `translate(-50%, -50%) rotate(${rotations.headline}deg)`,
                     width: dimensions.width - 128,
-                    minHeight: content.fontSizes?.headline || 72,
-                    zIndex: 30,
-                    cursor: draggingElement === "headline" ? "grabbing" : "grab",
+                    textAlign: alignments.headline,
+                    zIndex: content.zIndex?.headline || 5,
+                    cursor: onHeadlinePositionChange
+                      ? draggingElement === "headline"
+                        ? "grabbing"
+                        : "grab"
+                      : "default",
                     userSelect: "none",
                   }}
-                  onMouseDown={(e) => handleDrag("headline", e)}
+                  onMouseDown={(e) => onHeadlinePositionChange && handleDrag("headline", e)}
                 >
+                  {onHeadlinePositionChange && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: -24,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        background: "rgba(0,0,0,0.6)",
+                        padding: "2px 8px",
+                        borderRadius: 4,
+                        fontSize: 12,
+                        color: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                        opacity: draggingElement === "headline" ? 1 : 0.5,
+                      }}
+                      data-drag-label
+                    >
+                      <Move size={10} /> Headline
+                    </div>
+                  )}
                   <div
                     style={{
-                      position: "absolute",
-                      top: -24,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      background: "rgba(0,0,0,0.6)",
-                      padding: "2px 8px",
-                      borderRadius: 4,
-                      fontSize: 12,
-                      color: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                      opacity: draggingElement === "headline" ? 1 : 0.5,
+                      fontSize: content.fontSizes?.headline || 72,
+                      fontWeight: 700,
+                      fontFamily: `'${content.fonts?.headline || "Poppins"}', sans-serif`,
+                      lineHeight: 1.2,
+                      color: colors.headline,
+                      whiteSpace: "pre-line",
+                      ...getTextStyle("headline"),
                     }}
-                    data-drag-label
                   >
-                    <Move size={10} /> Headline
+                    {content.headline}
                   </div>
                 </div>
               )}
 
+              {/* Content Sections - Each Draggable */}
               {content.sections.map((section, index) => (
                 <div
                   key={index}
@@ -642,9 +776,13 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     left: `${content.positions?.sections?.[index]?.x || 50}%`,
                     transform: `translate(-50%, -50%) rotate(${rotations.sections?.[index] || 0}deg)`,
                     width: dimensions.width - 128,
-                    minHeight: 120,
-                    zIndex: 30,
-                    cursor: onSectionPositionChange ? (draggingElement === `section-${index}` ? "grabbing" : "grab") : "default",
+                    textAlign: alignments.subheadline,
+                    zIndex: content.zIndex?.sections?.[index] || 3,
+                    cursor: onSectionPositionChange
+                      ? draggingElement === `section-${index}`
+                        ? "grabbing"
+                        : "grab"
+                      : "default",
                     userSelect: "none",
                   }}
                   onMouseDown={(e) => onSectionPositionChange && handleDrag(`section-${index}`, e)}
@@ -671,6 +809,110 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                       <Move size={10} /> Section {index + 1}
                     </div>
                   )}
+                  {/* Divider line above section (if enabled) */}
+                  {content.showDividers && (() => {
+                    const dColor = content.dividerColor || "#ffffff";
+                    const dWidth = `${content.dividerWidth ?? 60}%`;
+                    const dThickness = content.dividerThickness ?? 3;
+                    const dStyle = content.dividerStyle || "line";
+                    const dGlow = content.dividerGlow ?? false;
+                    const dGlowIntensity = content.dividerGlowIntensity ?? 8;
+
+                    if (dStyle === "dashed" || dStyle === "dotted" || dStyle === "double") {
+                      return (
+                        <div
+                          style={{
+                            width: dWidth,
+                            borderTop: `${dThickness}px ${dStyle === "double" ? "double" : dStyle} ${dColor}`,
+                            margin: "0 auto",
+                            marginBottom: 20,
+                            ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
+                          }}
+                        />
+                      );
+                    }
+                    return (
+                      <div
+                        style={{
+                          width: dWidth,
+                          height: dThickness,
+                          background: `linear-gradient(90deg, transparent 0%, ${dColor} 15%, ${dColor} 85%, transparent 100%)`,
+                          margin: "0 auto",
+                          marginBottom: 20,
+                          ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
+                        }}
+                      />
+                    );
+                  })()}
+                  {/* Section box wrapper */}
+                  {(() => {
+                    const boxEnabled = content.sectionBoxes ?? false;
+                    const boxColor = content.sectionBoxColor || "#ffffff";
+                    const boxOpacity = (content.sectionBoxOpacity ?? 15) / 100;
+                    const boxRadius = content.sectionBoxRadius ?? 12;
+                    const boxPadding = content.sectionBoxPadding ?? 24;
+                    const boxStyle = content.sectionBoxStyle || "border-only";
+                    const borderWidth = content.sectionBoxBorderWidth ?? 2;
+                    const showGlow = content.sectionBoxGlow ?? false;
+                    const glowIntensity = content.sectionBoxGlowIntensity ?? 10;
+                    const hexToRgba = (hex: string, alpha: number) => {
+                      const r = parseInt(hex.slice(1, 3), 16) || 255;
+                      const g = parseInt(hex.slice(3, 5), 16) || 255;
+                      const b = parseInt(hex.slice(5, 7), 16) || 255;
+                      return `rgba(${r},${g},${b},${alpha})`;
+                    };
+                    const bgMap = {
+                      "border-only": "transparent",
+                      "frosted": "rgba(0,0,0,0.3)",
+                      "solid": hexToRgba(boxColor, boxOpacity * 0.5),
+                    };
+                    const glowShadow = showGlow
+                      ? `0 0 ${glowIntensity}px ${hexToRgba(boxColor, 0.6)}, inset 0 0 ${glowIntensity * 0.5}px ${hexToRgba(boxColor, 0.15)}`
+                      : "none";
+                    const wrapperStyle: React.CSSProperties = boxEnabled ? {
+                      background: bgMap[boxStyle],
+                      border: `${borderWidth}px solid ${hexToRgba(boxColor, boxOpacity)}`,
+                      borderRadius: boxRadius,
+                      padding: boxPadding,
+                      boxShadow: glowShadow,
+                      backdropFilter: boxStyle === "frosted" ? "blur(4px)" : "none",
+                    } : {};
+                    return (
+                      <div style={wrapperStyle}>
+                        {section.subheadline && (
+                          <div
+                            style={{
+                              fontSize: content.fontSizes?.subheadline || 48,
+                              fontWeight: 600,
+                              fontFamily: `'${content.fonts?.subheadline || "Poppins"}', sans-serif`,
+                              color: colors.subheadline,
+                              lineHeight: 1.3,
+                              marginBottom: 12,
+                              whiteSpace: "pre-line",
+                              ...getTextStyle("subheadline"),
+                            }}
+                          >
+                            {section.subheadline}
+                          </div>
+                        )}
+                        {section.body && (
+                          <div
+                            style={{
+                              fontSize: content.fontSizes?.body || 32,
+                              fontFamily: `'${content.fonts?.body || "Poppins"}', sans-serif`,
+                              lineHeight: 1.5,
+                              color: colors.body,
+                              textAlign: alignments.body,
+                              whiteSpace: "pre-line",
+                              ...getTextStyle("body"),
+                            }}
+                          >
+                            {section.body}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
             </div>

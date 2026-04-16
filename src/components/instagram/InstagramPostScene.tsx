@@ -61,8 +61,6 @@ export const hexToRgba = (hex: string, alpha: number) => {
   return `rgba(${r},${g},${b},${alpha})`;
 };
 
-const getDividerSpacing = (content: PostContent) => 20 + (content.dividerOffsetY ?? 0);
-
 const getBackgroundImageStyle = (content: PostContent): React.CSSProperties => {
   const bgCoverage = content.background?.coverage || "full";
   const bgCoveragePercent = content.background?.coveragePercent || 50;
@@ -265,7 +263,6 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
           const dStyle = content.dividerStyle || "line";
           const dGlow = content.dividerGlow ?? false;
           const dGlowIntensity = content.dividerGlowIntensity ?? 8;
-          const dividerSpacing = getDividerSpacing(content);
 
           const boxEnabled = content.sectionBoxes ?? false;
           const boxColor = content.sectionBoxColor || "#ffffff";
@@ -317,7 +314,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                         width: dWidth,
                         borderTop: `${dThickness}px ${dStyle === "double" ? "double" : dStyle} ${dColor}`,
                         margin: "0 auto",
-                        marginBottom: dividerSpacing,
+                        marginBottom: 20,
                         ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
                       }}
                     />
@@ -330,7 +327,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                       height: dThickness,
                       background: `linear-gradient(90deg, transparent 0%, ${dColor} 15%, ${dColor} 85%, transparent 100%)`,
                       margin: "0 auto",
-                      marginBottom: dividerSpacing,
+                      marginBottom: 20,
                       ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
                     }}
                   />
