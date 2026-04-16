@@ -407,7 +407,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg z-[1200] [&~*]:z-[1200]">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto z-[1200] [&~*]:z-[1200]">
         <DialogHeader>
           <DialogTitle>Animation Preview</DialogTitle>
         </DialogHeader>
