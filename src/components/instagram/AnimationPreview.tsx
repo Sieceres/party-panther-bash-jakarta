@@ -497,7 +497,7 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
           </div>
 
           {/* Scaled preview — uses the shared scene with timeline-driven styles */}
-          <div className="flex justify-center">
+          <div className="flex justify-center overflow-auto">
             <div
               style={{
                 width: previewWidth,
@@ -509,9 +509,10 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
               <div
                 style={{
                   transform: `scale(${previewScale})`,
-                  transformOrigin: "top left",
+                  transformOrigin: "top center",
                   width: dimensions.width,
                   height: dimensions.height,
+                  marginBottom: -(dimensions.height * (1 - previewScale)),
                 }}
               >
                 <InstagramPostScene
