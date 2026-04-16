@@ -789,7 +789,7 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                   <div className="flex gap-2 items-center">
                     <Label className="text-xs w-14">Thickness</Label>
                     <Slider
-                      value={[content.dividerThickness ?? 1]}
+                      value={[content.dividerThickness ?? 3]}
                       onValueChange={([v]) => updateField("dividerThickness", v)}
                       min={1}
                       max={8}
