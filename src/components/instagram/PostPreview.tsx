@@ -530,14 +530,15 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
         </div>
       </CardHeader>
       <CardContent className="p-3">
-        <div className="overflow-auto max-h-[600px] flex justify-center">
+        <div className="flex justify-center" style={{ maxHeight: 600, overflow: 'auto' }}>
           <div
             style={{
               transform: `scale(${previewScale})`,
-              transformOrigin: "top center",
+              transformOrigin: "top left",
               width: dimensions.width,
               height: dimensions.height,
               marginBottom: -(dimensions.height * (1 - previewScale)),
+              marginRight: -(dimensions.width * (1 - previewScale)),
             }}
           >
             <div
