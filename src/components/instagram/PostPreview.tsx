@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ExternalLink, Move, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
-import type { PostContent, BackgroundStyle, ElementPosition, LogoSettings } from "@/types/instagram-post";
-import partyPantherLogo from "@/assets/party-panther-logo.png";
+import type { PostContent, ElementPosition } from "@/types/instagram-post";
+import { InstagramPostScene } from "./InstagramPostScene";
 
 interface PostPreviewProps {
   content: PostContent;
@@ -13,31 +13,6 @@ interface PostPreviewProps {
   onSectionPositionChange?: (index: number, position: ElementPosition) => void;
   onLogoPositionChange?: (position: ElementPosition) => void;
 }
-
-const getBackgroundConfig = (style: BackgroundStyle) => {
-  switch (style) {
-    case "hero-style":
-      return {
-        mainGradient: "linear-gradient(135deg, #0d1b3e 0%, #1a1a2e 50%, #0d1b3e 100%)",
-        overlay: "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.6) 100%)",
-      };
-    case "neon-accent":
-      return {
-        mainGradient: "linear-gradient(180deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%)",
-        overlay: "linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 50%, rgba(0,0,0,0.3) 100%)",
-      };
-    case "custom-image":
-      return {
-        mainGradient: "transparent",
-        overlay: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%)",
-      };
-    default:
-      return {
-        mainGradient: "linear-gradient(180deg, #1a1a2e 0%, #0d1b3e 50%, #1a1a2e 100%)",
-        overlay: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%)",
-      };
-  }
-};
 
 export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositionChange, onLogoPositionChange }: PostPreviewProps) => {
   const previewRef = useRef<HTMLDivElement>(null);
@@ -60,31 +35,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
   const dimensions = getDimensions();
   const previewScale = content.format === "story" ? 0.25 : content.format === "portrait" ? 0.35 : 0.4;
-  const bgStyle = content.background?.style || content.backgroundStyle || "dark-gradient";
-  const bgConfig = getBackgroundConfig(bgStyle);
-
-  const colors = content.textStyles?.colors || { headline: "#00d4ff", subheadline: "#6366f1", body: "#e6e6e6" };
-  const shadows = content.textStyles?.shadows;
-  const strokes = content.textStyles?.strokes;
-  const alignments = content.textStyles?.alignments || { headline: "center", subheadline: "center", body: "center" };
-  const rotations = content.textStyles?.rotations || { headline: 0, sections: [0] };
-
-  const getTextStyle = (type: "headline" | "subheadline" | "body") => {
-    const shadow = shadows?.[type];
-    const stroke = strokes?.[type];
-
-    let style: React.CSSProperties = {};
-
-    if (shadow?.enabled) {
-      style.textShadow = `${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blur}px ${shadow.color}`;
-    }
-
-    if (stroke?.enabled) {
-      style.WebkitTextStroke = `${stroke.width}px ${stroke.color}`;
-    }
-
-    return style;
-  };
+  const scaledWidth = dimensions.width * previewScale;
 
   const handleDrag = (elementId: string, e: React.MouseEvent) => {
     if (!previewRef.current) return;
@@ -116,13 +67,11 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  // Helper to prepare clone for export (fixes html2canvas rendering differences)
   const prepareCloneForExport = (clone: HTMLElement) => {
     const brandContainer = clone.querySelector("[data-brand-container]") as HTMLElement | null;
     const brandLogo = clone.querySelector("[data-brand-logo]") as HTMLImageElement | null;
     const brandText = clone.querySelector("[data-brand-text]") as HTMLElement | null;
 
-    // Filters + gradient text can render inconsistently in html2canvas; make export layout deterministic.
     if (brandContainer) {
       brandContainer.style.display = "flex";
       brandContainer.style.flexDirection = "row";
@@ -136,13 +85,11 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       brandLogo.style.transform = "none";
     }
 
-    // Remove all drag labels from export
     clone.querySelectorAll("[data-drag-label]").forEach((el) => {
       (el as HTMLElement).style.display = "none";
     });
 
     if (brandText) {
-      // Replace gradient text with a solid color + shadow (gradient via background-clip isn't reliable)
       brandText.style.background = "none";
       (brandText.style as any).webkitBackgroundClip = "unset";
       brandText.style.backgroundClip = "unset";
@@ -150,13 +97,11 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       brandText.style.color = "#00CFFF";
       brandText.style.textShadow = "0 0 20px rgba(0, 207, 255, 0.6)";
       brandText.style.filter = "none";
-
-      // Make baseline deterministic across browsers/canvas:
       brandText.style.display = "flex";
       (brandText.style as any).alignItems = "center";
       brandText.style.height = "56px";
       brandText.style.lineHeight = "1";
-      brandText.style.transform = "translateY(-16px)";
+      brandText.style.transform = "translateY(0px)";
     }
   };
 
@@ -184,6 +129,9 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
             <meta charset="utf-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             <title>Preview (100%)</title>
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&family=Montserrat:wght@400;600;700;800&family=Oswald:wght@400;600;700&family=Playfair+Display:wght@400;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
             <style>
               body {
                 margin: 0;
@@ -219,21 +167,11 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       `);
       popup.document.close();
 
-      // Clone the preview element and mount it into the popup at 100% scale.
       const clone = previewRef.current.cloneNode(true) as HTMLElement;
       clone.style.transform = "none";
       clone.style.width = `${dimensions.width}px`;
       clone.style.height = `${dimensions.height}px`;
-
-      // Ensure brand block is aligned the same way in the popup.
-      const brandText = clone.querySelector("[data-brand-text]") as HTMLElement | null;
-      if (brandText) {
-        brandText.style.display = "flex";
-        (brandText.style as any).alignItems = "center";
-        brandText.style.height = "56px";
-        brandText.style.lineHeight = "1";
-        brandText.style.transform = "translateY(-1px)";
-      }
+      prepareCloneForExport(clone);
 
       const mount = popup.document.getElementById("mount");
       mount?.appendChild(clone);
@@ -260,10 +198,8 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
 
     setPreviewLoading(true);
     try {
-      // Wait for fonts to be ready
       await document.fonts.ready;
 
-      // Clone the preview element and render it off-screen at full size (no CSS transform)
       const clone = previewRef.current.cloneNode(true) as HTMLElement;
       clone.style.position = "fixed";
       clone.style.left = "-9999px";
@@ -273,10 +209,8 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       clone.style.height = `${dimensions.height}px`;
       document.body.appendChild(clone);
 
-      // Prepare clone for export (fix gradient text)
       prepareCloneForExport(clone);
 
-      // Wait for images to load in the clone (important for html2canvas)
       const images = Array.from(clone.querySelectorAll("img")) as HTMLImageElement[];
       await Promise.race([
         Promise.all(
@@ -303,13 +237,9 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
         logging: false,
       });
 
-      // Remove the clone
       document.body.removeChild(clone);
 
-      // Convert to PNG data URL
       const dataUrl = canvas.toDataURL("image/png");
-
-      // Open in new popup window with download option
       const popup = window.open("", "_blank", `width=500,height=700`);
       if (popup) {
         popup.document.write(`
@@ -389,62 +319,11 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
     }
   };
 
-  const bgImage = content.background?.image || content.backgroundImage;
-  const bgOpacity = content.background?.opacity ?? 30;
-  const bgCoverage = content.background?.coverage || "full";
-  const bgCoveragePercent = content.background?.coveragePercent || 50;
-
-  const getBackgroundImageStyle = (): React.CSSProperties => {
-    if (bgCoverage === "full") {
-      return { inset: 0 };
-    }
-
-    const percent = `${bgCoveragePercent}%`;
-    switch (bgCoverage) {
-      case "top":
-        return { top: 0, left: 0, right: 0, height: percent };
-      case "bottom":
-        return { bottom: 0, left: 0, right: 0, height: percent };
-      case "left":
-        return { top: 0, bottom: 0, left: 0, width: percent };
-      case "right":
-        return { top: 0, bottom: 0, right: 0, width: percent };
-      case "middle": {
-        const gap = (100 - bgCoveragePercent) / 2;
-        return { top: `${gap}%`, left: 0, right: 0, height: percent };
-      }
-      default:
-        return { inset: 0 };
-    }
-  };
-
-  // Generate scattered stars for the starfield background
-  const generateStars = (count: number) => {
-    const stars = [];
-    for (let i = 0; i < count; i++) {
-      const size = Math.random() * 2 + 1;
-      const opacity = Math.random() * 0.7 + 0.3;
-      stars.push({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size,
-        opacity,
-      });
-    }
-    return stars;
-  };
-
-  const stars = bgCoverage === "middle" ? generateStars(80) : [];
-
-  const scaledWidth = dimensions.width * previewScale;
-
   const handleDirectDownload = async () => {
     if (!previewRef.current) return;
 
     setPreviewLoading(true);
     try {
-      // Wait for fonts to be ready
       await document.fonts.ready;
 
       const clone = previewRef.current.cloneNode(true) as HTMLElement;
@@ -456,7 +335,6 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
       clone.style.height = `${dimensions.height}px`;
       document.body.appendChild(clone);
 
-      // Prepare clone for export (fix gradient text)
       prepareCloneForExport(clone);
 
       const images = Array.from(clone.querySelectorAll("img")) as HTMLImageElement[];
@@ -510,6 +388,25 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
     }
   };
 
+  const logoScale = content.logoSettings?.scale ?? 1;
+  const logoX = content.logoSettings?.position?.x ?? 10;
+  const logoY = content.logoSettings?.position?.y ?? 5;
+  const scaledLogoSize = 56 * logoScale;
+  const scaledFontSize = 28 * logoScale;
+  const contentWidth = dimensions.width - 128;
+  const headlinePos = content.positions?.headline || { x: 50, y: 30 };
+
+  const countLines = (value: string) => (value?.split("\n").length || 1);
+  const headlineOverlayHeight = Math.max(96, (content.fontSizes?.headline || 72) * 1.2 * countLines(content.headline || "") + 32);
+  const getSectionOverlayHeight = (index: number) => {
+    const section = content.sections[index];
+    const subheadlineHeight = section?.subheadline ? (content.fontSizes?.subheadline || 48) * 1.3 * countLines(section.subheadline) : 0;
+    const bodyHeight = section?.body ? (content.fontSizes?.body || 32) * 1.5 * countLines(section.body) : 0;
+    const dividerHeight = content.showDividers ? (content.dividerThickness ?? 3) + 28 + Math.abs(content.dividerOffsetY ?? 0) : 0;
+    const boxPadding = content.sectionBoxes ? (content.sectionBoxPadding ?? 24) * 2 : 0;
+    return Math.max(140, subheadlineHeight + bodyHeight + dividerHeight + boxPadding + 32);
+  };
+
   return (
     <Card style={{ width: scaledWidth + 48, maxWidth: "100%" }}>
       <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap p-3">
@@ -541,253 +438,108 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
             }}
           >
             <div
-              ref={previewRef}
               style={{
+                position: "relative",
                 width: dimensions.width,
                 height: dimensions.height,
-                position: "relative",
-                overflow: "hidden",
-                fontFamily: "'Poppins', sans-serif",
               }}
             >
-              {/* Starfield background for middle coverage */}
-              {bgStyle === "custom-image" && bgImage && bgCoverage === "middle" && (
+              <InstagramPostScene
+                ref={previewRef}
+                content={content}
+                width={dimensions.width}
+                height={dimensions.height}
+              />
+
+              {((content.showLogo ?? true) || (content.showBrandName ?? true)) && onLogoPositionChange && (
                 <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "linear-gradient(180deg, #0d1b3e 0%, #1a1a2e 50%, #0d1b3e 100%)",
-                  }}
-                >
-                  {stars.map((star) => (
-                    <div
-                      key={star.id}
-                      style={{
-                        position: "absolute",
-                        left: `${star.x}%`,
-                        top: `${star.y}%`,
-                        width: star.size,
-                        height: star.size,
-                        borderRadius: "50%",
-                        backgroundColor: "#ffffff",
-                        opacity: star.opacity,
-                        boxShadow: `0 0 ${star.size * 2}px rgba(255, 255, 255, 0.5)`,
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Custom Background Image */}
-              {bgStyle === "custom-image" && bgImage && (
-                <>
-                  <div
-                    style={{
-                      position: "absolute",
-                      ...getBackgroundImageStyle(),
-                      backgroundImage: `url(${bgImage})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
-                  />
-                  {bgOpacity > 0 && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        ...getBackgroundImageStyle(),
-                        backgroundColor: `rgba(0,0,0,${bgOpacity / 100})`,
-                      }}
-                    />
-                  )}
-                </>
-              )}
-
-              {/* Background gradient */}
-              {bgStyle !== "custom-image" && (
-                <div style={{ position: "absolute", inset: 0, background: bgConfig.mainGradient }} />
-              )}
-
-              {/* Overlay (for custom images, overlay is controlled ONLY by “Overlay Darkness”) */}
-              {bgStyle !== "custom-image" && (
-                <div style={{ position: "absolute", inset: 0, background: bgConfig.overlay }} />
-              )}
-
-              {/* Logo & Brand */}
-              {((content.showLogo ?? true) || (content.showBrandName ?? true)) && (() => {
-                const logoScale = content.logoSettings?.scale ?? 1;
-                const logoX = content.logoSettings?.position?.x ?? 10;
-                const logoY = content.logoSettings?.position?.y ?? 5;
-                const baseLogoSize = 56;
-                const scaledLogoSize = baseLogoSize * logoScale;
-                const scaledFontSize = 28 * logoScale;
-                return (
-                <div
-                  data-brand-container
                   style={{
                     position: "absolute",
                     left: `${logoX}%`,
                     top: `${logoY}%`,
-                    zIndex: 10,
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 8 * logoScale,
-                    cursor: onLogoPositionChange
-                      ? draggingElement === "logo" ? "grabbing" : "grab"
-                      : "default",
+                    width: (content.showBrandName ?? true) ? Math.min(dimensions.width * 0.62, 460 * logoScale) : scaledLogoSize,
+                    height: scaledLogoSize + 28,
+                    cursor: draggingElement === "logo" ? "grabbing" : "grab",
                     userSelect: "none",
                   }}
-                  onMouseDown={(e) => onLogoPositionChange && handleDrag("logo", e)}
+                  onMouseDown={(e) => handleDrag("logo", e)}
                 >
-                  {onLogoPositionChange && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: -24,
-                        left: 0,
-                        background: "rgba(0,0,0,0.6)",
-                        padding: "2px 8px",
-                        borderRadius: 4,
-                        fontSize: 12,
-                        color: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 4,
-                        opacity: draggingElement === "logo" ? 1 : 0.5,
-                      }}
-                      data-drag-label
-                    >
-                      <Move size={10} /> Logo
-                    </div>
-                  )}
-                  {(content.showLogo ?? true) && (
-                    <img
-                      data-brand-logo
-                      src={partyPantherLogo}
-                      alt="Party Panther logo"
-                      width={scaledLogoSize}
-                      height={scaledLogoSize}
-                      crossOrigin="anonymous"
-                      loading="eager"
-                      decoding="async"
-                      style={{
-                        width: scaledLogoSize,
-                        height: scaledLogoSize,
-                        minWidth: scaledLogoSize,
-                        minHeight: scaledLogoSize,
-                        objectFit: "contain",
-                        filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
-                        display: "block",
-                        flexShrink: 0,
-                      }}
-                    />
-                  )}
-                  {(content.showBrandName ?? true) && (
-                    <span
-                      data-brand-text
-                      style={{
-                        fontSize: scaledFontSize,
-                        fontWeight: 800,
-                        background: "linear-gradient(to right, #00CFFF, #4F8EFF)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                        whiteSpace: "nowrap",
-                        filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
-                        display: "flex",
-                        alignItems: "center",
-                        height: scaledLogoSize,
-                        lineHeight: 1,
-                        transform: "translateY(0px)",
-                      }}
-                    >
-                      Party Panther
-                    </span>
-                  )}
-                </div>
-                );
-              })()}
-
-              {/* Headline - Draggable */}
-              {content.headline && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: `${content.positions?.headline?.y || 30}%`,
-                    left: `${content.positions?.headline?.x || 50}%`,
-                    transform: `translate(-50%, -50%) rotate(${rotations.headline}deg)`,
-                    width: dimensions.width - 128,
-                    textAlign: alignments.headline,
-                    zIndex: content.zIndex?.headline || 5,
-                    cursor: onHeadlinePositionChange
-                      ? draggingElement === "headline"
-                        ? "grabbing"
-                        : "grab"
-                      : "default",
-                    userSelect: "none",
-                  }}
-                  onMouseDown={(e) => onHeadlinePositionChange && handleDrag("headline", e)}
-                >
-                  {onHeadlinePositionChange && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: -24,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        background: "rgba(0,0,0,0.6)",
-                        padding: "2px 8px",
-                        borderRadius: 4,
-                        fontSize: 12,
-                        color: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 4,
-                        opacity: draggingElement === "headline" ? 1 : 0.5,
-                      }}
-                      data-drag-label
-                    >
-                      <Move size={10} /> Headline
-                    </div>
-                  )}
                   <div
                     style={{
-                      fontSize: content.fontSizes?.headline || 72,
-                      fontWeight: 700,
-                      fontFamily: `'${content.fonts?.headline || "Poppins"}', sans-serif`,
-                      lineHeight: 1.2,
-                      color: colors.headline,
-                      whiteSpace: "pre-line",
-                      ...getTextStyle("headline"),
+                      position: "absolute",
+                      top: -24,
+                      left: 0,
+                      background: "rgba(0,0,0,0.6)",
+                      padding: "2px 8px",
+                      borderRadius: 4,
+                      fontSize: 12,
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                      opacity: draggingElement === "logo" ? 1 : 0.5,
                     }}
+                    data-drag-label
                   >
-                    {content.headline}
+                    <Move size={10} /> Logo
                   </div>
                 </div>
               )}
 
-              {/* Content Sections - Each Draggable */}
-              {content.sections.map((section, index) => (
+              {content.headline && onHeadlinePositionChange && (
                 <div
-                  key={index}
                   style={{
                     position: "absolute",
-                    top: `${content.positions?.sections?.[index]?.y || 50 + index * 15}%`,
-                    left: `${content.positions?.sections?.[index]?.x || 50}%`,
-                    transform: `translate(-50%, -50%) rotate(${rotations.sections?.[index] || 0}deg)`,
-                    width: dimensions.width - 128,
-                    textAlign: alignments.subheadline,
-                    zIndex: content.zIndex?.sections?.[index] || 3,
-                    cursor: onSectionPositionChange
-                      ? draggingElement === `section-${index}`
-                        ? "grabbing"
-                        : "grab"
-                      : "default",
+                    top: `${headlinePos.y}%`,
+                    left: `${headlinePos.x}%`,
+                    transform: "translate(-50%, -50%)",
+                    width: contentWidth,
+                    height: headlineOverlayHeight,
+                    cursor: draggingElement === "headline" ? "grabbing" : "grab",
                     userSelect: "none",
                   }}
-                  onMouseDown={(e) => onSectionPositionChange && handleDrag(`section-${index}`, e)}
+                  onMouseDown={(e) => handleDrag("headline", e)}
                 >
-                  {onSectionPositionChange && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: -24,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      background: "rgba(0,0,0,0.6)",
+                      padding: "2px 8px",
+                      borderRadius: 4,
+                      fontSize: 12,
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                      opacity: draggingElement === "headline" ? 1 : 0.5,
+                    }}
+                    data-drag-label
+                  >
+                    <Move size={10} /> Headline
+                  </div>
+                </div>
+              )}
+
+              {content.sections.map((_, index) => {
+                const position = content.positions?.sections?.[index] || { x: 50, y: 50 + index * 15 };
+                return onSectionPositionChange ? (
+                  <div
+                    key={index}
+                    style={{
+                      position: "absolute",
+                      top: `${position.y}%`,
+                      left: `${position.x}%`,
+                      transform: "translate(-50%, -50%)",
+                      width: contentWidth,
+                      height: getSectionOverlayHeight(index),
+                      cursor: draggingElement === `section-${index}` ? "grabbing" : "grab",
+                      userSelect: "none",
+                    }}
+                    onMouseDown={(e) => handleDrag(`section-${index}`, e)}
+                  >
                     <div
                       style={{
                         position: "absolute",
@@ -808,116 +560,9 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     >
                       <Move size={10} /> Section {index + 1}
                     </div>
-                  )}
-                  {/* Divider line above section (if enabled) */}
-                  {content.showDividers && (() => {
-                    const dColor = content.dividerColor || "#ffffff";
-                    const dWidth = `${content.dividerWidth ?? 60}%`;
-                    const dThickness = content.dividerThickness ?? 3;
-                    const dStyle = content.dividerStyle || "line";
-                    const dGlow = content.dividerGlow ?? false;
-                    const dGlowIntensity = content.dividerGlowIntensity ?? 8;
-                    const dOffsetY = content.dividerOffsetY ?? 0;
-
-                    if (dStyle === "dashed" || dStyle === "dotted" || dStyle === "double") {
-                      return (
-                        <div
-                          style={{
-                            width: dWidth,
-                            borderTop: `${dThickness}px ${dStyle === "double" ? "double" : dStyle} ${dColor}`,
-                            margin: "0 auto",
-                            marginBottom: 20,
-                            transform: `translateY(${dOffsetY}px)`,
-                            ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
-                          }}
-                        />
-                      );
-                    }
-                    return (
-                      <div
-                        style={{
-                          width: dWidth,
-                          height: dThickness,
-                          background: `linear-gradient(90deg, transparent 0%, ${dColor} 15%, ${dColor} 85%, transparent 100%)`,
-                          margin: "0 auto",
-                          marginBottom: 20,
-                          transform: `translateY(${dOffsetY}px)`,
-                          ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
-                        }}
-                      />
-                    );
-                  })()}
-                  {/* Section box wrapper */}
-                  {(() => {
-                    const boxEnabled = content.sectionBoxes ?? false;
-                    const boxColor = content.sectionBoxColor || "#ffffff";
-                    const boxOpacity = (content.sectionBoxOpacity ?? 15) / 100;
-                    const boxRadius = content.sectionBoxRadius ?? 12;
-                    const boxPadding = content.sectionBoxPadding ?? 24;
-                    const boxStyle = content.sectionBoxStyle || "border-only";
-                    const borderWidth = content.sectionBoxBorderWidth ?? 2;
-                    const showGlow = content.sectionBoxGlow ?? false;
-                    const glowIntensity = content.sectionBoxGlowIntensity ?? 10;
-                    const hexToRgba = (hex: string, alpha: number) => {
-                      const r = parseInt(hex.slice(1, 3), 16) || 255;
-                      const g = parseInt(hex.slice(3, 5), 16) || 255;
-                      const b = parseInt(hex.slice(5, 7), 16) || 255;
-                      return `rgba(${r},${g},${b},${alpha})`;
-                    };
-                    const bgMap = {
-                      "border-only": "transparent",
-                      "frosted": "rgba(0,0,0,0.3)",
-                      "solid": hexToRgba(boxColor, boxOpacity * 0.5),
-                    };
-                    const glowShadow = showGlow
-                      ? `0 0 ${glowIntensity}px ${hexToRgba(boxColor, 0.6)}, inset 0 0 ${glowIntensity * 0.5}px ${hexToRgba(boxColor, 0.15)}`
-                      : "none";
-                    const wrapperStyle: React.CSSProperties = boxEnabled ? {
-                      background: bgMap[boxStyle],
-                      border: `${borderWidth}px solid ${hexToRgba(boxColor, boxOpacity)}`,
-                      borderRadius: boxRadius,
-                      padding: boxPadding,
-                      boxShadow: glowShadow,
-                      backdropFilter: boxStyle === "frosted" ? "blur(4px)" : "none",
-                    } : {};
-                    return (
-                      <div style={wrapperStyle}>
-                        {section.subheadline && (
-                          <div
-                            style={{
-                              fontSize: content.fontSizes?.subheadline || 48,
-                              fontWeight: 600,
-                              fontFamily: `'${content.fonts?.subheadline || "Poppins"}', sans-serif`,
-                              color: colors.subheadline,
-                              lineHeight: 1.3,
-                              marginBottom: 12,
-                              whiteSpace: "pre-line",
-                              ...getTextStyle("subheadline"),
-                            }}
-                          >
-                            {section.subheadline}
-                          </div>
-                        )}
-                        {section.body && (
-                          <div
-                            style={{
-                              fontSize: content.fontSizes?.body || 32,
-                              fontFamily: `'${content.fonts?.body || "Poppins"}', sans-serif`,
-                              lineHeight: 1.5,
-                              color: colors.body,
-                              textAlign: alignments.body,
-                              whiteSpace: "pre-line",
-                              ...getTextStyle("body"),
-                            }}
-                          >
-                            {section.body}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-              ))}
+                  </div>
+                ) : null;
+              })}
             </div>
           </div>
         </div>
