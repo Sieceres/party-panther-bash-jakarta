@@ -789,14 +789,14 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                   <div className="flex gap-2 items-center">
                     <Label className="text-xs w-14">Thickness</Label>
                     <Slider
-                      value={[content.dividerThickness ?? 1]}
+                      value={[content.dividerThickness ?? 3]}
                       onValueChange={([v]) => updateField("dividerThickness", v)}
                       min={1}
                       max={8}
                       step={1}
                       className="flex-1"
                     />
-                    <span className="text-xs text-muted-foreground w-6 text-right">{content.dividerThickness ?? 1}px</span>
+                    <span className="text-xs text-muted-foreground w-6 text-right">{content.dividerThickness ?? 3}px</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <Label className="text-xs">Glow Effect</Label>
