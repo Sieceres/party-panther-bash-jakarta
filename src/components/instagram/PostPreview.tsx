@@ -817,6 +817,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                     const dStyle = content.dividerStyle || "line";
                     const dGlow = content.dividerGlow ?? false;
                     const dGlowIntensity = content.dividerGlowIntensity ?? 8;
+                    const dOffsetY = content.dividerOffsetY ?? 0;
 
                     if (dStyle === "dashed" || dStyle === "dotted" || dStyle === "double") {
                       return (
@@ -826,6 +827,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                             borderTop: `${dThickness}px ${dStyle === "double" ? "double" : dStyle} ${dColor}`,
                             margin: "0 auto",
                             marginBottom: 20,
+                            transform: `translateY(${dOffsetY}px)`,
                             ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
                           }}
                         />
@@ -839,6 +841,7 @@ export const PostPreview = ({ content, onHeadlinePositionChange, onSectionPositi
                           background: `linear-gradient(90deg, transparent 0%, ${dColor} 15%, ${dColor} 85%, transparent 100%)`,
                           margin: "0 auto",
                           marginBottom: 20,
+                          transform: `translateY(${dOffsetY}px)`,
                           ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
                         }}
                       />

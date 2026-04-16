@@ -263,6 +263,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
           const dStyle = content.dividerStyle || "line";
           const dGlow = content.dividerGlow ?? false;
           const dGlowIntensity = content.dividerGlowIntensity ?? 8;
+          const dOffsetY = content.dividerOffsetY ?? 0;
 
           const boxEnabled = content.sectionBoxes ?? false;
           const boxColor = content.sectionBoxColor || "#ffffff";
@@ -315,6 +316,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                         borderTop: `${dThickness}px ${dStyle === "double" ? "double" : dStyle} ${dColor}`,
                         margin: "0 auto",
                         marginBottom: 20,
+                        transform: `translateY(${dOffsetY}px)`,
                         ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
                       }}
                     />
@@ -328,6 +330,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                       background: `linear-gradient(90deg, transparent 0%, ${dColor} 15%, ${dColor} 85%, transparent 100%)`,
                       margin: "0 auto",
                       marginBottom: 20,
+                      transform: `translateY(${dOffsetY}px)`,
                       ...(dGlow ? { boxShadow: `0 0 ${dGlowIntensity}px ${dColor}60, 0 0 ${dGlowIntensity * 2}px ${dColor}30` } : {}),
                     }}
                   />
