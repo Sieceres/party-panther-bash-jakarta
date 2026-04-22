@@ -21,6 +21,13 @@ function escapeHtml(str: string | null | undefined): string {
     .replace(/'/g, "&#039;");
 }
 
+function absoluteImage(image: string | null | undefined): string {
+  if (!image) return DEFAULT_IMAGE;
+  if (/^https?:\/\//i.test(image)) return image;
+  if (image.startsWith("/")) return `${SITE_URL}${image}`;
+  return `${SITE_URL}/${image}`;
+}
+
 function buildHtml(meta: {
   title: string;
   description: string;
@@ -107,7 +114,7 @@ Deno.serve(async (req) => {
         meta = {
           title: `${data.title} at ${data.venue_name} — Jakarta Event | Party Panther`,
           description: `${data.title} at ${data.venue_name}, Jakarta on ${data.date}. ${(data.description || "").slice(0, 120)}`,
-          image: data.image_url || DEFAULT_IMAGE,
+          image: absoluteImage(data.image_url),
           url: `${SITE_URL}/e/${data.slug || slug}`,
           redirectUrl: `${SITE_URL}/e/${data.slug || slug}`,
         };
@@ -132,7 +139,7 @@ Deno.serve(async (req) => {
         meta = {
           title: `${data.title} at ${data.venue_name} — Jakarta Drink Promo | Party Panther`,
           description: `${data.discount_text} — ${data.title} at ${data.venue_name}${data.area ? ` in ${data.area}` : ""}, Jakarta. ${(data.description || "").slice(0, 120)}`,
-          image: data.image_url || DEFAULT_IMAGE,
+          image: absoluteImage(data.image_url),
           url: `${SITE_URL}/p/${data.slug || slug}`,
           redirectUrl: `${SITE_URL}/p/${data.slug || slug}`,
         };
@@ -157,7 +164,7 @@ Deno.serve(async (req) => {
         meta = {
           title: `${data.name}${data.area ? ` — ${data.area}` : ""} — Jakarta Bar & Club | Party Panther`,
           description: `${data.name}${data.area ? ` in ${data.area}` : ""}, Jakarta. ${(data.description || "").slice(0, 120) || "Discover drink promos, events and more at this Jakarta venue."}`,
-          image: data.image_url || DEFAULT_IMAGE,
+          image: absoluteImage(data.image_url),
           url: `${SITE_URL}/v/${data.slug || slug}`,
           redirectUrl: `${SITE_URL}/v/${data.slug || slug}`,
         };
