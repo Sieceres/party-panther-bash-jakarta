@@ -74,7 +74,54 @@ export const CreatePromoForm = () => {
     }
   };
 
-  const handleAIExtracted = (data: {
+  const findMatchingVenue = async (name: string, address?: string): Promise<VenueResult | null> => {
+    const trimmed = name.trim();
+    if (!trimmed) return null;
+    try {
+      // 1. Exact case-insensitive match
+      const { data: exact } = await supabase
+        .from("venues")
+        .select("id, name, address, area")
+        .ilike("name", trimmed)
+        .limit(5);
+
+      if (exact && exact.length > 0) {
+        // If multiple, prefer one whose address overlaps
+        if (exact.length > 1 && address) {
+          const addrLower = address.toLowerCase();
+          const addrMatch = exact.find(v => v.address && addrLower.includes(v.address.toLowerCase().slice(0, 15)));
+          if (addrMatch) return addrMatch;
+        }
+        return exact[0];
+      }
+
+      // 2. Fuzzy: strip common suffixes/punctuation and try contains
+      const normalized = trimmed.replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim();
+      const core = normalized.replace(/\b(bar|club|lounge|restaurant|cafe|kitchen|rooftop|the)\b/gi, "").trim();
+      const searchTerm = core.length >= 3 ? core : normalized;
+
+      const { data: fuzzy } = await supabase
+        .from("venues")
+        .select("id, name, address, area")
+        .ilike("name", `%${searchTerm}%`)
+        .limit(10);
+
+      if (fuzzy && fuzzy.length > 0) {
+        // Prefer one that, when normalized similarly, matches closely
+        const target = normalized.toLowerCase();
+        const best = fuzzy.find(v => {
+          const vn = v.name.replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+          return vn === target || vn.includes(target) || target.includes(vn);
+        });
+        return best || fuzzy[0];
+      }
+    } catch (err) {
+      console.error("findMatchingVenue error:", err);
+    }
+    return null;
+  };
+
+  const handleAIExtracted = async (data: {
     title?: string;
     description?: string;
     venue_name?: string;
@@ -99,6 +146,24 @@ export const CreatePromoForm = () => {
       image: data.image_url || prev.image,
     }));
     setHasUnsavedChanges(true);
+
+    // Try to auto-link to an existing venue so we don't create duplicates
+    if (data.venue_name) {
+      const match = await findMatchingVenue(data.venue_name, data.venue_address);
+      if (match) {
+        setSelectedVenueId(match.id);
+        setFormData(prev => ({
+          ...prev,
+          venue: match.name, // use canonical casing/spelling
+          address: prev.address || match.address || "",
+          area: prev.area || match.area || "",
+        }));
+        toast({
+          title: "Linked to existing venue",
+          description: `Matched "${data.venue_name}" → "${match.name}"`,
+        });
+      }
+    }
   };
 
   useEffect(() => {
@@ -153,6 +218,11 @@ export const CreatePromoForm = () => {
       // Auto-create venue if no existing venue was selected
       let venueId = selectedVenueId;
       if (!venueId && formData.venue.trim()) {
+        // Final safety net: case-insensitive match before creating a duplicate
+        const match = await findMatchingVenue(formData.venue, formData.address);
+        if (match) {
+          venueId = match.id;
+        } else {
         const { data: newVenue, error: venueError } = await supabase
           .from('venues')
           .insert({
@@ -174,6 +244,7 @@ export const CreatePromoForm = () => {
           supabase.functions.invoke('scrape-venue-images', {
             body: { venue_id: newVenue.id, mode: 'all' }
           }).catch(err => console.error('Venue enrichment failed:', err));
+        }
         }
       }
 
