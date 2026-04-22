@@ -21,6 +21,13 @@ function escapeHtml(str: string | null | undefined): string {
     .replace(/'/g, "&#039;");
 }
 
+function absoluteImage(image: string | null | undefined): string {
+  if (!image) return DEFAULT_IMAGE;
+  if (/^https?:\/\//i.test(image)) return image;
+  if (image.startsWith("/")) return `${SITE_URL}${image}`;
+  return `${SITE_URL}/${image}`;
+}
+
 function buildHtml(meta: {
   title: string;
   description: string;
