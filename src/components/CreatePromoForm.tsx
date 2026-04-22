@@ -239,6 +239,8 @@ export const CreatePromoForm = () => {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            <PromoAIExtract onExtracted={handleAIExtracted} />
+
             <BasicPromoInfo
               title={formData.title}
               description={formData.description}
