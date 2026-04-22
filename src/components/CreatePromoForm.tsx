@@ -10,6 +10,8 @@ import { PromoDiscount } from "./form-components/PromoDiscount";
 
 import { PromoDetails } from "./form-components/PromoDetails";
 import { ImageUpload } from "./form-components/ImageUpload";
+import { PromoAIExtract } from "./form-components/PromoAIExtract";
+import { normalizePromoType } from "@/lib/promo-types";
 import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
 import { DuplicateWarning } from "./DuplicateWarning";
 import { VoucherSettings } from "./VoucherSettings";
@@ -70,6 +72,33 @@ export const CreatePromoForm = () => {
         setFormData(prev => ({ ...prev, ...updates }));
       }
     }
+  };
+
+  const handleAIExtracted = (data: {
+    title?: string;
+    description?: string;
+    venue_name?: string;
+    venue_address?: string;
+    discount_text?: string;
+    promo_type?: string;
+    day_of_week?: string[];
+    area?: string;
+    drink_type?: string[];
+    image_url?: string;
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      title: data.title || prev.title,
+      description: data.description || prev.description,
+      venue: data.venue_name || prev.venue,
+      address: data.venue_address || prev.address,
+      promoType: data.promo_type ? normalizePromoType(data.promo_type) : prev.promoType,
+      dayOfWeek: data.day_of_week && data.day_of_week.length ? data.day_of_week : prev.dayOfWeek,
+      area: data.area || prev.area,
+      drinkType: data.drink_type && data.drink_type.length ? data.drink_type : prev.drinkType,
+      image: data.image_url || prev.image,
+    }));
+    setHasUnsavedChanges(true);
   };
 
   useEffect(() => {
