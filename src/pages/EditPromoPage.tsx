@@ -10,6 +10,7 @@ import { PromoDiscount } from "@/components/form-components/PromoDiscount";
 
 import { PromoDetails } from "@/components/form-components/PromoDetails";
 import { ImageUpload } from "@/components/form-components/ImageUpload";
+import { PromoAIExtract } from "@/components/form-components/PromoAIExtract";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { VoucherSettings } from "@/components/VoucherSettings";
 import type { VenueResult } from "@/components/form-components/VenueAutocomplete";
@@ -112,6 +113,31 @@ export const EditPromoPage = () => {
         setFormData(prev => ({ ...prev, ...updates }));
       }
     }
+  };
+
+  const handleAIExtracted = (data: {
+    title?: string;
+    description?: string;
+    venue_name?: string;
+    venue_address?: string;
+    discount_text?: string;
+    day_of_week?: string[];
+    area?: string;
+    drink_type?: string[];
+    image_url?: string;
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      title: data.title || prev.title,
+      description: data.description || prev.description,
+      discount: data.discount_text || prev.discount,
+      venue: data.venue_name || prev.venue,
+      address: data.venue_address || prev.address,
+      dayOfWeek: data.day_of_week && data.day_of_week.length ? data.day_of_week : prev.dayOfWeek,
+      area: data.area || prev.area,
+      drinkType: data.drink_type && data.drink_type.length ? data.drink_type : prev.drinkType,
+      image: data.image_url || prev.image,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -221,6 +247,8 @@ export const EditPromoPage = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              <PromoAIExtract onExtracted={handleAIExtracted} />
+
               <BasicPromoInfo
                 title={formData.title}
                 description={formData.description}
