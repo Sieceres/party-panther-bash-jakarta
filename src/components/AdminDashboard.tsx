@@ -847,45 +847,87 @@ export const AdminDashboard = () => {
         </div>
 
         {/* Management Tabs */}
-        <Tabs value={activeTab} onValueChange={(val) => setSearchParams({ tab: val })} className="space-y-6">
-          <TabsList className="flex w-full flex-wrap h-auto gap-1">
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="reports" className="relative">
-              Reports
-              {pendingReportCount > 0 && (
-                <Badge variant="destructive" className="ml-1.5 px-1.5 py-0 text-[10px] min-w-[18px] h-[18px] flex items-center justify-center">
-                  {pendingReportCount}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="flags" className="relative">
-              <Flag className="w-3 h-3 mr-1" />
-              Flags
-              {pendingFlagCount > 0 && (
-                <Badge variant="destructive" className="ml-1.5 px-1.5 py-0 text-[10px] min-w-[18px] h-[18px] flex items-center justify-center">
-                  {pendingFlagCount}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
-            <TabsTrigger value="promos">Promos</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="tags">Tags</TabsTrigger>
-            <TabsTrigger value="venues">Venues</TabsTrigger>
-            <TabsTrigger value="venue-claims">Claims</TabsTrigger>
-            <TabsTrigger value="venue-edits">Edits</TabsTrigger>
-            <TabsTrigger value="venue-audit">Audit</TabsTrigger>
-            <TabsTrigger value="venue-merge">Merge</TabsTrigger>
-            <TabsTrigger value="receipts">Receipts</TabsTrigger>
-            <TabsTrigger value="database">Database</TabsTrigger>
-            <TabsTrigger value="migration">Migration</TabsTrigger>
-            <TabsTrigger value="ig-creator">IG Creator</TabsTrigger>
-            <TabsTrigger value="import">Import</TabsTrigger>
-            <TabsTrigger value="notifications">
-              <Bell className="w-3 h-3 mr-1" />
-              Notifications
-            </TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={(val) => setSearchParams({ tab: val })} className="space-y-4">
+          {(() => {
+            const categories: { id: string; label: string; tabs: { value: string; label: string; icon?: JSX.Element; badge?: number }[] }[] = [
+              { id: 'overview', label: 'Overview', tabs: [
+                { value: 'analytics', label: 'Analytics' },
+              ]},
+              { id: 'moderation', label: 'Moderation', tabs: [
+                { value: 'reports', label: 'Reports', badge: pendingReportCount },
+                { value: 'flags', label: 'Flags', icon: <Flag className="w-3 h-3 mr-1" />, badge: pendingFlagCount },
+              ]},
+              { id: 'content', label: 'Content', tabs: [
+                { value: 'events', label: 'Events' },
+                { value: 'promos', label: 'Promos' },
+                { value: 'tags', label: 'Tags' },
+                { value: 'ig-creator', label: 'IG Creator' },
+                { value: 'import', label: 'Import' },
+              ]},
+              { id: 'venues', label: 'Venues', tabs: [
+                { value: 'venues', label: 'All Venues' },
+                { value: 'venue-claims', label: 'Claims' },
+                { value: 'venue-edits', label: 'Edits' },
+                { value: 'venue-audit', label: 'Audit' },
+                { value: 'venue-merge', label: 'Merge' },
+              ]},
+              { id: 'users', label: 'Users', tabs: [
+                { value: 'users', label: 'All Users' },
+                { value: 'receipts', label: 'Receipts' },
+              ]},
+              { id: 'system', label: 'System', tabs: [
+                { value: 'database', label: 'Database' },
+                { value: 'migration', label: 'Migration' },
+                { value: 'notifications', label: 'Notifications', icon: <Bell className="w-3 h-3 mr-1" /> },
+              ]},
+            ];
+            const activeCategory = categories.find(c => c.tabs.some(t => t.value === activeTab)) ?? categories[0];
+            return (
+              <div className="space-y-2">
+                {/* Top-level categories */}
+                <div className="flex w-full flex-wrap gap-1 p-1 rounded-lg bg-muted">
+                  {categories.map(cat => {
+                    const isActive = cat.id === activeCategory.id;
+                    const catBadge = cat.tabs.reduce((sum, t) => sum + (t.badge || 0), 0);
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => setSearchParams({ tab: cat.tabs[0].value })}
+                        className={`relative px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                          isActive
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {cat.label}
+                        {catBadge > 0 && (
+                          <Badge variant="destructive" className="ml-1.5 px-1.5 py-0 text-[10px] min-w-[18px] h-[18px] inline-flex items-center justify-center">
+                            {catBadge}
+                          </Badge>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Subcategory tabs */}
+                {activeCategory.tabs.length > 1 && (
+                  <TabsList className="flex w-full flex-wrap h-auto gap-1">
+                    {activeCategory.tabs.map(tab => (
+                      <TabsTrigger key={tab.value} value={tab.value} className="relative">
+                        {tab.icon}
+                        {tab.label}
+                        {tab.badge && tab.badge > 0 ? (
+                          <Badge variant="destructive" className="ml-1.5 px-1.5 py-0 text-[10px] min-w-[18px] h-[18px] flex items-center justify-center">
+                            {tab.badge}
+                          </Badge>
+                        ) : null}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                )}
+              </div>
+            );
+          })()}
 
           <TabsContent value="analytics">
             <AdminAnalytics />
