@@ -475,6 +475,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               inputId="event-image"
               uploadToStorage={true}
               storageFolder="events"
+              aiExtractType={!initialData?.id ? "event" : undefined}
+              onAIExtract={!initialData?.id ? handleAIExtracted : undefined}
             />
 
             <EventTagSelector
