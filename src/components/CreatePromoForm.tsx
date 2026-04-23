@@ -352,6 +352,8 @@ export const CreatePromoForm = () => {
               inputId="promo-image"
               uploadToStorage={true}
               storageFolder="promos"
+              aiExtractType="promo"
+              onAIExtract={handleAIExtracted}
             />
 
             <VoucherSettings
