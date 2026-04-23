@@ -325,6 +325,29 @@ serve(async (req) => {
 
     console.log(`Extracted ${items.length} ${type} items`);
 
+    // Safety net: if event dates are missing the year or set to a clearly past year, assume current/next year
+    if ((type === "event" || !type) && items.length > 0) {
+      const now = new Date();
+      const currentYear = now.getUTCFullYear();
+      items = items.map((item: any) => {
+        if (!item?.date || typeof item.date !== "string") return item;
+        const match = item.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!match) return item;
+        const [, yStr, mStr, dStr] = match;
+        let year = parseInt(yStr, 10);
+        const month = parseInt(mStr, 10);
+        const day = parseInt(dStr, 10);
+        if (year < currentYear) {
+          // Try current year first
+          const candidate = new Date(Date.UTC(currentYear, month - 1, day));
+          const daysDiff = (candidate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+          year = daysDiff < -7 ? currentYear + 1 : currentYear;
+          item.date = `${year}-${mStr}-${dStr}`;
+        }
+        return item;
+      });
+    }
+
     return new Response(JSON.stringify({ items: items.length ? items : [], ...(items.length === 0 ? { error: "No items extracted" } : {}) }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
