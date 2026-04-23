@@ -208,6 +208,7 @@ You MUST use the extract_promos tool to return the results.`;
       return `You are an expert at extracting event information from images and documents.
 Extract ALL events you can find. Each event should be a separate item.
 Be thorough — extract everything visible. Use ISO date format (YYYY-MM-DD) for dates and 24h format (HH:MM) for times.
+If the source material shows a day and month but no year, assume the event takes place in the current year (${new Date().getUTCFullYear()}). If that date has already passed by more than a week, assume next year (${new Date().getUTCFullYear() + 1}). Never leave the year blank or default to a past year.
 You MUST use the extract_events tool to return the results.`;
   }
 }
