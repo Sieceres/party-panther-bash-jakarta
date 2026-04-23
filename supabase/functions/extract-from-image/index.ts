@@ -208,6 +208,7 @@ You MUST use the extract_promos tool to return the results.`;
       return `You are an expert at extracting event information from images and documents.
 Extract ALL events you can find. Each event should be a separate item.
 Be thorough — extract everything visible. Use ISO date format (YYYY-MM-DD) for dates and 24h format (HH:MM) for times.
+If the source material shows a day and month but no year, assume the event takes place in the current year (${new Date().getUTCFullYear()}). If that date has already passed by more than a week, assume next year (${new Date().getUTCFullYear() + 1}). Never leave the year blank or default to a past year.
 You MUST use the extract_events tool to return the results.`;
   }
 }
@@ -323,6 +324,29 @@ serve(async (req) => {
     }
 
     console.log(`Extracted ${items.length} ${type} items`);
+
+    // Safety net: if event dates are missing the year or set to a clearly past year, assume current/next year
+    if ((type === "event" || !type) && items.length > 0) {
+      const now = new Date();
+      const currentYear = now.getUTCFullYear();
+      items = items.map((item: any) => {
+        if (!item?.date || typeof item.date !== "string") return item;
+        const match = item.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!match) return item;
+        const [, yStr, mStr, dStr] = match;
+        let year = parseInt(yStr, 10);
+        const month = parseInt(mStr, 10);
+        const day = parseInt(dStr, 10);
+        if (year < currentYear) {
+          // Try current year first
+          const candidate = new Date(Date.UTC(currentYear, month - 1, day));
+          const daysDiff = (candidate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+          year = daysDiff < -7 ? currentYear + 1 : currentYear;
+          item.date = `${year}-${mStr}-${dStr}`;
+        }
+        return item;
+      });
+    }
 
     return new Response(JSON.stringify({ items: items.length ? items : [], ...(items.length === 0 ? { error: "No items extracted" } : {}) }), {
       status: 200,
