@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, Loader2, Clipboard } from "lucide-react";
+import { Upload, Loader2, Sparkles } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { uploadImage, UploadProgress } from "@/lib/supabase-storage";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ImageUploadProps {
   label: string;
@@ -15,6 +16,15 @@ interface ImageUploadProps {
   inputId: string;
   uploadToStorage?: boolean;
   storageFolder?: 'events' | 'promos';
+  /**
+   * If provided, pasted/uploaded images will additionally be sent to the AI
+   * extractor and the result will be passed back via this callback so the
+   * parent form can autofill its fields. The user can opt out per-upload via
+   * the "Use as [event/promo] image" checkbox (which controls whether the
+   * image itself is also stored as the entity image).
+   */
+  onAIExtract?: (data: Record<string, any>) => void;
+  aiExtractType?: 'event' | 'promo';
 }
 
 export const ImageUpload = ({ 
@@ -23,14 +33,20 @@ export const ImageUpload = ({
   onImageChange, 
   inputId,
   uploadToStorage = true,
-  storageFolder = 'events'
+  storageFolder = 'events',
+  onAIExtract,
+  aiExtractType,
 }: ImageUploadProps) => {
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>({
     progress: 0,
     status: 'idle'
   });
   const [previewUrl, setPreviewUrl] = useState<string>(imageUrl);
+  const [useAsImage, setUseAsImage] = useState<boolean>(true);
+  const [isExtracting, setIsExtracting] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const useAsImageRef = useRef(useAsImage);
+  useEffect(() => { useAsImageRef.current = useAsImage; }, [useAsImage]);
 
   // Listen for paste events globally when this component is mounted
   useEffect(() => {
@@ -50,16 +66,50 @@ export const ImageUpload = ({
     };
     window.addEventListener('paste', handlePaste);
     return () => window.removeEventListener('paste', handlePaste);
-  }, [uploadToStorage, storageFolder]);
+  }, [uploadToStorage, storageFolder, onAIExtract, aiExtractType]);
+
+  const runAIExtract = async (base64: string) => {
+    if (!onAIExtract || !aiExtractType) return;
+    setIsExtracting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("extract-from-image", {
+        body: { image: base64, type: aiExtractType, style: "exact" },
+      });
+      if (error) throw error;
+      const item = data?.items?.[0];
+      if (item) {
+        onAIExtract(item);
+        toast.success(`AI auto-filled ${aiExtractType} details`, {
+          description: item.title ? `Found: ${item.title}` : undefined,
+        });
+      }
+    } catch (err) {
+      console.error("AI extract from image failed:", err);
+      toast.error("Couldn't auto-fill from image");
+    } finally {
+      setIsExtracting(false);
+    }
+  };
 
   const processFile = async (file: File) => {
-    // Show preview immediately
+    // Show preview immediately (also used as the source for AI extraction)
+    let base64Data: string | null = null;
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const result = e.target?.result as string;
+      base64Data = result;
       setPreviewUrl(result);
+      // Kick off AI extraction in parallel with upload (if enabled)
+      if (onAIExtract && aiExtractType) {
+        runAIExtract(result);
+      }
     };
     reader.readAsDataURL(file);
+
+    // If the user opted out of using this as the image, skip upload entirely
+    if (!useAsImageRef.current) {
+      return;
+    }
 
     if (!uploadToStorage) {
       const r2 = new FileReader();
@@ -105,7 +155,19 @@ export const ImageUpload = ({
   return (
     <div className="space-y-2" ref={containerRef}>
       <Label htmlFor={inputId}>{label}</Label>
-      <p className="text-xs text-muted-foreground">You can also paste an image from your clipboard (Ctrl+V / ⌘+V)</p>
+      <p className="text-xs text-muted-foreground">
+        You can also paste an image from your clipboard (Ctrl+V / ⌘+V)
+        {onAIExtract && aiExtractType ? ` — AI will auto-fill ${aiExtractType} details from it` : ""}
+      </p>
+      {onAIExtract && aiExtractType && (
+        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+          <Checkbox
+            checked={useAsImage}
+            onCheckedChange={(v) => setUseAsImage(v === true)}
+          />
+          <span>Also use this as the {aiExtractType} image</span>
+        </label>
+      )}
       <div className="space-y-3">
         <div className="flex items-center space-x-4">
           <Input
@@ -135,6 +197,12 @@ export const ImageUpload = ({
               </>
             )}
           </Button>
+          {isExtracting && (
+            <div className="flex items-center text-xs text-primary gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+              <span>AI reading image…</span>
+            </div>
+          )}
           {(previewUrl || imageUrl) && (
             <div className="w-16 h-16 rounded border overflow-hidden">
               <img 
