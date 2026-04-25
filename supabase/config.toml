@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.notify-admin]
 verify_jwt = false
+
+[functions.og-meta]
+verify_jwt = false
