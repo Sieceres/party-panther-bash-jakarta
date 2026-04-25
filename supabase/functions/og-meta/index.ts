@@ -23,6 +23,8 @@ function escapeHtml(str: string | null | undefined): string {
 
 function absoluteImage(image: string | null | undefined): string {
   if (!image) return DEFAULT_IMAGE;
+  // Inline base64 data URLs cannot be used as og:image by Facebook/WhatsApp/etc.
+  if (image.startsWith("data:")) return DEFAULT_IMAGE;
   if (/^https?:\/\//i.test(image)) return image;
   if (image.startsWith("/")) return `${SITE_URL}${image}`;
   return `${SITE_URL}/${image}`;
