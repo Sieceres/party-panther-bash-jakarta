@@ -13,7 +13,7 @@ import { SpinningPaws } from "./ui/spinning-paws";
 import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { getPromoBySlugOrId } from "@/lib/slug-utils";
+import { getPromoBySlugOrId, getPromoShareUrl } from "@/lib/slug-utils";
 import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import Linkify from "linkify-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -502,7 +502,7 @@ export const PromoDetailPage = () => {
                   className="w-full min-h-[44px]"
                   style={{ fontSize: 'clamp(0.875rem, 1.3vw, 1rem)' }}
                   onClick={() => {
-                    const shareUrl = `https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/og-meta/promo/${promo.slug || promo.id}`;
+                    const shareUrl = getPromoShareUrl(promo);
                     navigator.clipboard.writeText(shareUrl);
                     toast({
                       title: "Link Copied!",

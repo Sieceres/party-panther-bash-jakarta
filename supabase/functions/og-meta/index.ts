@@ -21,6 +21,13 @@ function escapeHtml(str: string | null | undefined): string {
     .replace(/'/g, "&#039;");
 }
 
+function compactText(str: string | null | undefined, maxLength: number): string {
+  return (str || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength);
+}
+
 function absoluteImage(image: string | null | undefined): string {
   if (!image) return DEFAULT_IMAGE;
   // Inline base64 data URLs cannot be used as og:image by Facebook/WhatsApp/etc.
@@ -72,10 +79,10 @@ Deno.serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    // Expected path: /og-meta/{type}/{slug}
+    // Expected path: /og-meta/{type}/{slug}; also support ?type=e&slug=... for Cloudflare Worker calls.
     const pathParts = url.pathname.replace(/^\/og-meta\/?/, "").split("/").filter(Boolean);
-    const typeRaw = pathParts[0]; // event/e, promo/p, venue/v
-    const slug = pathParts.slice(1).join("/");
+    const typeRaw = pathParts[0] || url.searchParams.get("type") || ""; // event/e, promo/p, venue/v
+    const slug = pathParts.slice(1).join("/") || url.searchParams.get("slug") || "";
 
     // Normalise short aliases
     const typeMap: Record<string, string> = { e: "event", p: "promo", v: "venue", event: "event", promo: "promo", venue: "venue" };
@@ -115,7 +122,7 @@ Deno.serve(async (req) => {
       if (data) {
         meta = {
           title: `${data.title} at ${data.venue_name} — Jakarta Event | Party Panther`,
-          description: `${data.title} at ${data.venue_name}, Jakarta on ${data.date}. ${(data.description || "").slice(0, 120)}`,
+          description: compactText(`${data.title} at ${data.venue_name}, Jakarta on ${data.date}. ${data.description || ""}`, 180),
           image: absoluteImage(data.image_url),
           url: `${SITE_URL}/e/${data.slug || slug}`,
           redirectUrl: `${SITE_URL}/e/${data.slug || slug}`,
@@ -140,7 +147,7 @@ Deno.serve(async (req) => {
       if (data) {
         meta = {
           title: `${data.title} at ${data.venue_name} — Jakarta Drink Promo | Party Panther`,
-          description: `${data.discount_text} — ${data.title} at ${data.venue_name}${data.area ? ` in ${data.area}` : ""}, Jakarta. ${(data.description || "").slice(0, 120)}`,
+          description: compactText(`${data.discount_text} — ${data.title} at ${data.venue_name}${data.area ? ` in ${data.area}` : ""}, Jakarta. ${data.description || ""}`, 180),
           image: absoluteImage(data.image_url),
           url: `${SITE_URL}/p/${data.slug || slug}`,
           redirectUrl: `${SITE_URL}/p/${data.slug || slug}`,
@@ -165,7 +172,7 @@ Deno.serve(async (req) => {
       if (data) {
         meta = {
           title: `${data.name}${data.area ? ` — ${data.area}` : ""} — Jakarta Bar & Club | Party Panther`,
-          description: `${data.name}${data.area ? ` in ${data.area}` : ""}, Jakarta. ${(data.description || "").slice(0, 120) || "Discover drink promos, events and more at this Jakarta venue."}`,
+          description: compactText(`${data.name}${data.area ? ` in ${data.area}` : ""}, Jakarta. ${data.description || "Discover drink promos, events and more at this Jakarta venue."}`, 180),
           image: absoluteImage(data.image_url),
           url: `${SITE_URL}/v/${data.slug || slug}`,
           redirectUrl: `${SITE_URL}/v/${data.slug || slug}`,
@@ -178,7 +185,7 @@ Deno.serve(async (req) => {
     return new Response(html, {
       headers: {
         ...corsHeaders,
-        "Content-Type": "text/html; charset=utf-8",
+        "content-type": "text/html; charset=utf-8",
         "Cache-Control": "public, max-age=3600",
       },
     });
