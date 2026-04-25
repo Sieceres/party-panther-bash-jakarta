@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     // Expected path: /og-meta/{type}/{slug}; also support ?type=e&slug=... for Cloudflare Worker calls.
     const pathParts = url.pathname.replace(/^\/og-meta\/?/, "").split("/").filter(Boolean);
-    const typeRaw = pathParts[0] || url.searchParams.get("type") || undefined; // event/e, promo/p, venue/v
+    const typeRaw = pathParts[0] || url.searchParams.get("type") || ""; // event/e, promo/p, venue/v
     const slug = pathParts.slice(1).join("/") || url.searchParams.get("slug") || "";
 
     // Normalise short aliases
