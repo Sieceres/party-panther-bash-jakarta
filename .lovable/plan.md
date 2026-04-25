@@ -1,75 +1,69 @@
-## The problem
+## What I found
 
-Right now when Facebook, WhatsApp, Twitter, LinkedIn, etc. fetch a share URL like `https://partypanther.net/e/some-event-slug`, Cloudflare returns the generic Lovable `index.html` with hard-coded "Party Panther Jakarta" OG tags. The crawler never sees the event-specific title, image, or description.
+1. **The Worker routes are NOT firing** despite being listed and enabled.
+   - I requested `https://partypanther.net/e/angkot-pub-crawl` with `User-Agent: facebookexternalhit/1.1`
+   - The response was the generic Lovable `index.html` (with `x-deployment-id` and `set-cookie: __dpl=...` — both signatures of Lovable's origin, not the Worker)
+   - If the Worker were running, the response would have come from `og-meta` with event-specific tags
 
-I verified this directly:
-- `curl -A "facebookexternalhit/1.1" https://partypanther.net/e/test-event` → returns the generic `index.html`
-- The `og-meta` Supabase Edge Function itself works correctly and returns event-specific OG tags when called
+2. **The Worker code itself is correct.** I reviewed it — it inspects User-Agent, matches `/e/`, `/p/`, `/v/` prefixes, fetches from the og-meta function, and falls back to origin proxy. The og-meta function works fine without an apikey (verified — returns 200).
 
-So the edge function is fine. **The missing piece is the Cloudflare Worker (`ppworker`) intercepting crawler requests.**
+3. **Separate bug spotted in og-meta:** when an event's `image_url` is a `data:image/...` base64 string, the code prepends `partypanther.net/` to it, producing a broken URL like `https://partypanther.net/data:image/jpeg;base64,...`. This needs a one-line fix.
 
-When we removed the Worker Custom Domain attachment to fix the site outage, the Worker stopped seeing any traffic. To restore rich previews we need to re-attach it — but as **Routes**, not as a Custom Domain (which would break the site again).
+## Why aren't the routes firing?
 
-## Required Cloudflare changes (you do these in the dashboard)
+You confirmed all 6 routes are listed, assigned to `ppworker`, and enabled. So one of these subtle Cloudflare gotchas must apply:
 
-### 1. Add Worker Routes
+### Most likely culprit: route order / Custom Domain remnant
+In Cloudflare, **Custom Domains beat Routes** in the matching priority. If `partypanther.net` (or `www.partypanther.net`) is still attached as a Custom Domain on **any** Worker (not necessarily `ppworker`), that Custom Domain hijacks ALL paths including `/e/*`, and Routes for those paths never get a chance to fire.
 
-Go to **Workers & Pages → `ppworker` → Settings → Triggers → Routes** and add:
+The Custom Domain might be:
+- Still on `ppworker` (from an old config), OR
+- On a **different** Worker in the same account, OR
+- Shown in the zone-level Workers Routes view but not the per-Worker view
 
-| Route pattern | Zone |
-|---|---|
-| `partypanther.net/e/*` | partypanther.net |
-| `partypanther.net/p/*` | partypanther.net |
-| `partypanther.net/v/*` | partypanther.net |
-| `www.partypanther.net/e/*` | partypanther.net |
-| `www.partypanther.net/p/*` | partypanther.net |
-| `www.partypanther.net/v/*` | partypanther.net |
+### Second possibility: Route pattern needs the protocol/wildcard
+Cloudflare sometimes interprets `partypanther.net/e/*` differently from `*partypanther.net/e/*` or `https://partypanther.net/e/*`. The `*` prefix variant matches more reliably.
 
-**Critical:** Do NOT add a catch-all like `partypanther.net/*` — that would break the site again. Only the three short-share prefixes.
+## Diagnostic steps for you to run
 
-### 2. Confirm there's no Custom Domain on the Worker
+Please check **one** Cloudflare page:
 
-Same Triggers page — the **Custom Domains** section must be empty (no `partypanther.net` or `www.partypanther.net` listed). If they reappeared, remove them.
+**Cloudflare dashboard → partypanther.net zone → Workers Routes** (this is the zone-level view, NOT the per-Worker view)
 
-### 3. Verify DNS is unchanged
+Tell me:
+1. How many entries appear there?
+2. For each, what's the **Route pattern** (exact text) and what **Worker** is it assigned to?
+3. Is there any entry with pattern `partypanther.net/*` or `*partypanther.net/*` (catch-all)?
+4. Below the routes list, is there a "Custom Domains" or HTTP Routes section showing the apex domain attached to a Worker?
 
-A `@` and A `www` should still point to `185.158.133.1` (proxied 🟠). Routes attach to the proxied request flow, so this stays as-is.
+Also check:
 
-## What the Worker should do (for reference — already deployed)
+**Cloudflare → Workers & Pages → (every Worker in your account) → Settings → Domains & Routes**
+- Is `partypanther.net` or `www.partypanther.net` listed as a **Custom Domain** on ANY worker (including ones other than `ppworker`)?
 
-The Worker code (`ppworker`, lives in Cloudflare, not in this repo) should:
+## What I'll do once you confirm
 
-1. Inspect the `User-Agent` header on incoming requests
-2. If it matches a known social crawler (`facebookexternalhit`, `Twitterbot`, `LinkedInBot`, `WhatsApp`, `Slackbot`, `TelegramBot`, `Discordbot`, `Googlebot`, etc.) → fetch and return the response from `https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/og-meta/{e|p|v}/{slug}` (passing the `apikey` header)
-3. Otherwise → `fetch(request)` to pass the user through to Lovable's origin
+Based on your answers:
+- **If a stale Custom Domain exists** → you remove it, then I re-test.
+- **If routes are wrong-zone or wrong-pattern** → I'll give you the exact patterns to recreate.
+- **If everything looks right but it still doesn't fire** → I'll have you do a one-line edit to the Worker (add a `console.log` at the top) and check Worker logs to confirm whether it's even being invoked. If it isn't, that proves a routing issue at the Cloudflare layer.
 
-If the Worker code was lost or needs verification, I can paste the source for you to redeploy — just say the word.
+## Code fix in this repo (independent of Cloudflare)
 
-## How I'll verify it works
+Fix the `data:` URL bug in `supabase/functions/og-meta/index.ts`:
 
-Once you've added the routes, ping me and I'll run:
-
-```bash
-# Should return event-specific OG tags
-curl -A "facebookexternalhit/1.1" https://partypanther.net/e/<real-event-slug>
-
-# Should return the normal React app
-curl -A "Mozilla/5.0" https://partypanther.net/e/<real-event-slug>
+```ts
+function absoluteImage(image: string | null | undefined): string {
+  if (!image) return DEFAULT_IMAGE;
+  if (image.startsWith("data:")) return DEFAULT_IMAGE; // base64 inline images can't be used as og:image
+  if (/^https?:\/\//i.test(image)) return image;
+  if (image.startsWith("/")) return `${SITE_URL}${image}`;
+  return `${SITE_URL}/${image}`;
+}
 ```
 
-Then you can re-scrape in:
-- Facebook: https://developers.facebook.com/tools/debug/
-- Twitter/X: https://cards-dev.twitter.com/validator
-- LinkedIn: https://www.linkedin.com/post-inspector/
+Reason: Facebook/WhatsApp/etc. cannot fetch `data:` URLs as preview images. Some of your events have base64-encoded images stored directly in `image_url`, so even when the Worker DOES fire, the preview image will be broken. Falling back to the default keeps previews working.
 
-## Code changes in this repo
+## TL;DR
 
-**None required.** Everything on the app side is already in place:
-- `getEventShareUrl` / `getPromoShareUrl` / `getVenueShareUrl` in `src/lib/slug-utils.ts` already build the `/e/*`, `/p/*`, `/v/*` short URLs
-- The `og-meta` edge function in `supabase/functions/og-meta/index.ts` already returns event/promo/venue-specific meta tags
-
-This is a pure Cloudflare configuration fix.
-
-## TL;DR for Cloudflare
-
-> "On Worker `ppworker`, add Routes for `partypanther.net/e/*`, `/p/*`, `/v/*` and the same three patterns on `www.partypanther.net`. Do NOT add a Custom Domain and do NOT add a catch-all `/*` route. DNS A records for `@` and `www` stay pointing to `185.158.133.1` proxied."
+The Worker isn't being invoked at all by Cloudflare — please check the zone-level Workers Routes page and verify no other Worker has `partypanther.net` as a Custom Domain. While you do that, I'll patch the `data:` URL bug in og-meta so previews don't break for events that use inline base64 images.
