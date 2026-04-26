@@ -78,8 +78,10 @@ export const getVenueUrl = (venue: any) => `/venue/${venue?.slug || venue?.id}`;
 export const getEditEventUrl = (event: any) => `/edit-event/${event?.slug || event?.id}`;
 export const getEditPromoUrl = (promo: any) => `/edit-promo/${promo?.slug || promo?.id}`;
 
-// Short share URLs on the main domain — Cloudflare Worker handles
-// crawler detection and proxies to the og-meta edge function for rich previews.
+// Short share URLs on the main domain. A Vercel edge middleware in front of
+// partypanther.net detects social-media crawlers and serves OG HTML from the
+// Supabase `og-meta` edge function; everything else is transparently proxied
+// to the Lovable origin (partypanther.lovable.app).
 const SITE_URL = "https://partypanther.net";
 export const getEventShareUrl = (event: any) => `${SITE_URL}/e/${event?.slug || event?.id}`;
 export const getPromoShareUrl = (promo: any) => `${SITE_URL}/p/${promo?.slug || promo?.id}`;
