@@ -218,7 +218,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                     transform: "translateY(0px)",
                   }}
                 >
-                  Party Panther
+                  {(content.showBrandLocation ?? false) ? "Party Panther Jakarta" : "Party Panther"}
                 </span>
               )}
             </div>

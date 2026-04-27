@@ -113,6 +113,7 @@ export interface PostContent {
   background: BackgroundSettings;
   showLogo: boolean;
   showBrandName: boolean;
+  showBrandLocation?: boolean;
   logoSettings?: LogoSettings;
   fonts: FontSettings;
   fontSizes: FontSizeSettings;
