@@ -1,6 +1,5 @@
 import type { PostContent, BackgroundStyle, ElementPosition } from "@/types/instagram-post";
-import brandLockup from "@/assets/brand-lockup.png";
-import brandLockupJakarta from "@/assets/brand-lockup-jakarta.png";
+import partyPantherLogo from "@/assets/party-panther-logo.png";
 import React from "react";
 
 /** Shared visual renderer used by PostPreview (interactive) and AnimationPreview (export). */
@@ -155,16 +154,14 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
           <div style={{ position: "absolute", inset: 0, background: bgConfig.overlay }} />
         )}
 
-        {/* Brand Lockup (single image — guarantees consistent alignment in preview, animation, and export) */}
+        {/* Logo & Brand */}
         {isVisible("logo") && ((content.showLogo ?? true) || (content.showBrandName ?? true)) && (() => {
           const logoScale = content.logoSettings?.scale ?? 1;
           const logoX = content.logoSettings?.position?.x ?? 10;
           const logoY = content.logoSettings?.position?.y ?? 5;
-          const useJakarta = content.showBrandLocation ?? false;
-          const lockupSrc = useJakarta ? brandLockupJakarta : brandLockup;
-          // Base height roughly matches the original 56px logo box at scale 1
-          const baseHeight = 56;
-          const scaledHeight = baseHeight * logoScale;
+          const baseLogoSize = 56;
+          const scaledLogoSize = baseLogoSize * logoScale;
+          const scaledFontSize = 28 * logoScale;
           return (
             <div
               data-brand-container
@@ -173,23 +170,57 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                 left: `${logoX}%`,
                 top: `${logoY}%`,
                 zIndex: 10,
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8 * logoScale,
                 ...getElStyle("logo"),
               }}
             >
-              <img
-                data-brand-logo
-                src={lockupSrc}
-                alt={useJakarta ? "Party Panther Jakarta" : "Party Panther"}
-                crossOrigin="anonymous"
-                loading="eager"
-                decoding="async"
-                style={{
-                  height: scaledHeight,
-                  width: "auto",
-                  display: "block",
-                  objectFit: "contain",
-                }}
-              />
+              {(content.showLogo ?? true) && (
+                <img
+                  data-brand-logo
+                  src={partyPantherLogo}
+                  alt="Party Panther logo"
+                  width={scaledLogoSize}
+                  height={scaledLogoSize}
+                  crossOrigin="anonymous"
+                  loading="eager"
+                  decoding="async"
+                  style={{
+                    width: scaledLogoSize,
+                    height: scaledLogoSize,
+                    minWidth: scaledLogoSize,
+                    minHeight: scaledLogoSize,
+                    objectFit: "contain",
+                    filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
+                    display: "block",
+                    flexShrink: 0,
+                  }}
+                />
+              )}
+              {(content.showBrandName ?? true) && (
+                <span
+                  data-brand-text
+                  style={{
+                    fontSize: scaledFontSize,
+                    fontWeight: 800,
+                    background: "linear-gradient(to right, #00CFFF, #4F8EFF)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    whiteSpace: "nowrap",
+                    filter: "drop-shadow(0 0 12px rgba(0, 207, 255, 0.4))",
+                    display: "flex",
+                    alignItems: "center",
+                    height: scaledLogoSize,
+                    lineHeight: 1,
+                    transform: "translateY(0px)",
+                  }}
+                >
+                  {(content.showBrandLocation ?? false) ? "Party Panther Jakarta" : "Party Panther"}
+                </span>
+              )}
             </div>
           );
         })()}
