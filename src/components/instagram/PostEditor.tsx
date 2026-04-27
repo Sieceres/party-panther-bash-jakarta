@@ -397,6 +397,18 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                   onCheckedChange={(checked) => updateField("showBrandName", checked)}
                 />
               </div>
+              {(content.showBrandName ?? true) && (
+                <div className="flex items-center justify-between pl-4">
+                  <Label htmlFor="showBrandLocation" className="text-sm text-muted-foreground">
+                    Append "Jakarta"
+                  </Label>
+                  <Switch
+                    id="showBrandLocation"
+                    checked={content.showBrandLocation ?? false}
+                    onCheckedChange={(checked) => updateField("showBrandLocation", checked)}
+                  />
+                </div>
+              )}
               {((content.showLogo ?? true) || (content.showBrandName ?? true)) && (
                 <div className="space-y-3 pt-2 border-t">
                   <div className="space-y-1">
