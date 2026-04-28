@@ -97,7 +97,7 @@ const Auth = () => {
         toast({
           title: "Check your email!",
           description: "We've sent you a confirmation link. Please verify your email to complete signup.",
-          duration: 6000,
+          duration: 5000,
         });
         setEmail("");
         setPassword("");
