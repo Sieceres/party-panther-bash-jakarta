@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Clipboard, Type } from "lucide-react";
+import { Clipboard, Type, Images } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -16,6 +16,7 @@ import { BatchImportReview, ExtractedPromo, ExtractedEvent, ExtractedContact, Ex
 import { detectDrinkCategory, getPlaceholderImage, enrichDrinkTypes } from "@/lib/drink-categories";
 import { isSpreadsheetFile, parseSpreadsheetFile } from "@/lib/spreadsheet-parser";
 import { normalizePromoType } from "@/lib/promo-types";
+import { PhotoBatchImport } from "@/components/PhotoBatchImport";
 
 type ImportType = "promo" | "event" | "contact" | "venue";
 type Step = "upload" | "review" | "done";
@@ -33,7 +34,7 @@ const BatchImport = () => {
   const [extractionProgress, setExtractionProgress] = useState(0);
   const [extractionStatus, setExtractionStatus] = useState("Uploading image...");
   const [textInput, setTextInput] = useState("");
-  const [inputMode, setInputMode] = useState<"file" | "text">("file");
+  const [inputMode, setInputMode] = useState<"file" | "text" | "photos">("file");
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -663,13 +664,16 @@ const BatchImport = () => {
                 </Select>
               </div>
 
-              <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as "file" | "text")}>
+              <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as "file" | "text" | "photos")}>
                 <TabsList className="w-full">
                   <TabsTrigger value="file" className="flex-1 gap-2">
                     <FileImage className="w-4 h-4" /> File Upload
                   </TabsTrigger>
                   <TabsTrigger value="text" className="flex-1 gap-2">
                     <Type className="w-4 h-4" /> Paste Text
+                  </TabsTrigger>
+                  <TabsTrigger value="photos" className="flex-1 gap-2">
+                    <Images className="w-4 h-4" /> Photo Batch
                   </TabsTrigger>
                 </TabsList>
 
@@ -743,6 +747,12 @@ const BatchImport = () => {
                       </Button>
                     </>
                   )}
+                </TabsContent>
+
+                <TabsContent value="photos" className="mt-4">
+                  <PhotoBatchImport
+                    defaultKind={importType === "event" ? "event" : "promo"}
+                  />
                 </TabsContent>
               </Tabs>
             </CardContent>
