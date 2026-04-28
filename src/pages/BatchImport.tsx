@@ -34,7 +34,7 @@ const BatchImport = () => {
   const [extractionProgress, setExtractionProgress] = useState(0);
   const [extractionStatus, setExtractionStatus] = useState("Uploading image...");
   const [textInput, setTextInput] = useState("");
-  const [inputMode, setInputMode] = useState<"file" | "text">("file");
+  const [inputMode, setInputMode] = useState<"file" | "text" | "photos">("file");
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
