@@ -255,28 +255,44 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         }
       }
 
-      // Auto-create venue if not in directory
+      // Auto-create venue if not in directory — but first check for an existing match
       let venueId = selectedVenueId;
-      if (!venueId && formData.venue.trim()) {
-        const { data: newVenue, error: venueError } = await supabase
+      const venueNameTrimmed = formData.venue.trim();
+      if (!venueId && venueNameTrimmed) {
+        // Case-insensitive exact-name lookup to avoid duplicate venue creation
+        const { data: existingVenues } = await supabase
           .from('venues')
-          .insert({
-            name: formData.venue.trim(),
-            area: venueArea || null,
-            address: location?.address || venueArea || null,
-            latitude: location?.lat || null,
-            longitude: location?.lng || null,
-            created_by: user.id,
-          })
-          .select('id')
-          .single();
-        
-        if (!venueError && newVenue) {
-          venueId = newVenue.id;
-          // Fire-and-forget: enrich venue with scraper
-          supabase.functions.invoke('scrape-venue-images', {
-            body: { venue_id: newVenue.id, mode: 'all' }
-          }).catch(err => console.error('Venue scrape failed:', err));
+          .select('id, name')
+          .ilike('name', venueNameTrimmed)
+          .limit(5);
+
+        const exactMatch = existingVenues?.find(
+          (v) => v.name.trim().toLowerCase() === venueNameTrimmed.toLowerCase()
+        );
+
+        if (exactMatch) {
+          venueId = exactMatch.id;
+        } else {
+          const { data: newVenue, error: venueError } = await supabase
+            .from('venues')
+            .insert({
+              name: venueNameTrimmed,
+              area: venueArea || null,
+              address: location?.address || venueArea || null,
+              latitude: location?.lat || null,
+              longitude: location?.lng || null,
+              created_by: user.id,
+            })
+            .select('id')
+            .single();
+
+          if (!venueError && newVenue) {
+            venueId = newVenue.id;
+            // Fire-and-forget: enrich venue with scraper
+            supabase.functions.invoke('scrape-venue-images', {
+              body: { venue_id: newVenue.id, mode: 'all' }
+            }).catch(err => console.error('Venue scrape failed:', err));
+          }
         }
       }
 
