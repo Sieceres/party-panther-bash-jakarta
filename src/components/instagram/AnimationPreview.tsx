@@ -349,7 +349,19 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
           backgroundColor: null,
           logging: false,
         });
-        frames.push(canvas);
+        // H.264 requires even dimensions. Pad to even if needed.
+        const evenW = canvas.width % 2 === 0 ? canvas.width : canvas.width + 1;
+        const evenH = canvas.height % 2 === 0 ? canvas.height : canvas.height + 1;
+        if (evenW !== canvas.width || evenH !== canvas.height) {
+          const padded = document.createElement("canvas");
+          padded.width = evenW;
+          padded.height = evenH;
+          const pctx = padded.getContext("2d")!;
+          pctx.drawImage(canvas, 0, 0);
+          frames.push(padded);
+        } else {
+          frames.push(canvas);
+        }
         setCapturedFrames(frames.length);
         setExportProgress(`Capturing frame ${frames.length}/${totalFrames + 1}`);
       } catch (err) {
@@ -397,10 +409,31 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
 
       gif.render();
     } else {
-      // WebM or MP4
-      setExportProgress("Encoding video...");
-      const w = dimensions.width;
-      const h = dimensions.height;
+      // MP4 (preferred, WhatsApp-compatible) or WebM fallback
+      const w = frames[0].width;
+      const h = frames[0].height;
+
+      // Try WebCodecs first for true H.264/MP4 (WhatsApp-compatible)
+      if (format === "mp4") {
+        setExportProgress("Encoding MP4 (H.264)…");
+        const mp4Blob = await encodeMp4WithWebCodecs(frames, w, h, fps);
+        if (mp4Blob) {
+          const url = URL.createObjectURL(mp4Blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `animation-${Date.now()}.mp4`;
+          a.click();
+          URL.revokeObjectURL(url);
+          setRecording(false);
+          setRecordingFormat(null);
+          setCapturedFrames(0);
+          setExportProgress("");
+          return;
+        }
+        // Fall through to MediaRecorder if WebCodecs path failed
+      }
+
+      setExportProgress("Encoding video…");
       const streamCanvas = document.createElement("canvas");
       streamCanvas.width = w;
       streamCanvas.height = h;
@@ -408,7 +441,13 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
 
       let mimeType: string;
       let ext: string;
-      if (format === "mp4" && MediaRecorder.isTypeSupported("video/mp4")) {
+      if (
+        format === "mp4" &&
+        MediaRecorder.isTypeSupported("video/mp4;codecs=avc1.42E028")
+      ) {
+        mimeType = "video/mp4;codecs=avc1.42E028";
+        ext = "mp4";
+      } else if (format === "mp4" && MediaRecorder.isTypeSupported("video/mp4")) {
         mimeType = "video/mp4";
         ext = "mp4";
       } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
