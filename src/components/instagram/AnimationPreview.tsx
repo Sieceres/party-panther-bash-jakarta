@@ -382,16 +382,36 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
     if (format === "gif") {
       setExportProgress("Assembling GIF...");
       const GIF = (await import("gif.js")).default;
+      // Downscale to keep file size reasonable. GIF is inherently large
+      // (256 colors, no inter-frame compression). Cap the longest edge at 600px.
+      const MAX_GIF_EDGE = 600;
+      const srcW = dimensions.width;
+      const srcH = dimensions.height;
+      const scale = Math.min(1, MAX_GIF_EDGE / Math.max(srcW, srcH));
+      const gifW = Math.max(2, Math.round(srcW * scale / 2) * 2);
+      const gifH = Math.max(2, Math.round(srcH * scale / 2) * 2);
       const gif = new GIF({
         workers: 2,
-        quality: 10,
-        width: dimensions.width,
-        height: dimensions.height,
+        quality: 15,
+        width: gifW,
+        height: gifH,
+        dither: false,
         workerScript: "/gif.worker.js",
       });
 
       frames.forEach((frame) => {
-        gif.addFrame(frame, { delay: frameInterval, copy: true });
+        let frameToAdd: HTMLCanvasElement = frame;
+        if (frame.width !== gifW || frame.height !== gifH) {
+          const scaled = document.createElement("canvas");
+          scaled.width = gifW;
+          scaled.height = gifH;
+          const sctx = scaled.getContext("2d")!;
+          sctx.imageSmoothingEnabled = true;
+          sctx.imageSmoothingQuality = "high";
+          sctx.drawImage(frame, 0, 0, gifW, gifH);
+          frameToAdd = scaled;
+        }
+        gif.addFrame(frameToAdd, { delay: frameInterval, copy: true });
       });
 
       gif.on("finished", (blob: Blob) => {
