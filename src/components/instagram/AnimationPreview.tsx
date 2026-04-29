@@ -13,6 +13,84 @@ import React from "react";
 
 type AnimationType = "fade" | "slide-up" | "slide-left" | "scale" | "typewriter" | "blur-in" | "flip";
 
+// Encode pre-captured frames into a WhatsApp-compatible H.264 MP4 using
+// WebCodecs + mp4-muxer. Returns a Blob, or null if WebCodecs is unavailable.
+async function encodeMp4WithWebCodecs(
+  frames: HTMLCanvasElement[],
+  width: number,
+  height: number,
+  fps: number,
+): Promise<Blob | null> {
+  // WebCodecs availability check
+  if (typeof (globalThis as any).VideoEncoder === "undefined") return null;
+  try {
+    const { Muxer, ArrayBufferTarget } = await import("mp4-muxer");
+
+    // H.264 baseline profile, level 4.0 — broadly compatible (WhatsApp, iOS, Android)
+    const codec = "avc1.42E028";
+
+    // Probe support
+    const support = await (globalThis as any).VideoEncoder.isConfigSupported({
+      codec,
+      width,
+      height,
+      bitrate: 6_000_000,
+      framerate: fps,
+    });
+    if (!support?.supported) return null;
+
+    const target = new ArrayBufferTarget();
+    const muxer = new Muxer({
+      target,
+      video: {
+        codec: "avc",
+        width,
+        height,
+        frameRate: fps,
+      },
+      fastStart: "in-memory", // moov atom at start = WhatsApp/iOS streaming-friendly
+    });
+
+    const encoder = new (globalThis as any).VideoEncoder({
+      output: (chunk: any, meta: any) => muxer.addVideoChunk(chunk, meta),
+      error: (e: Error) => console.error("VideoEncoder error:", e),
+    });
+
+    encoder.configure({
+      codec,
+      width,
+      height,
+      bitrate: 6_000_000,
+      framerate: fps,
+      avc: { format: "avc" },
+    });
+
+    const frameDurationUs = Math.round(1_000_000 / fps);
+
+    for (let i = 0; i < frames.length; i++) {
+      const VF = (globalThis as any).VideoFrame;
+      const vf = new VF(frames[i], {
+        timestamp: i * frameDurationUs,
+        duration: frameDurationUs,
+      });
+      // Force a keyframe periodically so the file is seekable
+      encoder.encode(vf, { keyFrame: i % Math.max(1, fps * 2) === 0 });
+      vf.close();
+      // Yield occasionally to keep the UI responsive
+      if (i % 10 === 0) await new Promise((r) => setTimeout(r, 0));
+    }
+
+    await encoder.flush();
+    encoder.close();
+    muxer.finalize();
+
+    return new Blob([target.buffer], { type: "video/mp4" });
+  } catch (err) {
+    console.error("WebCodecs MP4 encode failed:", err);
+    return null;
+  }
+}
+
 interface AnimationPreviewProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
