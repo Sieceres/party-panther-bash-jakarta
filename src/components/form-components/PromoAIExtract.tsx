@@ -100,11 +100,11 @@ export const PromoAIExtract = ({ onExtracted }: PromoAIExtractProps) => {
   };
 
   return (
-    <div className="border border-dashed border-primary/40 rounded-lg overflow-hidden">
+    <div className="rounded-lg overflow-hidden border border-white/20">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-primary hover:bg-primary/5 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-fuchsia-500/30 to-cyan-400/30 hover:from-fuchsia-500/40 hover:to-cyan-400/40 transition-colors"
       >
         <span className="flex items-center gap-2">
           <Sparkles className="w-4 h-4" />
