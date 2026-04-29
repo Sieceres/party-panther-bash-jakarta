@@ -13,6 +13,84 @@ import React from "react";
 
 type AnimationType = "fade" | "slide-up" | "slide-left" | "scale" | "typewriter" | "blur-in" | "flip";
 
+// Encode pre-captured frames into a WhatsApp-compatible H.264 MP4 using
+// WebCodecs + mp4-muxer. Returns a Blob, or null if WebCodecs is unavailable.
+async function encodeMp4WithWebCodecs(
+  frames: HTMLCanvasElement[],
+  width: number,
+  height: number,
+  fps: number,
+): Promise<Blob | null> {
+  // WebCodecs availability check
+  if (typeof (globalThis as any).VideoEncoder === "undefined") return null;
+  try {
+    const { Muxer, ArrayBufferTarget } = await import("mp4-muxer");
+
+    // H.264 baseline profile, level 4.0 — broadly compatible (WhatsApp, iOS, Android)
+    const codec = "avc1.42E028";
+
+    // Probe support
+    const support = await (globalThis as any).VideoEncoder.isConfigSupported({
+      codec,
+      width,
+      height,
+      bitrate: 6_000_000,
+      framerate: fps,
+    });
+    if (!support?.supported) return null;
+
+    const target = new ArrayBufferTarget();
+    const muxer = new Muxer({
+      target,
+      video: {
+        codec: "avc",
+        width,
+        height,
+        frameRate: fps,
+      },
+      fastStart: "in-memory", // moov atom at start = WhatsApp/iOS streaming-friendly
+    });
+
+    const encoder = new (globalThis as any).VideoEncoder({
+      output: (chunk: any, meta: any) => muxer.addVideoChunk(chunk, meta),
+      error: (e: Error) => console.error("VideoEncoder error:", e),
+    });
+
+    encoder.configure({
+      codec,
+      width,
+      height,
+      bitrate: 6_000_000,
+      framerate: fps,
+      avc: { format: "avc" },
+    });
+
+    const frameDurationUs = Math.round(1_000_000 / fps);
+
+    for (let i = 0; i < frames.length; i++) {
+      const VF = (globalThis as any).VideoFrame;
+      const vf = new VF(frames[i], {
+        timestamp: i * frameDurationUs,
+        duration: frameDurationUs,
+      });
+      // Force a keyframe periodically so the file is seekable
+      encoder.encode(vf, { keyFrame: i % Math.max(1, fps * 2) === 0 });
+      vf.close();
+      // Yield occasionally to keep the UI responsive
+      if (i % 10 === 0) await new Promise((r) => setTimeout(r, 0));
+    }
+
+    await encoder.flush();
+    encoder.close();
+    muxer.finalize();
+
+    return new Blob([target.buffer], { type: "video/mp4" });
+  } catch (err) {
+    console.error("WebCodecs MP4 encode failed:", err);
+    return null;
+  }
+}
+
 interface AnimationPreviewProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -271,7 +349,19 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
           backgroundColor: null,
           logging: false,
         });
-        frames.push(canvas);
+        // H.264 requires even dimensions. Pad to even if needed.
+        const evenW = canvas.width % 2 === 0 ? canvas.width : canvas.width + 1;
+        const evenH = canvas.height % 2 === 0 ? canvas.height : canvas.height + 1;
+        if (evenW !== canvas.width || evenH !== canvas.height) {
+          const padded = document.createElement("canvas");
+          padded.width = evenW;
+          padded.height = evenH;
+          const pctx = padded.getContext("2d")!;
+          pctx.drawImage(canvas, 0, 0);
+          frames.push(padded);
+        } else {
+          frames.push(canvas);
+        }
         setCapturedFrames(frames.length);
         setExportProgress(`Capturing frame ${frames.length}/${totalFrames + 1}`);
       } catch (err) {
@@ -319,10 +409,31 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
 
       gif.render();
     } else {
-      // WebM or MP4
-      setExportProgress("Encoding video...");
-      const w = dimensions.width;
-      const h = dimensions.height;
+      // MP4 (preferred, WhatsApp-compatible) or WebM fallback
+      const w = frames[0].width;
+      const h = frames[0].height;
+
+      // Try WebCodecs first for true H.264/MP4 (WhatsApp-compatible)
+      if (format === "mp4") {
+        setExportProgress("Encoding MP4 (H.264)…");
+        const mp4Blob = await encodeMp4WithWebCodecs(frames, w, h, fps);
+        if (mp4Blob) {
+          const url = URL.createObjectURL(mp4Blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `animation-${Date.now()}.mp4`;
+          a.click();
+          URL.revokeObjectURL(url);
+          setRecording(false);
+          setRecordingFormat(null);
+          setCapturedFrames(0);
+          setExportProgress("");
+          return;
+        }
+        // Fall through to MediaRecorder if WebCodecs path failed
+      }
+
+      setExportProgress("Encoding video…");
       const streamCanvas = document.createElement("canvas");
       streamCanvas.width = w;
       streamCanvas.height = h;
@@ -330,7 +441,13 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
 
       let mimeType: string;
       let ext: string;
-      if (format === "mp4" && MediaRecorder.isTypeSupported("video/mp4")) {
+      if (
+        format === "mp4" &&
+        MediaRecorder.isTypeSupported("video/mp4;codecs=avc1.42E028")
+      ) {
+        mimeType = "video/mp4;codecs=avc1.42E028";
+        ext = "mp4";
+      } else if (format === "mp4" && MediaRecorder.isTypeSupported("video/mp4")) {
         mimeType = "video/mp4";
         ext = "mp4";
       } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
@@ -396,8 +513,9 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
   const previewWidth = dimensions.width * previewScale;
   const previewHeight = dimensions.height * previewScale;
 
-  // Check if MP4 is natively supported
+  // MP4 is available if either WebCodecs OR MediaRecorder can produce it.
   const mp4Supported = useMemo(() => {
+    if (typeof (globalThis as any).VideoEncoder !== "undefined") return true;
     try {
       return MediaRecorder.isTypeSupported("video/mp4");
     } catch {
@@ -461,16 +579,16 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                 {mp4Supported && (
                   <DropdownMenuItem onClick={() => doExport("mp4")}>
                     <Download className="w-4 h-4 mr-2" />
-                    Download as MP4
+                    MP4 (WhatsApp / Instagram)
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={() => doExport("webm")}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Download as WebM
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => doExport("gif")}>
                   <Download className="w-4 h-4 mr-2" />
-                  Download as GIF
+                  GIF (universal)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => doExport("webm")}>
+                  <Download className="w-4 h-4 mr-2" />
+                  WebM (web only)
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
