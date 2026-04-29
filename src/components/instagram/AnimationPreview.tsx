@@ -513,8 +513,9 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
   const previewWidth = dimensions.width * previewScale;
   const previewHeight = dimensions.height * previewScale;
 
-  // Check if MP4 is natively supported
+  // MP4 is available if either WebCodecs OR MediaRecorder can produce it.
   const mp4Supported = useMemo(() => {
+    if (typeof (globalThis as any).VideoEncoder !== "undefined") return true;
     try {
       return MediaRecorder.isTypeSupported("video/mp4");
     } catch {
@@ -578,16 +579,16 @@ export const AnimationPreview = ({ open, onOpenChange, content }: AnimationPrevi
                 {mp4Supported && (
                   <DropdownMenuItem onClick={() => doExport("mp4")}>
                     <Download className="w-4 h-4 mr-2" />
-                    Download as MP4
+                    MP4 (WhatsApp / Instagram)
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={() => doExport("webm")}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Download as WebM
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => doExport("gif")}>
                   <Download className="w-4 h-4 mr-2" />
-                  Download as GIF
+                  GIF (universal)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => doExport("webm")}>
+                  <Download className="w-4 h-4 mr-2" />
+                  WebM (web only)
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
