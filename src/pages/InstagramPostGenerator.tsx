@@ -10,7 +10,7 @@ import { AnimationPreview } from "@/components/instagram/AnimationPreview";
 import { TemplatePicker } from "@/components/instagram/TemplatePicker";
 import { SaveTemplateDialog } from "@/components/instagram/SaveTemplateDialog";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, FolderOpen, FilePlus, Layers, Play, LayoutTemplate, Bookmark } from "lucide-react";
+import { ArrowLeft, Save, FolderOpen, FilePlus, Layers, Play, LayoutTemplate, Bookmark, FileCode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { checkUserAdminStatus } from "@/lib/auth-helpers";
 import { useToast } from "@/hooks/use-toast";
@@ -551,6 +551,14 @@ const InstagramPostGenerator = () => {
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Admin
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/admin/html-reel-to-video')}
+              >
+                <FileCode className="w-4 h-4 mr-2" />
+                HTML → Video
               </Button>
             </div>
           </div>
