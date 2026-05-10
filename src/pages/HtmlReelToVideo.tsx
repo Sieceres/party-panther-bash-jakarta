@@ -203,20 +203,54 @@ const HtmlReelToVideo = () => {
       throw new Error("Preview not ready");
     }
     const doc = iframe.contentDocument;
+    const win = iframe.contentWindow as any;
     // Wait for fonts inside iframe
     try { await (doc as any).fonts?.ready; } catch { /* noop */ }
 
     const totalFrames = Math.round(duration * fps);
     const frameInterval = 1000 / fps;
     const frames: HTMLCanvasElement[] = [];
-    const startWall = performance.now();
+
+    // Deterministic timeline: pause all CSS/Web animations and scrub
+    // currentTime per frame. Eliminates the shake caused by html2canvas
+    // taking variable time while real-time animations drift.
+    const getAnims = (): any[] => {
+      try {
+        return typeof (doc as any).getAnimations === "function"
+          ? (doc as any).getAnimations({ subtree: true })
+          : [];
+      } catch { return []; }
+    };
+    const anims = getAnims();
+    for (const a of anims) {
+      try {
+        a.pause();
+        // Make sure finite-iteration anims don't auto-fill and freeze early
+        if (a.effect && typeof a.effect.updateTiming === "function") {
+          // leave timing alone; we'll just set currentTime
+        }
+      } catch { /* ignore */ }
+    }
 
     for (let i = 0; i < totalFrames; i++) {
       const targetT = i * frameInterval;
-      const elapsed = performance.now() - startWall;
-      if (elapsed < targetT) {
-        await new Promise((r) => setTimeout(r, targetT - elapsed));
+      // Scrub every animation (including ones added late) to the exact frame time
+      const currentAnims = getAnims();
+      for (const a of currentAnims) {
+        try {
+          if (a.playState !== "paused") a.pause();
+          a.currentTime = targetT;
+        } catch { /* ignore */ }
       }
+      // Let the iframe paint the new state
+      await new Promise<void>((r) => {
+        if (typeof win?.requestAnimationFrame === "function") {
+          win.requestAnimationFrame(() => r());
+        } else {
+          requestAnimationFrame(() => r());
+        }
+      });
+
       const canvas = await html2canvas(doc.documentElement, {
         width: REEL_W,
         height: REEL_H,
