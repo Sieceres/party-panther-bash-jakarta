@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import InstagramPostGenerator from "./pages/InstagramPostGenerator";
+import HtmlReelToVideo from "./pages/HtmlReelToVideo";
 import { EventDetailPage } from "./components/EventDetailPage";
 import { PromoDetailPage } from "./components/PromoDetailPage";
 import { VenueDetailPage } from "./components/VenueDetailPage";
@@ -69,6 +70,7 @@ const App = () => (
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/instagram-generator" element={<InstagramPostGenerator />} />
           <Route path="/instagram-generator" element={<InstagramPostGenerator />} />
+          <Route path="/admin/html-reel-to-video" element={<HtmlReelToVideo />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/edit-event/:id" element={<EditEventPage />} />
           <Route path="/edit-promo/:id" element={<EditPromoPage />} />

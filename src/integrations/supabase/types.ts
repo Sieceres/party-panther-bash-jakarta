@@ -530,6 +530,42 @@ export type Database = {
           },
         ]
       }
+      html_reels: {
+        Row: {
+          created_at: string
+          created_by: string
+          default_duration: number
+          default_fps: number
+          html_url: string
+          id: string
+          name: string
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          default_duration?: number
+          default_fps?: number
+          html_url: string
+          id?: string
+          name: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          default_duration?: number
+          default_fps?: number
+          html_url?: string
+          id?: string
+          name?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       instagram_oembed_cache: {
         Row: {
           cached_at: string
