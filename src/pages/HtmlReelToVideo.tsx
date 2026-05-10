@@ -76,8 +76,8 @@ const HtmlReelToVideo = () => {
           navigate("/auth");
           return;
         }
-        const isAdmin = await checkUserAdminStatus(user.id);
-        if (!isAdmin) {
+        const status = await checkUserAdminStatus(user.id);
+        if (!status.is_admin) {
           toast({ title: "Admins only", variant: "destructive" });
           navigate("/admin");
           return;
