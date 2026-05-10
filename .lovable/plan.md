@@ -1,96 +1,76 @@
-## Goal
 
-Restore pretty share URLs (`partypanther.net/e/...`, `/p/...`, `/v/...`) with working Facebook/WhatsApp/Twitter previews — without Cloudflare and without exposing the `supabase.co` URL. All development continues in Lovable; Vercel is just a thin proxy layer.
+# HTML Reel → Video Tool
 
-## How it will work
+A new admin tool that lets you upload an animated HTML file (like `party_panther_story_7.html`), save it to a personal library, and export it as an MP4/WebM/GIF at 1080×1920.
+
+## What you get
+
+- New page at `/admin/html-reel-to-video` (entry button added to the IG Generator header so it's discoverable).
+- Upload `.html` file → it's saved to Supabase Storage and listed in your library.
+- Preview the HTML inside a 1080×1920 iframe (scaled down to fit the screen).
+- Controls: **Duration** (1–30s slider) and **FPS** (15 / 24 / 30).
+- **Export** dropdown: MP4 (WhatsApp / Instagram), WebM, GIF — same three options and same encoder code as the IG generator export.
+- Library panel: list of saved reels with thumbnail (first frame), rename, delete, re-export.
+
+## How recording works
 
 ```text
-                         partypanther.net
-                                │
-                                ▼
-                       ┌────────────────┐
-                       │  Vercel Edge   │  ← middleware.ts inspects each request
-                       │  Middleware    │
-                       └────────────────┘
-                          │           │
-         crawler + /e,/p,/v│           │everything else
-                          ▼           ▼
-            Supabase og-meta    partypanther.lovable.app
-            (OG HTML response)  (real app, transparent proxy)
+[ iframe loads HTML ]
+        │
+        ▼
+[ requestAnimationFrame loop ]
+   for N = duration * fps frames:
+     - html2canvas(iframe.documentElement) → 1080×1920 canvas
+     - push to frames[]
+        │
+        ▼
+[ encode frames[] ]
+   ├─ MP4   → encodeMp4WithWebCodecs (existing helper, reused)
+   ├─ WebM  → MediaRecorder fallback (existing path)
+   └─ GIF   → gif.js worker (existing path, 600px cap)
+        │
+        ▼
+[ download Blob + upload thumbnail to library row ]
 ```
 
-- Real users never notice Vercel exists; URL stays `partypanther.net/...`.
-- Crawlers (facebookexternalhit, WhatsApp, Twitterbot, etc.) get OG-tagged HTML from your existing `og-meta` function.
-- The Supabase URL is never visible to anyone.
+The CSS animations in the uploaded HTML run in real time inside the iframe; the capture loop simply samples frames at the chosen FPS for the chosen duration. Nothing in the IG generator's existing scene/animation code is touched.
 
-## What I'll do (in Lovable)
+## Storage & data
 
-1. **Create a new sibling repo** for the Vercel proxy (it's only 3 files, kept separate from this app's repo so it doesn't pollute the Lovable codebase). I'll provide the file contents and exact instructions to push it to a new GitHub repo named `partypanther-edge`:
-   - `middleware.ts` — crawler detection + routing logic
-   - `vercel.json` — config (matcher, framework=other)
-   - `package.json` — minimal, no dependencies
-2. **Revert `src/lib/slug-utils.ts`** so `getEventShareUrl` / `getPromoShareUrl` / `getVenueShareUrl` produce pretty `https://partypanther.net/e/...` URLs again.
-3. **Leave the `og-meta` edge function as-is** — it already returns correct OG HTML and a redirect for humans; the Vercel middleware will only call it for crawlers, so the redirect path stays unused but harmless.
+Two new pieces of backend (one migration):
 
-## What you'll do (one-time setup, ~30 min)
+- **Storage**: reuse existing `Party Panther Bucket I` bucket under prefix `html-reels/{user_id}/{uuid}.html` (and `.../thumb.jpg`). Public read, authenticated write to own folder.
+- **Table**: `public.html_reels`
+  - `name` (text), `html_url` (text), `thumbnail_url` (text, nullable), `default_duration` (int), `default_fps` (int)
+  - RLS: admin-only read/write (matches existing IG generator access rule per memory).
 
-I'll guide you through each step in chat as we go, but for awareness:
+## Files added/changed
 
-1. Create a free Vercel account (sign in with GitHub).
-2. Create a new empty GitHub repo `partypanther-edge`. I'll give you the 3 file contents to paste/commit.
-3. In Vercel: **Add New Project** → import `partypanther-edge` → deploy (takes ~30 sec).
-4. In Vercel project → **Settings → Domains** → add `partypanther.net` and `www.partypanther.net`. Vercel shows you the DNS records.
-5. In Lovable: **Project Settings → Domains** → remove `partypanther.net` (keep the project published at `partypanther.lovable.app`).
-6. At your registrar: replace existing A/CNAME records for `partypanther.net` and `www` with the values Vercel gives you (typically an A record `76.76.21.21` for root and a CNAME for www).
-7. Wait for DNS to propagate (10 min – few hours). Vercel auto-issues SSL.
-8. I run a `curl` test battery with crawler user-agents to confirm OG tags are correct on `/e/`, `/p/`, `/v/` URLs and that real browsers still see the app.
+**New**
+- `src/pages/HtmlReelToVideo.tsx` — page shell, library + editor layout
+- `src/components/html-reel/HtmlReelLibrary.tsx` — list/rename/delete saved reels
+- `src/components/html-reel/HtmlReelPreview.tsx` — scaled iframe preview
+- `src/components/html-reel/HtmlReelExporter.tsx` — duration/fps/format controls + capture loop
+- `src/lib/html-reel-encoder.ts` — extracted encoder helpers (MP4/WebM/GIF) shared with `AnimationPreview.tsx`
 
-## Technical details (the middleware)
+**Changed**
+- `src/App.tsx` — add `/admin/html-reel-to-video` route (above catch-all)
+- `src/pages/InstagramPostGenerator.tsx` — add "HTML → Video" header button linking to the new page
+- `src/components/instagram/AnimationPreview.tsx` — refactor to import shared encoder helpers (no behavior change)
 
-The Vercel middleware (~40 lines) does exactly this:
+**Migration**
+- `html_reels` table + RLS policies + storage policies for the `html-reels/` prefix
 
-```ts
-// Pseudocode — actual file will be provided
-const CRAWLER_RE = /facebookexternalhit|Twitterbot|WhatsApp|LinkedInBot|.../i;
-const TYPE_MAP = { e: "event", p: "promo", v: "venue" };
+## Known limits (worth flagging)
 
-export default async function middleware(req) {
-  const url = new URL(req.url);
-  const ua = req.headers.get("user-agent") || "";
-  const [, prefix, slug] = url.pathname.match(/^\/([^/]+)\/([^/?#]+)/) || [];
+- **html2canvas can't render every CSS feature.** Complex blend-modes, `backdrop-filter`, some SVG filters, and `<canvas>`/WebGL inside the iframe may render imperfectly. Your uploaded file uses gradients, transforms, opacity and keyframes — those all work.
+- **External fonts** (e.g. Google Fonts loaded by the HTML) need to finish loading before capture starts; the tool waits on `document.fonts.ready` inside the iframe before the first frame.
+- **Performance**: 30fps × 6s × 1080×1920 ≈ 180 frames at full resolution. Capture takes ~30–60s on a typical laptop. UI shows a progress bar. (If this is too slow we can later swap html2canvas for a server-side Puppeteer edge function — out of scope for v1.)
+- Recording is real-time playback; one-shot CSS animations longer than the chosen duration get cut off, animations shorter loop naturally.
 
-  if (CRAWLER_RE.test(ua) && TYPE_MAP[prefix] && slug) {
-    return fetch(`https://qgttbaibhmzbmknjlghj.supabase.co/functions/v1/og-meta?type=${prefix}&slug=${slug}`);
-  }
+## Out of scope (v1)
 
-  // Everyone else → proxy to Lovable origin, preserving path/query
-  return fetch(`https://partypanther.lovable.app${url.pathname}${url.search}`, {
-    headers: { ...req.headers, host: "partypanther.lovable.app" }
-  });
-}
-```
-
-`vercel.json` sets the matcher to `/(.*)` so middleware runs on every path.
-
-## What stays the same
-
-- All app code, edits, and deploys happen in Lovable as today.
-- Supabase database, edge functions, auth — unchanged.
-- Lovable's "Publish" button still works; it updates `partypanther.lovable.app`, which Vercel proxies.
-- The `partypanther-edge` repo essentially never needs to be touched again after setup.
-
-## What changes
-
-- DNS for `partypanther.net` moves from Lovable → Vercel.
-- One extra service in your stack (Vercel free tier — well within limits for this use).
-- If Vercel has an outage, the custom domain is down (but `partypanther.lovable.app` keeps working as a fallback).
-
-## Order of operations once approved
-
-1. I revert `slug-utils.ts` to pretty URLs (safe to do now — won't break anything because Lovable still serves the domain until you flip DNS).
-2. I give you the 3 files for the `partypanther-edge` repo and walk you through creating it + deploying to Vercel.
-3. You add the domain in Vercel and get the DNS records.
-4. You remove the domain in Lovable + update DNS at your registrar.
-5. I verify with curl and we're done.
-
-No code in the main Lovable project changes beyond the `slug-utils.ts` revert.
+- Server-side rendering / headless Chrome
+- Editing the HTML inside the app
+- Audio tracks
+- Multi-page or interactive HTML (clicks, scroll-driven anims)
