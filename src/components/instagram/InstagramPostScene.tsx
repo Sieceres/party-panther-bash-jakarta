@@ -16,6 +16,12 @@ export const getBackgroundConfig = (style: BackgroundStyle) => {
         mainGradient: "linear-gradient(180deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%)",
         overlay: "linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 50%, rgba(0,0,0,0.3) 100%)",
       };
+    case "deep-blue-radial":
+      return {
+        mainGradient: "radial-gradient(ellipse at 50% 50%, #102a5e 0%, #08153a 55%, #050a1f 100%)",
+        overlay:
+          "radial-gradient(circle at 18% 18%, rgba(40,90,200,0.55) 0%, transparent 35%), radial-gradient(circle at 85% 78%, rgba(120,60,200,0.45) 0%, transparent 32%), linear-gradient(180deg, rgba(0,0,0,0.25) 0%, transparent 40%, rgba(0,0,0,0.35) 100%)",
+      };
     case "custom-image":
       return {
         mainGradient: "transparent",
