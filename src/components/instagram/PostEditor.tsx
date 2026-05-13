@@ -292,6 +292,7 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                   <SelectItem value="dark-gradient">Dark Gradient</SelectItem>
                   <SelectItem value="hero-style">Hero Style (Floating Glows)</SelectItem>
                   <SelectItem value="neon-accent">Neon Accent</SelectItem>
+                  <SelectItem value="deep-blue-radial">Deep Blue Radial (Party Panther)</SelectItem>
                   {content.background.image && <SelectItem value="custom-image">Custom Image</SelectItem>}
                 </SelectContent>
               </Select>
@@ -961,6 +962,156 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                   )}
                 </div>
               )}
+            </div>
+
+            {/* Story Chrome (corner brackets, scanline, dots, progress) */}
+            <div className="space-y-3 p-3 border rounded-lg">
+              <div className="flex items-center justify-between">
+                <Label className="font-medium">Story Chrome</Label>
+                <Switch
+                  checked={content.storyChrome?.enabled ?? false}
+                  onCheckedChange={(checked) =>
+                    updateField("storyChrome", {
+                      enabled: checked,
+                      color: content.storyChrome?.color ?? "#00CFFF",
+                      cornerSize: content.storyChrome?.cornerSize ?? 60,
+                      cornerThickness: content.storyChrome?.cornerThickness ?? 2,
+                      scanline: content.storyChrome?.scanline ?? true,
+                      scanlineOpacity: content.storyChrome?.scanlineOpacity ?? 25,
+                      progressEnabled: content.storyChrome?.progressEnabled ?? true,
+                      progressPercent: content.storyChrome?.progressPercent ?? 60,
+                      dotsEnabled: content.storyChrome?.dotsEnabled ?? true,
+                      dotCount: content.storyChrome?.dotCount ?? 4,
+                      activeDot: content.storyChrome?.activeDot ?? 2,
+                    })
+                  }
+                />
+              </div>
+              {content.storyChrome?.enabled && (() => {
+                const sc = content.storyChrome!;
+                const set = (patch: Partial<typeof sc>) => updateField("storyChrome", { ...sc, ...patch });
+                return (
+                  <div className="space-y-3">
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-16">Color</Label>
+                      <Input type="color" value={sc.color} onChange={(e) => set({ color: e.target.value })} className="w-10 h-6 p-0.5" />
+                      <Input type="text" value={sc.color} onChange={(e) => set({ color: e.target.value })} className="w-24 h-6 text-xs font-mono" />
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-16">Corner</Label>
+                      <Slider value={[sc.cornerSize]} onValueChange={([v]) => set({ cornerSize: v })} min={30} max={140} step={2} className="flex-1" />
+                      <span className="text-xs text-muted-foreground w-10 text-right">{sc.cornerSize}px</span>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-16">Thick</Label>
+                      <Slider value={[sc.cornerThickness]} onValueChange={([v]) => set({ cornerThickness: v })} min={1} max={6} step={1} className="flex-1" />
+                      <span className="text-xs text-muted-foreground w-8 text-right">{sc.cornerThickness}px</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Vertical Scanline</Label>
+                      <Switch checked={sc.scanline} onCheckedChange={(v) => set({ scanline: v })} />
+                    </div>
+                    {sc.scanline && (
+                      <div className="flex gap-2 items-center">
+                        <Label className="text-xs w-16">Opacity</Label>
+                        <Slider value={[sc.scanlineOpacity]} onValueChange={([v]) => set({ scanlineOpacity: v })} min={5} max={80} step={5} className="flex-1" />
+                        <span className="text-xs text-muted-foreground w-8 text-right">{sc.scanlineOpacity}%</span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Progress Bar</Label>
+                      <Switch checked={sc.progressEnabled} onCheckedChange={(v) => set({ progressEnabled: v })} />
+                    </div>
+                    {sc.progressEnabled && (
+                      <div className="flex gap-2 items-center">
+                        <Label className="text-xs w-16">Progress</Label>
+                        <Slider value={[sc.progressPercent]} onValueChange={([v]) => set({ progressPercent: v })} min={0} max={100} step={5} className="flex-1" />
+                        <span className="text-xs text-muted-foreground w-8 text-right">{sc.progressPercent}%</span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Pagination Dots</Label>
+                      <Switch checked={sc.dotsEnabled} onCheckedChange={(v) => set({ dotsEnabled: v })} />
+                    </div>
+                    {sc.dotsEnabled && (
+                      <>
+                        <div className="flex gap-2 items-center">
+                          <Label className="text-xs w-16">Dots</Label>
+                          <Slider value={[sc.dotCount]} onValueChange={([v]) => set({ dotCount: v, activeDot: Math.min(sc.activeDot, v - 1) })} min={1} max={8} step={1} className="flex-1" />
+                          <span className="text-xs text-muted-foreground w-6 text-right">{sc.dotCount}</span>
+                        </div>
+                        <div className="flex gap-2 items-center">
+                          <Label className="text-xs w-16">Active</Label>
+                          <Slider value={[sc.activeDot]} onValueChange={([v]) => set({ activeDot: v })} min={0} max={Math.max(0, sc.dotCount - 1)} step={1} className="flex-1" />
+                          <span className="text-xs text-muted-foreground w-6 text-right">{sc.activeDot + 1}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Pill Buttons */}
+            <div className="space-y-3 p-3 border rounded-lg">
+              <div className="flex items-center justify-between">
+                <Label className="font-medium">Neon Pill Buttons</Label>
+                <Switch
+                  checked={content.pillButtons?.enabled ?? false}
+                  onCheckedChange={(checked) =>
+                    updateField("pillButtons", {
+                      enabled: checked,
+                      labels: content.pillButtons?.labels ?? "Map\nVenue Directory\nCommunity",
+                      color: content.pillButtons?.color ?? "#00CFFF",
+                      fontSize: content.pillButtons?.fontSize ?? 28,
+                      position: content.pillButtons?.position ?? { x: 50, y: 78 },
+                      width: content.pillButtons?.width ?? 80,
+                      glow: content.pillButtons?.glow ?? true,
+                    })
+                  }
+                />
+              </div>
+              {content.pillButtons?.enabled && (() => {
+                const pb = content.pillButtons!;
+                const set = (patch: Partial<typeof pb>) => updateField("pillButtons", { ...pb, ...patch });
+                return (
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Labels (one per line)</Label>
+                      <Textarea
+                        value={pb.labels}
+                        onChange={(e) => set({ labels: e.target.value })}
+                        rows={3}
+                        className="text-xs"
+                      />
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-16">Color</Label>
+                      <Input type="color" value={pb.color} onChange={(e) => set({ color: e.target.value })} className="w-10 h-6 p-0.5" />
+                      <Input type="text" value={pb.color} onChange={(e) => set({ color: e.target.value })} className="w-24 h-6 text-xs font-mono" />
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-16">Size</Label>
+                      <Slider value={[pb.fontSize]} onValueChange={([v]) => set({ fontSize: v })} min={16} max={48} step={2} className="flex-1" />
+                      <span className="text-xs text-muted-foreground w-10 text-right">{pb.fontSize}px</span>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-16">Width</Label>
+                      <Slider value={[pb.width]} onValueChange={([v]) => set({ width: v })} min={30} max={95} step={5} className="flex-1" />
+                      <span className="text-xs text-muted-foreground w-8 text-right">{pb.width}%</span>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-16">X / Y</Label>
+                      <Slider value={[pb.position.x]} onValueChange={([v]) => set({ position: { ...pb.position, x: v } })} min={0} max={100} step={1} className="flex-1" />
+                      <Slider value={[pb.position.y]} onValueChange={([v]) => set({ position: { ...pb.position, y: v } })} min={0} max={100} step={1} className="flex-1" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Glow</Label>
+                      <Switch checked={pb.glow} onCheckedChange={(v) => set({ glow: v })} />
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </TabsContent>
 

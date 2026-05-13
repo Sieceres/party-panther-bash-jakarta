@@ -16,6 +16,12 @@ export const getBackgroundConfig = (style: BackgroundStyle) => {
         mainGradient: "linear-gradient(180deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%)",
         overlay: "linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 50%, rgba(0,0,0,0.3) 100%)",
       };
+    case "deep-blue-radial":
+      return {
+        mainGradient: "radial-gradient(ellipse at 50% 50%, #102a5e 0%, #08153a 55%, #050a1f 100%)",
+        overlay:
+          "radial-gradient(circle at 18% 18%, rgba(40,90,200,0.55) 0%, transparent 35%), radial-gradient(circle at 85% 78%, rgba(120,60,200,0.45) 0%, transparent 32%), linear-gradient(180deg, rgba(0,0,0,0.25) 0%, transparent 40%, rgba(0,0,0,0.35) 100%)",
+      };
     case "custom-image":
       return {
         mainGradient: "transparent",
@@ -396,6 +402,174 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
             />
           </div>
         )}
+
+        {/* Pill Buttons (e.g. MAP / VENUE DIRECTORY / COMMUNITY) */}
+        {content.pillButtons?.enabled && content.pillButtons.labels.trim() && (() => {
+          const pb = content.pillButtons!;
+          const items = pb.labels
+            .split(/\r?\n/)
+            .map((l) => l.trim())
+            .filter(Boolean);
+          if (items.length === 0) return null;
+          const cyan = pb.color || "#00CFFF";
+          const fontSize = pb.fontSize ?? 28;
+          const widthPct = pb.width ?? 80;
+          const px = pb.position?.x ?? 50;
+          const py = pb.position?.y ?? 75;
+          return (
+            <div
+              style={{
+                position: "absolute",
+                left: `${px}%`,
+                top: `${py}%`,
+                transform: "translate(-50%, -50%)",
+                width: `${widthPct}%`,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 16,
+                justifyContent: "center",
+                zIndex: 6,
+                ...getElStyle("pillButtons"),
+              }}
+            >
+              {items.map((label, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: `${Math.round(fontSize * 0.55)}px ${Math.round(fontSize * 1.2)}px`,
+                    border: `2px solid ${hexToRgba(cyan, 0.85)}`,
+                    borderRadius: 9999,
+                    color: cyan,
+                    fontSize,
+                    fontWeight: 600,
+                    letterSpacing: "0.08em",
+                    fontFamily: "'Poppins', sans-serif",
+                    textTransform: "uppercase",
+                    background: hexToRgba(cyan, 0.06),
+                    boxShadow: pb.glow
+                      ? `0 0 ${Math.round(fontSize * 0.6)}px ${hexToRgba(cyan, 0.5)}, inset 0 0 ${Math.round(fontSize * 0.4)}px ${hexToRgba(cyan, 0.15)}`
+                      : "none",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
+        {/* Story Chrome: corner brackets, scanline, dots + progress bar */}
+        {content.storyChrome?.enabled && (() => {
+          const sc = content.storyChrome!;
+          const color = sc.color || "#00CFFF";
+          const cs = sc.cornerSize ?? 60;
+          const ct = sc.cornerThickness ?? 2;
+          const inset = 24;
+          const cornerStyle = (which: "tl" | "tr" | "bl" | "br"): React.CSSProperties => {
+            const base: React.CSSProperties = {
+              position: "absolute",
+              width: cs,
+              height: cs,
+              pointerEvents: "none",
+            };
+            const borderColor = hexToRgba(color, 0.9);
+            const filter = `drop-shadow(0 0 6px ${hexToRgba(color, 0.5)})`;
+            switch (which) {
+              case "tl":
+                return { ...base, top: inset, left: inset, borderTop: `${ct}px solid ${borderColor}`, borderLeft: `${ct}px solid ${borderColor}`, filter };
+              case "tr":
+                return { ...base, top: inset, right: inset, borderTop: `${ct}px solid ${borderColor}`, borderRight: `${ct}px solid ${borderColor}`, filter };
+              case "bl":
+                return { ...base, bottom: inset, left: inset, borderBottom: `${ct}px solid ${borderColor}`, borderLeft: `${ct}px solid ${borderColor}`, filter };
+              case "br":
+                return { ...base, bottom: inset, right: inset, borderBottom: `${ct}px solid ${borderColor}`, borderRight: `${ct}px solid ${borderColor}`, filter };
+            }
+          };
+
+          const dotCount = Math.max(1, Math.min(8, sc.dotCount ?? 4));
+          const activeDot = Math.max(0, Math.min(dotCount - 1, sc.activeDot ?? 0));
+          const progressPct = Math.max(0, Math.min(100, sc.progressPercent ?? 60));
+          const scanlineOpacity = (sc.scanlineOpacity ?? 25) / 100;
+
+          return (
+            <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 20 }}>
+              {/* Corner brackets */}
+              <div style={cornerStyle("tl")} />
+              <div style={cornerStyle("tr")} />
+              <div style={cornerStyle("bl")} />
+              <div style={cornerStyle("br")} />
+
+              {/* Vertical scanline */}
+              {sc.scanline && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: inset + cs,
+                    bottom: inset + cs + 80,
+                    left: "50%",
+                    width: 1,
+                    transform: "translateX(-0.5px)",
+                    background: `linear-gradient(180deg, transparent 0%, ${hexToRgba(color, scanlineOpacity)} 20%, ${hexToRgba(color, scanlineOpacity)} 80%, transparent 100%)`,
+                  }}
+                />
+              )}
+
+              {/* Bottom progress bar */}
+              {sc.progressEnabled && (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: inset + 56,
+                    left: inset + 24,
+                    right: inset + 24,
+                    height: 3,
+                    borderRadius: 2,
+                    background: hexToRgba(color, 0.18),
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${progressPct}%`,
+                      height: "100%",
+                      background: color,
+                      boxShadow: `0 0 10px ${hexToRgba(color, 0.7)}`,
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Bottom pagination dots */}
+              {sc.dotsEnabled && (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: inset + 28,
+                    left: 0,
+                    right: 0,
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: 10,
+                  }}
+                >
+                  {Array.from({ length: dotCount }).map((_, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        width: i === activeDot ? 8 : 6,
+                        height: i === activeDot ? 8 : 6,
+                        borderRadius: 9999,
+                        background: i === activeDot ? color : hexToRgba(color, 0.35),
+                        boxShadow: i === activeDot ? `0 0 8px ${hexToRgba(color, 0.7)}` : "none",
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
     );
   },

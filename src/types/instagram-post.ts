@@ -1,5 +1,10 @@
 export type PostFormat = "square" | "portrait" | "story";
-export type BackgroundStyle = "dark-gradient" | "hero-style" | "neon-accent" | "custom-image";
+export type BackgroundStyle =
+  | "dark-gradient"
+  | "hero-style"
+  | "neon-accent"
+  | "deep-blue-radial"
+  | "custom-image";
 export type FontFamily = "Poppins" | "Inter" | "Montserrat" | "Playfair Display" | "Bebas Neue" | "Oswald";
 export type TextAlignment = "left" | "center" | "right";
 
@@ -90,6 +95,31 @@ export interface QRCodeSettings {
   position: ElementPosition;
 }
 
+export interface StoryChromeSettings {
+  enabled: boolean;
+  color: string;          // typically "#00CFFF"
+  cornerSize: number;     // 30-120
+  cornerThickness: number; // 1-6
+  scanline: boolean;
+  scanlineOpacity: number; // 0-100
+  progressEnabled: boolean;
+  progressPercent: number; // 0-100
+  dotsEnabled: boolean;
+  dotCount: number;        // 1-8
+  activeDot: number;       // 0-(dotCount-1)
+}
+
+export interface PillButtonsSettings {
+  enabled: boolean;
+  /** One label per line. */
+  labels: string;
+  color: string;            // border + text + glow
+  fontSize: number;         // 16-48
+  position: ElementPosition; // anchor of the centered group
+  width: number;            // % of canvas the row may use, 30-95
+  glow: boolean;
+}
+
 // Legacy compatibility - textPosition
 export interface TextPosition {
   x: number;
@@ -141,6 +171,8 @@ export interface PostContent {
   sectionBoxGlowIntensity?: number; // 1-30
   sectionBoxStyle?: "border-only" | "frosted" | "solid";
   sectionBoxBorderWidth?: number; // 0-5
+  storyChrome?: StoryChromeSettings;
+  pillButtons?: PillButtonsSettings;
   // Legacy compatibility
   backgroundStyle?: BackgroundStyle;
   backgroundImage?: string;
