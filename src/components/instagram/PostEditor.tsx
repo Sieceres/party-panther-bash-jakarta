@@ -292,6 +292,7 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                   <SelectItem value="dark-gradient">Dark Gradient</SelectItem>
                   <SelectItem value="hero-style">Hero Style (Floating Glows)</SelectItem>
                   <SelectItem value="neon-accent">Neon Accent</SelectItem>
+                  <SelectItem value="deep-blue-radial">Deep Blue Radial (Party Panther)</SelectItem>
                   {content.background.image && <SelectItem value="custom-image">Custom Image</SelectItem>}
                 </SelectContent>
               </Select>
