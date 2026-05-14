@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { TextFormatToolbar } from "./TextFormatToolbar";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -465,6 +466,11 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                 <Label htmlFor="headline">Headline</Label>
                 <EmojiPicker onSelect={(emoji) => insertEmoji(emoji, "headline")} />
               </div>
+              <TextFormatToolbar
+                targetId="headline"
+                value={content.headline}
+                onChange={(v) => updateField("headline", v)}
+              />
               <Textarea
                 id="headline"
                 value={content.headline}
@@ -564,6 +570,11 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                       <Label htmlFor={`subheadline-${index}`} className="text-xs">Sub-headline</Label>
                       <EmojiPicker onSelect={(emoji) => insertEmoji(emoji, "subheadline", index)} />
                     </div>
+                    <TextFormatToolbar
+                      targetId={`subheadline-${index}`}
+                      value={section.subheadline}
+                      onChange={(v) => updateSection(index, "subheadline", v)}
+                    />
                     <Textarea
                       id={`subheadline-${index}`}
                       value={section.subheadline}
@@ -582,6 +593,11 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                       <Label htmlFor={`body-${index}`} className="text-xs">Body Text</Label>
                       <EmojiPicker onSelect={(emoji) => insertEmoji(emoji, "body", index)} />
                     </div>
+                    <TextFormatToolbar
+                      targetId={`body-${index}`}
+                      value={section.body}
+                      onChange={(v) => updateSection(index, "body", v)}
+                    />
                     <Textarea
                       id={`body-${index}`}
                       value={section.body}
@@ -690,7 +706,13 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                 />
               </div>
               <p className="text-xs text-muted-foreground leading-snug">
-                Wrap any word with <code className="px-1 rounded bg-muted">**double asterisks**</code> in your headline, sub-headline, or body to colour it with the accent color. Example: <code className="px-1 rounded bg-muted">HAVE AN **EVENT**?</code>
+                Select text in any field and use the toolbar above it for{" "}
+                <strong>bold</strong>, <em>italic</em>, underline, accent highlight, or a custom color.
+                Markup: <code className="px-1 rounded bg-muted">**accent**</code>,{" "}
+                <code className="px-1 rounded bg-muted">__bold__</code>,{" "}
+                <code className="px-1 rounded bg-muted">//italic//</code>,{" "}
+                <code className="px-1 rounded bg-muted">[u]underline[/u]</code>,{" "}
+                <code className="px-1 rounded bg-muted">[c:#ff0]color[/c]</code>.
               </p>
             </div>
 

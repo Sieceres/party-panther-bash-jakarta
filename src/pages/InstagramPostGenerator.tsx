@@ -21,6 +21,12 @@ import type { PostContent, SavedPost, ElementPosition } from "@/types/instagram-
 import { DEFAULT_POST_CONTENT, migratePostContent } from "@/types/instagram-post";
 import { STARTER_TEMPLATES } from "@/lib/starter-templates";
 
+/** Initial canvas the editor opens with. */
+const INITIAL_CONTENT: PostContent = (() => {
+  const tpl = STARTER_TEMPLATES.find((t) => t.name === "Party Panther Story");
+  return tpl ? migratePostContent(JSON.parse(JSON.stringify(tpl.settings))) : { ...DEFAULT_POST_CONTENT };
+})();
+
 const InstagramPostGenerator = () => {
   usePageTitle("Instagram Generator");
   const navigate = useNavigate();
@@ -31,7 +37,9 @@ const InstagramPostGenerator = () => {
   
   // Carousel mode
   const [carouselMode, setCarouselMode] = useState(false);
-  const [slides, setSlides] = useState<PostContent[]>([{ ...DEFAULT_POST_CONTENT }]);
+  const [slides, setSlides] = useState<PostContent[]>([
+    JSON.parse(JSON.stringify(INITIAL_CONTENT)),
+  ]);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   
   // Current content (single mode or current slide)
