@@ -39,6 +39,8 @@ export interface ColorSettings {
   headline: string;
   subheadline: string;
   body: string;
+  /** Color for **highlighted** words wrapped in double-asterisks. */
+  accent?: string;
 }
 
 export interface TextShadowSettings {

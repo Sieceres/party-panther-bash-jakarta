@@ -594,6 +594,68 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                 </div>
               ))}
             </div>
+
+            {/* Pill Buttons (call-to-action labels) */}
+            <div className="space-y-3 p-3 border rounded-lg">
+              <div className="flex items-center justify-between">
+                <Label className="font-medium">Neon Pill Buttons</Label>
+                <Switch
+                  checked={content.pillButtons?.enabled ?? false}
+                  onCheckedChange={(checked) =>
+                    updateField("pillButtons", {
+                      enabled: checked,
+                      labels: content.pillButtons?.labels ?? "Map\nVenue Directory\nCommunity",
+                      color: content.pillButtons?.color ?? "#00CFFF",
+                      fontSize: content.pillButtons?.fontSize ?? 28,
+                      position: content.pillButtons?.position ?? { x: 50, y: 78 },
+                      width: content.pillButtons?.width ?? 80,
+                      glow: content.pillButtons?.glow ?? true,
+                    })
+                  }
+                />
+              </div>
+              {content.pillButtons?.enabled && (() => {
+                const pb = content.pillButtons!;
+                const set = (patch: Partial<typeof pb>) => updateField("pillButtons", { ...pb, ...patch });
+                return (
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Labels (one per line)</Label>
+                      <Textarea
+                        value={pb.labels}
+                        onChange={(e) => set({ labels: e.target.value })}
+                        rows={3}
+                        className="text-xs"
+                      />
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-16">Color</Label>
+                      <Input type="color" value={pb.color} onChange={(e) => set({ color: e.target.value })} className="w-10 h-6 p-0.5" />
+                      <Input type="text" value={pb.color} onChange={(e) => set({ color: e.target.value })} className="w-24 h-6 text-xs font-mono" />
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-16">Size</Label>
+                      <Slider value={[pb.fontSize]} onValueChange={([v]) => set({ fontSize: v })} min={16} max={48} step={2} className="flex-1" />
+                      <span className="text-xs text-muted-foreground w-10 text-right">{pb.fontSize}px</span>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-16">Width</Label>
+                      <Slider value={[pb.width]} onValueChange={([v]) => set({ width: v })} min={30} max={95} step={5} className="flex-1" />
+                      <span className="text-xs text-muted-foreground w-8 text-right">{pb.width}%</span>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs w-16">X / Y</Label>
+                      <Slider value={[pb.position.x]} onValueChange={([v]) => set({ position: { ...pb.position, x: v } })} min={0} max={100} step={1} className="flex-1" />
+                      <Slider value={[pb.position.y]} onValueChange={([v]) => set({ position: { ...pb.position, y: v } })} min={0} max={100} step={1} className="flex-1" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Glow</Label>
+                      <Switch checked={pb.glow} onCheckedChange={(v) => set({ glow: v })} />
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
           </TabsContent>
 
           {/* STYLING TAB */}
@@ -605,7 +667,7 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                 ...content,
                 textStyles: { ...content.textStyles, colors },
               })} />
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <ColorPicker
                   label="Headline"
                   value={content.textStyles.colors.headline}
@@ -621,7 +683,15 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                   value={content.textStyles.colors.body}
                   onChange={(color) => updateColor("body", color)}
                 />
+                <ColorPicker
+                  label="Accent (highlight)"
+                  value={content.textStyles.colors.accent ?? "#ff3b6b"}
+                  onChange={(color) => updateColor("accent", color)}
+                />
               </div>
+              <p className="text-xs text-muted-foreground leading-snug">
+                Wrap any word with <code className="px-1 rounded bg-muted">**double asterisks**</code> in your headline, sub-headline, or body to colour it with the accent color. Example: <code className="px-1 rounded bg-muted">HAVE AN **EVENT**?</code>
+              </p>
             </div>
 
             {/* Font Settings */}
@@ -1047,68 +1117,6 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                         </div>
                       </>
                     )}
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Pill Buttons */}
-            <div className="space-y-3 p-3 border rounded-lg">
-              <div className="flex items-center justify-between">
-                <Label className="font-medium">Neon Pill Buttons</Label>
-                <Switch
-                  checked={content.pillButtons?.enabled ?? false}
-                  onCheckedChange={(checked) =>
-                    updateField("pillButtons", {
-                      enabled: checked,
-                      labels: content.pillButtons?.labels ?? "Map\nVenue Directory\nCommunity",
-                      color: content.pillButtons?.color ?? "#00CFFF",
-                      fontSize: content.pillButtons?.fontSize ?? 28,
-                      position: content.pillButtons?.position ?? { x: 50, y: 78 },
-                      width: content.pillButtons?.width ?? 80,
-                      glow: content.pillButtons?.glow ?? true,
-                    })
-                  }
-                />
-              </div>
-              {content.pillButtons?.enabled && (() => {
-                const pb = content.pillButtons!;
-                const set = (patch: Partial<typeof pb>) => updateField("pillButtons", { ...pb, ...patch });
-                return (
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <Label className="text-xs">Labels (one per line)</Label>
-                      <Textarea
-                        value={pb.labels}
-                        onChange={(e) => set({ labels: e.target.value })}
-                        rows={3}
-                        className="text-xs"
-                      />
-                    </div>
-                    <div className="flex gap-2 items-center">
-                      <Label className="text-xs w-16">Color</Label>
-                      <Input type="color" value={pb.color} onChange={(e) => set({ color: e.target.value })} className="w-10 h-6 p-0.5" />
-                      <Input type="text" value={pb.color} onChange={(e) => set({ color: e.target.value })} className="w-24 h-6 text-xs font-mono" />
-                    </div>
-                    <div className="flex gap-2 items-center">
-                      <Label className="text-xs w-16">Size</Label>
-                      <Slider value={[pb.fontSize]} onValueChange={([v]) => set({ fontSize: v })} min={16} max={48} step={2} className="flex-1" />
-                      <span className="text-xs text-muted-foreground w-10 text-right">{pb.fontSize}px</span>
-                    </div>
-                    <div className="flex gap-2 items-center">
-                      <Label className="text-xs w-16">Width</Label>
-                      <Slider value={[pb.width]} onValueChange={([v]) => set({ width: v })} min={30} max={95} step={5} className="flex-1" />
-                      <span className="text-xs text-muted-foreground w-8 text-right">{pb.width}%</span>
-                    </div>
-                    <div className="flex gap-2 items-center">
-                      <Label className="text-xs w-16">X / Y</Label>
-                      <Slider value={[pb.position.x]} onValueChange={([v]) => set({ position: { ...pb.position, x: v } })} min={0} max={100} step={1} className="flex-1" />
-                      <Slider value={[pb.position.y]} onValueChange={([v]) => set({ position: { ...pb.position, y: v } })} min={0} max={100} step={1} className="flex-1" />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs">Glow</Label>
-                      <Switch checked={pb.glow} onCheckedChange={(v) => set({ glow: v })} />
-                    </div>
                   </div>
                 );
               })()}

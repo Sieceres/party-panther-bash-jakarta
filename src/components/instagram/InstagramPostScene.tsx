@@ -67,6 +67,26 @@ export const hexToRgba = (hex: string, alpha: number) => {
   return `rgba(${r},${g},${b},${alpha})`;
 };
 
+/**
+ * Render text with **word** segments highlighted in the accent color.
+ * Falls back to plain text when no accent color is set or no markers found.
+ */
+export const renderHighlighted = (text: string, accent?: string): React.ReactNode => {
+  if (!text) return text;
+  if (!accent || !text.includes("**")) return text;
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return (
+        <span key={i} style={{ color: accent }}>
+          {part.slice(2, -2)}
+        </span>
+      );
+    }
+    return <React.Fragment key={i}>{part}</React.Fragment>;
+  });
+};
+
 const getBackgroundImageStyle = (content: PostContent): React.CSSProperties => {
   const bgCoverage = content.background?.coverage || "full";
   const bgCoveragePercent = content.background?.coveragePercent || 50;
@@ -256,7 +276,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                 ...getTextStyle("headline", content),
               }}
             >
-              {content.headline}
+              {renderHighlighted(content.headline, content.textStyles?.colors?.accent)}
             </div>
           </div>
         )}
@@ -358,7 +378,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                       ...getTextStyle("subheadline", content),
                     }}
                   >
-                    {section.subheadline}
+                    {renderHighlighted(section.subheadline, content.textStyles?.colors?.accent)}
                   </div>
                 )}
                 {section.body && (
@@ -373,7 +393,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                       ...getTextStyle("body", content),
                     }}
                   >
-                    {section.body}
+                    {renderHighlighted(section.body, content.textStyles?.colors?.accent)}
                   </div>
                 )}
               </div>
