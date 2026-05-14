@@ -68,23 +68,101 @@ export const hexToRgba = (hex: string, alpha: number) => {
 };
 
 /**
- * Render text with **word** segments highlighted in the accent color.
- * Falls back to plain text when no accent color is set or no markers found.
+ * Render text with inline formatting markup. Supports nesting:
+ *   **text**         → highlight in the configured accent color
+ *   __text__         → bold
+ *   //text//         → italic
+ *   [u]text[/u]      → underline
+ *   [c:#hex]text[/c] → arbitrary text color
+ * When no markers are present, returns the raw string for cheap rendering.
  */
 export const renderHighlighted = (text: string, accent?: string): React.ReactNode => {
   if (!text) return text;
-  if (!accent || !text.includes("**")) return text;
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
-      return (
-        <span key={i} style={{ color: accent }}>
-          {part.slice(2, -2)}
+  if (
+    !text.includes("**") &&
+    !text.includes("__") &&
+    !text.includes("//") &&
+    !text.includes("[")
+  ) {
+    return text;
+  }
+
+  type Pat = {
+    re: RegExp;
+    render: (m: RegExpExecArray, key: string, inner: React.ReactNode) => React.ReactNode;
+    inner: (m: RegExpExecArray) => string;
+  };
+  const patterns: Pat[] = [
+    {
+      re: /\[c:(#[0-9a-fA-F]{3,8})\]([\s\S]*?)\[\/c\]/,
+      render: (m, k, inner) => (
+        <span key={k} style={{ color: m[1] }}>
+          {inner}
         </span>
-      );
+      ),
+      inner: (m) => m[2],
+    },
+    {
+      re: /\[u\]([\s\S]+?)\[\/u\]/,
+      render: (_m, k, inner) => (
+        <span key={k} style={{ textDecoration: "underline" }}>
+          {inner}
+        </span>
+      ),
+      inner: (m) => m[1],
+    },
+    {
+      re: /__([\s\S]+?)__/,
+      render: (_m, k, inner) => <strong key={k}>{inner}</strong>,
+      inner: (m) => m[1],
+    },
+    {
+      re: /\/\/([\s\S]+?)\/\//,
+      render: (_m, k, inner) => <em key={k}>{inner}</em>,
+      inner: (m) => m[1],
+    },
+    {
+      re: /\*\*([\s\S]+?)\*\*/,
+      render: (_m, k, inner) =>
+        accent ? (
+          <span key={k} style={{ color: accent }}>
+            {inner}
+          </span>
+        ) : (
+          <React.Fragment key={k}>{inner}</React.Fragment>
+        ),
+      inner: (m) => m[1],
+    },
+  ];
+
+  const parse = (str: string, keyPrefix: string): React.ReactNode[] => {
+    const out: React.ReactNode[] = [];
+    let cursor = 0;
+    while (cursor < str.length) {
+      let best: { idx: number; m: RegExpExecArray; pat: Pat } | null = null;
+      const slice = str.slice(cursor);
+      for (const pat of patterns) {
+        const re = new RegExp(pat.re.source);
+        const m = re.exec(slice);
+        if (m && (best === null || m.index < best.idx)) {
+          best = { idx: m.index, m, pat };
+        }
+      }
+      if (!best) {
+        out.push(str.slice(cursor));
+        break;
+      }
+      if (best.idx > 0) out.push(str.slice(cursor, cursor + best.idx));
+      const key = `${keyPrefix}-${out.length}`;
+      const innerStr = best.pat.inner(best.m);
+      const innerNodes = parse(innerStr, key);
+      out.push(best.pat.render(best.m, key, innerNodes));
+      cursor += best.idx + best.m[0].length;
     }
-    return <React.Fragment key={i}>{part}</React.Fragment>;
-  });
+    return out;
+  };
+
+  return parse(text, "rt");
 };
 
 const getBackgroundImageStyle = (content: PostContent): React.CSSProperties => {
