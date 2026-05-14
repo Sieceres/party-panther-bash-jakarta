@@ -276,7 +276,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                 ...getTextStyle("headline", content),
               }}
             >
-              {content.headline}
+              {renderHighlighted(content.headline, content.textStyles?.colors?.accent)}
             </div>
           </div>
         )}
@@ -378,7 +378,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                       ...getTextStyle("subheadline", content),
                     }}
                   >
-                    {section.subheadline}
+                    {renderHighlighted(section.subheadline, content.textStyles?.colors?.accent)}
                   </div>
                 )}
                 {section.body && (
@@ -393,7 +393,7 @@ export const InstagramPostScene = React.forwardRef<HTMLDivElement, InstagramPost
                       ...getTextStyle("body", content),
                     }}
                   >
-                    {section.body}
+                    {renderHighlighted(section.body, content.textStyles?.colors?.accent)}
                   </div>
                 )}
               </div>
