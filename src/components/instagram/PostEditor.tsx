@@ -605,7 +605,7 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                 ...content,
                 textStyles: { ...content.textStyles, colors },
               })} />
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <ColorPicker
                   label="Headline"
                   value={content.textStyles.colors.headline}
@@ -621,7 +621,15 @@ export const PostEditor = ({ content, onChange }: PostEditorProps) => {
                   value={content.textStyles.colors.body}
                   onChange={(color) => updateColor("body", color)}
                 />
+                <ColorPicker
+                  label="Accent (highlight)"
+                  value={content.textStyles.colors.accent ?? "#ff3b6b"}
+                  onChange={(color) => updateColor("accent", color)}
+                />
               </div>
+              <p className="text-xs text-muted-foreground leading-snug">
+                Wrap any word with <code className="px-1 rounded bg-muted">**double asterisks**</code> in your headline, sub-headline, or body to colour it with the accent color. Example: <code className="px-1 rounded bg-muted">HAVE AN **EVENT**?</code>
+              </p>
             </div>
 
             {/* Font Settings */}
