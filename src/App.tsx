@@ -83,6 +83,7 @@ const App = () => (
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/about" element={<About />} />
           <Route path="/wce" element={<WorldCupExplorer />} />
+          <Route path="/esc" element={<Eurovision42 />} />
           <Route path="/import" element={<BatchImport />} />
           <Route path="/map" element={<MapExplorer />} />
           <Route path="/venues" element={<VenueDirectory />} />
