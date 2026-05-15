@@ -25,6 +25,7 @@ import TermsConditions from "./pages/TermsConditions";
 import About from "./pages/About";
 import ResetPassword from "./pages/ResetPassword";
 import WorldCupExplorer from "./pages/WorldCupExplorer";
+import Eurovision42 from "./pages/Eurovision42";
 import Proofing from "./pages/Proofing";
 import BatchImport from "./pages/BatchImport";
 import MapExplorer from "./pages/MapExplorer";
