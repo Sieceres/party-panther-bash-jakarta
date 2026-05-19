@@ -148,32 +148,6 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/`
-        }
-      });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
-    }
-  };
-
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -191,13 +165,9 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
             <form onSubmit={handleSignIn} className="space-y-4">
               <div ref={googleSignInRef} className="w-full flex justify-center min-h-[40px]" />
               {googleSignInError && (
-                <button
-                  type="button"
-                  onClick={handleGoogleSignIn}
-                  className="text-xs text-muted-foreground hover:underline w-full text-center"
-                >
-                  Trouble with Google? Use redirect sign-in instead
-                </button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Google sign-in is temporarily unavailable. Please use email instead.
+                </p>
               )}
               
               <div className="relative">
@@ -250,13 +220,9 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
             <form onSubmit={handleSignUp} className="space-y-4">
               <div ref={googleSignUpRef} className="w-full flex justify-center min-h-[40px]" />
               {googleSignUpError && (
-                <button
-                  type="button"
-                  onClick={handleGoogleSignIn}
-                  className="text-xs text-muted-foreground hover:underline w-full text-center"
-                >
-                  Trouble with Google? Use redirect sign-in instead
-                </button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Google sign-in is temporarily unavailable. Please use email instead.
+                </p>
               )}
               
               <div className="relative">
