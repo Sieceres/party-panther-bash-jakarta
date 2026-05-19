@@ -4,11 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const GOOGLE_CLIENT_ID =
   "900992276408-mmaa6o6t4dom10rm3b6r9tvin4jcgdu0.apps.googleusercontent.com";
 
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
+// Window.google is declared as `typeof google` elsewhere via @types/google.maps.
 
 async function sha256Base64(input: string): Promise<string> {
   const buf = await crypto.subtle.digest(
