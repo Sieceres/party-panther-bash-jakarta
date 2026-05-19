@@ -34,6 +34,7 @@ import PromoReview from "./pages/PromoReview";
 import VenueAreaReview from "./pages/VenueAreaReview";
 import VoucherVerify from "./pages/VoucherVerify";
 import Lintang from "./pages/Lintang";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
