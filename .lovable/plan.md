@@ -1,76 +1,81 @@
+## Goal
 
-# HTML Reel → Video Tool
+Replace the redirect-based Google login inside `LoginDialog` with Google's **Identity Services (GIS)** popup using `supabase.auth.signInWithIdToken`. The user signs in without ever leaving `partypanther.net`, so the scary `qgttbaibhmzbmknjlghj.supabase.co` URL never appears.
 
-A new admin tool that lets you upload an animated HTML file (like `party_panther_story_7.html`), save it to a personal library, and export it as an MP4/WebM/GIF at 1080×1920.
+Scope: **LoginDialog only**. The `/auth` page keeps the existing redirect flow as a fallback (useful for OAuth edge cases and mobile in-app browsers where GIS isn't supported).
 
-## What you get
+---
 
-- New page at `/admin/html-reel-to-video` (entry button added to the IG Generator header so it's discoverable).
-- Upload `.html` file → it's saved to Supabase Storage and listed in your library.
-- Preview the HTML inside a 1080×1920 iframe (scaled down to fit the screen).
-- Controls: **Duration** (1–30s slider) and **FPS** (15 / 24 / 30).
-- **Export** dropdown: MP4 (WhatsApp / Instagram), WebM, GIF — same three options and same encoder code as the IG generator export.
-- Library panel: list of saved reels with thumbnail (first frame), rename, delete, re-export.
+## What you need to do in Google Cloud Console (I'll walk you through)
 
-## How recording works
+You already have a Google OAuth client (the one currently used for the redirect flow). We'll reuse it — just need to add your site origins.
 
-```text
-[ iframe loads HTML ]
-        │
-        ▼
-[ requestAnimationFrame loop ]
-   for N = duration * fps frames:
-     - html2canvas(iframe.documentElement) → 1080×1920 canvas
-     - push to frames[]
-        │
-        ▼
-[ encode frames[] ]
-   ├─ MP4   → encodeMp4WithWebCodecs (existing helper, reused)
-   ├─ WebM  → MediaRecorder fallback (existing path)
-   └─ GIF   → gif.js worker (existing path, 600px cap)
-        │
-        ▼
-[ download Blob + upload thumbnail to library row ]
-```
+1. Open https://console.cloud.google.com/apis/credentials
+2. Pick your project → click the existing **OAuth 2.0 Client ID** (Web application) you use for Supabase.
+3. Under **Authorized JavaScript origins**, add:
+   - `https://partypanther.net`
+   - `https://www.partypanther.net`
+   - `https://partypanther.lovable.app`
+   - `https://id-preview--1ebb9f24-fda5-4dae-ac77-480d72954427.lovable.app`
+   - `http://localhost:5173` (for local dev, optional)
+4. **Authorized redirect URIs** — leave as-is (still needed for the `/auth` redirect fallback).
+5. Copy the **Client ID** (looks like `xxxxxxxxxxxx-xxxxxxxxxx.apps.googleusercontent.com`) and paste it to me in chat.
+6. In Supabase Dashboard → Authentication → Providers → **Google**, scroll to **Authorized Client IDs** and add the same Client ID there (this lets Supabase trust ID tokens issued to it).
 
-The CSS animations in the uploaded HTML run in real time inside the iframe; the capture loop simply samples frames at the chosen FPS for the chosen duration. Nothing in the IG generator's existing scene/animation code is touched.
+The Client ID is **public** — safe to commit. No secret needed.
 
-## Storage & data
+---
 
-Two new pieces of backend (one migration):
+## What I'll build
 
-- **Storage**: reuse existing `Party Panther Bucket I` bucket under prefix `html-reels/{user_id}/{uuid}.html` (and `.../thumb.jpg`). Public read, authenticated write to own folder.
-- **Table**: `public.html_reels`
-  - `name` (text), `html_url` (text), `thumbnail_url` (text, nullable), `default_duration` (int), `default_fps` (int)
-  - RLS: admin-only read/write (matches existing IG generator access rule per memory).
+### 1. Load the GIS script
+Add `<script src="https://accounts.google.com/gsi/client" async defer></script>` to `index.html`.
 
-## Files added/changed
+### 2. New hook: `src/hooks/useGoogleOneTap.ts`
+- Generates a random nonce, SHA-256 hashes it.
+- Initializes `google.accounts.id` with the Client ID and hashed nonce.
+- Renders Google's official "Sign in with Google" button into a target div.
+- On callback, calls `supabase.auth.signInWithIdToken({ provider: 'google', token: credential, nonce: rawNonce })`.
+- Returns `{ buttonRef, loading, error }`.
 
-**New**
-- `src/pages/HtmlReelToVideo.tsx` — page shell, library + editor layout
-- `src/components/html-reel/HtmlReelLibrary.tsx` — list/rename/delete saved reels
-- `src/components/html-reel/HtmlReelPreview.tsx` — scaled iframe preview
-- `src/components/html-reel/HtmlReelExporter.tsx` — duration/fps/format controls + capture loop
-- `src/lib/html-reel-encoder.ts` — extracted encoder helpers (MP4/WebM/GIF) shared with `AnimationPreview.tsx`
+### 3. Update `src/components/LoginDialog.tsx`
+- Replace the current custom "Continue with Google" `<Button>` (which calls `signInWithOAuth` and redirects) with a `<div ref={buttonRef}>` that GIS renders the official Google button into.
+- Keep the email/password tabs untouched.
+- On successful sign-in: close dialog, fire `onSuccess?.()` (same as today).
+- Client ID stored as `const GOOGLE_CLIENT_ID = "..."` at top of the hook (public value).
 
-**Changed**
-- `src/App.tsx` — add `/admin/html-reel-to-video` route (above catch-all)
-- `src/pages/InstagramPostGenerator.tsx` — add "HTML → Video" header button linking to the new page
-- `src/components/instagram/AnimationPreview.tsx` — refactor to import shared encoder helpers (no behavior change)
+### 4. Leave `/auth` page alone
+The redirect flow stays as a fallback. Most users hit the dialog anyway.
 
-**Migration**
-- `html_reels` table + RLS policies + storage policies for the `html-reels/` prefix
+---
 
-## Known limits (worth flagging)
+## Technical notes
 
-- **html2canvas can't render every CSS feature.** Complex blend-modes, `backdrop-filter`, some SVG filters, and `<canvas>`/WebGL inside the iframe may render imperfectly. Your uploaded file uses gradients, transforms, opacity and keyframes — those all work.
-- **External fonts** (e.g. Google Fonts loaded by the HTML) need to finish loading before capture starts; the tool waits on `document.fonts.ready` inside the iframe before the first frame.
-- **Performance**: 30fps × 6s × 1080×1920 ≈ 180 frames at full resolution. Capture takes ~30–60s on a typical laptop. UI shows a progress bar. (If this is too slow we can later swap html2canvas for a server-side Puppeteer edge function — out of scope for v1.)
-- Recording is real-time playback; one-shot CSS animations longer than the chosen duration get cut off, animations shorter loop naturally.
+- **Nonce flow** (required for security):
+  ```ts
+  const rawNonce = crypto.randomUUID();
+  const hashed = btoa(String.fromCharCode(...new Uint8Array(
+    await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawNonce))
+  )));
+  // pass `hashed` to GIS, pass `rawNonce` to supabase.signInWithIdToken
+  ```
+- **FedCM**: GIS now requires `use_fedcm_for_prompt: true` in Chrome. We'll enable it.
+- **Fallback**: if GIS fails to load (ad-blockers, in-app browsers), show a small "Use redirect sign-in instead" link that calls the existing `signInWithOAuth`.
+- No DB changes, no edge functions, no new secrets.
 
-## Out of scope (v1)
+---
 
-- Server-side rendering / headless Chrome
-- Editing the HTML inside the app
-- Audio tracks
-- Multi-page or interactive HTML (clicks, scroll-driven anims)
+## Files touched
+
+- `index.html` — add GIS script tag
+- `src/hooks/useGoogleOneTap.ts` — new
+- `src/components/LoginDialog.tsx` — swap Google button for GIS-rendered button + fallback link
+
+---
+
+## What I need from you to start
+
+1. The **Google OAuth Web Client ID** (after you add the origins above).
+2. Confirmation that you've added it to Supabase's **Authorized Client IDs** list.
+
+Once you paste the Client ID, I'll implement the three file changes.
