@@ -18,7 +18,8 @@ function waitForGoogle(timeoutMs = 5000): Promise<any> {
   return new Promise((resolve, reject) => {
     const start = Date.now();
     const tick = () => {
-      if (window.google?.accounts?.id) return resolve(window.google);
+      const g = (window as any).google;
+      if (g?.accounts?.id) return resolve(g);
       if (Date.now() - start > timeoutMs)
         return reject(new Error("Google Identity Services failed to load"));
       setTimeout(tick, 100);
