@@ -92,6 +92,7 @@ const App = () => (
           <Route path="/admin/review-venues" element={<VenueAreaReview />} />
           <Route path="/lexium" element={<Proofing />} />
           <Route path="/lintang" element={<Lintang />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/voucher/:code" element={<VoucherVerify />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
