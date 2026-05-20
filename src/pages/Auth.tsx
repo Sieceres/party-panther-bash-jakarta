@@ -177,28 +177,28 @@ const Auth = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    alert("Debug: /auth Google button clicked — src/pages/Auth.tsx is being edited.");
-    console.log("Debug: /auth Google button clicked", { file: "src/pages/Auth.tsx" });
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/`,
-        }
+    const googleApi = (window as any).google;
+    if (!googleApi?.accounts?.id) {
+      toast({
+        title: "Google not ready",
+        description: "Please wait a moment and try again.",
+        variant: "destructive",
       });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
+      return;
+    }
+    try {
+      googleApi.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: (window as any).handleGoogleSignInToken,
+        ux_mode: "popup",
+        itp_support: true,
+      });
+      googleApi.accounts.id.prompt();
+    } catch (err) {
+      console.error("Google init error:", err);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "Could not open Google sign-in.",
         variant: "destructive",
       });
     }
