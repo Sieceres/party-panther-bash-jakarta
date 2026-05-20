@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
-import { useGoogleOneTap } from "@/hooks/useGoogleOneTap";
+
+const GOOGLE_CLIENT_ID =
+  "900992276408-mmaa6o6t4dom10rm3b6r9tvin4jcgdu0.apps.googleusercontent.com";
 
 interface LoginDialogProps {
   open: boolean;
@@ -24,21 +26,65 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleGoogleSuccess = () => {
-    toast({ title: "Login successful", description: "" });
-    onOpenChange(false);
-    onSuccess?.();
-  };
+  // Register global callback for Google Identity Services HTML API.
+  useEffect(() => {
+    (window as any).handleGoogleSignInToken = async (response: { credential: string }) => {
+      try {
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: "google",
+          token: response.credential,
+        });
+        if (error) throw error;
+        console.log("Login successful!", data.user);
+        toast({ title: "Login successful", description: "" });
+        onOpenChange(false);
+        onSuccess?.();
+      } catch (e: any) {
+        console.error("Supabase auth error:", e?.message);
+        toast({
+          title: "Google sign-in failed",
+          description: e?.message || "Please try again or use email.",
+          variant: "destructive",
+        });
+      }
+    };
+    return () => {
+      try {
+        delete (window as any).handleGoogleSignInToken;
+      } catch {
+        (window as any).handleGoogleSignInToken = undefined;
+      }
+    };
+  }, [onOpenChange, onSuccess, toast]);
 
-  const {
-    buttonRef: googleSignInRef,
-    error: googleSignInError,
-  } = useGoogleOneTap({ enabled: open, onSuccess: handleGoogleSuccess });
-
-  const {
-    buttonRef: googleSignUpRef,
-    error: googleSignUpError,
-  } = useGoogleOneTap({ enabled: open, onSuccess: handleGoogleSuccess });
+  // When the dialog opens, (re)render the Google button(s) inside it.
+  useEffect(() => {
+    if (!open) return;
+    const g = (window as any).google;
+    if (!g?.accounts?.id) return;
+    const targets = document.querySelectorAll<HTMLDivElement>(".g_id_signin");
+    targets.forEach((el) => {
+      el.innerHTML = "";
+      try {
+        g.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: (window as any).handleGoogleSignInToken,
+          ux_mode: "popup",
+          context: "signin",
+        });
+        g.accounts.id.renderButton(el, {
+          type: "standard",
+          shape: "rectangular",
+          theme: "outline",
+          text: "signin_with",
+          size: "large",
+          logo_alignment: "left",
+        });
+      } catch (err) {
+        console.error("Google button render failed:", err);
+      }
+    });
+  }, [open]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,12 +209,7 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
           
           <TabsContent value="signin">
             <form onSubmit={handleSignIn} className="space-y-4">
-              <div ref={googleSignInRef} className="w-full flex justify-center min-h-[40px]" />
-              {googleSignInError && (
-                <p className="text-xs text-muted-foreground text-center">
-                  Google sign-in is temporarily unavailable. Please use email instead.
-                </p>
-              )}
+              <div className="g_id_signin w-full flex justify-center min-h-[40px]" />
               
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -218,12 +259,7 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
           
           <TabsContent value="signup">
             <form onSubmit={handleSignUp} className="space-y-4">
-              <div ref={googleSignUpRef} className="w-full flex justify-center min-h-[40px]" />
-              {googleSignUpError && (
-                <p className="text-xs text-muted-foreground text-center">
-                  Google sign-in is temporarily unavailable. Please use email instead.
-                </p>
-              )}
+              <div className="g_id_signin w-full flex justify-center min-h-[40px]" />
               
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
