@@ -26,7 +26,7 @@ const Auth = () => {
 
   const GOOGLE_CLIENT_ID = "900992276408-mmaa6o6t4dom10rm3b6r9tvin4jcgdu0.apps.googleusercontent.com";
 
-  // Register global callback for Google popup
+  // Register global callback + initialize/render Google buttons
   useEffect(() => {
     (window as any).handleGoogleSignInToken = async (response: any) => {
       const { data, error } = await supabase.auth.signInWithIdToken({
@@ -45,7 +45,43 @@ const Auth = () => {
         navigate("/");
       }
     };
+
+    let cancelled = false;
+    const render = () => {
+      if (cancelled) return;
+      const g = (window as any).google;
+      if (!g?.accounts?.id) {
+        setTimeout(render, 150);
+        return;
+      }
+      try {
+        g.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: (window as any).handleGoogleSignInToken,
+          ux_mode: "popup",
+          itp_support: true,
+        });
+        const targets = document.querySelectorAll<HTMLDivElement>(".g_id_signin");
+        targets.forEach((el) => {
+          el.innerHTML = "";
+          g.accounts.id.renderButton(el, {
+            type: "standard",
+            shape: "rectangular",
+            theme: "outline",
+            text: "continue_with",
+            size: "large",
+            logo_alignment: "left",
+            width: 320,
+          });
+        });
+      } catch (err) {
+        console.error("Error rendering Google button:", err);
+      }
+    };
+    render();
+
     return () => {
+      cancelled = true;
       delete (window as any).handleGoogleSignInToken;
     };
   }, [navigate, toast]);
@@ -176,33 +212,6 @@ const Auth = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    const googleApi = (window as any).google;
-    if (!googleApi?.accounts?.id) {
-      toast({
-        title: "Google not ready",
-        description: "Please wait a moment and try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-    try {
-      googleApi.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: (window as any).handleGoogleSignInToken,
-        ux_mode: "popup",
-        itp_support: true,
-      });
-      googleApi.accounts.id.prompt();
-    } catch (err) {
-      console.error("Google init error:", err);
-      toast({
-        title: "Error",
-        description: "Could not open Google sign-in.",
-        variant: "destructive",
-      });
-    }
-  };
 
 
   return (
