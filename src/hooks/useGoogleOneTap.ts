@@ -1,16 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export const GOOGLE_CLIENT_ID =
-  "900992276408-mmaa6o6t4dom10rm3b6r9tvin4jcgdu0.apps.googleusercontent.com";
+export const GOOGLE_CLIENT_ID = "900992276408-mmaa6o6t4dom10rm3b6r9tvin4jcgdu0.apps.googleusercontent.com";
 
 // Window.google is declared as `typeof google` elsewhere via @types/google.maps.
 
 async function sha256Base64(input: string): Promise<string> {
-  const buf = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(input),
-  );
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
   return btoa(String.fromCharCode(...new Uint8Array(buf)));
 }
 
@@ -20,8 +16,7 @@ function waitForGoogle(timeoutMs = 5000): Promise<any> {
     const tick = () => {
       const g = (window as any).google;
       if (g?.accounts?.id) return resolve(g);
-      if (Date.now() - start > timeoutMs)
-        return reject(new Error("Google Identity Services failed to load"));
+      if (Date.now() - start > timeoutMs) return reject(new Error("Google Identity Services failed to load"));
       setTimeout(tick, 100);
     };
     tick();
@@ -56,6 +51,7 @@ export function useGoogleOneTap({ enabled, onSuccess, onError }: Options) {
 
         google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
+          ux_mode: "popup", // 👈 THIS IS THE FIX. It forces a clean modal overlay and hides the Supabase URL!
           callback: async (response: { credential: string }) => {
             setLoading(true);
             try {
@@ -64,6 +60,7 @@ export function useGoogleOneTap({ enabled, onSuccess, onError }: Options) {
                 token: response.credential,
                 nonce: nonceRef.current?.raw,
               });
+
               if (error) throw error;
               onSuccess?.();
             } catch (e: any) {
@@ -74,9 +71,6 @@ export function useGoogleOneTap({ enabled, onSuccess, onError }: Options) {
               setLoading(false);
             }
           },
-          nonce: hashed,
-          use_fedcm_for_prompt: true,
-          auto_select: false,
         });
 
         if (buttonRef.current) {
