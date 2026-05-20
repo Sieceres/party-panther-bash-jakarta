@@ -24,6 +24,32 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const GOOGLE_CLIENT_ID = "900992276408-mmaa6o6t4dom10rm3b6r9tvin4jcgdu0.apps.googleusercontent.com";
+
+  // Register global callback for Google popup
+  useEffect(() => {
+    (window as any).handleGoogleSignInToken = async (response: any) => {
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: "google",
+        token: response.credential,
+      });
+      if (error) {
+        console.error("Supabase auth error:", error.message);
+        toast({
+          title: "Sign in failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        console.log("Login successful!", data.user);
+        navigate("/");
+      }
+    };
+    return () => {
+      delete (window as any).handleGoogleSignInToken;
+    };
+  }, [navigate, toast]);
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
