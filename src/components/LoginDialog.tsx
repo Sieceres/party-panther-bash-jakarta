@@ -60,30 +60,54 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
   // When the dialog opens, (re)render the Google button(s) inside it.
   useEffect(() => {
     if (!open) return;
-    const g = (window as any).google;
-    if (!g?.accounts?.id) return;
-    const targets = document.querySelectorAll<HTMLDivElement>(".g_id_signin");
-    targets.forEach((el) => {
-      el.innerHTML = "";
+    let cancelled = false;
+    const render = () => {
+      if (cancelled) return;
+      const g = (window as any).google;
+      if (!g?.accounts?.id) {
+        setTimeout(render, 150);
+        return;
+      }
       try {
         g.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
           callback: (window as any).handleGoogleSignInToken,
           ux_mode: "popup",
           context: "signin",
-        });
-        g.accounts.id.renderButton(el, {
-          type: "standard",
-          shape: "rectangular",
-          theme: "outline",
-          text: "signin_with",
-          size: "large",
-          logo_alignment: "left",
+          itp_support: true,
         });
       } catch (err) {
-        console.error("Google button render failed:", err);
+        console.error("Google init failed:", err);
+        return;
       }
-    });
+      const targets = document.querySelectorAll<HTMLDivElement>(".g_id_signin");
+      if (targets.length === 0) {
+        setTimeout(render, 100);
+        return;
+      }
+      targets.forEach((el) => {
+        el.innerHTML = "";
+        try {
+          g.accounts.id.renderButton(el, {
+            type: "standard",
+            shape: "rectangular",
+            theme: "outline",
+            text: "signin_with",
+            size: "large",
+            logo_alignment: "left",
+            width: 320,
+          });
+        } catch (err) {
+          console.error("Google button render failed:", err);
+        }
+      });
+    };
+    // Slight delay so dialog content mounts first
+    const t = setTimeout(render, 50);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
   }, [open]);
 
   const handleSignUp = async (e: React.FormEvent) => {
