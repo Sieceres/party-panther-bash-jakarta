@@ -16,23 +16,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'daily',
       priority: 0.9,
     },
-    {
-      url: `${baseUrl}/promos`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/venues`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/map`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
+    // Test comment: Updated on May 20 2026 - Party Panther
   ]
 }
