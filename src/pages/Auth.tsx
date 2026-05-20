@@ -151,6 +151,9 @@ const Auth = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    alert("Debug: /auth Google button clicked — src/pages/Auth.tsx is being edited.");
+    console.log("Debug: /auth Google button clicked", { file: "src/pages/Auth.tsx" });
+
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
