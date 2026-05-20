@@ -51,8 +51,15 @@ export function useGoogleOneTap({ enabled, onSuccess, onError }: Options) {
 
         google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
-          ux_mode: "popup", // 👈 THIS IS THE FIX. It forces a clean modal overlay and hides the Supabase URL!
+          ux_mode: "popup",
           callback: async (response: { credential: string }) => {
+            // 🚨 TEST 1: If you see this, the popup mode worked and Google successfully gave you the token!
+            alert(
+              "🎉 Vibe check passed! Google popup code is running. Token received: " +
+                response.credential.substring(0, 10) +
+                "...",
+            );
+
             setLoading(true);
             try {
               const { error } = await supabase.auth.signInWithIdToken({
@@ -62,9 +69,14 @@ export function useGoogleOneTap({ enabled, onSuccess, onError }: Options) {
               });
 
               if (error) throw error;
+
+              // 🚨 TEST 2: If you see this, Supabase accepted the token completely free!
+              alert("🚀 Supabase login success! Redirecting...");
               onSuccess?.();
             } catch (e: any) {
               const msg = e?.message || "Google sign-in failed";
+              // 🚨 TEST 3: If it fails on the Supabase side, you'll see why here
+              alert("❌ Supabase Error: " + msg);
               setError(msg);
               onError?.(msg);
             } finally {
@@ -72,6 +84,9 @@ export function useGoogleOneTap({ enabled, onSuccess, onError }: Options) {
             }
           },
         });
+
+        // 🚨 TEST 4: Let's see if the hook is even initializing on page load
+        console.log("🛠️ useGoogleOneTap hook has initialized Google Identity Services.");
 
         if (buttonRef.current) {
           buttonRef.current.innerHTML = "";
