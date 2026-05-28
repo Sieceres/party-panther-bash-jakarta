@@ -53,6 +53,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [instagramPostUrl, setInstagramPostUrl] = useState(initialData?.instagram_post_url || "");
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(initialData?.venue_id || null);
   const [venueArea, setVenueArea] = useState(initialData?.venue_address || ""); // area stored in venue_address for now
+  const [aiAutoFilledVenue, setAiAutoFilledVenue] = useState(false);
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
@@ -151,6 +152,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
     organizer_name?: string;
     price_currency?: string;
     image_url?: string;
+    organizer_whatsapp?: string;
   }) => {
     setFormData(prev => ({
       ...prev,
@@ -159,11 +161,16 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       time: extracted.time || prev.time,
       venue: extracted.venue_name || prev.venue,
       organizer: extracted.organizer_name || prev.organizer,
+      whatsapp: extracted.organizer_whatsapp || prev.whatsapp,
       // Use the poster image if no image has been set yet
       image: (extracted.image_url && !prev.image) ? extracted.image_url : prev.image,
     }));
     if (extracted.venue_address) {
       setVenueArea(extracted.venue_address);
+    }
+    // Mark that the venue came from AI — the background scraper will fill in area/location.
+    if (extracted.venue_name) {
+      setAiAutoFilledVenue(true);
     }
     if (extracted.date) {
       const [year, month, day] = extracted.date.split('-').map(Number);
