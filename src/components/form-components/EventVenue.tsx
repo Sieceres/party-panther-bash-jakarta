@@ -5,7 +5,8 @@ import { VenueAutocomplete, VenueResult } from "./VenueAutocomplete";
 import { LocationAutocomplete } from "./LocationAutocomplete";
 import { supabase } from "@/integrations/supabase/client";
 import { JAKARTA_AREAS } from "@/lib/area-config";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin, Loader2, Sparkles, Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface EventVenueProps {
   venue: string;
@@ -16,6 +17,7 @@ interface EventVenueProps {
   onAreaChange: (area: string) => void;
   onLocationChange: (location: { lat: number; lng: number; address: string } | null) => void;
   onVenueIdChange: (venueId: string | null) => void;
+  autoFilledByAI?: boolean;
 }
 
 export const EventVenue = ({ 
@@ -27,8 +29,13 @@ export const EventVenue = ({
   onAreaChange,
   onLocationChange,
   onVenueIdChange,
+  autoFilledByAI = false,
 }: EventVenueProps) => {
   const [isLoadingVenueDetails, setIsLoadingVenueDetails] = useState(false);
+  const [manualOverride, setManualOverride] = useState(false);
+
+  // If AI auto-filled the venue and we haven't overridden, collapse area/location pickers.
+  const collapsed = autoFilledByAI && !manualOverride && !selectedVenueId;
 
   const handleVenueSelect = async (venueResult: VenueResult | null) => {
     if (!venueResult) {
@@ -83,6 +90,7 @@ export const EventVenue = ({
           onVenueSelect={handleVenueSelect}
           selectedVenueId={selectedVenueId}
         />
+        {!collapsed && (
         <div className="space-y-2">
           <Label htmlFor="area">Area</Label>
           <Select value={area} onValueChange={onAreaChange}>
@@ -105,7 +113,31 @@ export const EventVenue = ({
             </SelectContent>
           </Select>
         </div>
+        )}
       </div>
+
+      {collapsed && (
+        <div className="text-sm bg-accent/40 rounded-md p-3 flex items-start gap-2">
+          <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0 text-primary" />
+          <div className="flex-1 min-w-0">
+            <div className="font-medium">Area &amp; location will be auto-detected</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              We'll scrape this venue's details from the web after you submit. If we can't find it,
+              an admin will fill it in — your event still gets created.
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 mt-1 text-xs"
+              onClick={() => setManualOverride(true)}
+            >
+              <Pencil className="w-3 h-3 mr-1" />
+              Edit manually
+            </Button>
+          </div>
+        </div>
+      )}
 
       {isLoadingVenueDetails && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -115,7 +147,7 @@ export const EventVenue = ({
       )}
 
       {/* Show location autocomplete if venue has no coordinates yet */}
-      {!selectedVenueId && (
+      {!selectedVenueId && !collapsed && (
         <LocationAutocomplete
           location={location}
           onLocationSelect={onLocationChange}

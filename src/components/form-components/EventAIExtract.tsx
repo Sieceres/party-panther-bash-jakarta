@@ -18,6 +18,7 @@ interface ExtractedEvent {
   organizer_name?: string;
   price_currency?: string;
   image_url?: string;
+  organizer_whatsapp?: string;
 }
 
 interface EventAIExtractProps {
