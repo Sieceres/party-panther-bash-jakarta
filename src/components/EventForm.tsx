@@ -482,6 +482,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               onAreaChange={setVenueArea}
               onLocationChange={handleSetLocation}
               onVenueIdChange={setSelectedVenueId}
+              autoFilledByAI={aiAutoFilledVenue}
             />
 
             <EventOrganizer
