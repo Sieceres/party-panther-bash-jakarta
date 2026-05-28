@@ -65,6 +65,7 @@ const eventTool = {
               venue_address: { type: "string", description: "Venue address if visible" },
               organizer_name: { type: "string", description: "Organizer name if visible" },
               price_currency: { type: "string", description: "Currency code, default IDR" },
+              organizer_whatsapp: { type: "string", description: "WhatsApp / contact phone number visible on the poster, in international format (+62...). If the number starts with 0, convert it to +62. If multiple numbers are visible, return the one labeled as WhatsApp/RSVP/contact." },
             },
             required: ["title"],
             additionalProperties: false,
