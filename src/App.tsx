@@ -84,6 +84,16 @@ const App = () => (
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/about" element={<About />} />
           <Route path="/wce" element={<WorldCupExplorer />} />
+          <Route path="/wc" element={
+            <div className="w-full h-screen">
+              <iframe
+                src="https://worldcuppredictor-9fc2f.web.app"
+                className="w-full h-full border-0"
+                title="World Cup Predictor"
+                allow="fullscreen"
+              />
+            </div>
+          } />
           <Route path="/esc" element={<Eurovision42 />} />
           <Route path="/import" element={<BatchImport />} />
           <Route path="/map" element={<MapExplorer />} />
