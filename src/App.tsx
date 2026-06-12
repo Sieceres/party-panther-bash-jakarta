@@ -32,6 +32,7 @@ import MapExplorer from "./pages/MapExplorer";
 import VenueDirectory from "./pages/VenueDirectory";
 import PromoReview from "./pages/PromoReview";
 import VenueAreaReview from "./pages/VenueAreaReview";
+import ScrapedReview from "./pages/ScrapedReview";
 import VoucherVerify from "./pages/VoucherVerify";
 import Lintang from "./pages/Lintang";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -100,6 +101,7 @@ const App = () => (
           <Route path="/venues" element={<VenueDirectory />} />
           <Route path="/admin/review-promos" element={<PromoReview />} />
           <Route path="/admin/review-venues" element={<VenueAreaReview />} />
+          <Route path="/admin/scrape" element={<ScrapedReview />} />
           <Route path="/lexium" element={<Proofing />} />
           <Route path="/lintang" element={<Lintang />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
