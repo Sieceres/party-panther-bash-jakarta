@@ -686,6 +686,51 @@ export type Database = {
         }
         Relationships: []
       }
+      pending_scraped_items: {
+        Row: {
+          created_at: string
+          created_id: string | null
+          id: string
+          item_type: string
+          raw_data: Json
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source: string
+          source_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_id?: string | null
+          id?: string
+          item_type: string
+          raw_data: Json
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source: string
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_id?: string | null
+          id?: string
+          item_type?: string
+          raw_data?: Json
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source?: string
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
