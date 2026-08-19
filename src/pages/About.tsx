@@ -1,5 +1,4 @@
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, MapPin, Calendar, Star } from "lucide-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -119,7 +118,6 @@ const About = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

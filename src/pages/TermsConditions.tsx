@@ -1,5 +1,4 @@
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 const TermsConditions = () => {
@@ -109,7 +108,6 @@ const TermsConditions = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };
