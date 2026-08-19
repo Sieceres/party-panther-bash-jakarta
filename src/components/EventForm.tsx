@@ -483,6 +483,13 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               onDescriptionChange={(value) => handleInputChange("description", value)}
             />
 
+            <CustomLinkField
+              value={customSlug}
+              onChange={(v) => { setCustomSlug(v); setHasUnsavedChanges(true); }}
+              eventId={initialData?.id}
+              expiresAt={(initialData as any)?.custom_slug_expires_at}
+            />
+
             <EventDateTime
               eventDate={eventDate}
               time={formData.time}
