@@ -226,7 +226,7 @@ export const EventDetailPage = () => {
         const { data: attendeesData, error: attendeesError } = await supabase
           .from("event_attendees")
           .select(
-            "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note, is_anonymous, is_co_organizer",
+            "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note, is_anonymous, is_co_organizer",
           )
           .eq("event_id", eventData.id)
           .order("joined_at", { ascending: false });
@@ -349,7 +349,7 @@ export const EventDetailPage = () => {
       const { data: attendeesData } = await supabase
         .from("event_attendees")
         .select(
-          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note, is_anonymous, is_co_organizer",
+          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note, is_anonymous, is_co_organizer",
         )
         .eq("event_id", event.id)
         .order("joined_at", { ascending: false });
@@ -422,7 +422,7 @@ export const EventDetailPage = () => {
           const { data: attendeesData } = await supabase
             .from("event_attendees")
             .select(
-              "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+              "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note",
             )
             .eq("event_id", event.id)
             .order("joined_at", { ascending: false });
@@ -476,7 +476,7 @@ export const EventDetailPage = () => {
       const { data: attendeesData } = await supabase
         .from("event_attendees")
         .select(
-          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note",
         )
         .eq("event_id", event.id)
         .order("joined_at", { ascending: false });
@@ -908,7 +908,7 @@ export const EventDetailPage = () => {
     const { data: attendeesData } = await supabase
       .from("event_attendees")
       .select(
-        "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+        "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note",
       )
       .eq("event_id", event.id)
       .order("joined_at", { ascending: false });
