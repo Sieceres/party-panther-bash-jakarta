@@ -1185,6 +1185,15 @@ export const EventDetailPage = () => {
                 </CardHeader>
                 <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
                   <div className="space-y-3">
+                    {!user ? (
+                      <div className="text-center py-8 space-y-3">
+                        <p className="text-muted-foreground text-sm sm:text-base">
+                          Please sign in to see who's attending.
+                        </p>
+                        <Button onClick={() => navigate("/auth")}>Sign in / Sign up</Button>
+                      </div>
+                    ) : (
+                    <>
                     {displayedAttendees.map((attendee) => (
                       <div
                         key={attendee.id}
@@ -1394,7 +1403,7 @@ export const EventDetailPage = () => {
                     ))}
                     {attendees.length === 0 && (
                       <p className="text-center text-muted-foreground py-8">
-                        {!user ? "Please log in to see Attendees" : "No attendees yet. Be the first to join!"}
+                        No attendees yet. Be the first to join!
                       </p>
                     )}
                     {attendees.length > 10 && !showAllAttendees && (
@@ -1406,6 +1415,8 @@ export const EventDetailPage = () => {
                       <Button variant="ghost" className="w-full" onClick={() => setShowAllAttendees(false)}>
                         Show less
                       </Button>
+                    )}
+                    </>
                     )}
                   </div>
                 </CardContent>
