@@ -1873,6 +1873,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_total_attendee_count: { Args: never; Returns: number }
       get_unique_event_slug: {
         Args: { event_id?: string; title_text: string }
         Returns: string
