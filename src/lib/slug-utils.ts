@@ -85,7 +85,17 @@ export const getVenueBySlugOrId = async (identifier: string) => {
   return await supabase.from("venues").select("*").eq("id", identifier).maybeSingle();
 };
 
-export const getEventUrl = (event: any) => `/event/${event?.slug || event?.id}`;
+const activeCustomSlug = (event: any) => {
+  if (!event?.custom_slug) return null;
+  const exp = event.custom_slug_expires_at;
+  if (exp && new Date(exp) < new Date()) return null;
+  return event.custom_slug as string;
+};
+
+export const getEventUrl = (event: any) => {
+  const custom = activeCustomSlug(event);
+  return custom ? `/${custom}` : `/event/${event?.slug || event?.id}`;
+};
 export const getPromoUrl = (promo: any) => `/promo/${promo?.slug || promo?.id}`;
 export const getVenueUrl = (venue: any) => `/venue/${venue?.slug || venue?.id}`;
 export const getEditEventUrl = (event: any) => `/edit-event/${event?.slug || event?.id}`;
@@ -96,6 +106,9 @@ export const getEditPromoUrl = (promo: any) => `/edit-promo/${promo?.slug || pro
 // Supabase `og-meta` edge function; everything else is transparently proxied
 // to the Lovable origin (partypanther.lovable.app).
 const SITE_URL = "https://partypanther.net";
-export const getEventShareUrl = (event: any) => `${SITE_URL}/e/${event?.slug || event?.id}`;
+export const getEventShareUrl = (event: any) => {
+  const custom = activeCustomSlug(event);
+  return custom ? `${SITE_URL}/${custom}` : `${SITE_URL}/e/${event?.slug || event?.id}`;
+};
 export const getPromoShareUrl = (promo: any) => `${SITE_URL}/p/${promo?.slug || promo?.id}`;
 export const getVenueShareUrl = (venue: any) => `${SITE_URL}/v/${venue?.slug || venue?.id}`;
