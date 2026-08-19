@@ -103,6 +103,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       });
       setSelectedVenueId(initialData.venue_id || null);
       setVenueArea(initialData.venue_address || "");
+      setCustomSlug((initialData as any).custom_slug || "");
       setEventDate(
         initialData.date 
           ? (() => {
