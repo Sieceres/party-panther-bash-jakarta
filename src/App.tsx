@@ -58,6 +58,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <AuthRedirectTracker />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/events" element={<Index initialSection="events" />} />
