@@ -25,7 +25,7 @@ import { GoogleMap } from "./GoogleMap";
 import { CommentItem, Comment } from "./CommentItem";
 import { CommentActions } from "./CommentActions";
 import { ReportDialog } from "./ReportDialog";
-import { ReceiptUpload } from "./ReceiptUpload";
+import { EventPaymentInfo } from "./EventPaymentInfo";
 import { Header } from "./Header";
 import { EventTags } from "./EventTags";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,6 +56,7 @@ interface Event {
   image_url: string;
   is_recurrent: boolean;
   track_payments: boolean;
+  payment_info?: string | null;
   organizer_name: string;
   organizer_whatsapp: string;
   created_by: string;
@@ -226,7 +227,7 @@ export const EventDetailPage = () => {
         const { data: attendeesData, error: attendeesError } = await supabase
           .from("event_attendees")
           .select(
-            "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note, is_anonymous, is_co_organizer",
+            "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note, is_anonymous, is_co_organizer",
           )
           .eq("event_id", eventData.id)
           .order("joined_at", { ascending: false });
@@ -349,7 +350,7 @@ export const EventDetailPage = () => {
       const { data: attendeesData } = await supabase
         .from("event_attendees")
         .select(
-          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note, is_anonymous, is_co_organizer",
+          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note, is_anonymous, is_co_organizer",
         )
         .eq("event_id", event.id)
         .order("joined_at", { ascending: false });
@@ -422,7 +423,7 @@ export const EventDetailPage = () => {
           const { data: attendeesData } = await supabase
             .from("event_attendees")
             .select(
-              "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+              "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note",
             )
             .eq("event_id", event.id)
             .order("joined_at", { ascending: false });
@@ -476,7 +477,7 @@ export const EventDetailPage = () => {
       const { data: attendeesData } = await supabase
         .from("event_attendees")
         .select(
-          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note",
         )
         .eq("event_id", event.id)
         .order("joined_at", { ascending: false });
@@ -887,6 +888,7 @@ export const EventDetailPage = () => {
   };
 
   const handleReceiptUploaded = (attendeeId: string, receiptUrl: string) => {
+    // Uploading a receipt also implies the attendee claims to have paid
     // Update local state to show the uploaded receipt
     setAttendees((prev) =>
       prev.map((attendee) =>
@@ -895,7 +897,18 @@ export const EventDetailPage = () => {
               ...attendee,
               receipt_url: receiptUrl,
               receipt_uploaded_at: new Date().toISOString(),
+              payment_claimed_at: attendee.payment_claimed_at || new Date().toISOString(),
             }
+          : attendee,
+      ),
+    );
+  };
+
+  const handlePaymentClaimed = (attendeeId: string) => {
+    setAttendees((prev) =>
+      prev.map((attendee) =>
+        attendee.id === attendeeId
+          ? { ...attendee, payment_claimed_at: new Date().toISOString() }
           : attendee,
       ),
     );
@@ -908,7 +921,7 @@ export const EventDetailPage = () => {
     const { data: attendeesData } = await supabase
       .from("event_attendees")
       .select(
-        "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, receipt_url, receipt_uploaded_at, note",
+        "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note",
       )
       .eq("event_id", event.id)
       .order("joined_at", { ascending: false });
@@ -1204,6 +1217,11 @@ export const EventDetailPage = () => {
                               {attendee.payment_status && event.track_payments && (
                                 <span className="text-base sm:text-lg">💰</span>
                               )}
+                              {!attendee.payment_status && attendee.payment_claimed_at && event.track_payments && (
+                                <Badge variant="outline" className="text-xs border-amber-500 text-amber-600">
+                                  Pending
+                                </Badge>
+                              )}
                             </div>
                             {!isAnon && attendee.profiles?.bio && (
                               <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
@@ -1241,12 +1259,17 @@ export const EventDetailPage = () => {
                             </Badge>
                           )}
 
-                          {/* Receipt Upload - show for the user themselves and only if payment tracking is enabled */}
+                          {/* Payment info + "I have paid" - show for the user themselves when payment tracking is enabled */}
                           {user && attendee.user_id === user.id && event.track_payments && (
-                            <ReceiptUpload
+                            <EventPaymentInfo
                               eventId={event.id}
                               userId={user.id}
-                              currentReceiptUrl={attendee.receipt_url}
+                              paymentInfo={event.payment_info}
+                              attendeeId={attendee.id}
+                              paymentStatus={attendee.payment_status}
+                              paymentClaimedAt={attendee.payment_claimed_at}
+                              receiptUrl={attendee.receipt_url}
+                              onClaimed={() => handlePaymentClaimed(attendee.id)}
                               onReceiptUploaded={(receiptUrl) => handleReceiptUploaded(attendee.id, receiptUrl)}
                             />
                           )}

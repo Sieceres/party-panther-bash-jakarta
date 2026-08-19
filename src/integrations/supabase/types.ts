@@ -85,6 +85,7 @@ export type Database = {
           is_co_organizer: boolean
           joined_at: string | null
           note: string | null
+          payment_claimed_at: string | null
           payment_date: string | null
           payment_marked_by: string | null
           payment_status: boolean
@@ -99,6 +100,7 @@ export type Database = {
           is_co_organizer?: boolean
           joined_at?: string | null
           note?: string | null
+          payment_claimed_at?: string | null
           payment_date?: string | null
           payment_marked_by?: string | null
           payment_status?: boolean
@@ -113,6 +115,7 @@ export type Database = {
           is_co_organizer?: boolean
           joined_at?: string | null
           note?: string | null
+          payment_claimed_at?: string | null
           payment_date?: string | null
           payment_marked_by?: string | null
           payment_status?: boolean
@@ -456,6 +459,7 @@ export type Database = {
           max_attendees: number | null
           organizer_name: string | null
           organizer_whatsapp: string | null
+          payment_info: string | null
           price_currency: string | null
           slug: string | null
           time: string
@@ -485,6 +489,7 @@ export type Database = {
           max_attendees?: number | null
           organizer_name?: string | null
           organizer_whatsapp?: string | null
+          payment_info?: string | null
           price_currency?: string | null
           slug?: string | null
           time: string
@@ -514,6 +519,7 @@ export type Database = {
           max_attendees?: number | null
           organizer_name?: string | null
           organizer_whatsapp?: string | null
+          payment_info?: string | null
           price_currency?: string | null
           slug?: string | null
           time?: string
