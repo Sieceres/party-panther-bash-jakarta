@@ -2,7 +2,7 @@
 
 ## 1. Custom event URLs
 
-Organizers can claim a short custom link for their event, e.g. `partypanther.net/e/rooftop-nye`.
+Organizers can claim a short custom link for their event, e.g. `partypanther.net/rooftop-nye`.
 
 **Anti-squatting via expiry**
 - A custom link is only reserved from the moment it is claimed until **30 days after the event date**.
