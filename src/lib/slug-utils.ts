@@ -29,7 +29,9 @@ export const getEventBySlugOrId = async (identifier: string) => {
     enable_photos,
     venue_id,
     custom_slug,
-    custom_slug_expires_at
+    custom_slug_expires_at,
+    track_payments,
+    payment_info
   `;
 
   // Try custom link first
