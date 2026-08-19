@@ -57,6 +57,8 @@ interface Event {
   is_recurrent: boolean;
   track_payments: boolean;
   payment_info?: string | null;
+  payment_methods?: { method: string; detail: string }[] | null;
+  payment_qr_url?: string | null;
   organizer_name: string;
   organizer_whatsapp: string;
   created_by: string;
@@ -1265,6 +1267,8 @@ export const EventDetailPage = () => {
                               eventId={event.id}
                               userId={user.id}
                               paymentInfo={event.payment_info}
+                              paymentMethods={(event as any).payment_methods}
+                              paymentQrUrl={(event as any).payment_qr_url}
                               attendeeId={attendee.id}
                               paymentStatus={attendee.payment_status}
                               paymentClaimedAt={attendee.payment_claimed_at}

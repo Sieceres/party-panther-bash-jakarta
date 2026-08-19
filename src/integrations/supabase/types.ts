@@ -460,6 +460,8 @@ export type Database = {
           organizer_name: string | null
           organizer_whatsapp: string | null
           payment_info: string | null
+          payment_methods: Json
+          payment_qr_url: string | null
           price_currency: string | null
           slug: string | null
           time: string
@@ -490,6 +492,8 @@ export type Database = {
           organizer_name?: string | null
           organizer_whatsapp?: string | null
           payment_info?: string | null
+          payment_methods?: Json
+          payment_qr_url?: string | null
           price_currency?: string | null
           slug?: string | null
           time: string
@@ -520,6 +524,8 @@ export type Database = {
           organizer_name?: string | null
           organizer_whatsapp?: string | null
           payment_info?: string | null
+          payment_methods?: Json
+          payment_qr_url?: string | null
           price_currency?: string | null
           slug?: string | null
           time?: string

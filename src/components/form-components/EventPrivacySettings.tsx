@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
+import { PaymentMethodsEditor, PaymentMethod } from "./PaymentMethodsEditor";
 
 interface EventPrivacySettingsProps {
   accessLevel: string;
@@ -16,6 +17,8 @@ interface EventPrivacySettingsProps {
   trackPayments: boolean;
   instagramPostUrl: string;
   paymentInfo: string;
+  paymentMethods: PaymentMethod[];
+  paymentQrUrl: string | null;
   onAccessLevelChange: (value: string) => void;
   onMaxAttendeesChange: (value: number | null) => void;
   onEnableCheckInChange: (value: boolean) => void;
@@ -24,6 +27,8 @@ interface EventPrivacySettingsProps {
   onTrackPaymentsChange: (value: boolean) => void;
   onInstagramPostUrlChange: (value: string) => void;
   onPaymentInfoChange: (value: string) => void;
+  onPaymentMethodsChange: (value: PaymentMethod[]) => void;
+  onPaymentQrUrlChange: (value: string | null) => void;
 }
 
 export const EventPrivacySettings = ({
@@ -35,6 +40,8 @@ export const EventPrivacySettings = ({
   trackPayments,
   instagramPostUrl,
   paymentInfo,
+  paymentMethods,
+  paymentQrUrl,
   onAccessLevelChange,
   onMaxAttendeesChange,
   onEnableCheckInChange,
@@ -42,7 +49,9 @@ export const EventPrivacySettings = ({
   onIsRecurrentChange,
   onTrackPaymentsChange,
   onInstagramPostUrlChange,
-  onPaymentInfoChange
+  onPaymentInfoChange,
+  onPaymentMethodsChange,
+  onPaymentQrUrlChange
 }: EventPrivacySettingsProps) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -150,18 +159,28 @@ export const EventPrivacySettings = ({
           </div>
 
           {trackPayments && (
-            <div className="space-y-2">
-              <Label htmlFor="paymentInfo">Payment Info</Label>
+            <div className="space-y-4 rounded-lg border p-3">
+              <PaymentMethodsEditor
+                methods={paymentMethods}
+                qrUrl={paymentQrUrl}
+                notes={paymentInfo}
+                onMethodsChange={onPaymentMethodsChange}
+                onQrUrlChange={onPaymentQrUrlChange}
+              />
+
+              <div className="space-y-2">
+              <Label htmlFor="paymentInfo">Additional payment notes</Label>
               <Textarea
                 id="paymentInfo"
                 value={paymentInfo}
                 onChange={(e) => onPaymentInfoChange(e.target.value)}
-                placeholder={"e.g. BCA 1234567890 (Jane Doe)\nGoPay: 0812-3456-7890\nIDR 150.000 per person"}
-                rows={4}
+                placeholder={"e.g. IDR 150.000 per person. Send proof to the organizer after paying."}
+                rows={3}
               />
               <p className="text-sm text-muted-foreground">
                 Shown to attendees behind a "Payment info" button, where they can also mark "I have paid" and upload a receipt.
               </p>
+              </div>
             </div>
           )}
 
