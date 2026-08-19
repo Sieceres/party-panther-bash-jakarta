@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.scrape-jakarta-sources]
 verify_jwt = false
+
+[functions.maps-key]
+verify_jwt = false

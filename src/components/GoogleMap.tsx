@@ -1,6 +1,7 @@
 /// <reference types="google.maps" />
 import { useEffect, useRef, useState, useMemo } from "react";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
+import { supabase } from "@/integrations/supabase/client";
 
 interface GoogleMapProps {
   center?: { lat: number; lng: number };
@@ -10,10 +11,33 @@ interface GoogleMapProps {
   height?: string;
 }
 
-const GOOGLE_MAPS_API_KEY =
+const ENV_MAPS_KEY =
   import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY ||
   import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const GOOGLE_MAPS_CHANNEL = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID;
+
+// The Lovable-managed connector key is only valid on *.lovable.app.
+// On any other host (e.g. partypanther.net) fetch the project's own key.
+const isLovableHost = /(^|\.)lovable\.(app|dev)$/.test(window.location.hostname) ||
+  window.location.hostname === "localhost";
+
+let cachedKeyPromise: Promise<string> | null = null;
+const resolveMapsKey = (): Promise<string> => {
+  if (isLovableHost && ENV_MAPS_KEY) return Promise.resolve(ENV_MAPS_KEY);
+  if (!cachedKeyPromise) {
+    cachedKeyPromise = supabase.functions
+      .invoke("maps-key")
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return (data as { key?: string })?.key || ENV_MAPS_KEY || "";
+      })
+      .catch((e) => {
+        console.error("Failed to load Google Maps key:", e);
+        return ENV_MAPS_KEY || "";
+      });
+  }
+  return cachedKeyPromise;
+};
 
 export const GoogleMap = ({ 
   center: propCenter,
@@ -27,6 +51,7 @@ export const GoogleMap = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [keyMissing, setKeyMissing] = useState(false);
   const markersRef = useRef<google.maps.Marker[]>([]);
 
   // Load Google Maps script
@@ -36,23 +61,37 @@ export const GoogleMap = ({
       return;
     }
 
-    if (!GOOGLE_MAPS_API_KEY) {
-      console.error("Google Maps API key is not configured. Please set VITE_GOOGLE_MAPS_API_KEY environment variable.");
-      return;
-    }
+    let cancelled = false;
 
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places${
-      GOOGLE_MAPS_CHANNEL ? `&channel=${GOOGLE_MAPS_CHANNEL}` : ""
-    }`;
-    script.async = true;
-    script.onload = () => setIsLoaded(true);
-    script.onerror = () => console.error("Google Maps script failed to load.");
-    document.head.appendChild(script);
+    resolveMapsKey().then((key) => {
+      if (cancelled) return;
+      if (!key) {
+        setKeyMissing(true);
+        console.error("Google Maps API key is not configured.");
+        return;
+      }
+      if (window.google && window.google.maps) {
+        setIsLoaded(true);
+        return;
+      }
+      const existing = document.getElementById("google-maps-script") as HTMLScriptElement | null;
+      if (existing) {
+        existing.addEventListener("load", () => setIsLoaded(true));
+        return;
+      }
+      const script = document.createElement("script");
+      script.id = "google-maps-script";
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places${
+        !isLovableHost || !GOOGLE_MAPS_CHANNEL ? "" : `&channel=${GOOGLE_MAPS_CHANNEL}`
+      }`;
+      script.async = true;
+      script.onload = () => setIsLoaded(true);
+      script.onerror = () => console.error("Google Maps script failed to load.");
+      document.head.appendChild(script);
+    });
 
     return () => {
-      // Optional: cleanup script tag on component unmount
-      document.head.removeChild(script);
+      cancelled = true;
     };
   }, []);
 
@@ -129,7 +168,7 @@ export const GoogleMap = ({
     });
   }, [map, markers]);
 
-  if (!GOOGLE_MAPS_API_KEY) {
+  if (keyMissing) {
     return (
       <div 
         className="bg-muted rounded-lg flex items-center justify-center border border-destructive/20"
@@ -137,7 +176,7 @@ export const GoogleMap = ({
       >
         <div className="text-destructive text-center p-4">
           <p className="font-medium">Google Maps API key not configured</p>
-          <p className="text-sm">Please set VITE_GOOGLE_MAPS_API_KEY environment variable</p>
+          <p className="text-sm">Add your Google Maps browser key to the project secrets</p>
         </div>
       </div>
     );
