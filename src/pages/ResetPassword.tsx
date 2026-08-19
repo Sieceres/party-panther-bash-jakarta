@@ -17,26 +17,68 @@ export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isValidSession, setIsValidSession] = useState(false);
+  const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if we have a valid recovery session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session && session.user) {
+    let cancelled = false;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") && session) {
         setIsValidSession(true);
-      } else {
-        // Listen for auth state changes (PASSWORD_RECOVERY event)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-          if (event === 'PASSWORD_RECOVERY' && session) {
-            setIsValidSession(true);
-          }
-        });
-        return () => subscription.unsubscribe();
+        setChecking(false);
       }
+    });
+
+    const establishSession = async () => {
+      const url = new URL(window.location.href);
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+
+      const errorDescription =
+        url.searchParams.get("error_description") || hash.get("error_description");
+      const code = url.searchParams.get("code");
+      const tokenHash = url.searchParams.get("token_hash") || url.searchParams.get("token");
+      const type = url.searchParams.get("type");
+      const accessToken = hash.get("access_token");
+      const refreshToken = hash.get("refresh_token");
+
+      try {
+        if (errorDescription) {
+          // expired / already used link
+        } else if (accessToken && refreshToken) {
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+        } else if (code) {
+          await supabase.auth.exchangeCodeForSession(code);
+        } else if (tokenHash) {
+          await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: (type as "recovery") || "recovery",
+          });
+        }
+      } catch {
+        // fall through to session check below
+      }
+
+      // Clean the tokens out of the URL so refreshes don't retry a used link
+      if (window.location.search || window.location.hash) {
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
+      setIsValidSession(!!session?.user);
+      setChecking(false);
     };
 
-    checkSession();
+    establishSession();
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -71,6 +113,14 @@ export default function ResetPassword() {
       setLoading(false);
     }
   };
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/20 via-background to-secondary/20 p-4">
+        <p className="text-muted-foreground">Verifying your reset link…</p>
+      </div>
+    );
+  }
 
   if (!isValidSession) {
     return (
