@@ -6,6 +6,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { WhatsAppGroupDialog } from "@/components/WhatsAppGroupDialog";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthRedirectTracker } from "@/components/AuthRedirectTracker";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Index from "./pages/Index";
@@ -58,6 +59,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <AuthRedirectTracker />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/events" element={<Index initialSection="events" />} />

@@ -11,6 +11,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { Header } from "@/components/Header";
 import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { consumeAuthRedirect } from "@/lib/auth-redirect";
 
 const Auth = () => {
   usePageTitle("Sign In");
@@ -23,6 +24,7 @@ const Auth = () => {
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [redirectTo] = useState(() => consumeAuthRedirect());
 
   const GOOGLE_CLIENT_ID = "900992276408-mmaa6o6t4dom10rm3b6r9tvin4jcgdu0.apps.googleusercontent.com";
 
@@ -42,7 +44,7 @@ const Auth = () => {
         });
       } else {
         console.log("Login successful!", data.user);
-        navigate("/");
+        navigate(redirectTo);
       }
     };
 
@@ -84,7 +86,7 @@ const Auth = () => {
       cancelled = true;
       delete (window as any).handleGoogleSignInToken;
     };
-  }, [navigate, toast]);
+  }, [navigate, toast, redirectTo]);
 
   useEffect(() => {
     // Set up auth state listener
@@ -95,7 +97,7 @@ const Auth = () => {
         
         // Redirect authenticated users to home page
         if (session?.user) {
-          navigate("/");
+          navigate(redirectTo);
         }
       }
     );
@@ -106,19 +108,19 @@ const Auth = () => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        navigate("/");
+        navigate(redirectTo);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, redirectTo]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}${redirectTo}`;
       
       const { error } = await supabase.auth.signUp({
         email,
