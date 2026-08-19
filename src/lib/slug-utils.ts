@@ -27,10 +27,23 @@ export const getEventBySlugOrId = async (identifier: string) => {
     max_attendees,
     enable_check_in,
     enable_photos,
-    venue_id
+    venue_id,
+    custom_slug,
+    custom_slug_expires_at
   `;
 
-  // Try slug first
+  // Try custom link first
+  const { data: eventByCustom } = await supabase
+    .from("events")
+    .select(commonFields)
+    .eq("custom_slug", identifier.toLowerCase())
+    .maybeSingle();
+
+  if (eventByCustom) {
+    return { data: eventByCustom, error: null };
+  }
+
+  // Then slug
   const { data: eventBySlug, error: slugError } = await supabase
     .from("events")
     .select(commonFields)
