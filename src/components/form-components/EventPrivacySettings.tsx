@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
@@ -14,6 +15,7 @@ interface EventPrivacySettingsProps {
   isRecurrent: boolean;
   trackPayments: boolean;
   instagramPostUrl: string;
+  paymentInfo: string;
   onAccessLevelChange: (value: string) => void;
   onMaxAttendeesChange: (value: number | null) => void;
   onEnableCheckInChange: (value: boolean) => void;
@@ -21,6 +23,7 @@ interface EventPrivacySettingsProps {
   onIsRecurrentChange: (value: boolean) => void;
   onTrackPaymentsChange: (value: boolean) => void;
   onInstagramPostUrlChange: (value: string) => void;
+  onPaymentInfoChange: (value: string) => void;
 }
 
 export const EventPrivacySettings = ({
@@ -31,13 +34,15 @@ export const EventPrivacySettings = ({
   isRecurrent,
   trackPayments,
   instagramPostUrl,
+  paymentInfo,
   onAccessLevelChange,
   onMaxAttendeesChange,
   onEnableCheckInChange,
   onEnablePhotosChange,
   onIsRecurrentChange,
   onTrackPaymentsChange,
-  onInstagramPostUrlChange
+  onInstagramPostUrlChange,
+  onPaymentInfoChange
 }: EventPrivacySettingsProps) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -143,6 +148,22 @@ export const EventPrivacySettings = ({
               onCheckedChange={onTrackPaymentsChange}
             />
           </div>
+
+          {trackPayments && (
+            <div className="space-y-2">
+              <Label htmlFor="paymentInfo">Payment Info</Label>
+              <Textarea
+                id="paymentInfo"
+                value={paymentInfo}
+                onChange={(e) => onPaymentInfoChange(e.target.value)}
+                placeholder={"e.g. BCA 1234567890 (Jane Doe)\nGoPay: 0812-3456-7890\nIDR 150.000 per person"}
+                rows={4}
+              />
+              <p className="text-sm text-muted-foreground">
+                Shown to attendees behind a "Payment info" button, where they can also mark "I have paid" and upload a receipt.
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="instagramPostUrl">Instagram Post</Label>
