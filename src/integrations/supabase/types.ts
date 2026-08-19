@@ -443,6 +443,8 @@ export type Database = {
           access_level: Database["public"]["Enums"]["event_access_level"]
           created_at: string
           created_by: string
+          custom_slug: string | null
+          custom_slug_expires_at: string | null
           date: string
           description: string | null
           enable_check_in: boolean
@@ -470,6 +472,8 @@ export type Database = {
           access_level?: Database["public"]["Enums"]["event_access_level"]
           created_at?: string
           created_by: string
+          custom_slug?: string | null
+          custom_slug_expires_at?: string | null
           date: string
           description?: string | null
           enable_check_in?: boolean
@@ -497,6 +501,8 @@ export type Database = {
           access_level?: Database["public"]["Enums"]["event_access_level"]
           created_at?: string
           created_by?: string
+          custom_slug?: string | null
+          custom_slug_expires_at?: string | null
           date?: string
           description?: string | null
           enable_check_in?: boolean
@@ -1561,6 +1567,10 @@ export type Database = {
         Args: { event_id_param: string }
         Returns: boolean
       }
+      claim_event_custom_slug: {
+        Args: { _event_id: string; _slug: string }
+        Returns: string
+      }
       generate_slug: { Args: { input_text: string }; Returns: string }
       get_event_attendee_counts: {
         Args: never
@@ -1859,6 +1869,10 @@ export type Database = {
       has_superadmin_role: { Args: { _user_id: string }; Returns: boolean }
       is_admin_or_superadmin: { Args: { _user_id: string }; Returns: boolean }
       is_current_user_admin: { Args: never; Returns: boolean }
+      is_custom_slug_available: {
+        Args: { _event_id?: string; _slug: string }
+        Returns: boolean
+      }
       is_event_co_organizer: {
         Args: { event_id_param: string; user_id_param: string }
         Returns: boolean
@@ -1867,6 +1881,7 @@ export type Database = {
         Args: { _event_id: string; _user_id: string }
         Returns: boolean
       }
+      is_reserved_slug: { Args: { _slug: string }; Returns: boolean }
       is_user_banned: { Args: { _user_id: string }; Returns: boolean }
       refresh_event_attendee_stats: { Args: never; Returns: undefined }
       refresh_promo_review_stats: { Args: never; Returns: undefined }
