@@ -1,5 +1,4 @@
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 const Lintang = () => {
@@ -161,7 +160,6 @@ const Lintang = () => {
         </section>
       </main>
 
-      <Footer />
     </div>
   );
 };

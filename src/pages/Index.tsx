@@ -7,7 +7,6 @@ import { PromosSection } from "@/components/sections/PromosSection";
 import { UserProfile } from "@/components/UserProfile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Footer } from "@/components/Footer";
 import { useOptimizedData } from "@/hooks/useOptimizedData";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { areaMatchesFilter } from "@/lib/area-config";
@@ -391,7 +390,6 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
       </Helmet>
       <Header activeSection={activeSection} onSectionChange={handleSectionChange} />
       {renderContent()}
-      <Footer onSectionChange={handleSectionChange} />
     </div>
   );
 };

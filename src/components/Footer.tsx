@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
+import { APP_VERSION } from "@/lib/version";
 
 interface FooterProps {
   onSectionChange?: (section: string) => void;
@@ -53,7 +54,6 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
             <p className="text-xs sm:text-sm text-muted-foreground max-w-xs text-center md:text-left">
               Your ultimate guide to Jakarta's hottest parties, events, and promotions.
             </p>
-            <img src="/logo-partypanyther.jpeg" alt="Party Panther Logo" className="mt-2 h-16 sm:h-20 md:h-24 w-auto object-contain" />
           </div>
 
           {/* Links */}
@@ -86,14 +86,6 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
                 </Button>
               </div>
             </div>
-            
-            {/* Contact Info */}
-            <div className="flex flex-col items-center md:items-start space-y-1 sm:space-y-2">
-              <h3 className="font-semibold text-base sm:text-lg mb-2">Contact Us</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">Email: info@partypanther.id</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Phone: +62 812 3456 7890</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Instagram: @partypanther.id</p>
-            </div>
           </div>
         </div>
 
@@ -101,7 +93,7 @@ export const Footer = ({ onSectionChange }: FooterProps) => {
 
         {/* Copyright */}
         <div className="text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Party Panther. All rights reserved.
+          © {new Date().getFullYear()} Party Panther. All rights reserved. · v{APP_VERSION}
         </div>
       </div>
     </footer>
