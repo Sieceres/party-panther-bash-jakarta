@@ -52,6 +52,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://partypanther.net/e/angkot-pub-crawl-vol-viii</loc>
+    <lastmod>2026-08-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://partypanther.net/e/jazz-brazilian-night-at-dock-of-tuna</loc>
     <lastmod>2026-04-22</lastmod>
     <changefreq>weekly</changefreq>
@@ -791,7 +797,7 @@
   </url>
   <url>
     <loc>https://partypanther.net/v/miss-mendes</loc>
-    <lastmod>2026-04-22</lastmod>
+    <lastmod>2026-08-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
