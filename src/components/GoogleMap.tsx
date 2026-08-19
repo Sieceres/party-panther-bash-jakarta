@@ -168,7 +168,7 @@ export const GoogleMap = ({
     });
   }, [map, markers]);
 
-  if (!GOOGLE_MAPS_API_KEY) {
+  if (keyMissing) {
     return (
       <div 
         className="bg-muted rounded-lg flex items-center justify-center border border-destructive/20"
@@ -176,7 +176,7 @@ export const GoogleMap = ({
       >
         <div className="text-destructive text-center p-4">
           <p className="font-medium">Google Maps API key not configured</p>
-          <p className="text-sm">Please set VITE_GOOGLE_MAPS_API_KEY environment variable</p>
+          <p className="text-sm">Add your Google Maps browser key to the project secrets</p>
         </div>
       </div>
     );
