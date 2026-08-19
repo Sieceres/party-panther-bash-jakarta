@@ -59,7 +59,13 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
 
   // When the dialog opens, (re)render the Google button(s) inside it.
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      document.querySelectorAll<HTMLDivElement>(".g_id_signin").forEach((element) => {
+        element.replaceChildren();
+      });
+      document.getElementById("credential_picker_container")?.remove();
+      return;
+    }
     let cancelled = false;
     const render = () => {
       if (cancelled) return;
@@ -107,6 +113,7 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
     return () => {
       cancelled = true;
       clearTimeout(t);
+      document.getElementById("credential_picker_container")?.remove();
     };
   }, [open]);
 
