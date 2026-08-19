@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,6 @@ import { MapPin, ArrowLeft, User as UserIcon, Star, Share2, Edit2, Trash2, Badge
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
-import { GoogleMap } from "./GoogleMap";
 import { CommentItem, Comment } from "./CommentItem";
 import { CommentActions } from "./CommentActions";
 import { ReportDialog } from "./ReportDialog";
@@ -104,35 +103,10 @@ export const EventDetailPage = () => {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [joinAnonymously, setJoinAnonymously] = useState(false);
   const [venueSlug, setVenueSlug] = useState<string | null>(null);
-  const [linkedVenueLocation, setLinkedVenueLocation] = useState<{
-    latitude: number | null;
-    longitude: number | null;
-    address: string | null;
-  } | null>(null);
+  const [linkedVenueAddress, setLinkedVenueAddress] = useState<string | null>(null);
 
   usePageTitle(event?.title ? `${event.title}` : "Event");
-  const displayLatitude = linkedVenueLocation?.latitude ?? event?.venue_latitude;
-  const displayLongitude = linkedVenueLocation?.longitude ?? event?.venue_longitude;
-  const memoizedCenter = useMemo(() => {
-    if (displayLatitude == null || displayLongitude == null) {
-      return { lat: -6.2088, lng: 106.8456 }; // Jakarta default
-    }
-    return {
-      lat: Number(displayLatitude),
-      lng: Number(displayLongitude),
-    };
-  }, [displayLatitude, displayLongitude]);
-
-  const markers = useMemo(() => {
-    if (displayLatitude == null || displayLongitude == null) return [];
-    return [
-      {
-        lat: Number(displayLatitude),
-        lng: Number(displayLongitude),
-        title: event.venue_name,
-      },
-    ];
-  }, [displayLatitude, displayLongitude, event?.venue_name]);
+  const displayVenueAddress = linkedVenueAddress || event?.venue_address;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -150,18 +124,14 @@ export const EventDetailPage = () => {
         if (eventData.venue_id) {
           const { data: venueData } = await supabase
             .from("venues")
-            .select("slug, latitude, longitude, address")
+            .select("slug, address")
             .eq("id", eventData.venue_id)
             .maybeSingle();
           if (venueData?.slug) {
             setVenueSlug(venueData.slug);
           }
-          if (venueData) {
-            setLinkedVenueLocation({
-              latitude: venueData.latitude == null ? null : Number(venueData.latitude),
-              longitude: venueData.longitude == null ? null : Number(venueData.longitude),
-              address: venueData.address,
-            });
+          if (venueData?.address) {
+            setLinkedVenueAddress(venueData.address);
           }
         }
 
@@ -1123,7 +1093,7 @@ export const EventDetailPage = () => {
                             <p className="text-sm sm:text-base font-medium">{event.venue_name}</p>
                           )}
                           <p className="text-xs sm:text-sm text-muted-foreground">
-                            {linkedVenueLocation?.address || event.venue_address}
+                            {displayVenueAddress}
                           </p>
                         </div>
                       </div>
@@ -1154,10 +1124,20 @@ export const EventDetailPage = () => {
                     </div>
                   </div>
 
-                  {markers.length > 0 && (
+                  {displayVenueAddress && (
                     <div className="space-y-2">
                       <h4 className="text-base sm:text-lg font-semibold">Location</h4>
-                      <GoogleMap center={memoizedCenter} markers={markers} height="300px" />
+                      <div className="overflow-hidden rounded-lg">
+                        <iframe
+                          width="100%"
+                          height="300"
+                          className="border-0"
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                          src={`https://maps.google.com/maps?q=${encodeURIComponent(displayVenueAddress)}&output=embed`}
+                          title={`${event.venue_name} location`}
+                        />
+                      </div>
                     </div>
                   )}
                 </CardContent>
