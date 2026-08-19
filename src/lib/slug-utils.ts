@@ -30,7 +30,6 @@ export const getEventBySlugOrId = async (identifier: string) => {
     venue_id,
     custom_slug,
     custom_slug_expires_at,
-    track_payments,
     payment_info
   `;
 
