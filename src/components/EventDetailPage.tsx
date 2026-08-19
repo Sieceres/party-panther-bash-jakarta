@@ -25,7 +25,6 @@ import { GoogleMap } from "./GoogleMap";
 import { CommentItem, Comment } from "./CommentItem";
 import { CommentActions } from "./CommentActions";
 import { ReportDialog } from "./ReportDialog";
-import { ReceiptUpload } from "./ReceiptUpload";
 import { EventPaymentInfo } from "./EventPaymentInfo";
 import { Header } from "./Header";
 import { EventTags } from "./EventTags";
