@@ -1,8 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const getEventBySlugOrId = async (identifier: string) => {
-  // Fetch the event row directly and include instagram_post_url explicitly.
-  // This is simpler and guarantees the field is present in the returned object.
+  // Public (anon-safe) columns. Contact/payment columns are only readable by
+  // signed-in users, so they are fetched in a second query when authenticated.
   const commonFields = `
     id,
     title,
@@ -17,7 +17,6 @@ export const getEventBySlugOrId = async (identifier: string) => {
     is_recurrent,
     track_payments,
     organizer_name,
-    organizer_whatsapp,
     created_by,
     created_at,
     updated_at,
@@ -29,11 +28,20 @@ export const getEventBySlugOrId = async (identifier: string) => {
     enable_photos,
     venue_id,
     custom_slug,
-    custom_slug_expires_at,
-    payment_info,
-    payment_methods,
-    payment_qr_url
+    custom_slug_expires_at
   `;
+
+  const withPrivateFields = async (event: any) => {
+    if (!event) return event;
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) return event;
+    const { data: extra } = await supabase
+      .from("events")
+      .select("organizer_whatsapp, payment_info, payment_methods, payment_qr_url")
+      .eq("id", event.id)
+      .maybeSingle();
+    return extra ? { ...event, ...extra } : event;
+  };
 
   // Try custom link first
   const { data: eventByCustom } = await supabase
@@ -43,7 +51,7 @@ export const getEventBySlugOrId = async (identifier: string) => {
     .maybeSingle();
 
   if (eventByCustom) {
-    return { data: eventByCustom, error: null };
+    return { data: await withPrivateFields(eventByCustom), error: null };
   }
 
   // Then slug
@@ -57,7 +65,7 @@ export const getEventBySlugOrId = async (identifier: string) => {
     return { data: null, error: slugError };
   }
   if (eventBySlug) {
-    return { data: eventBySlug, error: null };
+    return { data: await withPrivateFields(eventBySlug), error: null };
   }
 
   // Fallback: try by id
@@ -71,7 +79,7 @@ export const getEventBySlugOrId = async (identifier: string) => {
     return { data: null, error: idError };
   }
 
-  return { data: eventById || null, error: null };
+  return { data: eventById ? await withPrivateFields(eventById) : null, error: null };
 };
 
 export const getPromoBySlugOrId = async (identifier: string) => {

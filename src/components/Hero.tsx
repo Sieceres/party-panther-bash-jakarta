@@ -34,17 +34,15 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         // Fetch events count
         const { count: eventsCount } = await supabase
           .from('events')
-          .select('*', { count: 'exact', head: true });
+          .select('id', { count: 'exact', head: true });
 
         // Fetch promos count
         const { count: promosCount } = await supabase
           .from('promos')
           .select('*', { count: 'exact', head: true });
 
-        // Fetch party goers count (total unique users who have joined events)
-        const { count: partyGoersCount } = await supabase
-          .from('event_attendees')
-          .select('user_id', { count: 'exact', head: true });
+        // Fetch party goers count (aggregate only; attendee rows are not publicly readable)
+        const { data: partyGoersCount } = await (supabase as any).rpc('get_total_attendee_count');
 
         setStats({
           events: eventsCount || 0,

@@ -196,7 +196,7 @@ export const VenueDetailPage = () => {
             .order("created_at", { ascending: false });
           const { data: matchingEvents } = await supabase
             .from("events")
-            .select("*")
+            .select("id, title, description, date, time, venue_name, venue_address, venue_latitude, venue_longitude, image_url, organizer_name, slug, custom_slug, custom_slug_expires_at, venue_id, created_by, created_at")
             .ilike("venue_name", decodedName)
             .order("date", { ascending: true });
           
@@ -242,7 +242,7 @@ export const VenueDetailPage = () => {
         const today = new Date().toISOString().split('T')[0];
         const { data: venueEvents } = await supabase
           .from("events")
-          .select("*")
+          .select("id, title, description, date, time, venue_name, venue_address, venue_latitude, venue_longitude, image_url, organizer_name, slug, custom_slug, custom_slug_expires_at, venue_id, created_by, created_at")
           .or(`venue_id.eq.${data.id},venue_name.ilike.${data.name}`)
           .gte("date", today)
           .order("date", { ascending: true });

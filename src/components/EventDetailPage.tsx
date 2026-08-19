@@ -225,14 +225,15 @@ export const EventDetailPage = () => {
           setComments(commentsWithProfiles);
         }
 
-        // Fetch attendees with profiles for display - using separate queries
-        const { data: attendeesData, error: attendeesError } = await supabase
-          .from("event_attendees")
-          .select(
-            "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note, is_anonymous, is_co_organizer",
-          )
-          .eq("event_id", eventData.id)
-          .order("joined_at", { ascending: false });
+        // Fetch attendees via a sanitized function: payment/receipt/note fields are
+        // only returned to the attendee themselves, organizers and admins.
+        const { data: attendeesRaw, error: attendeesError } = await (supabase as any).rpc(
+          "get_event_attendees",
+          { _event_id: eventData.id },
+        );
+        const attendeesData = ((attendeesRaw as any[]) || []).slice().sort(
+          (a, b) => new Date(b.joined_at || 0).getTime() - new Date(a.joined_at || 0).getTime(),
+        );
 
         if (attendeesData && !attendeesError) {
           // Fetch profiles for attendees

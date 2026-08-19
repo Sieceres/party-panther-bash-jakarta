@@ -1591,6 +1591,24 @@ export type Database = {
           event_id: string
         }[]
       }
+      get_event_attendees: {
+        Args: { _event_id: string }
+        Returns: {
+          event_id: string
+          id: string
+          is_anonymous: boolean
+          is_co_organizer: boolean
+          joined_at: string
+          note: string
+          payment_claimed_at: string
+          payment_date: string
+          payment_marked_by: string
+          payment_status: boolean
+          receipt_uploaded_at: string
+          receipt_url: string
+          user_id: string
+        }[]
+      }
       get_event_co_organizers: {
         Args: { event_id_param: string }
         Returns: {
