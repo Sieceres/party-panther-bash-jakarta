@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Wallet, CheckCircle2 } from "lucide-react";
+import { Wallet, CheckCircle2, QrCode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ReceiptUpload } from "./ReceiptUpload";
@@ -11,6 +11,8 @@ interface EventPaymentInfoProps {
   eventId: string;
   userId: string;
   paymentInfo?: string | null;
+  paymentMethods?: { method: string; detail: string }[] | null;
+  paymentQrUrl?: string | null;
   attendeeId: string;
   paymentStatus?: boolean;
   paymentClaimedAt?: string | null;
@@ -23,6 +25,8 @@ export const EventPaymentInfo = ({
   eventId,
   userId,
   paymentInfo,
+  paymentMethods,
+  paymentQrUrl,
   attendeeId,
   paymentStatus,
   paymentClaimedAt,
@@ -31,6 +35,7 @@ export const EventPaymentInfo = ({
   onReceiptUploaded,
 }: EventPaymentInfoProps) => {
   const [open, setOpen] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
@@ -69,15 +74,37 @@ export const EventPaymentInfo = ({
         </DialogHeader>
 
         <div className="space-y-4">
+          {paymentMethods && paymentMethods.length > 0 && (
+            <ul className="divide-y rounded-lg border">
+              {paymentMethods.map((m, i) => (
+                <li key={i} className="flex items-center justify-between gap-3 p-3 text-sm">
+                  <span className="font-medium">{m.method}</span>
+                  <span className="text-right break-all text-muted-foreground">{m.detail}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {paymentQrUrl && (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full flex items-center gap-2"
+              onClick={() => setQrOpen(true)}
+            >
+              <QrCode className="w-4 h-4" /> Show QR code
+            </Button>
+          )}
+
           {paymentInfo ? (
             <div className="rounded-lg bg-muted p-3 text-sm whitespace-pre-line break-words">
               <Linkify options={{ target: "_blank", className: "text-primary underline" }}>{paymentInfo}</Linkify>
             </div>
-          ) : (
+          ) : (!paymentMethods || paymentMethods.length === 0) && !paymentQrUrl ? (
             <p className="text-sm text-muted-foreground">
               The organizer hasn't added payment details yet. Contact them for instructions.
             </p>
-          )}
+          ) : null}
 
           {paymentStatus ? (
             <div className="flex items-center gap-2 text-sm text-green-600">
@@ -102,6 +129,17 @@ export const EventPaymentInfo = ({
           )}
         </div>
       </DialogContent>
+
+      <Dialog open={qrOpen} onOpenChange={setQrOpen}>
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Scan to pay</DialogTitle>
+          </DialogHeader>
+          {paymentQrUrl && (
+            <img src={paymentQrUrl} alt="Payment QR code" className="w-full rounded-lg bg-white p-2" />
+          )}
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };
