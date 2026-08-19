@@ -37,6 +37,7 @@ import ScrapedReview from "./pages/ScrapedReview";
 import VoucherVerify from "./pages/VoucherVerify";
 import Lintang from "./pages/Lintang";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import { Footer } from "@/components/Footer";
 
 const queryClient = new QueryClient();
 
@@ -114,7 +115,7 @@ const App = () => (
           <Route path="/:id" element={<EventDetailPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        
+        <Footer />
         <WhatsAppGroupDialog />
       </BrowserRouter>
     </TooltipProvider>
