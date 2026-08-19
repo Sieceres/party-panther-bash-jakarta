@@ -104,28 +104,35 @@ export const EventDetailPage = () => {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [joinAnonymously, setJoinAnonymously] = useState(false);
   const [venueSlug, setVenueSlug] = useState<string | null>(null);
+  const [linkedVenueLocation, setLinkedVenueLocation] = useState<{
+    latitude: number | null;
+    longitude: number | null;
+    address: string | null;
+  } | null>(null);
 
   usePageTitle(event?.title ? `${event.title}` : "Event");
+  const displayLatitude = linkedVenueLocation?.latitude ?? event?.venue_latitude;
+  const displayLongitude = linkedVenueLocation?.longitude ?? event?.venue_longitude;
   const memoizedCenter = useMemo(() => {
-    if (!event?.venue_latitude || !event?.venue_longitude) {
+    if (displayLatitude == null || displayLongitude == null) {
       return { lat: -6.2088, lng: 106.8456 }; // Jakarta default
     }
     return {
-      lat: Number(event.venue_latitude),
-      lng: Number(event.venue_longitude),
+      lat: Number(displayLatitude),
+      lng: Number(displayLongitude),
     };
-  }, [event?.venue_latitude, event?.venue_longitude]);
+  }, [displayLatitude, displayLongitude]);
 
   const markers = useMemo(() => {
-    if (!event?.venue_latitude || !event?.venue_longitude) return [];
+    if (displayLatitude == null || displayLongitude == null) return [];
     return [
       {
-        lat: Number(event.venue_latitude),
-        lng: Number(event.venue_longitude),
+        lat: Number(displayLatitude),
+        lng: Number(displayLongitude),
         title: event.venue_name,
       },
     ];
-  }, [event?.venue_latitude, event?.venue_longitude, event?.venue_name]);
+  }, [displayLatitude, displayLongitude, event?.venue_name]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -143,11 +150,18 @@ export const EventDetailPage = () => {
         if (eventData.venue_id) {
           const { data: venueData } = await supabase
             .from("venues")
-            .select("slug")
+            .select("slug, latitude, longitude, address")
             .eq("id", eventData.venue_id)
             .maybeSingle();
           if (venueData?.slug) {
             setVenueSlug(venueData.slug);
+          }
+          if (venueData) {
+            setLinkedVenueLocation({
+              latitude: venueData.latitude == null ? null : Number(venueData.latitude),
+              longitude: venueData.longitude == null ? null : Number(venueData.longitude),
+              address: venueData.address,
+            });
           }
         }
 
@@ -313,22 +327,17 @@ export const EventDetailPage = () => {
     }
     setJoiningEvent(true);
     try {
-      const { error } = await supabase.from("event_attendees").insert({
-        event_id: event.id,
-        user_id: user.id,
-        is_anonymous: joinAnonymously,
+      const { data: joined, error } = await (supabase as any).rpc("join_event", {
+        _event_id: event.id,
+        _is_anonymous: joinAnonymously,
       });
 
       if (error) {
-        if (error.code === "23505") {
-          toast({
-            title: "Already joined",
-            description: "You're already registered for this event.",
-            variant: "destructive",
-          });
-        } else {
-          throw error;
-        }
+        throw error;
+      }
+      if (!joined) {
+        setHasJoined(true);
+        toast({ title: "Already joined", description: "You're already registered for this event." });
         return;
       }
 
@@ -397,19 +406,16 @@ export const EventDetailPage = () => {
         // Auto-join the event by calling the join logic directly
         setJoiningEvent(true);
         try {
-          const { error } = await supabase.from("event_attendees").insert({
-            event_id: event.id,
-            user_id: user.id,
-            is_anonymous: joinAnonymously,
+          const { data: joined, error } = await (supabase as any).rpc("join_event", {
+            _event_id: event.id,
+            _is_anonymous: joinAnonymously,
           });
 
           if (error) {
-            if (error.code === "23505") {
-              // Already joined - just update state
-              setHasJoined(true);
-            } else {
-              throw error;
-            }
+            throw error;
+          }
+          if (!joined) {
+            setHasJoined(true);
             return;
           }
 
@@ -1116,7 +1122,9 @@ export const EventDetailPage = () => {
                           ) : (
                             <p className="text-sm sm:text-base font-medium">{event.venue_name}</p>
                           )}
-                          <p className="text-xs sm:text-sm text-muted-foreground">{event.venue_address}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            {linkedVenueLocation?.address || event.venue_address}
+                          </p>
                         </div>
                       </div>
                     </div>
