@@ -1,81 +1,31 @@
-## Goal
+# Custom event URLs (with expiry) + switchable AI style
 
-Replace the redirect-based Google login inside `LoginDialog` with Google's **Identity Services (GIS)** popup using `supabase.auth.signInWithIdToken`. The user signs in without ever leaving `partypanther.net`, so the scary `qgttbaibhmzbmknjlghj.supabase.co` URL never appears.
+## 1. Custom event URLs
 
-Scope: **LoginDialog only**. The `/auth` page keeps the existing redirect flow as a fallback (useful for OAuth edge cases and mobile in-app browsers where GIS isn't supported).
+Organizers can claim a short custom link for their event, e.g. `partypanther.net/e/rooftop-nye`.
 
----
+**Anti-squatting via expiry**
+- A custom link is only reserved from the moment it is claimed until **30 days after the event date**.
+- Once expired, the link is automatically released and can be claimed by anyone else. The event stays reachable forever through its normal auto-generated slug, so nothing breaks.
+- Expired-but-not-reclaimed links keep working (grace), they simply stop blocking others.
+- Recurring events keep their link refreshed automatically as the date moves forward.
 
-## What you need to do in Google Cloud Console (I'll walk you through)
+**Rules**
+- 3–40 chars, lowercase letters/numbers/hyphens only.
+- Blocklist of reserved words (admin, auth, events, promos, venue, api, login, privacy, e, p, v, …).
+- One custom link per event; only the event creator, co-organizers, or an admin can set it.
+- Live availability check as you type (green "available" / red "taken until …").
+- Changing it frees the old one immediately.
 
-You already have a Google OAuth client (the one currently used for the redirect flow). We'll reuse it — just need to add your site origins.
+**Where it appears**
+- New "Custom link" field in the event form (create + edit), under the title, showing the full preview URL and a copy button.
+- Share buttons use the custom link when one is active.
 
-1. Open https://console.cloud.google.com/apis/credentials
-2. Pick your project → click the existing **OAuth 2.0 Client ID** (Web application) you use for Supabase.
-3. Under **Authorized JavaScript origins**, add:
-   - `https://partypanther.net`
-   - `https://www.partypanther.net`
-   - `https://partypanther.lovable.app`
-   - `https://id-preview--1ebb9f24-fda5-4dae-ac77-480d72954427.lovable.app`
-   - `http://localhost:5173` (for local dev, optional)
-4. **Authorized redirect URIs** — leave as-is (still needed for the `/auth` redirect fallback).
-5. Copy the **Client ID** (looks like `xxxxxxxxxxxx-xxxxxxxxxx.apps.googleusercontent.com`) and paste it to me in chat.
-6. In Supabase Dashboard → Authentication → Providers → **Google**, scroll to **Authorized Client IDs** and add the same Client ID there (this lets Supabase trust ID tokens issued to it).
+## 2. Change AI style without re-uploading
 
-The Client ID is **public** — safe to commit. No secret needed.
-
----
-
-## What I'll build
-
-### 1. Load the GIS script
-Add `<script src="https://accounts.google.com/gsi/client" async defer></script>` to `index.html`.
-
-### 2. New hook: `src/hooks/useGoogleOneTap.ts`
-- Generates a random nonce, SHA-256 hashes it.
-- Initializes `google.accounts.id` with the Client ID and hashed nonce.
-- Renders Google's official "Sign in with Google" button into a target div.
-- On callback, calls `supabase.auth.signInWithIdToken({ provider: 'google', token: credential, nonce: rawNonce })`.
-- Returns `{ buttonRef, loading, error }`.
-
-### 3. Update `src/components/LoginDialog.tsx`
-- Replace the current custom "Continue with Google" `<Button>` (which calls `signInWithOAuth` and redirects) with a `<div ref={buttonRef}>` that GIS renders the official Google button into.
-- Keep the email/password tabs untouched.
-- On successful sign-in: close dialog, fire `onSuccess?.()` (same as today).
-- Client ID stored as `const GOOGLE_CLIENT_ID = "..."` at top of the hook (public value).
-
-### 4. Leave `/auth` page alone
-The redirect flow stays as a fallback. Most users hit the dialog anyway.
-
----
+In the poster auto-fill panel, after the first extraction the uploaded poster (or pasted text) is kept in memory. A **"Re-extract with this style"** button appears next to the style picker so switching between Playful / Compact / Exact / Custom re-runs the AI on the same source instantly. A small thumbnail of the retained poster is shown so it is clear what will be re-processed.
 
 ## Technical notes
-
-- **Nonce flow** (required for security):
-  ```ts
-  const rawNonce = crypto.randomUUID();
-  const hashed = btoa(String.fromCharCode(...new Uint8Array(
-    await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawNonce))
-  )));
-  // pass `hashed` to GIS, pass `rawNonce` to supabase.signInWithIdToken
-  ```
-- **FedCM**: GIS now requires `use_fedcm_for_prompt: true` in Chrome. We'll enable it.
-- **Fallback**: if GIS fails to load (ad-blockers, in-app browsers), show a small "Use redirect sign-in instead" link that calls the existing `signInWithOAuth`.
-- No DB changes, no edge functions, no new secrets.
-
----
-
-## Files touched
-
-- `index.html` — add GIS script tag
-- `src/hooks/useGoogleOneTap.ts` — new
-- `src/components/LoginDialog.tsx` — swap Google button for GIS-rendered button + fallback link
-
----
-
-## What I need from you to start
-
-1. The **Google OAuth Web Client ID** (after you add the origins above).
-2. Confirmation that you've added it to Supabase's **Authorized Client IDs** list.
-
-Once you paste the Client ID, I'll implement the three file changes.
+- Migration: add `custom_slug text unique`, `custom_slug_expires_at timestamptz` to `public.events`; partial unique index on active claims; helper function `claim_event_custom_slug(event_id, slug)` (security definer) validating format, blocklist, permissions and expiry-based availability; grants unchanged (RLS on events already covers reads).
+- Route resolution: `getEventBySlugOrId` gains a `custom_slug` lookup first, then slug, then id. `getEventUrl`/`getEventShareUrl` prefer `custom_slug` when non-expired.
+- `EventAIExtract` keeps `lastSource` state (`{kind: 'image'|'text', value}`) and exposes a re-extract action reusing the existing `extract-from-image` edge function.
