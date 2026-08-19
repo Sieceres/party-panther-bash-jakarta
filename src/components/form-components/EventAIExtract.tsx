@@ -218,6 +218,22 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
                 className="text-xs"
               />
             )}
+            {lastSource && (
+              <div className="flex items-center gap-3 rounded-md border border-border p-2">
+                {lastSource.kind === "image" ? (
+                  <img src={lastSource.value} alt="Uploaded poster" className="w-10 h-10 object-cover rounded" />
+                ) : (
+                  <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
+                )}
+                <p className="text-[11px] text-muted-foreground flex-1">
+                  Change the style above and re-run the AI on the same {lastSource.kind === "image" ? "poster" : "text"}.
+                </p>
+                <Button type="button" size="sm" variant="secondary" onClick={reExtract} disabled={isExtracting}>
+                  {isExtracting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+                  Re-extract
+                </Button>
+              </div>
+            )}
           </div>
 
           {mode === "poster" && (
