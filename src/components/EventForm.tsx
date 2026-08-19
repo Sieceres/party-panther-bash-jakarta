@@ -47,6 +47,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [isRecurrent, setIsRecurrent] = useState(initialData?.is_recurrent || false);
   const [trackPayments, setTrackPayments] = useState(initialData?.track_payments || false);
   const [paymentInfo, setPaymentInfo] = useState((initialData as any)?.payment_info || "");
+  const [paymentMethods, setPaymentMethods] = useState<any[]>(((initialData as any)?.payment_methods as any[]) || []);
+  const [paymentQrUrl, setPaymentQrUrl] = useState<string | null>((initialData as any)?.payment_qr_url || null);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [accessLevel, setAccessLevel] = useState<string>(initialData?.access_level || 'public');
   const [maxAttendees, setMaxAttendees] = useState<number | null>(initialData?.max_attendees || null);
@@ -116,6 +118,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       setIsRecurrent(initialData.is_recurrent || false);
       setTrackPayments(initialData.track_payments || false);
       setPaymentInfo((initialData as any).payment_info || "");
+      setPaymentMethods(((initialData as any).payment_methods as any[]) || []);
+      setPaymentQrUrl((initialData as any).payment_qr_url || null);
       setAccessLevel(initialData.access_level || 'public');
       setMaxAttendees(initialData.max_attendees || null);
       setEnableCheckIn(initialData.enable_check_in || false);
@@ -324,6 +328,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         is_recurrent: isRecurrent,
         track_payments: trackPayments,
         payment_info: trackPayments ? (paymentInfo || null) : null,
+        payment_methods: trackPayments ? paymentMethods.filter((m: any) => m.method && m.detail?.trim()) : [],
+        payment_qr_url: trackPayments ? (paymentQrUrl || null) : null,
         instagram_post_url: instagramPostUrl || null,
         access_level: accessLevel as "public" | "private" | "invite_only" | "secret",
         max_attendees: maxAttendees,
@@ -546,6 +552,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               trackPayments={trackPayments}
               instagramPostUrl={instagramPostUrl}
               paymentInfo={paymentInfo}
+              paymentMethods={paymentMethods}
+              paymentQrUrl={paymentQrUrl}
               onAccessLevelChange={setAccessLevel}
               onMaxAttendeesChange={setMaxAttendees}
               onEnableCheckInChange={setEnableCheckIn}
@@ -554,6 +562,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               onTrackPaymentsChange={setTrackPayments}
               onInstagramPostUrlChange={setInstagramPostUrl}
               onPaymentInfoChange={setPaymentInfo}
+              onPaymentMethodsChange={setPaymentMethods}
+              onPaymentQrUrlChange={setPaymentQrUrl}
             />
 
             {/* Duplicate Warning - only for new events */}
