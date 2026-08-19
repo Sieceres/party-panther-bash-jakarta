@@ -16,6 +16,7 @@ import { ImageUpload } from "./form-components/ImageUpload";
 import { EventTagSelector } from "./form-components/EventTagSelector";
 import { EventPrivacySettings } from "./form-components/EventPrivacySettings";
 import { EventAIExtract } from "./form-components/EventAIExtract";
+import { CustomLinkField } from "./form-components/CustomLinkField";
 import { EventPreviewDialog } from "./EventPreviewDialog";
 import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
 import { DuplicateWarning } from "./DuplicateWarning";
@@ -54,6 +55,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(initialData?.venue_id || null);
   const [venueArea, setVenueArea] = useState(initialData?.venue_address || ""); // area stored in venue_address for now
   const [aiAutoFilledVenue, setAiAutoFilledVenue] = useState(false);
+  const [customSlug, setCustomSlug] = useState<string>((initialData as any)?.custom_slug || "");
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
@@ -101,6 +103,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       });
       setSelectedVenueId(initialData.venue_id || null);
       setVenueArea(initialData.venue_address || "");
+      setCustomSlug((initialData as any).custom_slug || "");
       setEventDate(
         initialData.date 
           ? (() => {
@@ -348,6 +351,22 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
 
       if (error) throw error;
 
+      // Handle custom link claim / release
+      const targetEventId = initialData?.id || newEventId;
+      if (targetEventId && customSlug !== (((initialData as any)?.custom_slug) || "")) {
+        const { error: slugError } = await (supabase as any).rpc("claim_event_custom_slug", {
+          _event_id: targetEventId,
+          _slug: customSlug || null,
+        });
+        if (slugError) {
+          toast({
+            title: "Custom link not saved",
+            description: slugError.message || "That link is not available.",
+            variant: "destructive",
+          });
+        }
+      }
+
       // Handle tag assignments for both new and updated events
       const eventId = initialData?.id || newEventId;
       if (eventId) {
@@ -463,6 +482,13 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               description={formData.description}
               onTitleChange={(value) => handleInputChange("title", value)}
               onDescriptionChange={(value) => handleInputChange("description", value)}
+            />
+
+            <CustomLinkField
+              value={customSlug}
+              onChange={(v) => { setCustomSlug(v); setHasUnsavedChanges(true); }}
+              eventId={initialData?.id}
+              expiresAt={(initialData as any)?.custom_slug_expires_at}
             />
 
             <EventDateTime

@@ -108,6 +108,8 @@ const App = () => (
           <Route path="/voucher/:code" element={<VoucherVerify />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          {/* Custom event links, e.g. partypanther.net/rooftop-nye */}
+          <Route path="/:id" element={<EventDetailPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         

@@ -32,6 +32,7 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
   const [textInput, setTextInput] = useState("");
   const [aiStyle, setAiStyle] = useState<"playful" | "compact" | "exact" | "custom">("exact");
   const [customInstructions, setCustomInstructions] = useState("");
+  const [lastSource, setLastSource] = useState<{ kind: "image" | "text"; value: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,6 +49,7 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
   };
 
   const extractFromImage = async (imageData: string) => {
+    setLastSource({ kind: "image", value: imageData });
     setIsExtracting(true);
     try {
       const { data, error } = await supabase.functions.invoke("extract-from-image", {
@@ -69,7 +71,6 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
       toast.success("Event details extracted!", {
         description: `Found: ${event.title || "event info"}`,
       });
-      setIsOpen(false);
     } catch (err: any) {
       console.error("AI extraction error:", err);
       toast.error("Failed to extract event details", {
@@ -87,6 +88,7 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
     }
 
     setIsExtracting(true);
+    setLastSource({ kind: "text", value: textInput });
     try {
       const { data, error } = await supabase.functions.invoke("extract-from-image", {
         body: { text: textInput, type: "event", style: aiStyle, customInstructions: aiStyle === "custom" ? customInstructions : undefined },
@@ -105,8 +107,6 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
       toast.success("Event details extracted!", {
         description: `Found: ${event.title || "event info"}`,
       });
-      setIsOpen(false);
-      setTextInput("");
     } catch (err: any) {
       console.error("AI extraction error:", err);
       toast.error("Failed to extract event details", {
@@ -114,6 +114,15 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
       });
     } finally {
       setIsExtracting(false);
+    }
+  };
+
+  const reExtract = async () => {
+    if (!lastSource) return;
+    if (lastSource.kind === "image") {
+      await extractFromImage(lastSource.value);
+    } else {
+      await extractFromText();
     }
   };
 
@@ -208,6 +217,22 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
                 rows={2}
                 className="text-xs"
               />
+            )}
+            {lastSource && (
+              <div className="flex items-center gap-3 rounded-md border border-border p-2">
+                {lastSource.kind === "image" ? (
+                  <img src={lastSource.value} alt="Uploaded poster" className="w-10 h-10 object-cover rounded" />
+                ) : (
+                  <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
+                )}
+                <p className="text-[11px] text-muted-foreground flex-1">
+                  Change the style above and re-run the AI on the same {lastSource.kind === "image" ? "poster" : "text"}.
+                </p>
+                <Button type="button" size="sm" variant="secondary" onClick={reExtract} disabled={isExtracting}>
+                  {isExtracting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+                  Re-extract
+                </Button>
+              </div>
             )}
           </div>
 
