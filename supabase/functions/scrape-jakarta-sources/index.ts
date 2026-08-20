@@ -19,7 +19,6 @@ const SOURCES: SourceDef[] = [
   { id: "vault", name: "Vault Jakarta", url: "https://vault-jakarta.com/", type: "event" },
   { id: "hop", name: "See You at the Hop", url: "https://seeyouatthehop.com/programme", type: "both" },
   { id: "pats", name: "Pat's X (Jakarta Party Club)", url: "https://jakartapartyclub.com/nightclub/pats-x/", type: "event" },
-  { id: "t5", name: "Classic Hotel T5", url: "https://classichoteljakarta.com/T5/", type: "event" },
 ];
 
 async function firecrawlScrape(url: string, apiKey: string): Promise<string | null> {
