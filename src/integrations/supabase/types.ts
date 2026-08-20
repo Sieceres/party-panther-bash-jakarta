@@ -1728,6 +1728,19 @@ export type Database = {
         }[]
       }
       get_my_claim: { Args: { claim: string }; Returns: Json }
+      get_promo_reviews: {
+        Args: { p_promo_id: string }
+        Returns: {
+          comment: string
+          created_at: string
+          id: string
+          is_anonymous: boolean
+          promo_id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_promos_simple: {
         Args: never
         Returns: {
@@ -1893,6 +1906,7 @@ export type Database = {
           is_super_admin: boolean
         }[]
       }
+      get_user_review_count: { Args: { p_user_id: string }; Returns: number }
       get_user_role:
         | { Args: never; Returns: string }
         | { Args: { _user_id: string }; Returns: string }

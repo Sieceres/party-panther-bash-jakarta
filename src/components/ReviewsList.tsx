@@ -56,19 +56,18 @@ export const ReviewsList = ({ promoId, venueOwnerId, onReviewsChange }: ReviewsL
 
   const fetchReviews = useCallback(async () => {
     try {
-      const { data: reviewsData, error: reviewsError } = await supabase
-        .from('promo_reviews')
-        .select('*')
-        .eq('promo_id', promoId)
-        .order('created_at', { ascending: false });
+      const { data: reviewsData, error: reviewsError } = await (supabase as any)
+        .rpc('get_promo_reviews', { p_promo_id: promoId });
 
       if (reviewsError) throw reviewsError;
 
       // Fetch profiles and replies in parallel for each review
       const reviewsWithDetails = await Promise.all(
-        (reviewsData || []).map(async (review) => {
+        (reviewsData || []).map(async (review: any) => {
           const [profileRes, replyRes] = await Promise.all([
-            supabase.from('profiles').select('display_name, avatar_url, is_verified').eq('user_id', review.user_id).single(),
+            review.user_id
+              ? supabase.from('profiles').select('display_name, avatar_url, is_verified').eq('user_id', review.user_id).single()
+              : Promise.resolve({ data: null }),
             supabase.from('review_replies').select('*').eq('review_id', review.id).maybeSingle(),
           ]);
 
