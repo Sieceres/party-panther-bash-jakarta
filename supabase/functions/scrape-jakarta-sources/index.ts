@@ -136,10 +136,32 @@ STRICT RULES:
   if (!call) return [];
   try {
     const parsed = JSON.parse(call.function.arguments);
-    return parsed.items || [];
+    const items = parsed.items || [];
+    return type === "promo" ? items.filter(isDrinkPromo) : items;
   } catch {
     return [];
   }
+}
+
+const DRINK_WORDS =
+  /\b(drink|beer|bir|wine|cocktail|spirit|whisk|vodka|gin|rum|tequila|sake|soju|shot|bucket|bottle|pint|jug|tower|happy\s*hour|free\s*flow|ladies?\s*night|mocktail|margarita|mojito|highball|prosecco|champagne|sangria)\b/i;
+const DEAL_WORDS =
+  /(\bb[1o]g[1o]\b|buy\s*\d+\s*get\s*\d+|\d+\s*%|half\s*price|free\s*flow|happy\s*hour|ladies?\s*night|discount|promo|\bidr\b|\brp\b|\d+\s*k\b|\bfor\s*\d)/i;
+const EVENTY_WORDS =
+  /\b(dj|line[- ]?up|lineup|guest\s*set|live\s*(band|music|show)|concert|festival|tickets?|presents|b2b|showcase|nye|new\s*year'?s\s*eve|anniversary\s*party|halloween|countdown)\b/i;
+const SINGLE_DATE =
+  /\b(\d{4}-\d{2}-\d{2}|\d{1,2}(st|nd|rd|th)?\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*\d{1,2})\b/i;
+
+/** Keep only recurring drink deals; drop one-off events the model mislabeled as promos. */
+function isDrinkPromo(it: any): boolean {
+  const text = [it?.title, it?.discount_text, it?.description].filter(Boolean).join(" ");
+  if (!text.trim()) return false;
+  if (!DRINK_WORDS.test(text)) return false;
+  if (!DEAL_WORDS.test(text)) return false;
+  const hasRecurringDays = Array.isArray(it?.day_of_week) && it.day_of_week.length > 0;
+  if (EVENTY_WORDS.test(text)) return false;
+  if (SINGLE_DATE.test(text) && !hasRecurringDays) return false;
+  return true;
 }
 
 serve(async (req) => {
