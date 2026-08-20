@@ -30,4 +30,4 @@ So no new channel is needed: one new trigger plugs the payment claim into everyt
 ## Optional (say the word)
 
 - Add a matching toggle so organizers can mute payment notifications per event.
-- Also notify when a receipt image is uploaded (`receipt_url` set), not just the "I have paid" tap.
+Also included: a second notification when a receipt image is uploaded (`receipt_url` set), in addition to the "I have paid" tap.
