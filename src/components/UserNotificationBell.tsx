@@ -14,6 +14,7 @@ interface Notification {
   link: string | null;
   is_read: boolean;
   created_at: string;
+  metadata: Record<string, any> | null;
 }
 
 const TYPE_ICONS: Record<string, typeof Bell> = {
@@ -73,7 +74,19 @@ export const UserNotificationBell = ({ userId }: { userId: string }) => {
       await supabase.from("user_notifications").update({ is_read: true }).eq("id", n.id);
     }
     setOpen(false);
-    if (n.link) navigate(n.link);
+
+    // Links stored at creation time can go stale when a title (and therefore
+    // the slug) changes. Prefer resolving from the stable id in metadata.
+    let link = n.link;
+    const eventId = n.metadata?.event_id;
+    const promoId = n.metadata?.promo_id;
+    if (eventId && (!link || link.startsWith("/event/"))) {
+      link = `/event/${eventId}`;
+    } else if (promoId && (!link || link.startsWith("/promo/"))) {
+      link = `/promo/${promoId}`;
+    }
+
+    if (link) navigate(link);
     fetchNotifications();
   };
 
