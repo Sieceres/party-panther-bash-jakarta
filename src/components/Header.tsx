@@ -196,7 +196,10 @@ export const Header = ({ activeSection = '', onSectionChange }: HeaderProps) => 
                       className="relative flex items-center gap-1 text-sm"
                       title="Admin notifications"
                     >
-                      <Bell className="w-4 h-4" />
+                      <span className="relative">
+                        <Bell className="w-4 h-4" />
+                        <Shield className="absolute -bottom-1 -right-1 w-2.5 h-2.5 text-primary fill-primary" />
+                      </span>
                       {(pendingReportCount + pendingClaimCount) > 0 && (
                         <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
                           {(pendingReportCount + pendingClaimCount) > 99 ? '99+' : pendingReportCount + pendingClaimCount}
