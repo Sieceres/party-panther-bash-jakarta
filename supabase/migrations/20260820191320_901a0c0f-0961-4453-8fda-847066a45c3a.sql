@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.notify_payment_claimed() FROM anon, authenticated, public;

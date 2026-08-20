@@ -37,7 +37,13 @@ export const EventPaymentInfo = ({
   const [open, setOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
   const { toast } = useToast();
+
+  const startCooldown = () => {
+    setCooldown(true);
+    setTimeout(() => setCooldown(false), 30000);
+  };
 
   const handleMarkPaid = async () => {
     setSaving(true);
@@ -48,6 +54,7 @@ export const EventPaymentInfo = ({
         .eq("id", attendeeId);
       if (error) throw error;
       onClaimed();
+      startCooldown();
       toast({
         title: "Marked as paid",
         description: "You're now shown as Pending until the organizer confirms. Upload a receipt to speed it up.",
@@ -59,6 +66,29 @@ export const EventPaymentInfo = ({
       setSaving(false);
     }
   };
+
+  const handleUnmarkPaid = async () => {
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("event_attendees")
+        .update({ payment_claimed_at: null })
+        .eq("id", attendeeId);
+      if (error) throw error;
+      onClaimed();
+      startCooldown();
+      toast({
+        title: "Payment claim removed",
+        description: "You're no longer shown as pending payment.",
+      });
+    } catch (e) {
+      console.error(e);
+      toast({ title: "Error", description: "Could not save. Please try again.", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -121,12 +151,27 @@ export const EventPaymentInfo = ({
                 currentReceiptUrl={receiptUrl || undefined}
                 onReceiptUploaded={onReceiptUploaded}
               />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleUnmarkPaid}
+                disabled={saving || cooldown}
+                className="w-full"
+              >
+                {saving ? "Saving..." : cooldown ? "Please wait a moment..." : "I haven't paid yet"}
+              </Button>
             </div>
           ) : (
-            <Button onClick={handleMarkPaid} disabled={saving} className="w-full">
-              {saving ? "Saving..." : "I have paid"}
-            </Button>
+            <div className="space-y-2">
+              <Button onClick={handleMarkPaid} disabled={saving || cooldown} className="w-full">
+                {saving ? "Saving..." : cooldown ? "Please wait a moment..." : "I have paid"}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                You can change this a limited number of times.
+              </p>
+            </div>
           )}
+
         </div>
       </DialogContent>
 
