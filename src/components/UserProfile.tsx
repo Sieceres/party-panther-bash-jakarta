@@ -346,11 +346,10 @@ export const UserProfile = () => {
             .select('*', { count: 'exact', head: true })
             .eq('user_id', targetUserId);
 
-          // Get reviews count
-          const { count: reviewsCount } = await supabase
-            .from('promo_reviews')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', targetUserId);
+          // Get reviews count (masked-safe RPC)
+          const { data: reviewsCountData } = await (supabase as any)
+            .rpc('get_user_review_count', { p_user_id: targetUserId });
+          const reviewsCount = Number(reviewsCountData ?? 0);
 
           // Calculate account age in days
           const accountAge = profile?.created_at 
