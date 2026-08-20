@@ -105,7 +105,14 @@ async function extractFromText(
   const currentYear = new Date().getUTCFullYear();
   const sys = type === "event"
     ? `Extract upcoming events in Jakarta from this content. Be thorough but skip generic boilerplate. If a date shows day/month without year, assume ${currentYear} (or ${currentYear + 1} if already past). 24h time, ISO date.`
-    : `Extract specific recurring promos / happy hours / drink deals from this Jakarta venue content. Skip generic marketing. Each promo+day combo is a separate item.`;
+    : `You extract PROMOS for a Jakarta nightlife app. A promo is strictly a recurring DRINK offer at a venue: happy hour, ladies night, free flow, bottle promo, beer deal / bucket, buy-1-get-1 on drinks, discounted drink pricing.
+
+STRICT RULES:
+- NEVER return one-off events, parties, DJ line-ups, concerts, guest sets, festivals, holiday parties or anything tied to a single calendar date. Those are events, not promos.
+- If an item has a specific single date, an artist/DJ name, a ticket price, or a line-up, SKIP it.
+- Only include an item if it names a concrete drink deal with drinks and a price/discount. No food-only deals, no generic "great vibes" marketing, no venue descriptions.
+- Each promo + day combination is a separate item. Use the recurring weekdays it runs on.
+- If the content contains no qualifying drink deals, return an empty items array.`;
 
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
