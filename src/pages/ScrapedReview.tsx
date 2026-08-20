@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Loader2, RefreshCw, Check, X, ExternalLink } from "lucide-react";
 import { checkUserAdminStatus } from "@/lib/auth-helpers";
+import { searchPlaces } from "@/lib/photon";
 
 type ScrapedItem = {
   id: string;
@@ -18,20 +19,61 @@ type ScrapedItem = {
 };
 
 const SOURCES = [
-  { id: "indoparty", name: "IndoParty" },
-  { id: "tan_delulu", name: "TAN – Delulu" },
-  { id: "vault", name: "Vault" },
-  { id: "hop", name: "See You at the Hop" },
-  { id: "pats", name: "Pat's X" },
-  { id: "chope_promos", name: "Chope Promos" },
-  { id: "whatsnew_nightlife", name: "What's New – Nightlife" },
-  { id: "whatsnew_events", name: "What's New – Events" },
-  { id: "matalelaki", name: "MataLelaki" },
-  { id: "jakarta100bars", name: "Jakarta100bars" },
-  { id: "foodies_id", name: "FoodieS" },
-  { id: "jpc_events", name: "Jakarta Party Club" },
-  { id: "socialexpat", name: "Social Expat" },
+  { id: "indoparty", name: "IndoParty", dbName: "IndoParty" },
+  { id: "tan_delulu", name: "TAN – Delulu", dbName: "TAN Group – Delulu" },
+  { id: "vault", name: "Vault", dbName: "Vault Jakarta" },
+  { id: "hop", name: "See You at the Hop", dbName: "See You at the Hop" },
+  { id: "pats", name: "Pat's X", dbName: "Pat's X (Jakarta Party Club)" },
+  { id: "chope_promos", name: "Chope Promos", dbName: "Chope – Free Flow & Happy Hour" },
+  { id: "whatsnew_nightlife", name: "What's New – Nightlife", dbName: "What's New Indonesia – Nightlife" },
+  { id: "whatsnew_events", name: "What's New – Events", dbName: "What's New Indonesia – Events" },
+  { id: "matalelaki", name: "MataLelaki", dbName: "MataLelaki Events" },
+  { id: "jakarta100bars", name: "Jakarta100bars", dbName: "Jakarta100bars" },
+  { id: "foodies_id", name: "FoodieS", dbName: "FoodieS Indonesia – Cocktails" },
+  { id: "jpc_events", name: "Jakarta Party Club", dbName: "Jakarta Party Club – Events" },
+  { id: "socialexpat", name: "Social Expat", dbName: "Social Expat – Jakarta Events" },
 ];
+
+/** Resolve venue location: reuse an existing venue row, else geocode the name/address. */
+async function resolveLocation(venueName?: string | null, venueAddress?: string | null) {
+  const result: {
+    venue_id?: string;
+    venue_address?: string | null;
+    venue_latitude?: number | null;
+    venue_longitude?: number | null;
+  } = {};
+  if (!venueName) return result;
+
+  const { data: venues } = await supabase
+    .from("venues")
+    .select("id, address, latitude, longitude")
+    .ilike("name", venueName)
+    .limit(1);
+
+  const venue = venues?.[0];
+  if (venue?.latitude && venue?.longitude) {
+    result.venue_id = venue.id;
+    result.venue_address = venue.address ?? venueAddress ?? null;
+    result.venue_latitude = Number(venue.latitude);
+    result.venue_longitude = Number(venue.longitude);
+    return result;
+  }
+  if (venue) result.venue_id = venue.id;
+
+  const query = [venueName, venueAddress].filter(Boolean).join(", ");
+  const features = await searchPlaces(`${query}, Jakarta`);
+  const f = features?.[0];
+  if (f) {
+    const [lng, lat] = f.geometry.coordinates;
+    result.venue_latitude = lat;
+    result.venue_longitude = lng;
+    result.venue_address =
+      venueAddress ||
+      [f.properties.street, f.properties.housenumber, f.properties.city].filter(Boolean).join(" ") ||
+      null;
+  }
+  return result;
+}
 
 type TypeFilter = "all" | "event" | "promo";
 
@@ -41,6 +83,7 @@ export default function ScrapedReview() {
   const [scraping, setScraping] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
 
   const load = async () => {
     setLoading(true);
@@ -62,6 +105,9 @@ export default function ScrapedReview() {
       setIsAdmin(status.is_admin);
     })();
   }, []);
+
+  const toggleSource = (id: string) =>
+    setSelectedSources((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
 
   const runScrape = async (sources?: string[]) => {
     setScraping(true);
@@ -94,6 +140,7 @@ export default function ScrapedReview() {
       time: d.time || "20:00",
       venue_name: d.venue_name || null,
       venue_address: d.venue_address || null,
+      ...(await resolveLocation(d.venue_name, d.venue_address)),
       organizer_name: d.organizer_name || item.source,
       organizer_whatsapp: d.organizer_whatsapp || null,
       price_currency: "IDR",
@@ -117,6 +164,7 @@ export default function ScrapedReview() {
       discount_text: d.discount_text || "See details",
       venue_name: d.venue_name || item.source,
       venue_address: d.venue_address || null,
+      ...(await resolveLocation(d.venue_name, d.venue_address)),
       promo_type: d.promo_type || "Other",
       day_of_week: d.day_of_week || null,
       drink_type: d.drink_type || null,
@@ -132,11 +180,16 @@ export default function ScrapedReview() {
     setItems((prev) => prev.filter((i) => i.id !== item.id));
   };
 
-  const visibleItems = typeFilter === "all" ? items : items.filter((i) => i.item_type === typeFilter);
+  const selectedDbNames = SOURCES.filter((s) => selectedSources.includes(s.id)).map((s) => s.dbName);
+  const sourceFiltered = selectedDbNames.length
+    ? items.filter((i) => selectedDbNames.includes(i.source))
+    : items;
+  const visibleItems =
+    typeFilter === "all" ? sourceFiltered : sourceFiltered.filter((i) => i.item_type === typeFilter);
   const counts = {
-    all: items.length,
-    event: items.filter((i) => i.item_type === "event").length,
-    promo: items.filter((i) => i.item_type === "promo").length,
+    all: sourceFiltered.length,
+    event: sourceFiltered.filter((i) => i.item_type === "event").length,
+    promo: sourceFiltered.filter((i) => i.item_type === "promo").length,
   };
 
   return (
@@ -147,19 +200,40 @@ export default function ScrapedReview() {
           <Button onClick={() => load()} variant="outline" size="sm">
             <RefreshCw className="w-4 h-4 mr-1" /> Reload
           </Button>
-          <Button onClick={() => runScrape()} disabled={scraping}>
+          <Button
+            onClick={() => runScrape(selectedSources.length ? selectedSources : undefined)}
+            disabled={scraping}
+          >
             {scraping ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-1" />}
-            Scrape All
+            {selectedSources.length ? `Scrape Selected (${selectedSources.length})` : "Scrape All"}
           </Button>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {SOURCES.map((s) => (
-          <Button key={s.id} size="sm" variant="outline" disabled={scraping} onClick={() => runScrape([s.id])}>
-            {s.name}
-          </Button>
-        ))}
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-sm text-muted-foreground">Sources:</span>
+          {SOURCES.map((s) => (
+            <Button
+              key={s.id}
+              size="sm"
+              variant={selectedSources.includes(s.id) ? "default" : "outline"}
+              disabled={scraping}
+              onClick={() => toggleSource(s.id)}
+            >
+              {s.name}
+            </Button>
+          ))}
+          {selectedSources.length > 0 && (
+            <Button size="sm" variant="ghost" onClick={() => setSelectedSources([])}>
+              Clear
+            </Button>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Selecting sources filters the list below and limits what gets scraped. Scraping a source replaces its
+          previous pending items.
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
