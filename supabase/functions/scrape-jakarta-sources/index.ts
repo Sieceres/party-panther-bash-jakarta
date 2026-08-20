@@ -75,7 +75,7 @@ async function extractFromText(
         type: "function" as const,
         function: {
           name: "extract_promos",
-          description: "Extract promos from text",
+          description: "Extract recurring DRINK deals (not events) from text",
           parameters: {
             type: "object",
             properties: {
