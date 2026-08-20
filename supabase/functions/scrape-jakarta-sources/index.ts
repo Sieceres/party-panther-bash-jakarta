@@ -75,7 +75,7 @@ async function extractFromText(
         type: "function" as const,
         function: {
           name: "extract_promos",
-          description: "Extract promos from text",
+          description: "Extract recurring DRINK deals (not events) from text",
           parameters: {
             type: "object",
             properties: {
@@ -88,10 +88,10 @@ async function extractFromText(
                     description: { type: "string" },
                     venue_name: { type: "string" },
                     venue_address: { type: "string" },
-                    discount_text: { type: "string" },
-                    promo_type: { type: "string" },
-                    day_of_week: { type: "array", items: { type: "string" } },
-                    drink_type: { type: "array", items: { type: "string" } },
+                    discount_text: { type: "string", description: "The concrete drink offer, e.g. 'Buy 1 Get 1 cocktails' or 'Beer bucket 5 for 200k'" },
+                    promo_type: { type: "string", enum: ["Happy Hour", "Ladies Night", "Free Flow", "Bottle Promo", "Beer Deal", "Other"] },
+                    day_of_week: { type: "array", items: { type: "string", enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] } },
+                    drink_type: { type: "array", items: { type: "string", enum: ["Beer", "Wine", "Cocktail", "Spirits", "Non-Alcoholic", "Mixed"] } },
                   },
                   required: ["title", "venue_name", "discount_text"],
                 },
@@ -105,7 +105,14 @@ async function extractFromText(
   const currentYear = new Date().getUTCFullYear();
   const sys = type === "event"
     ? `Extract upcoming events in Jakarta from this content. Be thorough but skip generic boilerplate. If a date shows day/month without year, assume ${currentYear} (or ${currentYear + 1} if already past). 24h time, ISO date.`
-    : `Extract specific recurring promos / happy hours / drink deals from this Jakarta venue content. Skip generic marketing. Each promo+day combo is a separate item.`;
+    : `You extract PROMOS for a Jakarta nightlife app. A promo is strictly a recurring DRINK offer at a venue: happy hour, ladies night, free flow, bottle promo, beer deal / bucket, buy-1-get-1 on drinks, discounted drink pricing.
+
+STRICT RULES:
+- NEVER return one-off events, parties, DJ line-ups, concerts, guest sets, festivals, holiday parties or anything tied to a single calendar date. Those are events, not promos.
+- If an item has a specific single date, an artist/DJ name, a ticket price, or a line-up, SKIP it.
+- Only include an item if it names a concrete drink deal with drinks and a price/discount. No food-only deals, no generic "great vibes" marketing, no venue descriptions.
+- Each promo + day combination is a separate item. Use the recurring weekdays it runs on.
+- If the content contains no qualifying drink deals, return an empty items array.`;
 
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -129,10 +136,32 @@ async function extractFromText(
   if (!call) return [];
   try {
     const parsed = JSON.parse(call.function.arguments);
-    return parsed.items || [];
+    const items = parsed.items || [];
+    return type === "promo" ? items.filter(isDrinkPromo) : items;
   } catch {
     return [];
   }
+}
+
+const DRINK_WORDS =
+  /\b(drink|beer|bir|wine|cocktail|spirit|whisk|vodka|gin|rum|tequila|sake|soju|shot|bucket|bottle|pint|jug|tower|happy\s*hour|free\s*flow|ladies?\s*night|mocktail|margarita|mojito|highball|prosecco|champagne|sangria)\b/i;
+const DEAL_WORDS =
+  /(\bb[1o]g[1o]\b|buy\s*\d+\s*get\s*\d+|\d+\s*%|half\s*price|free\s*flow|happy\s*hour|ladies?\s*night|discount|promo|\bidr\b|\brp\b|\d+\s*k\b|\bfor\s*\d)/i;
+const EVENTY_WORDS =
+  /\b(dj|line[- ]?up|lineup|guest\s*set|live\s*(band|music|show)|concert|festival|tickets?|presents|b2b|showcase|nye|new\s*year'?s\s*eve|anniversary\s*party|halloween|countdown)\b/i;
+const SINGLE_DATE =
+  /\b(\d{4}-\d{2}-\d{2}|\d{1,2}(st|nd|rd|th)?\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*\d{1,2})\b/i;
+
+/** Keep only recurring drink deals; drop one-off events the model mislabeled as promos. */
+function isDrinkPromo(it: any): boolean {
+  const text = [it?.title, it?.discount_text, it?.description].filter(Boolean).join(" ");
+  if (!text.trim()) return false;
+  if (!DRINK_WORDS.test(text)) return false;
+  if (!DEAL_WORDS.test(text)) return false;
+  const hasRecurringDays = Array.isArray(it?.day_of_week) && it.day_of_week.length > 0;
+  if (EVENTY_WORDS.test(text)) return false;
+  if (SINGLE_DATE.test(text) && !hasRecurringDays) return false;
+  return true;
 }
 
 serve(async (req) => {
