@@ -207,6 +207,14 @@ serve(async (req) => {
         continue;
       }
 
+      // Reset: drop previous pending items for this source so re-scraping doesn't duplicate
+      const { error: delErr } = await admin
+        .from("pending_scraped_items")
+        .delete()
+        .eq("source", src.name)
+        .eq("status", "pending");
+      if (delErr) console.error("Reset failed", src.name, delErr);
+
       const types: ("event" | "promo")[] = src.type === "both" ? ["event", "promo"] : [src.type];
       let inserted = 0;
       for (const t of types) {
