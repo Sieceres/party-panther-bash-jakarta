@@ -19,6 +19,14 @@ const SOURCES: SourceDef[] = [
   { id: "vault", name: "Vault Jakarta", url: "https://vault-jakarta.com/", type: "event" },
   { id: "hop", name: "See You at the Hop", url: "https://seeyouatthehop.com/programme", type: "both" },
   { id: "pats", name: "Pat's X (Jakarta Party Club)", url: "https://jakartapartyclub.com/nightclub/pats-x/", type: "event" },
+  { id: "chope_promos", name: "Chope – Free Flow & Happy Hour", url: "https://www.chope.co/jakarta-restaurants/pages/free-flow-other-offers-alcohol-bars-nightlife-jakarta?lang=en_US", type: "promo" },
+  { id: "whatsnew_nightlife", name: "What's New Indonesia – Nightlife", url: "https://whatsnewindonesia.com/jakarta/nightlife", type: "both" },
+  { id: "whatsnew_events", name: "What's New Indonesia – Events", url: "https://whatsnewindonesia.com/jakarta/event", type: "event" },
+  { id: "matalelaki", name: "MataLelaki Events", url: "https://matalelaki.com/event", type: "event" },
+  { id: "jakarta100bars", name: "Jakarta100bars", url: "https://www.jakarta100bars.com/", type: "both" },
+  { id: "foodies_id", name: "FoodieS Indonesia – Cocktails", url: "https://foodies.id/category/cocktails/", type: "both" },
+  { id: "jpc_events", name: "Jakarta Party Club – Events", url: "https://jakartapartyclub.com/events/", type: "event" },
+  { id: "socialexpat", name: "Social Expat – Jakarta Events", url: "https://www.socialexpat.net/events/", type: "event" },
 ];
 
 async function firecrawlScrape(url: string, apiKey: string): Promise<string | null> {
