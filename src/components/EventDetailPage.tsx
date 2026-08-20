@@ -551,37 +551,28 @@ export const EventDetailPage = () => {
         .select("id, comment, created_at, updated_at, user_id")
         .single();
 
-      if (data && !error) {
-        // Fetch profile for the new comment
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("user_id, display_name, avatar_url")
-          .eq("user_id", user.id)
-          .single();
-
-        const commentWithProfile = {
-          ...data,
-          profiles: profileData || null,
-        };
-
-        setComments([commentWithProfile, ...comments]);
-        setNewComment("");
-        setLastCommentTime(now);
-        toast({
-          title: "Comment added!",
-          description: "Your comment has been posted.",
-        });
-      }
-
       if (error) throw error;
 
-      setComments([...comments, data]);
+      // Fetch profile for the new comment
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url")
+        .eq("user_id", user.id)
+        .single();
+
+      const commentWithProfile = {
+        ...data,
+        profiles: profileData || null,
+      };
+
+      setComments([commentWithProfile, ...comments]);
       setNewComment("");
       setLastCommentTime(now);
       toast({
         title: "Comment added!",
         description: "Your comment has been posted.",
       });
+
     } catch (error) {
       console.error("Error adding comment:", error);
       toast({
