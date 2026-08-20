@@ -732,6 +732,7 @@ export const EventDetailPage = () => {
   const isOwner = user && user.id === event?.created_by;
   const isCoOrganizer = user && attendees.some((a) => a.user_id === user.id && a.is_co_organizer);
   const canDelete = isOwner || isAdmin;
+  const currentAttendee = user ? attendees.find((a) => a.user_id === user.id) : null;
 
   // Helper functions for pagination
   const displayedAttendees = showAllAttendees ? attendees : attendees.slice(0, 10);
@@ -1053,7 +1054,7 @@ export const EventDetailPage = () => {
                 </div>
               )}
 
-              {/* Event Details */}
+              {/* Event Description */}
               <Card>
                 <CardContent className="space-y-4 p-4 sm:p-5 md:p-6 pt-6">
                   <div className="text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
@@ -1067,81 +1068,220 @@ export const EventDetailPage = () => {
                       {event.description}
                     </Linkify>
                   </div>
+                </CardContent>
+              </Card>
 
-                  {event?.instagram_post_url && <InstagramEmbed postUrl={event.instagram_post_url} maxWidth={540} />}
+              {/* Event Actions */}
+              <Card>
+                <CardHeader className="p-4 sm:p-5 md:p-6 pb-0">
+                  <CardTitle className="text-lg sm:text-xl">Event Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 p-4 sm:p-5 md:p-6">
+                  {user && isRemovedFromEvent && !hasJoined && (
+                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+                      You have been removed from this event and cannot rejoin.
+                    </div>
+                  )}
+                  {user && !hasJoined && !isRemovedFromEvent && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Switch checked={joinAnonymously} onCheckedChange={setJoinAnonymously} />
+                        <div className="flex items-center gap-1.5">
+                          <EyeOff className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">Join anonymously</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs text-xs leading-relaxed">
+                                Attending an event creates engagement and might convince others to go too. However, you might not always want other users to see that you are attending, so you have the option to attend anonymously. To prevent abuse, Party Panther Admins will still be able to see anonymous attendees.
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </div>
+                      <Button variant="cta" onClick={handleJoinEvent} disabled={joiningEvent} className="w-full">
+                        {joiningEvent ? "Joining..." : "Join Event"}
+                      </Button>
+                    </div>
+                  )}
+                  {user && hasJoined && (
+                    <Button
+                      variant="outline"
+                      onClick={handleUnjoinEvent}
+                      disabled={leavingEvent}
+                      className="w-full border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-white"
+                    >
+                      {leavingEvent ? "Leaving..." : "✓ Joined - Click to Leave"}
+                    </Button>
+                  )}
+                  {!user && (
+                    <Button variant="cta" onClick={() => navigate("/auth")} className="w-full">
+                      Join Event
+                    </Button>
+                  )}
 
-                  {eventTags.length > 0 && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      const shareUrl = getEventShareUrl(event);
+                      navigator.clipboard.writeText(shareUrl);
+                      toast({
+                        title: "Link Copied!",
+                        description: "Event link copied to clipboard.",
+                      });
+                    }}
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share Event
+                  </Button>
+
+                  {(isOwner || isAdmin) && (
                     <>
-                      <Separator />
-                      <EventTags tags={eventTags} variant="full" />
+                      <Button variant="outline" className="w-full" onClick={handleEdit}>
+                        <Edit2 className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" className="w-full" disabled={isDeleting}>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            {isDeleting ? "Deleting..." : "Delete"}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this event? This action cannot be undone and will remove
+                              all associated data including attendees and comments.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={handleDelete}
+                              className="bg-destructive hover:bg-destructive/90"
+                              disabled={isDeleting}
+                            >
+                              {isDeleting ? "Deleting..." : "Delete Event"}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </>
                   )}
 
+                  <ReportDialog type="event" targetId={event.id} targetTitle={event.title} />
+                </CardContent>
+              </Card>
+
+              {/* Payment Info */}
+              {currentAttendee && event.track_payments && (
+                <Card>
+                  <CardHeader className="p-4 sm:p-5 md:p-6 pb-0">
+                    <CardTitle className="text-lg sm:text-xl">Payment</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 sm:p-5 md:p-6">
+                    <EventPaymentInfo
+                      eventId={event.id}
+                      userId={user.id}
+                      paymentInfo={event.payment_info}
+                      paymentMethods={(event as any).payment_methods}
+                      paymentQrUrl={(event as any).payment_qr_url}
+                      attendeeId={currentAttendee.id}
+                      paymentStatus={currentAttendee.payment_status}
+                      paymentClaimedAt={currentAttendee.payment_claimed_at}
+                      receiptUrl={currentAttendee.receipt_url}
+                      onClaimed={() => handlePaymentClaimed(currentAttendee.id)}
+                      onReceiptUploaded={(receiptUrl) => handleReceiptUploaded(currentAttendee.id, receiptUrl)}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Organizer, Venue & Location */}
+              <Card>
+                <CardContent className="space-y-4 p-4 sm:p-5 md:p-6 pt-6">
+                  <div className="space-y-2">
+                    <h4 className="text-base sm:text-lg font-semibold">Organizer</h4>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <UserIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <span className="text-sm sm:text-base">{event.organizer_name || creatorProfile?.display_name || "Anonymous"}</span>
+                      {creatorProfile?.venue_status === "verified" && (
+                        <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                          <BadgeCheck className="w-3 h-3" />
+                          Verified Venue
+                        </Badge>
+                      )}
+                      {event.organizer_whatsapp && user && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleContactOrganizer}
+                          className="text-xs sm:text-sm"
+                        >
+                          Contact
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
                   <Separator />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <h4 className="text-base sm:text-lg font-semibold">Venue</h4>
-                      <div className="flex items-start gap-2">
-                        <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
-                        <div className="min-w-0">
-                          {venueSlug ? (
-                            <Link to={`/venue/${venueSlug}`} className="text-sm sm:text-base font-medium text-primary hover:underline">
-                              {event.venue_name}
-                            </Link>
-                          ) : (
-                            <p className="text-sm sm:text-base font-medium">{event.venue_name}</p>
-                          )}
-                          <p className="text-xs sm:text-sm text-muted-foreground">
-                            {displayVenueAddress}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <h4 className="text-base sm:text-lg font-semibold">Organizer</h4>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <UserIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <span className="text-sm sm:text-base">{event.organizer_name || creatorProfile?.display_name || "Anonymous"}</span>
-                        {creatorProfile?.venue_status === "verified" && (
-                          <Badge variant="secondary" className="text-xs flex items-center gap-1">
-                            <BadgeCheck className="w-3 h-3" />
-                            Verified Venue
-                          </Badge>
+                  <div className="space-y-2">
+                    <h4 className="text-base sm:text-lg font-semibold">Venue</h4>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0">
+                        {venueSlug ? (
+                          <Link to={`/venue/${venueSlug}`} className="text-sm sm:text-base font-medium text-primary hover:underline">
+                            {event.venue_name}
+                          </Link>
+                        ) : (
+                          <p className="text-sm sm:text-base font-medium">{event.venue_name}</p>
                         )}
-                        {event.organizer_whatsapp && user && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleContactOrganizer}
-                            className="text-xs sm:text-sm"
-                          >
-                            Contact
-                          </Button>
-                        )}
+                        <p className="text-xs sm:text-sm text-muted-foreground">
+                          {displayVenueAddress}
+                        </p>
                       </div>
                     </div>
                   </div>
 
                   {displayVenueAddress && (
-                    <div className="space-y-2">
-                      <h4 className="text-base sm:text-lg font-semibold">Location</h4>
-                      <div className="overflow-hidden rounded-lg">
-                        <iframe
-                          width="100%"
-                          height="300"
-                          className="border-0"
-                          loading="lazy"
-                          referrerPolicy="no-referrer-when-downgrade"
-                          src={`https://maps.google.com/maps?q=${encodeURIComponent(displayVenueAddress)}&output=embed`}
-                          title={`${event.venue_name} location`}
-                        />
+                    <>
+                      <Separator />
+                      <div className="space-y-2">
+                        <h4 className="text-base sm:text-lg font-semibold">Location</h4>
+                        <div className="overflow-hidden rounded-lg">
+                          <iframe
+                            width="100%"
+                            height="300"
+                            className="border-0"
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            src={`https://maps.google.com/maps?q=${encodeURIComponent(displayVenueAddress)}&output=embed`}
+                            title={`${event.venue_name} location`}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    </>
                   )}
                 </CardContent>
               </Card>
+
+              {/* Instagram & Tags */}
+              {(event?.instagram_post_url || eventTags.length > 0) && (
+                <Card>
+                  <CardContent className="space-y-4 p-4 sm:p-5 md:p-6 pt-6">
+                    {event?.instagram_post_url && <InstagramEmbed postUrl={event.instagram_post_url} maxWidth={540} />}
+                    {eventTags.length > 0 && <EventTags tags={eventTags} variant="full" />}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Check-In Section */}
               {event.enable_check_in && (
@@ -1259,22 +1399,6 @@ export const EventDetailPage = () => {
                             </Badge>
                           )}
 
-                          {/* Payment info + "I have paid" - show for the user themselves when payment tracking is enabled */}
-                          {user && attendee.user_id === user.id && event.track_payments && (
-                            <EventPaymentInfo
-                              eventId={event.id}
-                              userId={user.id}
-                              paymentInfo={event.payment_info}
-                              paymentMethods={(event as any).payment_methods}
-                              paymentQrUrl={(event as any).payment_qr_url}
-                              attendeeId={attendee.id}
-                              paymentStatus={attendee.payment_status}
-                              paymentClaimedAt={attendee.payment_claimed_at}
-                              receiptUrl={attendee.receipt_url}
-                              onClaimed={() => handlePaymentClaimed(attendee.id)}
-                              onReceiptUploaded={(receiptUrl) => handleReceiptUploaded(attendee.id, receiptUrl)}
-                            />
-                          )}
 
                           {/* Edit Note - show for the user themselves */}
                           {user && attendee.user_id === user.id && (
@@ -1483,113 +1607,6 @@ export const EventDetailPage = () => {
 
             {/* Sidebar */}
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Event Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {user && isRemovedFromEvent && !hasJoined && (
-                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
-                      You have been removed from this event and cannot rejoin.
-                    </div>
-                  )}
-                  {user && !hasJoined && !isRemovedFromEvent && (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Switch checked={joinAnonymously} onCheckedChange={setJoinAnonymously} />
-                        <div className="flex items-center gap-1.5">
-                          <EyeOff className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">Join anonymously</span>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <HelpCircle className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
-                              </TooltipTrigger>
-                              <TooltipContent className="max-w-xs text-xs leading-relaxed">
-                                Attending an event creates engagement and might convince others to go too. However, you might not always want other users to see that you are attending, so you have the option to attend anonymously. To prevent abuse, Party Panther Admins will still be able to see anonymous attendees.
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      </div>
-                      <Button variant="cta" onClick={handleJoinEvent} disabled={joiningEvent} className="w-full">
-                        {joiningEvent ? "Joining..." : "Join Event"}
-                      </Button>
-                    </div>
-                  )}
-                  {user && hasJoined && (
-                    <Button
-                      variant="outline"
-                      onClick={handleUnjoinEvent}
-                      disabled={leavingEvent}
-                      className="w-full border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-white"
-                    >
-                      {leavingEvent ? "Leaving..." : "✓ Joined - Click to Leave"}
-                    </Button>
-                  )}
-                  {!user && (
-                    <Button variant="cta" onClick={() => navigate("/auth")} className="w-full">
-                      Join Event
-                    </Button>
-                  )}
-
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      const shareUrl = getEventShareUrl(event);
-                      navigator.clipboard.writeText(shareUrl);
-                      toast({
-                        title: "Link Copied!",
-                        description: "Event link copied to clipboard.",
-                      });
-                    }}
-                  >
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share Event
-                  </Button>
-
-                  {(isOwner || isAdmin) && (
-                    <>
-                      <Button variant="outline" className="w-full" onClick={handleEdit}>
-                        <Edit2 className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
-
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" className="w-full" disabled={isDeleting}>
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            {isDeleting ? "Deleting..." : "Delete"}
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Event</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete this event? This action cannot be undone and will remove
-                              all associated data including attendees and comments.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={handleDelete}
-                              className="bg-destructive hover:bg-destructive/90"
-                              disabled={isDeleting}
-                            >
-                              {isDeleting ? "Deleting..." : "Delete Event"}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </>
-                  )}
-
-                  <ReportDialog type="event" targetId={event.id} targetTitle={event.title} />
-                </CardContent>
-              </Card>
-
               {/* Invite Codes Management - only for organizers of private events */}
               {(isOwner || isCoOrganizer) && event.access_level !== "public" && (
                 <EventInviteCodes eventId={event.id} eventDate={event.date} eventTime={event.time} />
