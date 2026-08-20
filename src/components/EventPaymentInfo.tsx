@@ -151,12 +151,27 @@ export const EventPaymentInfo = ({
                 currentReceiptUrl={receiptUrl || undefined}
                 onReceiptUploaded={onReceiptUploaded}
               />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleUnmarkPaid}
+                disabled={saving || cooldown}
+                className="w-full"
+              >
+                {saving ? "Saving..." : cooldown ? "Please wait a moment..." : "I haven't paid yet"}
+              </Button>
             </div>
           ) : (
-            <Button onClick={handleMarkPaid} disabled={saving} className="w-full">
-              {saving ? "Saving..." : "I have paid"}
-            </Button>
+            <div className="space-y-2">
+              <Button onClick={handleMarkPaid} disabled={saving || cooldown} className="w-full">
+                {saving ? "Saving..." : cooldown ? "Please wait a moment..." : "I have paid"}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                You can change this a limited number of times.
+              </p>
+            </div>
           )}
+
         </div>
       </DialogContent>
 
