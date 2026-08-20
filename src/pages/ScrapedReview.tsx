@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, RefreshCw, Check, X, ExternalLink, Edit } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Loader2, RefreshCw, Check, X, ExternalLink } from "lucide-react";
+import { checkUserAdminStatus } from "@/lib/auth-helpers";
 
 type ScrapedItem = {
   id: string;
@@ -23,14 +23,16 @@ const SOURCES = [
   { id: "vault", name: "Vault" },
   { id: "hop", name: "See You at the Hop" },
   { id: "pats", name: "Pat's X" },
-  { id: "t5", name: "Classic T5" },
 ];
+
+type TypeFilter = "all" | "event" | "promo";
 
 export default function ScrapedReview() {
   const [items, setItems] = useState<ScrapedItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [scraping, setScraping] = useState(false);
-  const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
 
   const load = async () => {
     setLoading(true);
@@ -44,7 +46,14 @@ export default function ScrapedReview() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      const status = await checkUserAdminStatus(data.user?.id);
+      setIsAdmin(status.is_admin);
+    })();
+  }, []);
 
   const runScrape = async (sources?: string[]) => {
     setScraping(true);
@@ -115,6 +124,13 @@ export default function ScrapedReview() {
     setItems((prev) => prev.filter((i) => i.id !== item.id));
   };
 
+  const visibleItems = typeFilter === "all" ? items : items.filter((i) => i.item_type === typeFilter);
+  const counts = {
+    all: items.length,
+    event: items.filter((i) => i.item_type === "event").length,
+    promo: items.filter((i) => i.item_type === "promo").length,
+  };
+
   return (
     <div className="container mx-auto p-4 space-y-4 max-w-5xl">
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -138,14 +154,34 @@ export default function ScrapedReview() {
         ))}
       </div>
 
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="text-sm text-muted-foreground">Filter:</span>
+        {(["all", "event", "promo"] as TypeFilter[]).map((t) => (
+          <Button
+            key={t}
+            size="sm"
+            variant={typeFilter === t ? "default" : "outline"}
+            onClick={() => setTypeFilter(t)}
+          >
+            {t === "all" ? "All" : t === "event" ? "Events" : "Promos"} ({counts[t]})
+          </Button>
+        ))}
+      </div>
+
+      {!isAdmin && (
+        <p className="text-sm text-muted-foreground">
+          You are viewing in read-only mode. Sign in as an admin to approve or reject items.
+        </p>
+      )}
+
       {loading && <Loader2 className="w-6 h-6 animate-spin" />}
 
-      {!loading && items.length === 0 && (
+      {!loading && visibleItems.length === 0 && (
         <Card><CardContent className="py-8 text-center text-muted-foreground">No pending items. Try scraping.</CardContent></Card>
       )}
 
       <div className="space-y-3">
-        {items.map((item) => {
+        {visibleItems.map((item) => {
           const d = item.raw_data || {};
           return (
             <Card key={item.id}>
@@ -173,14 +209,16 @@ export default function ScrapedReview() {
                   {d.day_of_week?.length > 0 && <div><b>Days:</b> {d.day_of_week.join(", ")}</div>}
                   {d.description && <div className="text-muted-foreground line-clamp-3">{d.description}</div>}
                 </div>
-                <div className="flex gap-2 pt-2">
-                  <Button size="sm" onClick={() => item.item_type === "event" ? approveEvent(item) : approvePromo(item)}>
-                    <Check className="w-4 h-4 mr-1" /> Approve
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => reject(item.id)}>
-                    <X className="w-4 h-4 mr-1" /> Reject
-                  </Button>
-                </div>
+                {isAdmin && (
+                  <div className="flex gap-2 pt-2">
+                    <Button size="sm" onClick={() => item.item_type === "event" ? approveEvent(item) : approvePromo(item)}>
+                      <Check className="w-4 h-4 mr-1" /> Approve
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => reject(item.id)}>
+                      <X className="w-4 h-4 mr-1" /> Reject
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           );

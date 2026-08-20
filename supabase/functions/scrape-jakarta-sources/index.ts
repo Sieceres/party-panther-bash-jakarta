@@ -19,7 +19,6 @@ const SOURCES: SourceDef[] = [
   { id: "vault", name: "Vault Jakarta", url: "https://vault-jakarta.com/", type: "event" },
   { id: "hop", name: "See You at the Hop", url: "https://seeyouatthehop.com/programme", type: "both" },
   { id: "pats", name: "Pat's X (Jakarta Party Club)", url: "https://jakartapartyclub.com/nightclub/pats-x/", type: "event" },
-  { id: "t5", name: "Classic Hotel T5", url: "https://classichoteljakarta.com/T5/", type: "event" },
 ];
 
 async function firecrawlScrape(url: string, apiKey: string): Promise<string | null> {
@@ -140,23 +139,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    // Open for testing: no auth required to run a scrape.
+    // Approving scraped items still requires admin (enforced by RLS).
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-
-    const { data: isAdmin } = await supabase.rpc("is_current_user_admin");
-    if (!isAdmin) {
-      return new Response(JSON.stringify({ error: "Admin only" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
 
     const body = await req.json().catch(() => ({}));
     const requested: string[] | undefined = body?.sources;
