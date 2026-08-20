@@ -23,6 +23,14 @@ const SOURCES = [
   { id: "vault", name: "Vault" },
   { id: "hop", name: "See You at the Hop" },
   { id: "pats", name: "Pat's X" },
+  { id: "chope_promos", name: "Chope Promos" },
+  { id: "whatsnew_nightlife", name: "What's New – Nightlife" },
+  { id: "whatsnew_events", name: "What's New – Events" },
+  { id: "matalelaki", name: "MataLelaki" },
+  { id: "jakarta100bars", name: "Jakarta100bars" },
+  { id: "foodies_id", name: "FoodieS" },
+  { id: "jpc_events", name: "Jakarta Party Club" },
+  { id: "socialexpat", name: "Social Expat" },
 ];
 
 type TypeFilter = "all" | "event" | "promo";
