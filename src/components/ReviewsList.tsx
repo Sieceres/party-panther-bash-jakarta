@@ -56,11 +56,8 @@ export const ReviewsList = ({ promoId, venueOwnerId, onReviewsChange }: ReviewsL
 
   const fetchReviews = useCallback(async () => {
     try {
-      const { data: reviewsData, error: reviewsError } = await supabase
-        .from('promo_reviews')
-        .select('*')
-        .eq('promo_id', promoId)
-        .order('created_at', { ascending: false });
+      const { data: reviewsData, error: reviewsError } = await (supabase as any)
+        .rpc('get_promo_reviews', { p_promo_id: promoId });
 
       if (reviewsError) throw reviewsError;
 
