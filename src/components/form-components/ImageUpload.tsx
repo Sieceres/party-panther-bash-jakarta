@@ -5,7 +5,7 @@ import { Upload, Loader2, Sparkles } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { uploadImage, UploadProgress } from "@/lib/supabase-storage";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 

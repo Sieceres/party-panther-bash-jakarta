@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Search, Star, Users, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { TemplateCard } from "./TemplateCard";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { STARTER_TEMPLATES } from "@/lib/starter-templates";
 import type { PostContent } from "@/types/instagram-post";
 

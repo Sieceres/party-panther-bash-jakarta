@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, Upload, FileText, Loader2, ChevronDown, ChevronUp, Pencil } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ExtractedPromo {
