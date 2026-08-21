@@ -48,11 +48,14 @@ export const EventPaymentInfo = ({
   const handleMarkPaid = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("event_attendees")
         .update({ payment_claimed_at: new Date().toISOString() })
-        .eq("id", attendeeId);
+        .eq("id", attendeeId)
+        .select("id");
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error("Update blocked");
+
       onClaimed();
       startCooldown();
       toast({
@@ -70,11 +73,14 @@ export const EventPaymentInfo = ({
   const handleUnmarkPaid = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("event_attendees")
         .update({ payment_claimed_at: null })
-        .eq("id", attendeeId);
+        .eq("id", attendeeId)
+        .select("id");
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error("Update blocked");
+
       onClaimed();
       startCooldown();
       toast({
