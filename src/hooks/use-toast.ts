@@ -13,6 +13,7 @@ type ToasterToast = ToastProps & {
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  duration?: number
 }
 
 const actionTypes = {
@@ -139,8 +140,14 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
-function toast({ ...props }: Toast) {
+const DEFAULT_DURATION = 5000
+const ERROR_DURATION = 10000
+
+function toast({ duration: durationProp, ...props }: Toast) {
   const id = genId()
+  const duration =
+    durationProp ??
+    (props.variant === "destructive" ? ERROR_DURATION : DEFAULT_DURATION)
 
   const update = (props: ToasterToast) =>
     dispatch({
@@ -154,6 +161,7 @@ function toast({ ...props }: Toast) {
     toast: {
       ...props,
       id,
+      duration,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
