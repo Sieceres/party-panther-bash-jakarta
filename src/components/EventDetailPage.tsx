@@ -178,11 +178,10 @@ export const EventDetailPage = () => {
         setTotalAttendees(eventData.attendee_count || 0);
 
         // Fetch creator profile
-        const { data: creatorProfileData } = await supabase
-          .from("profiles")
-          .select("user_id, display_name, avatar_url, is_verified, venue_status, business_name")
-          .eq("user_id", eventData.created_by)
-          .single();
+        const { data: creatorProfiles } = await (supabase as any).rpc("get_public_profiles", {
+          _user_ids: [eventData.created_by],
+        });
+        const creatorProfileData = (creatorProfiles as any[])?.[0] || null;
 
         setCreatorProfile(creatorProfileData);
 
@@ -196,10 +195,9 @@ export const EventDetailPage = () => {
         if (commentsData && !commentsError) {
           // Fetch profiles for comment authors
           const userIds = [...new Set(commentsData.map((comment) => comment.user_id))];
-          const { data: profilesData } = await supabase
-            .from("profiles")
-            .select("user_id, display_name, avatar_url, is_verified")
-            .in("user_id", userIds);
+          const { data: profilesData } = await (supabase as any).rpc("get_public_profiles", {
+            _user_ids: userIds,
+          });
 
           // Join comments with profiles
           const commentsWithProfiles = commentsData.map((comment) => ({
@@ -222,10 +220,9 @@ export const EventDetailPage = () => {
         if (attendeesData && !attendeesError) {
           // Fetch profiles for attendees
           const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
-          const { data: profilesData } = await supabase
-            .from("profiles")
-            .select("user_id, display_name, avatar_url, is_verified")
-            .in("user_id", userIds);
+          const { data: profilesData } = await (supabase as any).rpc("get_public_profiles", {
+            _user_ids: userIds,
+          });
 
           // Join attendees with profiles
           const attendeesWithProfiles = attendeesData.map((attendee) => ({
@@ -340,10 +337,9 @@ export const EventDetailPage = () => {
       if (attendeesData) {
         // Fetch profiles for attendees
         const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
-        const { data: profilesData } = await supabase
-          .from("profiles")
-          .select("user_id, display_name, avatar_url, is_verified")
-          .in("user_id", userIds);
+        const { data: profilesData } = await (supabase as any).rpc("get_public_profiles", {
+          _user_ids: userIds,
+        });
 
         // Join attendees with profiles
         const attendeesWithProfiles = attendeesData.map((attendee) => ({
@@ -409,10 +405,9 @@ export const EventDetailPage = () => {
 
           if (attendeesData) {
             const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
-            const { data: profilesData } = await supabase
-              .from("profiles")
-              .select("user_id, display_name, avatar_url, is_verified")
-              .in("user_id", userIds);
+            const { data: profilesData } = await (supabase as any).rpc("get_public_profiles", {
+              _user_ids: userIds,
+            });
 
             const attendeesWithProfiles = attendeesData.map((attendee) => ({
               ...attendee,
@@ -464,10 +459,9 @@ export const EventDetailPage = () => {
       if (attendeesData) {
         // Fetch profiles for attendees
         const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
-        const { data: profilesData } = await supabase
-          .from("profiles")
-          .select("user_id, display_name, avatar_url, is_verified")
-          .in("user_id", userIds);
+        const { data: profilesData } = await (supabase as any).rpc("get_public_profiles", {
+          _user_ids: userIds,
+        });
 
         // Join attendees with profiles
         const attendeesWithProfiles = attendeesData.map((attendee) => ({
@@ -899,10 +893,9 @@ export const EventDetailPage = () => {
 
     if (attendeesData) {
       const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select("user_id, display_name, avatar_url, is_verified")
-        .in("user_id", userIds);
+      const { data: profilesData } = await (supabase as any).rpc("get_public_profiles", {
+        _user_ids: userIds,
+      });
 
       const attendeesWithProfiles = attendeesData.map((attendee) => ({
         ...attendee,
