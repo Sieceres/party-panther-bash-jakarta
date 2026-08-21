@@ -61,6 +61,7 @@ const App = () => (
       <BrowserRouter>
         <ScrollToTop />
         <AuthRedirectTracker />
+        <RecoveryLinkRedirect />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/events" element={<Index initialSection="events" />} />
