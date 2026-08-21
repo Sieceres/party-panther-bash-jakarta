@@ -272,6 +272,37 @@ export const EventDetailPage = () => {
 
   // Load Instagram embed script when event has instagram_post_url
 
+  // Refresh the full attendee list using the sanitized RPC (a direct table
+  // query is limited by RLS and would only return the current user's row).
+  const refreshAttendees = async (eventId?: string) => {
+    const targetId = eventId || event?.id;
+    if (!targetId) return;
+
+    const { data: attendeesRaw, error } = await (supabase as any).rpc("get_event_attendees", {
+      _event_id: targetId,
+    });
+    if (error) {
+      console.error("Error refreshing attendees:", error);
+      return;
+    }
+
+    const attendeesData = ((attendeesRaw as any[]) || [])
+      .slice()
+      .sort((a, b) => new Date(b.joined_at || 0).getTime() - new Date(a.joined_at || 0).getTime());
+
+    const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
+    const { data: profilesData } = await (supabase as any).rpc("get_public_profiles", {
+      _user_ids: userIds,
+    });
+
+    setAttendees(
+      attendeesData.map((attendee) => ({
+        ...attendee,
+        profiles: profilesData?.find((profile: any) => profile.user_id === attendee.user_id) || null,
+      })),
+    );
+  };
+
   const handleJoinEvent = async () => {
     if (!user) {
       // Store join intent in localStorage
