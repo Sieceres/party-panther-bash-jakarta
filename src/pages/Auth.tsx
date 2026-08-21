@@ -263,7 +263,7 @@ const Auth = () => {
                     <button
                       type="button"
                       onClick={() => setForgotPasswordOpen(true)}
-                      className="text-sm text-primary hover:underline"
+                      className="text-sm font-medium text-[#00CFFF] hover:text-cyan-300 hover:underline"
                     >
                       Forgot Password?
                     </button>
