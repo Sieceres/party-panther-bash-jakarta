@@ -272,6 +272,37 @@ export const EventDetailPage = () => {
 
   // Load Instagram embed script when event has instagram_post_url
 
+  // Refresh the full attendee list using the sanitized RPC (a direct table
+  // query is limited by RLS and would only return the current user's row).
+  const refreshAttendees = async (eventId?: string) => {
+    const targetId = eventId || event?.id;
+    if (!targetId) return;
+
+    const { data: attendeesRaw, error } = await (supabase as any).rpc("get_event_attendees", {
+      _event_id: targetId,
+    });
+    if (error) {
+      console.error("Error refreshing attendees:", error);
+      return;
+    }
+
+    const attendeesData = ((attendeesRaw as any[]) || [])
+      .slice()
+      .sort((a, b) => new Date(b.joined_at || 0).getTime() - new Date(a.joined_at || 0).getTime());
+
+    const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
+    const { data: profilesData } = await (supabase as any).rpc("get_public_profiles", {
+      _user_ids: userIds,
+    });
+
+    setAttendees(
+      attendeesData.map((attendee) => ({
+        ...attendee,
+        profiles: profilesData?.find((profile: any) => profile.user_id === attendee.user_id) || null,
+      })),
+    );
+  };
+
   const handleJoinEvent = async () => {
     if (!user) {
       // Store join intent in localStorage
@@ -326,28 +357,7 @@ export const EventDetailPage = () => {
       });
 
       // Refresh attendees list
-      const { data: attendeesData } = await supabase
-        .from("event_attendees")
-        .select(
-          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note, is_anonymous, is_co_organizer",
-        )
-        .eq("event_id", event.id)
-        .order("joined_at", { ascending: false });
-
-      if (attendeesData) {
-        // Fetch profiles for attendees
-        const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
-        const { data: profilesData } = await (supabase as any).rpc("get_public_profiles", {
-          _user_ids: userIds,
-        });
-
-        // Join attendees with profiles
-        const attendeesWithProfiles = attendeesData.map((attendee) => ({
-          ...attendee,
-          profiles: profilesData?.find((profile) => profile.user_id === attendee.user_id) || null,
-        }));
-        setAttendees(attendeesWithProfiles);
-      }
+      await refreshAttendees();
     } catch (error) {
       console.error("Error joining event:", error);
       toast({
@@ -395,26 +405,7 @@ export const EventDetailPage = () => {
           });
 
           // Refresh attendees list
-          const { data: attendeesData } = await supabase
-            .from("event_attendees")
-            .select(
-              "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note",
-            )
-            .eq("event_id", event.id)
-            .order("joined_at", { ascending: false });
-
-          if (attendeesData) {
-            const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
-            const { data: profilesData } = await (supabase as any).rpc("get_public_profiles", {
-              _user_ids: userIds,
-            });
-
-            const attendeesWithProfiles = attendeesData.map((attendee) => ({
-              ...attendee,
-              profiles: profilesData?.find((profile) => profile.user_id === attendee.user_id) || null,
-            }));
-            setAttendees(attendeesWithProfiles);
-          }
+          await refreshAttendees();
         } catch (error) {
           console.error("Error auto-joining event:", error);
           toast({
@@ -448,28 +439,7 @@ export const EventDetailPage = () => {
       });
 
       // Refresh attendees list
-      const { data: attendeesData } = await supabase
-        .from("event_attendees")
-        .select(
-          "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note",
-        )
-        .eq("event_id", event.id)
-        .order("joined_at", { ascending: false });
-
-      if (attendeesData) {
-        // Fetch profiles for attendees
-        const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
-        const { data: profilesData } = await (supabase as any).rpc("get_public_profiles", {
-          _user_ids: userIds,
-        });
-
-        // Join attendees with profiles
-        const attendeesWithProfiles = attendeesData.map((attendee) => ({
-          ...attendee,
-          profiles: profilesData?.find((profile) => profile.user_id === attendee.user_id) || null,
-        }));
-        setAttendees(attendeesWithProfiles);
-      }
+      await refreshAttendees();
     } catch (error) {
       console.error("Error leaving event:", error);
       toast({
@@ -883,26 +853,7 @@ export const EventDetailPage = () => {
     // Refresh attendees to show the updated note
     if (!event) return;
 
-    const { data: attendeesData } = await supabase
-      .from("event_attendees")
-      .select(
-        "id, user_id, joined_at, payment_status, payment_date, payment_marked_by, payment_claimed_at, receipt_url, receipt_uploaded_at, note",
-      )
-      .eq("event_id", event.id)
-      .order("joined_at", { ascending: false });
-
-    if (attendeesData) {
-      const userIds = [...new Set(attendeesData.map((attendee) => attendee.user_id))];
-      const { data: profilesData } = await (supabase as any).rpc("get_public_profiles", {
-        _user_ids: userIds,
-      });
-
-      const attendeesWithProfiles = attendeesData.map((attendee) => ({
-        ...attendee,
-        profiles: profilesData?.find((profile) => profile.user_id === attendee.user_id) || null,
-      }));
-      setAttendees(attendeesWithProfiles);
-    }
+    await refreshAttendees();
   };
 
   const handleToggleCoOrganizer = async (attendeeId: string, currentStatus: boolean, attendeeName: string) => {
