@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Check, Copy, Link2, Loader2, X } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 const SITE = "partypanther.net/";
 

@@ -14,7 +14,7 @@ import { NEIGHBORHOOD_COORDS, JAKARTA_AREAS } from "@/lib/area-config";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Helmet } from "react-helmet-async";
 import { NearbyPanel } from "@/components/map/NearbyPanel";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 // Fix default marker icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
