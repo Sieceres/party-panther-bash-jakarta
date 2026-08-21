@@ -1874,6 +1874,19 @@ export type Database = {
           whatsapp: string
         }[]
       }
+      get_public_profiles: {
+        Args: { _user_ids: string[] }
+        Returns: {
+          avatar_url: string
+          bio: string
+          business_name: string
+          display_name: string
+          is_verified: boolean
+          profile_type: string
+          user_id: string
+          venue_status: string
+        }[]
+      }
       get_safe_profile_info: {
         Args: { profile_user_id: string }
         Returns: {
