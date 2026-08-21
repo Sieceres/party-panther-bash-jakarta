@@ -7,6 +7,7 @@ import { WhatsAppGroupDialog } from "@/components/WhatsAppGroupDialog";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthRedirectTracker } from "@/components/AuthRedirectTracker";
+import { RecoveryLinkRedirect } from "@/components/RecoveryLinkRedirect";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Index from "./pages/Index";
@@ -61,6 +62,7 @@ const App = () => (
       <BrowserRouter>
         <ScrollToTop />
         <AuthRedirectTracker />
+        <RecoveryLinkRedirect />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/events" element={<Index initialSection="events" />} />
