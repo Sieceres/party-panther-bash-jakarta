@@ -25,11 +25,28 @@ export default async function middleware(request: Request): Promise<Response> {
   const ua = request.headers.get("user-agent") || "";
   const isCrawler = CRAWLER_RE.test(ua);
 
+  // Reserved single-segment app routes that are never event slugs
+  const RESERVED = new Set([
+    "", "auth", "events", "promos", "venues", "map", "admin", "profile", "contact",
+    "about", "privacy", "terms-conditions", "import", "lexium", "lintang",
+    "reset-password", "voucher", "wc", "wce", "esc", "instagram-generator",
+    "robots.txt", "sitemap.xml", "favicon.ico",
+  ]);
+
   // Match /{prefix}/{slug}
   const match = url.pathname.match(/^\/([^\/]+)\/([^\/?#]+)/);
   const prefix = match?.[1]?.toLowerCase();
-  const slug = match?.[2];
-  const type = prefix ? TYPE_MAP[prefix] : null;
+  let slug = match?.[2];
+  let type = prefix ? TYPE_MAP[prefix] : null;
+
+  // Single-segment custom event slugs, e.g. /apc
+  if (!type) {
+    const single = url.pathname.match(/^\/([^\/?#]+)\/?$/)?.[1];
+    if (single && !RESERVED.has(single.toLowerCase()) && !single.includes(".")) {
+      type = "e";
+      slug = single;
+    }
+  }
 
   // 1. Crawler hitting a share URL → return OG HTML from Supabase
   if (isCrawler && type && slug) {
@@ -53,6 +70,7 @@ export default async function middleware(request: Request): Promise<Response> {
       // fall through to origin proxy
     }
   }
+
 
   // 2. Everyone else → transparent proxy to Lovable origin
   const originUrl = `${ORIGIN}${url.pathname}${url.search}`;
