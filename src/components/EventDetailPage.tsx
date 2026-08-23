@@ -17,7 +17,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { MapPin, ArrowLeft, User as UserIcon, Star, Share2, Edit2, Trash2, BadgeCheck, EyeOff, HelpCircle } from "lucide-react";
+import {
+  MapPin,
+  ArrowLeft,
+  User as UserIcon,
+  Star,
+  Share2,
+  Edit2,
+  Trash2,
+  BadgeCheck,
+  EyeOff,
+  HelpCircle,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
@@ -156,12 +167,7 @@ export const EventDetailPage = () => {
         // Check if user has joined this event and if they were removed
         if (user) {
           const [{ data: attendeeData }, { data: removalData }] = await Promise.all([
-            supabase
-              .from("event_attendees")
-              .select("id")
-              .eq("event_id", eventData.id)
-              .eq("user_id", user.id)
-              .single(),
+            supabase.from("event_attendees").select("id").eq("event_id", eventData.id).eq("user_id", user.id).single(),
             supabase
               .from("removed_event_attendees")
               .select("id")
@@ -209,13 +215,12 @@ export const EventDetailPage = () => {
 
         // Fetch attendees via a sanitized function: payment/receipt/note fields are
         // only returned to the attendee themselves, organizers and admins.
-        const { data: attendeesRaw, error: attendeesError } = await (supabase as any).rpc(
-          "get_event_attendees",
-          { _event_id: eventData.id },
-        );
-        const attendeesData = ((attendeesRaw as any[]) || []).slice().sort(
-          (a, b) => new Date(b.joined_at || 0).getTime() - new Date(a.joined_at || 0).getTime(),
-        );
+        const { data: attendeesRaw, error: attendeesError } = await (supabase as any).rpc("get_event_attendees", {
+          _event_id: eventData.id,
+        });
+        const attendeesData = ((attendeesRaw as any[]) || [])
+          .slice()
+          .sort((a, b) => new Date(b.joined_at || 0).getTime() - new Date(a.joined_at || 0).getTime());
 
         if (attendeesData && !attendeesError) {
           // Fetch profiles for attendees
@@ -536,7 +541,6 @@ export const EventDetailPage = () => {
         title: "Comment added!",
         description: "Your comment has been posted.",
       });
-
     } catch (error) {
       console.error("Error adding comment:", error);
       toast({
@@ -553,7 +557,7 @@ export const EventDetailPage = () => {
     // Remove comment and all its replies
     const idsToRemove = new Set<string>([commentId]);
     const findReplies = (parentId: string) => {
-      comments.forEach(c => {
+      comments.forEach((c) => {
         if (c.parent_id === parentId) {
           idsToRemove.add(c.id);
           findReplies(c.id);
@@ -691,7 +695,7 @@ export const EventDetailPage = () => {
 
   // Helper functions for pagination
   const displayedAttendees = showAllAttendees ? attendees : attendees.slice(0, 10);
-  
+
   // Organize comments into a tree structure
   const organizedComments = useMemo(() => {
     const commentMap = new Map<string, Comment & { replies: Comment[] }>();
@@ -713,9 +717,7 @@ export const EventDetailPage = () => {
     });
 
     // Sort root comments by created_at (newest first for display)
-    return rootComments.sort((a, b) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+    return rootComments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }, [comments]);
 
   const displayedComments = showAllComments ? organizedComments : organizedComments.slice(0, 10);
@@ -842,9 +844,7 @@ export const EventDetailPage = () => {
   const handlePaymentClaimed = (attendeeId: string, claimedAt?: string | null) => {
     setAttendees((prev) =>
       prev.map((attendee) =>
-        attendee.id === attendeeId
-          ? { ...attendee, payment_claimed_at: claimedAt ?? null }
-          : attendee,
+        attendee.id === attendeeId ? { ...attendee, payment_claimed_at: claimedAt ?? null } : attendee,
       ),
     );
   };
@@ -934,11 +934,19 @@ export const EventDetailPage = () => {
   return (
     <>
       <Helmet>
-        <title>{event.title} at {event.venue_name} — Jakarta Event | Party Panther</title>
-        <meta name="description" content={`${event.title} at ${event.venue_name}, Jakarta on ${event.date}. ${event.description?.slice(0, 120)}`} />
+        <title>
+          {event.title} at {event.venue_name} — Jakarta Event | Party Panther
+        </title>
+        <meta
+          name="description"
+          content={`${event.title} at ${event.venue_name}, Jakarta on ${event.date}. ${event.description?.slice(0, 120)}`}
+        />
         <meta property="og:title" content={`${event.title} at ${event.venue_name} — Jakarta Event | Party Panther`} />
-        <meta property="og:description" content={`${event.title} at ${event.venue_name}, Jakarta on ${event.date}. ${event.description?.slice(0, 120)}`} />
-        <meta property="og:image" content={event.image_url || 'https://partypanther.net/og-default.jpg'} />
+        <meta
+          property="og:description"
+          content={`${event.title} at ${event.venue_name}, Jakarta on ${event.date}. ${event.description?.slice(0, 120)}`}
+        />
+        <meta property="og:image" content={event.image_url || "https://partypanther.net/og-default-v2.jpg"} />
         <meta property="og:url" content={`https://partypanther.net/event/${event.slug || id}`} />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -981,11 +989,7 @@ export const EventDetailPage = () => {
               {/* Event Image */}
               {event.image_url && (
                 <div className="rounded-lg overflow-hidden bg-muted/40 flex items-center justify-center max-h-[80vh]">
-                  <img
-                    src={event.image_url}
-                    alt={event.title}
-                    className="w-full h-auto max-h-[80vh] object-contain"
-                  />
+                  <img src={event.image_url} alt={event.title} className="w-full h-auto max-h-[80vh] object-contain" />
                 </div>
               )}
 
@@ -1030,7 +1034,10 @@ export const EventDetailPage = () => {
                                 <HelpCircle className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
                               </TooltipTrigger>
                               <TooltipContent className="max-w-xs text-xs leading-relaxed">
-                                Attending an event creates engagement and might convince others to go too. However, you might not always want other users to see that you are attending, so you have the option to attend anonymously. To prevent abuse, Party Panther Admins will still be able to see anonymous attendees.
+                                Attending an event creates engagement and might convince others to go too. However, you
+                                might not always want other users to see that you are attending, so you have the option
+                                to attend anonymously. To prevent abuse, Party Panther Admins will still be able to see
+                                anonymous attendees.
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -1051,7 +1058,6 @@ export const EventDetailPage = () => {
                       {leavingEvent ? "Leaving..." : "✓ Joined - Click to Leave"}
                     </Button>
                   )}
-
 
                   <Button
                     variant="outline"
@@ -1141,7 +1147,9 @@ export const EventDetailPage = () => {
                     <h4 className="text-base sm:text-lg font-semibold">Organizer</h4>
                     <div className="flex items-center gap-2 flex-wrap">
                       <UserIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-sm sm:text-base">{event.organizer_name || creatorProfile?.display_name || "Anonymous"}</span>
+                      <span className="text-sm sm:text-base">
+                        {event.organizer_name || creatorProfile?.display_name || "Anonymous"}
+                      </span>
                       {creatorProfile?.venue_status === "verified" && (
                         <Badge variant="secondary" className="text-xs flex items-center gap-1">
                           <BadgeCheck className="w-3 h-3" />
@@ -1169,15 +1177,16 @@ export const EventDetailPage = () => {
                       <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
                       <div className="min-w-0">
                         {venueSlug ? (
-                          <Link to={`/venue/${venueSlug}`} className="text-sm sm:text-base font-medium text-primary hover:underline">
+                          <Link
+                            to={`/venue/${venueSlug}`}
+                            className="text-sm sm:text-base font-medium text-primary hover:underline"
+                          >
                             {event.venue_name}
                           </Link>
                         ) : (
                           <p className="text-sm sm:text-base font-medium">{event.venue_name}</p>
                         )}
-                        <p className="text-xs sm:text-sm text-muted-foreground">
-                          {displayVenueAddress}
-                        </p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">{displayVenueAddress}</p>
                       </div>
                     </div>
                   </div>
@@ -1252,214 +1261,221 @@ export const EventDetailPage = () => {
                         <Button onClick={() => navigate("/auth")}>Sign in / Sign up</Button>
                       </div>
                     ) : (
-                    <>
-                    {displayedAttendees.map((attendee) => (
-                      <div
-                        key={attendee.id}
-                        className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-                      >
-                      {(() => {
-                        const isAnon = attendee.is_anonymous && !isAdmin && user?.id !== attendee.user_id;
-                        const isOwnAnon = attendee.is_anonymous && user?.id === attendee.user_id;
-                        return (
-                        <div
-                          className={`flex items-center gap-3 min-w-0 ${isAnon ? "" : "cursor-pointer"}`}
-                          onClick={() => !isAnon && handleProfileClick(attendee.user_id)}
-                        >
-                          <Avatar className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0">
-                            {isAnon ? (
-                              <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <EyeOff className="w-4 h-4 text-muted-foreground" />
-                              </div>
-                            ) : (
-                              <AvatarImage src={attendee.profiles?.avatar_url || defaultAvatar} />
-                            )}
-                            <AvatarFallback className="text-xs sm:text-sm">
-                              {isAnon ? "?" : attendee.profiles?.display_name?.[0]?.toUpperCase() || "A"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`text-sm sm:text-base font-medium ${isAnon ? "italic text-muted-foreground" : ""}`}>
-                                {isAnon ? "Anonymous Attendee" : attendee.profiles?.display_name || "Anonymous"}
-                                {isOwnAnon && " (you, anonymous)"}
-                                {isAdmin && attendee.is_anonymous && !isOwnAnon && ` (anon: ${attendee.profiles?.display_name || "Unknown"})`}
-                              </span>
-                              {attendee.payment_status && event.track_payments && (
-                                <span className="text-base sm:text-lg">💰</span>
-                              )}
-                              {!attendee.payment_status && attendee.payment_claimed_at && event.track_payments && (
-                                <Badge variant="outline" className="text-xs border-amber-500 text-amber-600">
-                                  Pending
+                      <>
+                        {displayedAttendees.map((attendee) => (
+                          <div
+                            key={attendee.id}
+                            className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                          >
+                            {(() => {
+                              const isAnon = attendee.is_anonymous && !isAdmin && user?.id !== attendee.user_id;
+                              const isOwnAnon = attendee.is_anonymous && user?.id === attendee.user_id;
+                              return (
+                                <div
+                                  className={`flex items-center gap-3 min-w-0 ${isAnon ? "" : "cursor-pointer"}`}
+                                  onClick={() => !isAnon && handleProfileClick(attendee.user_id)}
+                                >
+                                  <Avatar className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0">
+                                    {isAnon ? (
+                                      <div className="w-full h-full bg-muted flex items-center justify-center">
+                                        <EyeOff className="w-4 h-4 text-muted-foreground" />
+                                      </div>
+                                    ) : (
+                                      <AvatarImage src={attendee.profiles?.avatar_url || defaultAvatar} />
+                                    )}
+                                    <AvatarFallback className="text-xs sm:text-sm">
+                                      {isAnon ? "?" : attendee.profiles?.display_name?.[0]?.toUpperCase() || "A"}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span
+                                        className={`text-sm sm:text-base font-medium ${isAnon ? "italic text-muted-foreground" : ""}`}
+                                      >
+                                        {isAnon ? "Anonymous Attendee" : attendee.profiles?.display_name || "Anonymous"}
+                                        {isOwnAnon && " (you, anonymous)"}
+                                        {isAdmin &&
+                                          attendee.is_anonymous &&
+                                          !isOwnAnon &&
+                                          ` (anon: ${attendee.profiles?.display_name || "Unknown"})`}
+                                      </span>
+                                      {attendee.payment_status && event.track_payments && (
+                                        <span className="text-base sm:text-lg">💰</span>
+                                      )}
+                                      {!attendee.payment_status &&
+                                        attendee.payment_claimed_at &&
+                                        event.track_payments && (
+                                          <Badge variant="outline" className="text-xs border-amber-500 text-amber-600">
+                                            Pending
+                                          </Badge>
+                                        )}
+                                    </div>
+                                    {!isAnon && attendee.profiles?.bio && (
+                                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
+                                        {attendee.profiles.bio}
+                                      </p>
+                                    )}
+                                    {attendee.note && (
+                                      <p className="text-xs sm:text-sm text-muted-foreground italic line-clamp-2 mt-1 max-w-full break-words">
+                                        💭 {attendee.note}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                            <div className="flex items-center flex-wrap gap-2 w-full md:w-auto md:justify-end">
+                              {attendee.profiles?.is_verified && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Verified
                                 </Badge>
                               )}
-                            </div>
-                            {!isAnon && attendee.profiles?.bio && (
-                              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
-                                {attendee.profiles.bio}
-                              </p>
-                            )}
-                            {attendee.note && (
-                              <p className="text-xs sm:text-sm text-muted-foreground italic line-clamp-2 mt-1 max-w-full break-words">
-                                💭 {attendee.note}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        );
-                      })()}
-                        <div className="flex items-center flex-wrap gap-2 w-full md:w-auto md:justify-end">
-                          {attendee.profiles?.is_verified && (
-                            <Badge variant="secondary" className="text-xs">
-                              Verified
-                            </Badge>
-                          )}
-                          {attendee.profiles?.is_admin && (
-                            <Badge variant="destructive" className="text-xs">
-                              Admin
-                            </Badge>
-                          )}
-                          {attendee.profiles?.is_super_admin && (
-                            <Badge variant="destructive" className="text-xs">
-                              Super Admin
-                            </Badge>
-                          )}
-                          {attendee.is_co_organizer && (
-                            <Badge variant="default" className="text-xs bg-purple-600 hover:bg-purple-700">
-                              Co-Organizer
-                            </Badge>
-                          )}
+                              {attendee.profiles?.is_admin && (
+                                <Badge variant="destructive" className="text-xs">
+                                  Admin
+                                </Badge>
+                              )}
+                              {attendee.profiles?.is_super_admin && (
+                                <Badge variant="destructive" className="text-xs">
+                                  Super Admin
+                                </Badge>
+                              )}
+                              {attendee.is_co_organizer && (
+                                <Badge variant="default" className="text-xs bg-purple-600 hover:bg-purple-700">
+                                  Co-Organizer
+                                </Badge>
+                              )}
 
-
-                          {/* Edit Note - show for the user themselves */}
-                          {user && attendee.user_id === user.id && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setCurrentAttendeeId(attendee.id);
-                                setShowNoteDialog(true);
-                              }}
-                              className="border-cyan-500 text-cyan-500 hover:bg-cyan-50"
-                            >
-                              {attendee.note ? "Edit Note" : "Add Note"}
-                            </Button>
-                          )}
-
-                          {/* Receipt status for admins - only if payment tracking is enabled */}
-                          {isAdmin && attendee.receipt_url && event.track_payments && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.open(attendee.receipt_url, "_blank");
-                              }}
-                              className="border-blue-500 text-blue-500 hover:bg-blue-50"
-                            >
-                              View Receipt
-                            </Button>
-                          )}
-
-                          {(isOwner || isAdmin) && attendee.user_id !== user?.id && (
-                            <Button
-                              variant={attendee.is_co_organizer ? "outline" : "default"}
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleToggleCoOrganizer(
-                                  attendee.id,
-                                  attendee.is_co_organizer,
-                                  attendee.profiles?.display_name || "Anonymous",
-                                );
-                              }}
-                              className={
-                                attendee.is_co_organizer
-                                  ? "border-purple-500 text-purple-500"
-                                  : "bg-purple-500 hover:bg-purple-600"
-                              }
-                            >
-                              {attendee.is_co_organizer ? "Remove Co-Organizer" : "Make Co-Organizer"}
-                            </Button>
-                          )}
-
-                          {isAdmin && (
-                            <>
-                              {/* Payment status toggle - only if payment tracking is enabled */}
-                              {event.track_payments && (
+                              {/* Edit Note - show for the user themselves */}
+                              {user && attendee.user_id === user.id && (
                                 <Button
-                                  variant={attendee.payment_status ? "outline" : "default"}
+                                  variant="outline"
                                   size="sm"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleTogglePayment(attendee.id, attendee.payment_status);
+                                    setCurrentAttendeeId(attendee.id);
+                                    setShowNoteDialog(true);
                                   }}
-                                  className={
-                                    attendee.payment_status
-                                      ? "border-green-500 text-green-500"
-                                      : "bg-green-500 hover:bg-green-600"
-                                  }
+                                  className="border-cyan-500 text-cyan-500 hover:bg-cyan-50"
                                 >
-                                  {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
+                                  {attendee.note ? "Edit Note" : "Add Note"}
                                 </Button>
                               )}
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="border-red-500 text-red-500 hover:bg-red-50"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Remove Attendee</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to remove {attendee.profiles?.display_name || "this user"}{" "}
-                                      from the event? This action cannot be undone.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() =>
-                                        handleRemoveAttendee(
-                                          attendee.id,
-                                          attendee.profiles?.display_name || "Anonymous",
-                                        )
+
+                              {/* Receipt status for admins - only if payment tracking is enabled */}
+                              {isAdmin && attendee.receipt_url && event.track_payments && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(attendee.receipt_url, "_blank");
+                                  }}
+                                  className="border-blue-500 text-blue-500 hover:bg-blue-50"
+                                >
+                                  View Receipt
+                                </Button>
+                              )}
+
+                              {(isOwner || isAdmin) && attendee.user_id !== user?.id && (
+                                <Button
+                                  variant={attendee.is_co_organizer ? "outline" : "default"}
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleCoOrganizer(
+                                      attendee.id,
+                                      attendee.is_co_organizer,
+                                      attendee.profiles?.display_name || "Anonymous",
+                                    );
+                                  }}
+                                  className={
+                                    attendee.is_co_organizer
+                                      ? "border-purple-500 text-purple-500"
+                                      : "bg-purple-500 hover:bg-purple-600"
+                                  }
+                                >
+                                  {attendee.is_co_organizer ? "Remove Co-Organizer" : "Make Co-Organizer"}
+                                </Button>
+                              )}
+
+                              {isAdmin && (
+                                <>
+                                  {/* Payment status toggle - only if payment tracking is enabled */}
+                                  {event.track_payments && (
+                                    <Button
+                                      variant={attendee.payment_status ? "outline" : "default"}
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleTogglePayment(attendee.id, attendee.payment_status);
+                                      }}
+                                      className={
+                                        attendee.payment_status
+                                          ? "border-green-500 text-green-500"
+                                          : "bg-green-500 hover:bg-green-600"
                                       }
-                                      className="bg-red-600 hover:bg-red-700"
                                     >
-                                      Remove
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    {attendees.length === 0 && (
-                      <p className="text-center text-muted-foreground py-8">
-                        No attendees yet. Be the first to join!
-                      </p>
-                    )}
-                    {attendees.length > 10 && !showAllAttendees && (
-                      <Button variant="outline" className="w-full" onClick={() => setShowAllAttendees(true)}>
-                        See all {attendees.length} attendees
-                      </Button>
-                    )}
-                    {showAllAttendees && attendees.length > 10 && (
-                      <Button variant="ghost" className="w-full" onClick={() => setShowAllAttendees(false)}>
-                        Show less
-                      </Button>
-                    )}
-                    </>
+                                      {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
+                                    </Button>
+                                  )}
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="border-red-500 text-red-500 hover:bg-red-50"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Remove Attendee</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Are you sure you want to remove{" "}
+                                          {attendee.profiles?.display_name || "this user"} from the event? This action
+                                          cannot be undone.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={() =>
+                                            handleRemoveAttendee(
+                                              attendee.id,
+                                              attendee.profiles?.display_name || "Anonymous",
+                                            )
+                                          }
+                                          className="bg-red-600 hover:bg-red-700"
+                                        >
+                                          Remove
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                        {attendees.length === 0 && (
+                          <p className="text-center text-muted-foreground py-8">
+                            No attendees yet. Be the first to join!
+                          </p>
+                        )}
+                        {attendees.length > 10 && !showAllAttendees && (
+                          <Button variant="outline" className="w-full" onClick={() => setShowAllAttendees(true)}>
+                            See all {attendees.length} attendees
+                          </Button>
+                        )}
+                        {showAllAttendees && attendees.length > 10 && (
+                          <Button variant="ghost" className="w-full" onClick={() => setShowAllAttendees(false)}>
+                            Show less
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
                 </CardContent>
