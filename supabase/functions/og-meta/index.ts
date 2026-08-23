@@ -8,7 +8,7 @@ const corsHeaders = {
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SITE_URL = "https://partypanther.net";
-const DEFAULT_IMAGE = "https://lovable.dev/opengraph-image-p98pqg.png";
+const DEFAULT_IMAGE = "https://partypanther.net/og-default.jpg";
 const SITE_NAME = "Party Panther Jakarta";
 
 function escapeHtml(str: string | null | undefined): string {
