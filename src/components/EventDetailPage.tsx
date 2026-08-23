@@ -839,11 +839,11 @@ export const EventDetailPage = () => {
     );
   };
 
-  const handlePaymentClaimed = (attendeeId: string) => {
+  const handlePaymentClaimed = (attendeeId: string, claimedAt?: string | null) => {
     setAttendees((prev) =>
       prev.map((attendee) =>
         attendee.id === attendeeId
-          ? { ...attendee, payment_claimed_at: new Date().toISOString() }
+          ? { ...attendee, payment_claimed_at: claimedAt ?? null }
           : attendee,
       ),
     );
@@ -1127,7 +1127,7 @@ export const EventDetailPage = () => {
                       paymentStatus={currentAttendee.payment_status}
                       paymentClaimedAt={currentAttendee.payment_claimed_at}
                       receiptUrl={currentAttendee.receipt_url}
-                      onClaimed={() => handlePaymentClaimed(currentAttendee.id)}
+                      onClaimed={(claimedAt) => handlePaymentClaimed(currentAttendee.id, claimedAt)}
                       onReceiptUploaded={(receiptUrl) => handleReceiptUploaded(currentAttendee.id, receiptUrl)}
                     />
                   </CardContent>

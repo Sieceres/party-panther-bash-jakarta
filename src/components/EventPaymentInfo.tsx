@@ -17,7 +17,7 @@ interface EventPaymentInfoProps {
   paymentStatus?: boolean;
   paymentClaimedAt?: string | null;
   receiptUrl?: string | null;
-  onClaimed: () => void;
+  onClaimed: (claimedAt?: string | null) => void;
   onReceiptUploaded: (url: string) => void;
 }
 
@@ -56,7 +56,7 @@ export const EventPaymentInfo = ({
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("Update blocked");
 
-      onClaimed();
+      onClaimed(new Date().toISOString());
       startCooldown();
       toast({
         title: "Marked as paid",
@@ -81,7 +81,7 @@ export const EventPaymentInfo = ({
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("Update blocked");
 
-      onClaimed();
+      onClaimed(null);
       startCooldown();
       toast({
         title: "Payment claim removed",
