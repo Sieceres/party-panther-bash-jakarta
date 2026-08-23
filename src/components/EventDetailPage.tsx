@@ -938,7 +938,7 @@ export const EventDetailPage = () => {
         <meta name="description" content={`${event.title} at ${event.venue_name}, Jakarta on ${event.date}. ${event.description?.slice(0, 120)}`} />
         <meta property="og:title" content={`${event.title} at ${event.venue_name} — Jakarta Event | Party Panther`} />
         <meta property="og:description" content={`${event.title} at ${event.venue_name}, Jakarta on ${event.date}. ${event.description?.slice(0, 120)}`} />
-        <meta property="og:image" content={event.image_url || 'https://lovable.dev/opengraph-image-p98pqg.png'} />
+        <meta property="og:image" content={event.image_url || 'https://partypanther.net/og-default.jpg'} />
         <meta property="og:url" content={`https://partypanther.net/event/${event.slug || id}`} />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -1017,7 +1017,7 @@ export const EventDetailPage = () => {
                       You have been removed from this event and cannot rejoin.
                     </div>
                   )}
-                  {user && !hasJoined && !isRemovedFromEvent && (
+                  {!hasJoined && !(user && isRemovedFromEvent) && (
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <Switch checked={joinAnonymously} onCheckedChange={setJoinAnonymously} />
@@ -1051,11 +1051,7 @@ export const EventDetailPage = () => {
                       {leavingEvent ? "Leaving..." : "✓ Joined - Click to Leave"}
                     </Button>
                   )}
-                  {!user && (
-                    <Button variant="cta" onClick={() => navigate("/auth")} className="w-full">
-                      Join Event
-                    </Button>
-                  )}
+
 
                   <Button
                     variant="outline"

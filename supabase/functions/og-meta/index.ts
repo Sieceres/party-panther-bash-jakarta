@@ -8,7 +8,7 @@ const corsHeaders = {
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SITE_URL = "https://partypanther.net";
-const DEFAULT_IMAGE = "https://lovable.dev/opengraph-image-p98pqg.png";
+const DEFAULT_IMAGE = "https://partypanther.net/og-default.jpg";
 const SITE_NAME = "Party Panther Jakarta";
 
 function escapeHtml(str: string | null | undefined): string {
@@ -103,29 +103,43 @@ Deno.serve(async (req) => {
     };
 
     if (type === "event") {
-      // Try slug first, then id
+      const EVENT_FIELDS = "title, description, date, time, venue_name, image_url, slug, custom_slug";
+      // Try custom slug, then slug, then id
       let { data } = await supabase
         .from("events")
-        .select("title, description, date, time, venue_name, image_url, slug")
-        .eq("slug", slug)
+        .select(EVENT_FIELDS)
+        .eq("custom_slug", slug.toLowerCase())
         .maybeSingle();
 
       if (!data) {
         const res = await supabase
           .from("events")
-          .select("title, description, date, time, venue_name, image_url, slug")
+          .select(EVENT_FIELDS)
+          .eq("slug", slug)
+          .maybeSingle();
+        data = res.data;
+      }
+
+      if (!data && /^[0-9a-f-]{36}$/i.test(slug)) {
+        const res = await supabase
+          .from("events")
+          .select(EVENT_FIELDS)
           .eq("id", slug)
           .maybeSingle();
         data = res.data;
       }
 
+
       if (data) {
+        const eventUrl = data.custom_slug
+          ? `${SITE_URL}/${data.custom_slug}`
+          : `${SITE_URL}/e/${data.slug || slug}`;
         meta = {
           title: `${data.title} at ${data.venue_name} — Jakarta Event | Party Panther`,
           description: compactText(`${data.title} at ${data.venue_name}, Jakarta on ${data.date}. ${data.description || ""}`, 180),
           image: absoluteImage(data.image_url),
-          url: `${SITE_URL}/e/${data.slug || slug}`,
-          redirectUrl: `${SITE_URL}/e/${data.slug || slug}`,
+          url: eventUrl,
+          redirectUrl: eventUrl,
         };
       }
     } else if (type === "promo") {
