@@ -1017,7 +1017,7 @@ export const EventDetailPage = () => {
                       You have been removed from this event and cannot rejoin.
                     </div>
                   )}
-                  {user && !hasJoined && !isRemovedFromEvent && (
+                  {!hasJoined && !(user && isRemovedFromEvent) && (
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <Switch checked={joinAnonymously} onCheckedChange={setJoinAnonymously} />
@@ -1051,11 +1051,7 @@ export const EventDetailPage = () => {
                       {leavingEvent ? "Leaving..." : "✓ Joined - Click to Leave"}
                     </Button>
                   )}
-                  {!user && (
-                    <Button variant="cta" onClick={() => navigate("/auth")} className="w-full">
-                      Join Event
-                    </Button>
-                  )}
+
 
                   <Button
                     variant="outline"
