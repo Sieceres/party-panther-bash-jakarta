@@ -131,12 +131,15 @@ Deno.serve(async (req) => {
 
 
       if (data) {
+        const eventUrl = data.custom_slug
+          ? `${SITE_URL}/${data.custom_slug}`
+          : `${SITE_URL}/e/${data.slug || slug}`;
         meta = {
           title: `${data.title} at ${data.venue_name} — Jakarta Event | Party Panther`,
           description: compactText(`${data.title} at ${data.venue_name}, Jakarta on ${data.date}. ${data.description || ""}`, 180),
           image: absoluteImage(data.image_url),
-          url: `${SITE_URL}/e/${data.slug || slug}`,
-          redirectUrl: `${SITE_URL}/e/${data.slug || slug}`,
+          url: eventUrl,
+          redirectUrl: eventUrl,
         };
       }
     } else if (type === "promo") {
