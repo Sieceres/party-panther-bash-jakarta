@@ -103,21 +103,32 @@ Deno.serve(async (req) => {
     };
 
     if (type === "event") {
-      // Try slug first, then id
+      const EVENT_FIELDS = "title, description, date, time, venue_name, image_url, slug, custom_slug";
+      // Try custom slug, then slug, then id
       let { data } = await supabase
         .from("events")
-        .select("title, description, date, time, venue_name, image_url, slug")
-        .eq("slug", slug)
+        .select(EVENT_FIELDS)
+        .eq("custom_slug", slug.toLowerCase())
         .maybeSingle();
 
       if (!data) {
         const res = await supabase
           .from("events")
-          .select("title, description, date, time, venue_name, image_url, slug")
+          .select(EVENT_FIELDS)
+          .eq("slug", slug)
+          .maybeSingle();
+        data = res.data;
+      }
+
+      if (!data && /^[0-9a-f-]{36}$/i.test(slug)) {
+        const res = await supabase
+          .from("events")
+          .select(EVENT_FIELDS)
           .eq("id", slug)
           .maybeSingle();
         data = res.data;
       }
+
 
       if (data) {
         meta = {
