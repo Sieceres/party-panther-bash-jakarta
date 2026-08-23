@@ -8,7 +8,7 @@ const corsHeaders = {
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SITE_URL = "https://partypanther.net";
-const DEFAULT_IMAGE = "https://partypanther.net/og-default.jpg";
+const DEFAULT_IMAGE = "https://partypanther.net/og-default-v2.jpg";
 const SITE_NAME = "Party Panther Jakarta";
 
 function escapeHtml(str: string | null | undefined): string {
@@ -22,10 +22,7 @@ function escapeHtml(str: string | null | undefined): string {
 }
 
 function compactText(str: string | null | undefined, maxLength: number): string {
-  return (str || "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, maxLength);
+  return (str || "").replace(/\s+/g, " ").trim().slice(0, maxLength);
 }
 
 function absoluteImage(image: string | null | undefined): string {
@@ -37,13 +34,7 @@ function absoluteImage(image: string | null | undefined): string {
   return `${SITE_URL}/${image}`;
 }
 
-function buildHtml(meta: {
-  title: string;
-  description: string;
-  image: string;
-  url: string;
-  redirectUrl: string;
-}) {
+function buildHtml(meta: { title: string; description: string; image: string; url: string; redirectUrl: string }) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,12 +71,22 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     // Expected path: /og-meta/{type}/{slug}; also support ?type=e&slug=... for Cloudflare Worker calls.
-    const pathParts = url.pathname.replace(/^\/og-meta\/?/, "").split("/").filter(Boolean);
+    const pathParts = url.pathname
+      .replace(/^\/og-meta\/?/, "")
+      .split("/")
+      .filter(Boolean);
     const typeRaw = pathParts[0] || url.searchParams.get("type") || ""; // event/e, promo/p, venue/v
     const slug = pathParts.slice(1).join("/") || url.searchParams.get("slug") || "";
 
     // Normalise short aliases
-    const typeMap: Record<string, string> = { e: "event", p: "promo", v: "venue", event: "event", promo: "promo", venue: "venue" };
+    const typeMap: Record<string, string> = {
+      e: "event",
+      p: "promo",
+      v: "venue",
+      event: "event",
+      promo: "promo",
+      venue: "venue",
+    };
     const type = typeMap[typeRaw];
 
     if (!type || !slug) {
@@ -112,31 +113,23 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (!data) {
-        const res = await supabase
-          .from("events")
-          .select(EVENT_FIELDS)
-          .eq("slug", slug)
-          .maybeSingle();
+        const res = await supabase.from("events").select(EVENT_FIELDS).eq("slug", slug).maybeSingle();
         data = res.data;
       }
 
       if (!data && /^[0-9a-f-]{36}$/i.test(slug)) {
-        const res = await supabase
-          .from("events")
-          .select(EVENT_FIELDS)
-          .eq("id", slug)
-          .maybeSingle();
+        const res = await supabase.from("events").select(EVENT_FIELDS).eq("id", slug).maybeSingle();
         data = res.data;
       }
 
-
       if (data) {
-        const eventUrl = data.custom_slug
-          ? `${SITE_URL}/${data.custom_slug}`
-          : `${SITE_URL}/e/${data.slug || slug}`;
+        const eventUrl = data.custom_slug ? `${SITE_URL}/${data.custom_slug}` : `${SITE_URL}/e/${data.slug || slug}`;
         meta = {
           title: `${data.title} at ${data.venue_name} — Jakarta Event | Party Panther`,
-          description: compactText(`${data.title} at ${data.venue_name}, Jakarta on ${data.date}. ${data.description || ""}`, 180),
+          description: compactText(
+            `${data.title} at ${data.venue_name}, Jakarta on ${data.date}. ${data.description || ""}`,
+            180,
+          ),
           image: absoluteImage(data.image_url),
           url: eventUrl,
           redirectUrl: eventUrl,
@@ -161,7 +154,10 @@ Deno.serve(async (req) => {
       if (data) {
         meta = {
           title: `${data.title} at ${data.venue_name} — Jakarta Drink Promo | Party Panther`,
-          description: compactText(`${data.discount_text} — ${data.title} at ${data.venue_name}${data.area ? ` in ${data.area}` : ""}, Jakarta. ${data.description || ""}`, 180),
+          description: compactText(
+            `${data.discount_text} — ${data.title} at ${data.venue_name}${data.area ? ` in ${data.area}` : ""}, Jakarta. ${data.description || ""}`,
+            180,
+          ),
           image: absoluteImage(data.image_url),
           url: `${SITE_URL}/p/${data.slug || slug}`,
           redirectUrl: `${SITE_URL}/p/${data.slug || slug}`,
@@ -186,7 +182,10 @@ Deno.serve(async (req) => {
       if (data) {
         meta = {
           title: `${data.name}${data.area ? ` — ${data.area}` : ""} — Jakarta Bar & Club | Party Panther`,
-          description: compactText(`${data.name}${data.area ? ` in ${data.area}` : ""}, Jakarta. ${data.description || "Discover drink promos, events and more at this Jakarta venue."}`, 180),
+          description: compactText(
+            `${data.name}${data.area ? ` in ${data.area}` : ""}, Jakarta. ${data.description || "Discover drink promos, events and more at this Jakarta venue."}`,
+            180,
+          ),
           image: absoluteImage(data.image_url),
           url: `${SITE_URL}/v/${data.slug || slug}`,
           redirectUrl: `${SITE_URL}/v/${data.slug || slug}`,
