@@ -142,12 +142,15 @@ export const UserProfile = () => {
       const hasSuperAdmin = roles.some(r => r.role === 'superadmin');
       setIsAdmin(hasAdmin);
 
-      // Update profile with admin status for badge display
-      setProfile(prev => prev ? {
-        ...prev,
-        is_admin: hasAdmin,
-        is_super_admin: hasSuperAdmin,
-      } : prev);
+      // Only reflect these roles on the badge when viewing your OWN profile —
+      // otherwise the viewer's roles would be shown on someone else's profile.
+      if (!isAdminView && !isSharedProfile) {
+        setProfile(prev => prev ? {
+          ...prev,
+          is_admin: hasAdmin,
+          is_super_admin: hasSuperAdmin,
+        } : prev);
+      }
     } catch (error) {
       setIsAdmin(false);
     }
@@ -1144,7 +1147,7 @@ export const UserProfile = () => {
               )}
 
               {/* Venue Registration CTA & Status Cards (Non-Edit Mode) */}
-              {!isEditing && !isSharedProfile && (
+              {!isEditing && !isSharedProfile && !isAdminView && (
                 <>
                   {/* CTA Card - only show for users with no venue status or 'none' status */}
                   {(!profile?.venue_status || profile?.venue_status === 'none') && !venueCtaDismissed && (
