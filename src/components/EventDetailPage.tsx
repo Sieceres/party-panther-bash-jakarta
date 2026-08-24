@@ -398,6 +398,7 @@ export const EventDetailPage = () => {
 
         // Auto-join the event by calling the join logic directly
         setJoiningEvent(true);
+        if (event.track_payments) setJoiningDialogOpen(true);
         try {
           const { data: joined, error } = await (supabase as any).rpc("join_event", {
             _event_id: event.id,
