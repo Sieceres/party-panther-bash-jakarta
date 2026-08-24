@@ -359,6 +359,7 @@ export const EventDetailPage = () => {
         // Merge the joined confirmation into the payment dialog
         setJoinedBanner(true);
         setPaymentDialogOpen(true);
+        setJoiningDialogOpen(false);
       } else {
         toast({
           title: "Successfully joined event! 🎉",
