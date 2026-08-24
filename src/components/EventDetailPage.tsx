@@ -36,6 +36,7 @@ import { CommentItem, Comment } from "./CommentItem";
 import { CommentActions } from "./CommentActions";
 import { ReportDialog } from "./ReportDialog";
 import { EventPaymentInfo } from "./EventPaymentInfo";
+import { PawLoader } from "./PawLoader";
 import { Header } from "./Header";
 import { EventTags } from "./EventTags";
 import { supabase } from "@/integrations/supabase/client";
