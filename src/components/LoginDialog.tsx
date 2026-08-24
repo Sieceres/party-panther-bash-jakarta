@@ -125,7 +125,7 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
     try {
       const redirectUrl = `${window.location.origin}/`;
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -136,21 +136,25 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
         }
       });
 
-      if (error) {
-        if (error.message.includes("User already registered")) {
-          toast({
-            title: "Account exists",
-            description: "An account with this email already exists. Please sign in instead.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Error",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
+      const alreadyExists =
+        (error && (error.message.includes("User already registered") || error.message.toLowerCase().includes("already"))) ||
+        (!error && data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0);
+
+      if (alreadyExists) {
+        toast({
+          title: "Email already registered",
+          description: "An account with this email already exists. Please sign in instead.",
+          variant: "destructive",
+        });
+        setAuthTab("signin");
+      } else if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
       } else {
+
         toast({
           title: "Check your email!",
           description: "We've sent you a confirmation link. Please verify your email to complete signup.",
