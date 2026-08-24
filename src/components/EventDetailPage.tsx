@@ -417,6 +417,10 @@ export const EventDetailPage = () => {
 
           // Refresh attendees list
           await refreshAttendees();
+
+          if (event.track_payments) {
+            setPaymentDialogOpen(true);
+          }
         } catch (error) {
           console.error("Error auto-joining event:", error);
           toast({
