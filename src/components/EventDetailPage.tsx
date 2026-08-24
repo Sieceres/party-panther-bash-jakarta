@@ -112,6 +112,7 @@ export const EventDetailPage = () => {
   const [currentAttendeeId, setCurrentAttendeeId] = useState<string | null>(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [joinedBanner, setJoinedBanner] = useState(false);
+  const [joiningDialogOpen, setJoiningDialogOpen] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
   const [eventTags, setEventTags] = useState<any[]>([]);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
