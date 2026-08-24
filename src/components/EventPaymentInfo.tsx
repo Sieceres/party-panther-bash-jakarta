@@ -40,6 +40,9 @@ export const EventPaymentInfo = ({
   onReceiptUploaded,
   open: controlledOpen,
   onOpenChange,
+  showJoinedBanner,
+  eventTitle,
+  onAddNote,
 }: EventPaymentInfoProps) => {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const open = controlledOpen ?? uncontrolledOpen;
