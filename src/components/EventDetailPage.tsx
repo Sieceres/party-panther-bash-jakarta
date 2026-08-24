@@ -1056,7 +1056,14 @@ export const EventDetailPage = () => {
                         </div>
                       </div>
                       <Button variant="cta" onClick={handleJoinEvent} disabled={joiningEvent} className="w-full">
-                        {joiningEvent ? "Joining..." : "Join Event"}
+                        {joiningEvent ? (
+                          <span className="flex items-center gap-2">
+                            <PawLoader size={20} />
+                            Joining...
+                          </span>
+                        ) : (
+                          "Join Event"
+                        )}
                       </Button>
                     </div>
                   )}
