@@ -383,6 +383,7 @@ export const EventDetailPage = () => {
       });
     } finally {
       setJoiningEvent(false);
+      setJoiningDialogOpen(false);
     }
   };
 
