@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Wallet, CheckCircle2, QrCode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 import { ReceiptUpload } from "./ReceiptUpload";
 import Linkify from "linkify-react";
 
@@ -25,6 +26,8 @@ interface EventPaymentInfoProps {
   showJoinedBanner?: boolean;
   eventTitle?: string;
   onAddNote?: () => void;
+  initialNote?: string;
+  onNoteSaved?: () => void;
 }
 
 export const EventPaymentInfo = ({
@@ -44,6 +47,8 @@ export const EventPaymentInfo = ({
   showJoinedBanner,
   eventTitle,
   onAddNote,
+  initialNote = "",
+  onNoteSaved,
 }: EventPaymentInfoProps) => {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const open = controlledOpen ?? uncontrolledOpen;
@@ -53,12 +58,33 @@ export const EventPaymentInfo = ({
   };
   const [qrOpen, setQrOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [note, setNote] = useState(initialNote);
+  const [savingNote, setSavingNote] = useState(false);
   const [cooldown, setCooldown] = useState(false);
   const { toast } = useToast();
 
   const startCooldown = () => {
     setCooldown(true);
     setTimeout(() => setCooldown(false), 30000);
+  };
+
+  const handleSaveNote = async () => {
+    setSavingNote(true);
+    try {
+      const { error } = await supabase
+        .from("event_attendees")
+        .update({ note: note.trim() || null })
+        .eq("event_id", eventId)
+        .eq("user_id", userId);
+      if (error) throw error;
+      toast({ title: "Note saved!", description: "Your attendance note has been updated." });
+      onNoteSaved?.();
+    } catch (e) {
+      console.error(e);
+      toast({ title: "Error", description: "Failed to save note. Please try again.", variant: "destructive" });
+    } finally {
+      setSavingNote(false);
+    }
   };
 
   const handleMarkPaid = async () => {
@@ -130,15 +156,24 @@ export const EventPaymentInfo = ({
             <p className="text-sm text-muted-foreground">
               You're now registered{eventTitle ? ` for "${eventTitle}"` : ""}. See you there!
             </p>
-            {onAddNote && (
-              <Button variant="outline" size="sm" onClick={onAddNote} className="w-fit">
-                Add note?
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium whitespace-nowrap">Add note?</span>
+              <Input
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="E.g. This will make me roar!"
+                maxLength={50}
+                className="flex-1"
+              />
+              <Button size="sm" onClick={handleSaveNote} disabled={savingNote || !note.trim()}>
+                {savingNote ? "Saving..." : "Save"}
               </Button>
-            )}
+            </div>
             <Separator />
             <h3 className="text-base font-semibold">Payment info</h3>
           </div>
         )}
+
 
         <div className="space-y-4">
           {paymentMethods && paymentMethods.length > 0 && (
