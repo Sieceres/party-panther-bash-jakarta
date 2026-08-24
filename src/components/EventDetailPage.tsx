@@ -1086,6 +1086,18 @@ export const EventDetailPage = () => {
                     </Button>
                   )}
 
+                  <Dialog open={joiningDialogOpen} onOpenChange={setJoiningDialogOpen}>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Joining event...</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex flex-col items-center justify-center gap-3 py-10">
+                        <PawLoader size={56} label="Fetching payment info" />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+
                   {currentAttendee && event.track_payments && (
                     <EventPaymentInfo
                       eventId={event.id}
