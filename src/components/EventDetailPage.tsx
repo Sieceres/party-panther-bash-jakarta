@@ -110,6 +110,7 @@ export const EventDetailPage = () => {
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentAttendeeId, setCurrentAttendeeId] = useState<string | null>(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [joinedBanner, setJoinedBanner] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
   const [eventTags, setEventTags] = useState<any[]>([]);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
@@ -348,26 +349,26 @@ export const EventDetailPage = () => {
       setHasJoined(true);
       setTotalAttendees((prev) => prev + 1);
 
-      // Show success toast with action to add note
-      toast({
-        title: "Successfully joined event! 🎉",
-        description: (
-          <div className="flex flex-col gap-2">
-            <p>You're now registered for "{event.title}". See you there!</p>
-            <Button variant="outline" size="sm" onClick={() => setShowNoteDialog(true)} className="w-fit">
-              Add note?
-            </Button>
-          </div>
-        ),
-        duration: 8000,
-      });
-
       // Refresh attendees list
       await refreshAttendees();
 
-      // Auto-open payment info if the organizer tracks payments
       if (event.track_payments) {
+        // Merge the joined confirmation into the payment dialog
+        setJoinedBanner(true);
         setPaymentDialogOpen(true);
+      } else {
+        toast({
+          title: "Successfully joined event! 🎉",
+          description: (
+            <div className="flex flex-col gap-2">
+              <p>You're now registered for "{event.title}". See you there!</p>
+              <Button variant="outline" size="sm" onClick={() => setShowNoteDialog(true)} className="w-fit">
+                Add note?
+              </Button>
+            </div>
+          ),
+          duration: 8000,
+        });
       }
     } catch (error) {
       console.error("Error joining event:", error);
@@ -409,17 +410,18 @@ export const EventDetailPage = () => {
           setHasJoined(true);
           setTotalAttendees((prev) => prev + 1);
 
-          toast({
-            title: "Successfully joined event! 🎉",
-            description: `You're now registered for "${event.title}". See you there!`,
-            duration: 5000,
-          });
-
           // Refresh attendees list
           await refreshAttendees();
 
           if (event.track_payments) {
+            setJoinedBanner(true);
             setPaymentDialogOpen(true);
+          } else {
+            toast({
+              title: "Successfully joined event! 🎉",
+              description: `You're now registered for "${event.title}". See you there!`,
+              duration: 5000,
+            });
           }
         } catch (error) {
           console.error("Error auto-joining event:", error);
@@ -1083,7 +1085,17 @@ export const EventDetailPage = () => {
                       onClaimed={(claimedAt) => handlePaymentClaimed(currentAttendee.id, claimedAt)}
                       onReceiptUploaded={(receiptUrl) => handleReceiptUploaded(currentAttendee.id, receiptUrl)}
                       open={paymentDialogOpen}
-                      onOpenChange={setPaymentDialogOpen}
+                      onOpenChange={(o) => {
+                        setPaymentDialogOpen(o);
+                        if (!o) setJoinedBanner(false);
+                      }}
+                      showJoinedBanner={joinedBanner}
+                      eventTitle={event.title}
+                      onAddNote={() => {
+                        setPaymentDialogOpen(false);
+                        setJoinedBanner(false);
+                        setShowNoteDialog(true);
+                      }}
                     />
                   )}
 
