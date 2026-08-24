@@ -1091,11 +1091,8 @@ export const EventDetailPage = () => {
                       }}
                       showJoinedBanner={joinedBanner}
                       eventTitle={event.title}
-                      onAddNote={() => {
-                        setPaymentDialogOpen(false);
-                        setJoinedBanner(false);
-                        setShowNoteDialog(true);
-                      }}
+                      initialNote={attendees.find((a) => a.user_id === user?.id)?.note || ""}
+                      onNoteSaved={handleNoteSaved}
                     />
                   )}
 
