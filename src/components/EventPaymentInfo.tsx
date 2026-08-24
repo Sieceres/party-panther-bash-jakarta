@@ -21,6 +21,9 @@ interface EventPaymentInfoProps {
   onReceiptUploaded: (url: string) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  showJoinedBanner?: boolean;
+  eventTitle?: string;
+  onAddNote?: () => void;
 }
 
 export const EventPaymentInfo = ({
