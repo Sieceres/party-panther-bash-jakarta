@@ -19,6 +19,8 @@ interface EventPaymentInfoProps {
   receiptUrl?: string | null;
   onClaimed: (claimedAt?: string | null) => void;
   onReceiptUploaded: (url: string) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const EventPaymentInfo = ({
@@ -33,8 +35,15 @@ export const EventPaymentInfo = ({
   receiptUrl,
   onClaimed,
   onReceiptUploaded,
+  open: controlledOpen,
+  onOpenChange,
 }: EventPaymentInfoProps) => {
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const setOpen = (v: boolean) => {
+    if (onOpenChange) onOpenChange(v);
+    else setUncontrolledOpen(v);
+  };
   const [qrOpen, setQrOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [cooldown, setCooldown] = useState(false);
@@ -171,6 +180,20 @@ export const EventPaymentInfo = ({
             <div className="space-y-2">
               <Button onClick={handleMarkPaid} disabled={saving || cooldown} className="w-full">
                 {saving ? "Saving..." : cooldown ? "Please wait a moment..." : "I have paid"}
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={() => {
+                  setOpen(false);
+                  toast({
+                    title: "No problem",
+                    description: "You can find the payment info under event actions.",
+                    duration: 5000,
+                  });
+                }}
+              >
+                I'll do this later
               </Button>
               <p className="text-xs text-muted-foreground text-center">
                 You can change this a limited number of times.

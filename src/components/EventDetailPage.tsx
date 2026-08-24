@@ -109,6 +109,7 @@ export const EventDetailPage = () => {
   const [showAllComments, setShowAllComments] = useState(false);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentAttendeeId, setCurrentAttendeeId] = useState<string | null>(null);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
   const [eventTags, setEventTags] = useState<any[]>([]);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
@@ -363,6 +364,11 @@ export const EventDetailPage = () => {
 
       // Refresh attendees list
       await refreshAttendees();
+
+      // Auto-open payment info if the organizer tracks payments
+      if (event.track_payments) {
+        setPaymentDialogOpen(true);
+      }
     } catch (error) {
       console.error("Error joining event:", error);
       toast({
@@ -411,6 +417,10 @@ export const EventDetailPage = () => {
 
           // Refresh attendees list
           await refreshAttendees();
+
+          if (event.track_payments) {
+            setPaymentDialogOpen(true);
+          }
         } catch (error) {
           console.error("Error auto-joining event:", error);
           toast({
@@ -1059,6 +1069,24 @@ export const EventDetailPage = () => {
                     </Button>
                   )}
 
+                  {currentAttendee && event.track_payments && (
+                    <EventPaymentInfo
+                      eventId={event.id}
+                      userId={user.id}
+                      paymentInfo={event.payment_info}
+                      paymentMethods={(event as any).payment_methods}
+                      paymentQrUrl={(event as any).payment_qr_url}
+                      attendeeId={currentAttendee.id}
+                      paymentStatus={currentAttendee.payment_status}
+                      paymentClaimedAt={currentAttendee.payment_claimed_at}
+                      receiptUrl={currentAttendee.receipt_url}
+                      onClaimed={(claimedAt) => handlePaymentClaimed(currentAttendee.id, claimedAt)}
+                      onReceiptUploaded={(receiptUrl) => handleReceiptUploaded(currentAttendee.id, receiptUrl)}
+                      open={paymentDialogOpen}
+                      onOpenChange={setPaymentDialogOpen}
+                    />
+                  )}
+
                   <Button
                     variant="outline"
                     className="w-full"
@@ -1116,29 +1144,6 @@ export const EventDetailPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Payment Info */}
-              {currentAttendee && event.track_payments && (
-                <Card>
-                  <CardHeader className="p-4 sm:p-5 md:p-6 pb-0">
-                    <CardTitle className="text-lg sm:text-xl">Payment</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4 sm:p-5 md:p-6">
-                    <EventPaymentInfo
-                      eventId={event.id}
-                      userId={user.id}
-                      paymentInfo={event.payment_info}
-                      paymentMethods={(event as any).payment_methods}
-                      paymentQrUrl={(event as any).payment_qr_url}
-                      attendeeId={currentAttendee.id}
-                      paymentStatus={currentAttendee.payment_status}
-                      paymentClaimedAt={currentAttendee.payment_claimed_at}
-                      receiptUrl={currentAttendee.receipt_url}
-                      onClaimed={(claimedAt) => handlePaymentClaimed(currentAttendee.id, claimedAt)}
-                      onReceiptUploaded={(receiptUrl) => handleReceiptUploaded(currentAttendee.id, receiptUrl)}
-                    />
-                  </CardContent>
-                </Card>
-              )}
 
               {/* Organizer, Venue & Location */}
               <Card>
