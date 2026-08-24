@@ -22,6 +22,7 @@ const Auth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [authTab, setAuthTab] = useState("signin");
   const navigate = useNavigate();
   const { toast } = useToast();
   const [redirectTo] = useState(() => consumeAuthRedirect());
@@ -86,7 +87,7 @@ const Auth = () => {
       cancelled = true;
       delete (window as any).handleGoogleSignInToken;
     };
-  }, [navigate, toast, redirectTo]);
+  }, [navigate, toast, redirectTo, authTab]);
 
   useEffect(() => {
     // Set up auth state listener
@@ -229,7 +230,7 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             {/* Email Authentication First */}
-            <Tabs defaultValue="signin" className="w-full mb-6">
+            <Tabs value={authTab} onValueChange={setAuthTab} className="w-full mb-6">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
