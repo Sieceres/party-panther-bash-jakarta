@@ -163,7 +163,7 @@ export const EventPaymentInfo = ({
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="E.g. This will make me roar!"
                 maxLength={50}
-                className="flex-1"
+                className="flex-1 h-8 rounded-none border border-border bg-transparent px-2 text-sm italic placeholder:italic focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary"
               />
               <Button size="sm" onClick={handleSaveNote} disabled={savingNote || !note.trim()}>
                 {savingNote ? "Saving..." : "Save"}
