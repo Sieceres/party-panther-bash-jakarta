@@ -24,6 +24,7 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [authTab, setAuthTab] = useState("signin");
   const { toast } = useToast();
 
   // Register global callback for Google Identity Services HTML API.
@@ -115,7 +116,7 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
       clearTimeout(t);
       document.getElementById("credential_picker_container")?.remove();
     };
-  }, [open]);
+  }, [open, authTab]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -232,7 +233,7 @@ export const LoginDialog = ({ open, onOpenChange, onSuccess }: LoginDialogProps)
           <DialogTitle className="text-center gradient-text">Join Party Panther</DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue="signin" className="w-full">
+        <Tabs value={authTab} onValueChange={setAuthTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
