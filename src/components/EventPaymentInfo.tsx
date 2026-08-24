@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Wallet, CheckCircle2, QrCode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +22,9 @@ interface EventPaymentInfoProps {
   onReceiptUploaded: (url: string) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  showJoinedBanner?: boolean;
+  eventTitle?: string;
+  onAddNote?: () => void;
 }
 
 export const EventPaymentInfo = ({
@@ -37,6 +41,9 @@ export const EventPaymentInfo = ({
   onReceiptUploaded,
   open: controlledOpen,
   onOpenChange,
+  showJoinedBanner,
+  eventTitle,
+  onAddNote,
 }: EventPaymentInfoProps) => {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const open = controlledOpen ?? uncontrolledOpen;
@@ -108,15 +115,30 @@ export const EventPaymentInfo = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="flex items-center gap-2">
+        <Button variant="outline" className="w-full flex items-center justify-center gap-2">
           <Wallet className="w-4 h-4" />
           Payment info
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Payment info</DialogTitle>
+          <DialogTitle>{showJoinedBanner ? "Successfully joined event! 🎉" : "Payment info"}</DialogTitle>
         </DialogHeader>
+
+        {showJoinedBanner && (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              You're now registered{eventTitle ? ` for "${eventTitle}"` : ""}. See you there!
+            </p>
+            {onAddNote && (
+              <Button variant="outline" size="sm" onClick={onAddNote} className="w-fit">
+                Add note?
+              </Button>
+            )}
+            <Separator />
+            <h3 className="text-base font-semibold">Payment info</h3>
+          </div>
+        )}
 
         <div className="space-y-4">
           {paymentMethods && paymentMethods.length > 0 && (
