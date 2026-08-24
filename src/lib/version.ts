@@ -1,2 +1,2 @@
 // Bump by 0.01 on every change
-export const APP_VERSION = "0.69";
+export const APP_VERSION = "0.71";
