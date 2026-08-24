@@ -130,15 +130,24 @@ export const EventPaymentInfo = ({
             <p className="text-sm text-muted-foreground">
               You're now registered{eventTitle ? ` for "${eventTitle}"` : ""}. See you there!
             </p>
-            {onAddNote && (
-              <Button variant="outline" size="sm" onClick={onAddNote} className="w-fit">
-                Add note?
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium whitespace-nowrap">Add note?</span>
+              <Input
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="E.g. This will make me roar!"
+                maxLength={50}
+                className="flex-1"
+              />
+              <Button size="sm" onClick={handleSaveNote} disabled={savingNote || !note.trim()}>
+                {savingNote ? "Saving..." : "Save"}
               </Button>
-            )}
+            </div>
             <Separator />
             <h3 className="text-base font-semibold">Payment info</h3>
           </div>
         )}
+
 
         <div className="space-y-4">
           {paymentMethods && paymentMethods.length > 0 && (
