@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   MapPin,
   ArrowLeft,
@@ -112,6 +113,7 @@ export const EventDetailPage = () => {
   const [currentAttendeeId, setCurrentAttendeeId] = useState<string | null>(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [joinedBanner, setJoinedBanner] = useState(false);
+  const [joiningDialogOpen, setJoiningDialogOpen] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
   const [eventTags, setEventTags] = useState<any[]>([]);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
@@ -332,6 +334,7 @@ export const EventDetailPage = () => {
       return;
     }
     setJoiningEvent(true);
+    if (event.track_payments) setJoiningDialogOpen(true);
     try {
       const { data: joined, error } = await (supabase as any).rpc("join_event", {
         _event_id: event.id,
@@ -357,6 +360,7 @@ export const EventDetailPage = () => {
         // Merge the joined confirmation into the payment dialog
         setJoinedBanner(true);
         setPaymentDialogOpen(true);
+        setJoiningDialogOpen(false);
       } else {
         toast({
           title: "Successfully joined event! 🎉",
@@ -380,6 +384,7 @@ export const EventDetailPage = () => {
       });
     } finally {
       setJoiningEvent(false);
+      setJoiningDialogOpen(false);
     }
   };
 
@@ -394,6 +399,7 @@ export const EventDetailPage = () => {
 
         // Auto-join the event by calling the join logic directly
         setJoiningEvent(true);
+        if (event.track_payments) setJoiningDialogOpen(true);
         try {
           const { data: joined, error } = await (supabase as any).rpc("join_event", {
             _event_id: event.id,
@@ -433,6 +439,7 @@ export const EventDetailPage = () => {
           });
         } finally {
           setJoiningEvent(false);
+          setJoiningDialogOpen(false);
         }
       }
     };
@@ -1078,6 +1085,18 @@ export const EventDetailPage = () => {
                       {leavingEvent ? "Leaving..." : "✓ Joined - Click to Leave"}
                     </Button>
                   )}
+
+                  <Dialog open={joiningDialogOpen} onOpenChange={setJoiningDialogOpen}>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Joining event...</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex flex-col items-center justify-center gap-3 py-10">
+                        <PawLoader size={56} label="Fetching payment info" />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
 
                   {currentAttendee && event.track_payments && (
                     <EventPaymentInfo
