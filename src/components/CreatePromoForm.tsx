@@ -345,7 +345,6 @@ export const CreatePromoForm = () => {
               dayOfWeek={formData.dayOfWeek}
               area={formData.area}
               drinkType={formData.drinkType}
-              originalPrice={formData.originalPrice}
               discountedPrice={formData.discountedPrice}
               onValidUntilChange={(date) => {
                 setValidUntilDate(date);
@@ -355,7 +354,6 @@ export const CreatePromoForm = () => {
               onDayOfWeekChange={(values) => handleInputChange("dayOfWeek", values)}
               onAreaChange={(value) => handleInputChange("area", value)}
               onDrinkTypeChange={(values) => handleInputChange("drinkType", values)}
-              onOriginalPriceChange={(value) => handleInputChange("originalPrice", value)}
               onDiscountedPriceChange={(value) => handleInputChange("discountedPrice", value)}
             />
 
