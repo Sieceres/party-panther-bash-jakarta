@@ -195,6 +195,21 @@ Be thorough — extract everything visible. Use "description" to add any extra c
 For discount_text, be specific (e.g. "Buy 1 Get 1 Free", "50% off all drinks", "IDR 50k cocktails").
 Default currency is IDR unless otherwise specified.
 
+CRITICAL - Prices (this is the most commonly missed field):
+Scan the whole image for ANY number that represents money, including small print and corners.
+Indonesian posters write prices in many shorthands — always convert to a plain integer in rupiah:
+- "160K", "160K++", "160rb", "Rp160.000", "IDR 160,000" -> 160000
+- "249++", "150K" -> 249000 / 150000 (a bare 2-3 digit number next to a drink/deal means thousands of rupiah)
+- "IDR22.000.000" / "22jt" -> 22000000
+- Strike-through / "was" price -> original_price_amount; the highlighted, "from", "early bird" or promo price -> discounted_price_amount.
+- If only ONE price is visible, put it in discounted_price_amount and leave original_price_amount empty.
+- Ignore phone numbers, addresses, dates, times, street numbers and years — they are not prices.
+Only leave both price fields empty if the poster truly shows no price at all (e.g. pure "Buy 1 Get 1" with no amount).
+
+CRITICAL - Area:
+Always try to set "area" using one of the allowed values. If the poster does not name a neighborhood, infer it from the street address, mall, building or landmark shown (e.g. "Jl. Cikini Raya" -> "Menteng & Cikini", "SCBD Lot 14" -> "SCBD", "Kemang Raya" -> "Kemang", "Sunter"/"Jakarta Utara" with no closer match -> leave empty).
+
+
 IMPORTANT - Drink categorization:
 For drink_type, categorize drinks specifically:
 - Beer brands → ["Beer"]
