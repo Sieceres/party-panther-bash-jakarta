@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, Upload, FileText, Loader2, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { invokeExtraction } from "@/lib/extraction";
 
 interface ExtractedEvent {
   title?: string;
@@ -52,12 +53,7 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
     setLastSource({ kind: "image", value: imageData });
     setIsExtracting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("extract-from-image", {
-        body: { image: imageData, type: "event", style: aiStyle, customInstructions: aiStyle === "custom" ? customInstructions : undefined },
-      });
-
-      if (error) throw error;
-
+      const data = await invokeExtraction({ image: imageData, type: "event", style: aiStyle, customInstructions: aiStyle === "custom" ? customInstructions : undefined });
       const items = data?.items;
       if (!items || items.length === 0) {
         toast.error("Could not extract event details from this image");
@@ -90,12 +86,7 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
     setIsExtracting(true);
     setLastSource({ kind: "text", value: textInput });
     try {
-      const { data, error } = await supabase.functions.invoke("extract-from-image", {
-        body: { text: textInput, type: "event", style: aiStyle, customInstructions: aiStyle === "custom" ? customInstructions : undefined },
-      });
-
-      if (error) throw error;
-
+      const data = await invokeExtraction({ text: textInput, type: "event", style: aiStyle, customInstructions: aiStyle === "custom" ? customInstructions : undefined });
       const items = data?.items;
       if (!items || items.length === 0) {
         toast.error("Could not extract event details from this text");
