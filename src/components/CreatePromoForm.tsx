@@ -24,7 +24,6 @@ export const CreatePromoForm = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [validUntilDate, setValidUntilDate] = useState<Date>();
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [duplicateConfirmed, setDuplicateConfirmed] = useState(false);
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
@@ -268,7 +267,6 @@ export const CreatePromoForm = () => {
         price_currency: "IDR",
         original_price_amount: formData.originalPrice ? Number(formData.originalPrice) : null,
         discounted_price_amount: formData.discountedPrice ? Number(formData.discountedPrice) : null,
-        valid_until: validUntilDate?.toISOString(),
         day_of_week: formData.dayOfWeek,
         area: formData.area,
         drink_type: formData.drinkType,
@@ -340,16 +338,11 @@ export const CreatePromoForm = () => {
 
 
             <PromoDetails
-              validUntilDate={validUntilDate}
               promoType={formData.promoType}
               dayOfWeek={formData.dayOfWeek}
               area={formData.area}
               drinkType={formData.drinkType}
               discountedPrice={formData.discountedPrice}
-              onValidUntilChange={(date) => {
-                setValidUntilDate(date);
-                if (formErrors.length > 0) setFormErrors([]);
-              }}
               onPromoTypeChange={(value) => handleInputChange("promoType", value)}
               onDayOfWeekChange={(values) => handleInputChange("dayOfWeek", values)}
               onAreaChange={(value) => handleInputChange("area", value)}
@@ -398,7 +391,7 @@ export const CreatePromoForm = () => {
             />
 
             <div className="flex gap-3">
-              <PromoPreviewDialog formData={formData} validUntilDate={validUntilDate} />
+              <PromoPreviewDialog formData={formData} />
               <Button
                 type="submit"
                 className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 neon-glow disabled:opacity-50 disabled:cursor-not-allowed"
