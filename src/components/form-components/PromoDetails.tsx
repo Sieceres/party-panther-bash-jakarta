@@ -35,12 +35,17 @@ export const PromoDetails = ({
   dayOfWeek, 
   area, 
   drinkType,
+  originalPrice,
+  discountedPrice,
   onValidUntilChange, 
   onPromoTypeChange,
   onDayOfWeekChange, 
   onAreaChange, 
-  onDrinkTypeChange 
+  onDrinkTypeChange,
+  onOriginalPriceChange,
+  onDiscountedPriceChange
 }: PromoDetailsProps) => {
+
   return (
     <>
       <div className="space-y-2">
