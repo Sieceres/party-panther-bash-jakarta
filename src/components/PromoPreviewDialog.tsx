@@ -16,10 +16,9 @@ interface PromoPreviewDialogProps {
     image: string;
     dayOfWeek: string[];
   };
-  validUntilDate?: Date;
 }
 
-export const PromoPreviewDialog = ({ formData, validUntilDate }: PromoPreviewDialogProps) => {
+export const PromoPreviewDialog = ({ formData }: PromoPreviewDialogProps) => {
   const hasMinData = formData.title.trim();
   const drinkCategory = detectDrinkCategory(formData.title, formData.description, formData.promoType, formData.drinkType);
   const placeholderImage = getPlaceholderImage(drinkCategory);
@@ -69,9 +68,6 @@ export const PromoPreviewDialog = ({ formData, validUntilDate }: PromoPreviewDia
                 <Badge key={dt} variant="outline" className="text-xs">{dt}</Badge>
               ))}
             </div>
-            {validUntilDate && (
-              <p className="text-xs text-muted-foreground">Valid until {validUntilDate.toLocaleDateString()}</p>
-            )}
             <div className="flex items-center gap-1 text-xs text-muted-foreground pt-2 border-t border-border/30">
               <Star className="w-3.5 h-3.5" />
               <span>No reviews yet</span>

@@ -22,7 +22,6 @@ export const EditPromoPage = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [validUntilDate, setValidUntilDate] = useState<Date>();
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
   const [voucherEnabled, setVoucherEnabled] = useState(false);
   const [voucherMode, setVoucherMode] = useState("single");
@@ -87,11 +86,6 @@ export const EditPromoPage = () => {
           setVoucherEnabled((promo as any).voucher_enabled || false);
           setVoucherMode((promo as any).voucher_mode || "single");
           setVoucherCooldownDays((promo as any).voucher_cooldown_days || null);
-
-
-          if (promo.valid_until) {
-            setValidUntilDate(new Date(promo.valid_until));
-          }
         }
       } catch (error) {
         console.error('Error:', error);
@@ -194,7 +188,6 @@ export const EditPromoPage = () => {
         venue_address: formData.address,
         venue_latitude: null,
         venue_longitude: null,
-        valid_until: validUntilDate?.toISOString() || null,
         day_of_week: formData.dayOfWeek,
         area: formData.area,
         original_price_amount: formData.originalPrice ? Number(formData.originalPrice) : null,
@@ -283,12 +276,10 @@ export const EditPromoPage = () => {
                 area={formData.area}
                 discountedPrice={formData.discountedPrice}
                 drinkType={formData.drinkType}
-                validUntilDate={validUntilDate}
                 onDayOfWeekChange={(values) => handleInputChange('dayOfWeek', values)}
                 onAreaChange={(value) => handleInputChange('area', value)}
                 onDiscountedPriceChange={(value) => handleInputChange('discountedPrice', value)}
                 onDrinkTypeChange={(values) => handleInputChange('drinkType', values)}
-                onValidUntilChange={setValidUntilDate}
               />
 
               <ImageUpload
