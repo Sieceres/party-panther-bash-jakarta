@@ -145,33 +145,20 @@ export const PromoDetails = ({
       </div>
 
       {onDiscountedPriceChange && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="discountedPrice">Promo Price (IDR)</Label>
-            <Input
-              id="discountedPrice"
-              type="number"
-              inputMode="numeric"
-              min={0}
-              value={discountedPrice ?? ""}
-              onChange={(e) => onDiscountedPriceChange(e.target.value)}
-              placeholder="e.g. 160000"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="originalPrice">Original Price (IDR, optional)</Label>
-            <Input
-              id="originalPrice"
-              type="number"
-              inputMode="numeric"
-              min={0}
-              value={originalPrice ?? ""}
-              onChange={(e) => onOriginalPriceChange?.(e.target.value)}
-              placeholder="e.g. 220000"
-            />
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="discountedPrice">Promo Price (IDR)</Label>
+          <Input
+            id="discountedPrice"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            value={discountedPrice ?? ""}
+            onChange={(e) => onDiscountedPriceChange(e.target.value)}
+            placeholder="e.g. 160000"
+          />
         </div>
       )}
+
 
     </>
   );
