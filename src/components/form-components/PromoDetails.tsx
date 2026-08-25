@@ -17,14 +17,12 @@ interface PromoDetailsProps {
   dayOfWeek: string[];
   area: string;
   drinkType: string[];
-  originalPrice?: string;
   discountedPrice?: string;
   onValidUntilChange: (date: Date | undefined) => void;
   onPromoTypeChange?: (type: string) => void;
   onDayOfWeekChange: (days: string[]) => void;
   onAreaChange: (area: string) => void;
   onDrinkTypeChange: (types: string[]) => void;
-  onOriginalPriceChange?: (value: string) => void;
   onDiscountedPriceChange?: (value: string) => void;
 }
 
@@ -35,14 +33,12 @@ export const PromoDetails = ({
   dayOfWeek, 
   area, 
   drinkType,
-  originalPrice,
   discountedPrice,
   onValidUntilChange, 
   onPromoTypeChange,
   onDayOfWeekChange, 
   onAreaChange, 
   onDrinkTypeChange,
-  onOriginalPriceChange,
   onDiscountedPriceChange
 }: PromoDetailsProps) => {
 
