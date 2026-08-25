@@ -18,8 +18,11 @@ interface ExtractedPromo {
   day_of_week?: string[];
   area?: string;
   drink_type?: string[];
+  original_price_amount?: number;
+  discounted_price_amount?: number;
   image_url?: string;
 }
+
 
 interface PromoAIExtractProps {
   onExtracted: (data: ExtractedPromo) => void;
