@@ -35,33 +35,6 @@ export const PromoDetails = ({
 
   return (
     <>
-      <div className="space-y-2">
-        <Label>Valid Until (Optional)</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !validUntilDate && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {validUntilDate ? format(validUntilDate, "dd/MM/yyyy") : "Pick a date"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={validUntilDate}
-              onSelect={onValidUntilChange}
-              initialFocus
-              className="pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-
       {promoType !== undefined && onPromoTypeChange && (
         <div className="space-y-2">
           <Label htmlFor="promoType">Promo Type *</Label>
