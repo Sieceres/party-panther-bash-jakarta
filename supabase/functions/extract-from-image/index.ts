@@ -26,11 +26,12 @@ const promoTool = {
               discount_text: { type: "string", description: "The discount/deal text, e.g. '2-for-1 cocktails' or '50% off'" },
               promo_type: { type: "string", enum: ["Happy Hour", "Ladies Night", "Free Flow", "Bottle Promo", "Beer Deal", "Brunch Deal", "Food Special", "Drink Special", "Live Music", "Other"], description: "MUST be one of the enum values." },
               day_of_week: { type: "array", items: { type: "string" }, description: "Days this promo is active" },
-              area: { type: "string", description: "Specific neighborhood/area." },
+              area: { type: "string", enum: ["Kemang", "Senopati & Gunawarman", "SCBD", "Senayan", "Blok M & Melawai", "Kuningan & Setiabudi", "Sudirman & Thamrin", "Menteng & Cikini", "Kota Tua", "PIK", "Kelapa Gading", "Ancol", "Grogol", "Kebon Jeruk"], description: "Jakarta neighborhood, MUST be one of the enum values. Infer it from the address/street/landmark if the area is not named explicitly (e.g. Cikini -> 'Menteng & Cikini', Jl. Jenderal Sudirman Kav 52 / Fairgrounds -> 'SCBD', Pantai Indah Kapuk -> 'PIK'). Omit only if there is no location hint at all." },
               drink_type: { type: "array", items: { type: "string" }, description: "Types of drinks if applicable" },
-              original_price_amount: { type: "number", description: "Original price if visible" },
-              discounted_price_amount: { type: "number", description: "Discounted price if visible" },
+              original_price_amount: { type: "number", description: "Original / normal price as a plain number in the smallest full currency unit (no dots, no 'K'). E.g. 'IDR22.000.000' -> 22000000, '160K++' -> 160000." },
+              discounted_price_amount: { type: "number", description: "Promo / discounted / starting price as a plain number. E.g. '249++' -> 249000, '150K' -> 150000, 'Start from 160K++ for five bottles' -> 160000. Always fill this whenever ANY price is visible, even if there is no 'before' price." },
               price_currency: { type: "string", description: "Currency code, default IDR" },
+
               category: { type: "string", description: "Category: bar, club, restaurant, cafe, hotel, rooftop, beach_club, other" },
             },
             required: ["title", "venue_name", "discount_text"],
@@ -193,6 +194,21 @@ If you see a weekly schedule grid, extract every cell that contains a promo.
 Be thorough — extract everything visible. Use "description" to add any extra context.
 For discount_text, be specific (e.g. "Buy 1 Get 1 Free", "50% off all drinks", "IDR 50k cocktails").
 Default currency is IDR unless otherwise specified.
+
+CRITICAL - Prices (this is the most commonly missed field):
+Scan the whole image for ANY number that represents money, including small print and corners.
+Indonesian posters write prices in many shorthands — always convert to a plain integer in rupiah:
+- "160K", "160K++", "160rb", "Rp160.000", "IDR 160,000" -> 160000
+- "249++", "150K" -> 249000 / 150000 (a bare 2-3 digit number next to a drink/deal means thousands of rupiah)
+- "IDR22.000.000" / "22jt" -> 22000000
+- Strike-through / "was" price -> original_price_amount; the highlighted, "from", "early bird" or promo price -> discounted_price_amount.
+- If only ONE price is visible, put it in discounted_price_amount and leave original_price_amount empty.
+- Ignore phone numbers, addresses, dates, times, street numbers and years — they are not prices.
+Only leave both price fields empty if the poster truly shows no price at all (e.g. pure "Buy 1 Get 1" with no amount).
+
+CRITICAL - Area:
+Always try to set "area" using one of the allowed values. If the poster does not name a neighborhood, infer it from the street address, mall, building or landmark shown (e.g. "Jl. Cikini Raya" -> "Menteng & Cikini", "SCBD Lot 14" -> "SCBD", "Kemang Raya" -> "Kemang", "Sunter"/"Jakarta Utara" with no closer match -> leave empty).
+
 
 IMPORTANT - Drink categorization:
 For drink_type, categorize drinks specifically:

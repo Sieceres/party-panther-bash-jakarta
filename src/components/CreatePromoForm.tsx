@@ -10,6 +10,7 @@ import { PromoDiscount } from "./form-components/PromoDiscount";
 
 import { PromoDetails } from "./form-components/PromoDetails";
 import { ImageUpload } from "./form-components/ImageUpload";
+import { resolveAreaFromText } from "@/lib/area-config";
 import { PromoAIExtract } from "./form-components/PromoAIExtract";
 import { normalizePromoType } from "@/lib/promo-types";
 import { useDuplicateCheck } from "@/hooks/useDuplicateCheck";
@@ -39,6 +40,8 @@ export const CreatePromoForm = () => {
     dayOfWeek: [] as string[],
     area: "",
     drinkType: [] as string[],
+    originalPrice: "",
+    discountedPrice: "",
     image: ""
   });
   
@@ -131,8 +134,11 @@ export const CreatePromoForm = () => {
     day_of_week?: string[];
     area?: string;
     drink_type?: string[];
+    original_price_amount?: number;
+    discounted_price_amount?: number;
     image_url?: string;
   }) => {
+    const resolvedArea = resolveAreaFromText(data.area, data.venue_address, data.venue_name, data.description);
     setFormData(prev => ({
       ...prev,
       title: data.title || prev.title,
@@ -141,8 +147,10 @@ export const CreatePromoForm = () => {
       address: data.venue_address || prev.address,
       promoType: data.promo_type ? normalizePromoType(data.promo_type) : prev.promoType,
       dayOfWeek: data.day_of_week && data.day_of_week.length ? data.day_of_week : prev.dayOfWeek,
-      area: data.area || prev.area,
+      area: resolvedArea || prev.area,
       drinkType: data.drink_type && data.drink_type.length ? data.drink_type : prev.drinkType,
+      originalPrice: data.original_price_amount != null ? String(data.original_price_amount) : prev.originalPrice,
+      discountedPrice: data.discounted_price_amount != null ? String(data.discounted_price_amount) : prev.discountedPrice,
       image: data.image_url || prev.image,
     }));
     setHasUnsavedChanges(true);
@@ -258,6 +266,8 @@ export const CreatePromoForm = () => {
         venue_longitude: null,
         promo_type: formData.promoType,
         price_currency: "IDR",
+        original_price_amount: formData.originalPrice ? Number(formData.originalPrice) : null,
+        discounted_price_amount: formData.discountedPrice ? Number(formData.discountedPrice) : null,
         valid_until: validUntilDate?.toISOString(),
         day_of_week: formData.dayOfWeek,
         area: formData.area,
@@ -335,6 +345,8 @@ export const CreatePromoForm = () => {
               dayOfWeek={formData.dayOfWeek}
               area={formData.area}
               drinkType={formData.drinkType}
+              originalPrice={formData.originalPrice}
+              discountedPrice={formData.discountedPrice}
               onValidUntilChange={(date) => {
                 setValidUntilDate(date);
                 if (formErrors.length > 0) setFormErrors([]);
@@ -343,6 +355,8 @@ export const CreatePromoForm = () => {
               onDayOfWeekChange={(values) => handleInputChange("dayOfWeek", values)}
               onAreaChange={(value) => handleInputChange("area", value)}
               onDrinkTypeChange={(values) => handleInputChange("drinkType", values)}
+              onOriginalPriceChange={(value) => handleInputChange("originalPrice", value)}
+              onDiscountedPriceChange={(value) => handleInputChange("discountedPrice", value)}
             />
 
             <ImageUpload

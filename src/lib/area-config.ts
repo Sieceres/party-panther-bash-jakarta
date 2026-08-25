@@ -121,3 +121,58 @@ export function getRegionLabelForArea(area: string): string | null {
   }
   return null;
 }
+
+/** Aliases / landmarks that map free-text area or address hints to a canonical neighborhood */
+const AREA_ALIASES: Record<string, string> = {
+  "kemang": "Kemang",
+  "senopati": "Senopati & Gunawarman",
+  "gunawarman": "Senopati & Gunawarman",
+  "suryo": "Senopati & Gunawarman",
+  "scbd": "SCBD",
+  "sudirman central business district": "SCBD",
+  "fairgrounds": "SCBD",
+  "senayan": "Senayan",
+  "gelora": "Senayan",
+  "blok m": "Blok M & Melawai",
+  "melawai": "Blok M & Melawai",
+  "sudirman": "Sudirman & Thamrin",
+  "thamrin": "Sudirman & Thamrin",
+  "kuningan": "Kuningan & Setiabudi",
+  "mega kuningan": "Kuningan & Setiabudi",
+  "setiabudi": "Kuningan & Setiabudi",
+  "rasuna said": "Kuningan & Setiabudi",
+  "menteng": "Menteng & Cikini",
+  "cikini": "Menteng & Cikini",
+  "kota tua": "Kota Tua",
+  "glodok": "Kota Tua",
+  "pik": "PIK",
+  "pik 2": "PIK",
+  "pantai indah kapuk": "PIK",
+  "kelapa gading": "Kelapa Gading",
+  "ancol": "Ancol",
+  "grogol": "Grogol",
+  "kebon jeruk": "Kebon Jeruk",
+};
+
+/**
+ * Resolve a free-text area (and optional address) to one of the selectable
+ * neighborhoods. Returns null when nothing matches.
+ */
+export function resolveAreaFromText(...texts: (string | null | undefined)[]): string | null {
+  const haystack = texts.filter(Boolean).join(" ").toLowerCase();
+  if (!haystack.trim()) return null;
+
+  // Exact neighborhood name first
+  for (const hood of getAllNeighborhoods()) {
+    if (haystack.includes(hood.toLowerCase())) return hood;
+  }
+
+  // Longest alias wins (e.g. "mega kuningan" before "kuningan")
+  const aliases = Object.keys(AREA_ALIASES).sort((a, b) => b.length - a.length);
+  for (const alias of aliases) {
+    if (new RegExp(`\\b${alias.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(haystack)) {
+      return AREA_ALIASES[alias];
+    }
+  }
+  return null;
+}
