@@ -281,13 +281,11 @@ export const EditPromoPage = () => {
               <PromoDetails
                 dayOfWeek={formData.dayOfWeek}
                 area={formData.area}
-                originalPrice={formData.originalPrice}
                 discountedPrice={formData.discountedPrice}
                 drinkType={formData.drinkType}
                 validUntilDate={validUntilDate}
                 onDayOfWeekChange={(values) => handleInputChange('dayOfWeek', values)}
                 onAreaChange={(value) => handleInputChange('area', value)}
-                onOriginalPriceChange={(value) => handleInputChange('originalPrice', value)}
                 onDiscountedPriceChange={(value) => handleInputChange('discountedPrice', value)}
                 onDrinkTypeChange={(values) => handleInputChange('drinkType', values)}
                 onValidUntilChange={setValidUntilDate}
