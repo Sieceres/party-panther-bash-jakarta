@@ -10,6 +10,7 @@ import { PromoDiscount } from "@/components/form-components/PromoDiscount";
 
 import { PromoDetails } from "@/components/form-components/PromoDetails";
 import { ImageUpload } from "@/components/form-components/ImageUpload";
+import { resolveAreaFromText } from "@/lib/area-config";
 import { PromoAIExtract } from "@/components/form-components/PromoAIExtract";
 import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { VoucherSettings } from "@/components/VoucherSettings";
@@ -34,6 +35,8 @@ export const EditPromoPage = () => {
     address: "",
     dayOfWeek: [] as string[],
     area: "",
+    originalPrice: "",
+    discountedPrice: "",
     drinkType: [] as string[],
     image: ""
   });
@@ -74,6 +77,8 @@ export const EditPromoPage = () => {
             address: promo.venue_address || "",
             dayOfWeek: Array.isArray(promo.day_of_week) ? promo.day_of_week : (promo.day_of_week ? [promo.day_of_week] : []),
             area: promo.area || "",
+            originalPrice: promo.original_price_amount != null ? String(promo.original_price_amount) : "",
+            discountedPrice: promo.discounted_price_amount != null ? String(promo.discounted_price_amount) : "",
             drinkType: Array.isArray(promo.drink_type) ? promo.drink_type : (promo.drink_type ? [promo.drink_type] : []),
             image: promo.image_url || ""
           });
@@ -124,8 +129,11 @@ export const EditPromoPage = () => {
     day_of_week?: string[];
     area?: string;
     drink_type?: string[];
+    original_price_amount?: number;
+    discounted_price_amount?: number;
     image_url?: string;
   }) => {
+    const resolvedArea = resolveAreaFromText(data.area, data.venue_address, data.venue_name, data.description);
     setFormData(prev => ({
       ...prev,
       title: data.title || prev.title,
@@ -134,8 +142,10 @@ export const EditPromoPage = () => {
       venue: data.venue_name || prev.venue,
       address: data.venue_address || prev.address,
       dayOfWeek: data.day_of_week && data.day_of_week.length ? data.day_of_week : prev.dayOfWeek,
-      area: data.area || prev.area,
+      area: resolvedArea || prev.area,
       drinkType: data.drink_type && data.drink_type.length ? data.drink_type : prev.drinkType,
+      originalPrice: data.original_price_amount != null ? String(data.original_price_amount) : prev.originalPrice,
+      discountedPrice: data.discounted_price_amount != null ? String(data.discounted_price_amount) : prev.discountedPrice,
       image: data.image_url || prev.image,
     }));
   };
@@ -187,6 +197,8 @@ export const EditPromoPage = () => {
         valid_until: validUntilDate?.toISOString() || null,
         day_of_week: formData.dayOfWeek,
         area: formData.area,
+        original_price_amount: formData.originalPrice ? Number(formData.originalPrice) : null,
+        discounted_price_amount: formData.discountedPrice ? Number(formData.discountedPrice) : null,
         drink_type: formData.drinkType,
         image_url: formData.image || null,
         venue_id: venueId,
@@ -269,10 +281,14 @@ export const EditPromoPage = () => {
               <PromoDetails
                 dayOfWeek={formData.dayOfWeek}
                 area={formData.area}
+                originalPrice={formData.originalPrice}
+                discountedPrice={formData.discountedPrice}
                 drinkType={formData.drinkType}
                 validUntilDate={validUntilDate}
                 onDayOfWeekChange={(values) => handleInputChange('dayOfWeek', values)}
                 onAreaChange={(value) => handleInputChange('area', value)}
+                onOriginalPriceChange={(value) => handleInputChange('originalPrice', value)}
+                onDiscountedPriceChange={(value) => handleInputChange('discountedPrice', value)}
                 onDrinkTypeChange={(values) => handleInputChange('drinkType', values)}
                 onValidUntilChange={setValidUntilDate}
               />
