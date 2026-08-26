@@ -2,10 +2,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Hard limit for a single AI extraction call.
- * Vision extraction routinely needs 15-40s, so a 10s cut-off would abort
- * healthy requests. 60s is the "it's really stuck" threshold.
+ * Allow enough time for normal extraction while ending a genuinely stuck UI
+ * promptly.
  */
-export const EXTRACTION_TIMEOUT_MS = 60000;
+export const EXTRACTION_TIMEOUT_MS = 20000;
 
 export class ExtractionTimeoutError extends Error {
   constructor() {
