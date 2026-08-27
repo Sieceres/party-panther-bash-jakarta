@@ -375,7 +375,23 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
               return [dayStr, expiry].filter(Boolean).join(' · ') || 'No expiry';
             })()}
           </p>
+          {(promo.discounted_price_amount != null || promo.original_price_amount != null) && (
+            <div className="flex items-baseline gap-2">
+              {promo.discounted_price_amount != null && (
+                <span className="text-base sm:text-lg font-bold text-primary">
+                  {formatPrice(promo.discounted_price_amount, promo.price_currency)}
+                </span>
+              )}
+              {promo.original_price_amount != null &&
+                promo.original_price_amount !== promo.discounted_price_amount && (
+                <span className="text-xs sm:text-sm text-muted-foreground line-through">
+                  {formatPrice(promo.original_price_amount, promo.price_currency)}
+                </span>
+              )}
+            </div>
+          )}
         </div>
+
 
         {/* Rating/Reviews */}
         <div className="flex items-center justify-between pt-2 border-t border-border/30">
