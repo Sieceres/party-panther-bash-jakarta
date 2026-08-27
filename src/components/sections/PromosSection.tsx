@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LoginDialog } from "@/components/LoginDialog";
-import { Star, Lock, Filter, RotateCcw, ArrowUpDown, Download, Search, ClipboardCheck } from "lucide-react";
+import { Star, Lock, Filter, RotateCcw, ArrowUpDown, Download, Search, ClipboardCheck, Share2 } from "lucide-react";
 import { exportPromosToExcel } from "@/lib/promo-export";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -385,6 +385,22 @@ export const PromosSection = ({
               </SelectContent>
             </Select>
           </div>
+          <Button
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(window.location.href);
+                toast({ title: "Link copied", description: "Share this link to show these filtered promos." });
+              } catch {
+                toast({ title: "Couldn't copy link", description: window.location.href, variant: "destructive" });
+              }
+            }}
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground self-end mb-0.5"
+          >
+            <Share2 className="w-4 h-4 mr-1" />
+            Share filters
+          </Button>
           {hasActiveFilters && (
             <Button
               onClick={resetAllFilters}
