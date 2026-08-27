@@ -382,6 +382,11 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
           <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
             <Star className="w-4 h-4 text-yellow-400 fill-current" />
             <span>{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
+            {promo.created_at && (
+              <span className="text-[11px] sm:text-xs text-muted-foreground/80">
+                · Added {format(new Date(promo.created_at), "d MMM yyyy")}
+              </span>
+            )}
           </div>
           <Button
             variant="ghost"
