@@ -711,6 +711,7 @@ export const EventDetailPage = () => {
   const isOwner = user && user.id === event?.created_by;
   const isCoOrganizer = user && attendees.some((a) => a.user_id === user.id && a.is_co_organizer);
   const canDelete = isOwner || isAdmin;
+  const canManagePayments = isOwner || isCoOrganizer || isAdmin;
   const currentAttendee = user ? attendees.find((a) => a.user_id === user.id) : null;
 
   // Helper functions for pagination
@@ -748,10 +749,10 @@ export const EventDetailPage = () => {
   };
 
   const handleTogglePayment = async (attendeeId: string, currentStatus: boolean) => {
-    if (!isAdmin) {
+    if (!canManagePayments) {
       toast({
         title: "Unauthorized",
-        description: "Only admins can mark payment status.",
+        description: "Only organizers and admins can mark payment status.",
         variant: "destructive",
       });
       return;
@@ -1404,7 +1405,7 @@ export const EventDetailPage = () => {
                               )}
 
                               {/* Receipt status for admins - only if payment tracking is enabled */}
-                              {isAdmin && attendee.receipt_url && event.track_payments && (
+                              {canManagePayments && attendee.receipt_url && event.track_payments && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -1440,26 +1441,26 @@ export const EventDetailPage = () => {
                                 </Button>
                               )}
 
+                              {canManagePayments && event.track_payments && (
+                                <Button
+                                  variant={attendee.payment_status ? "outline" : "default"}
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleTogglePayment(attendee.id, attendee.payment_status);
+                                  }}
+                                  className={
+                                    attendee.payment_status
+                                      ? "border-green-500 text-green-500"
+                                      : "bg-green-500 hover:bg-green-600"
+                                  }
+                                >
+                                  {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
+                                </Button>
+                              )}
+
                               {isAdmin && (
                                 <>
-                                  {/* Payment status toggle - only if payment tracking is enabled */}
-                                  {event.track_payments && (
-                                    <Button
-                                      variant={attendee.payment_status ? "outline" : "default"}
-                                      size="sm"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleTogglePayment(attendee.id, attendee.payment_status);
-                                      }}
-                                      className={
-                                        attendee.payment_status
-                                          ? "border-green-500 text-green-500"
-                                          : "bg-green-500 hover:bg-green-600"
-                                      }
-                                    >
-                                      {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
-                                    </Button>
-                                  )}
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                       <Button
