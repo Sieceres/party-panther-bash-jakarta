@@ -1659,6 +1659,35 @@ export const AdminDashboard = () => {
           </AlertDialogContent>
         </AlertDialog>
 
+        <AlertDialog open={clearPromosOpen} onOpenChange={(open) => { if (!clearingPromos) { setClearPromosOpen(open); if (!open) setClearPromosConfirm(""); } }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete all promos?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently deletes all {promos.length} promos along with their reviews and comments. This cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="clearPromosConfirm">Type DELETE to confirm</Label>
+              <Input
+                id="clearPromosConfirm"
+                value={clearPromosConfirm}
+                onChange={(e) => setClearPromosConfirm(e.target.value)}
+                placeholder="DELETE"
+              />
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={clearingPromos}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                disabled={clearPromosConfirm !== "DELETE" || clearingPromos}
+                onClick={(e) => { e.preventDefault(); handleClearAllPromos(); }}
+              >
+                {clearingPromos ? "Deleting..." : "Delete all"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         </div>
       </div>
     </>
