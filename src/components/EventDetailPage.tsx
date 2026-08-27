@@ -711,6 +711,7 @@ export const EventDetailPage = () => {
   const isOwner = user && user.id === event?.created_by;
   const isCoOrganizer = user && attendees.some((a) => a.user_id === user.id && a.is_co_organizer);
   const canDelete = isOwner || isAdmin;
+  const canManagePayments = isOwner || isCoOrganizer || isAdmin;
   const currentAttendee = user ? attendees.find((a) => a.user_id === user.id) : null;
 
   // Helper functions for pagination
@@ -748,10 +749,10 @@ export const EventDetailPage = () => {
   };
 
   const handleTogglePayment = async (attendeeId: string, currentStatus: boolean) => {
-    if (!isAdmin) {
+    if (!canManagePayments) {
       toast({
         title: "Unauthorized",
-        description: "Only admins can mark payment status.",
+        description: "Only organizers and admins can mark payment status.",
         variant: "destructive",
       });
       return;
@@ -1404,7 +1405,7 @@ export const EventDetailPage = () => {
                               )}
 
                               {/* Receipt status for admins - only if payment tracking is enabled */}
-                              {isAdmin && attendee.receipt_url && event.track_payments && (
+                              {canManagePayments && attendee.receipt_url && event.track_payments && (
                                 <Button
                                   variant="outline"
                                   size="sm"
