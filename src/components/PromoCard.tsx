@@ -60,8 +60,14 @@ interface PromoCardProps {
   isVenueOwner?: boolean;
 }
 
-import { format } from "date-fns";
 import { getPromoUrl, getEditPromoUrl, getVenueUrl } from "@/lib/slug-utils";
+
+const formatPrice = (amount: number, currency?: string | null) => {
+  const code = currency || "IDR";
+  const formatted = new Intl.NumberFormat("id-ID").format(amount);
+  return code === "IDR" ? `Rp ${formatted}` : `${code} ${formatted}`;
+};
+
 
 export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0, isSelected = false, isVenueOwner = false }: PromoCardProps) => {
   const navigate = useNavigate();
