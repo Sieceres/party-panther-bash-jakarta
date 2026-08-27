@@ -149,7 +149,7 @@ export const ReportDialog = ({ type, targetId, targetTitle, open, onOpenChange }
         <DialogTrigger asChild>
           <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
             <Flag className="w-4 h-4 mr-2" />
-            Report
+            {type === 'promo' ? 'Report wrong info' : 'Report'}
           </Button>
         </DialogTrigger>
       )}
