@@ -81,6 +81,9 @@ export const AdminDashboard = () => {
     isCurrentlyAdmin?: boolean;
     isCurrentlySuperAdmin?: boolean;
   } | null>(null);
+  const [clearPromosOpen, setClearPromosOpen] = useState(false);
+  const [clearPromosConfirm, setClearPromosConfirm] = useState("");
+  const [clearingPromos, setClearingPromos] = useState(false);
   const [refreshingPromoStats, setRefreshingPromoStats] = useState(false);
   const [refreshingEventStats, setRefreshingEventStats] = useState(false);
   const [backfillingPromos, setBackfillingPromos] = useState(false);
