@@ -45,6 +45,7 @@ interface Promo {
   average_rating?: number;
   total_reviews?: number;
   is_favorite?: boolean;
+  created_at?: string;
 }
 
 interface PromoCardProps {

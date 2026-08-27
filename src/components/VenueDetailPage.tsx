@@ -487,6 +487,7 @@ export const VenueDetailPage = () => {
                           area: promo.area || "",
                           drinkType: promo.drink_type || [],
                           created_by: promo.created_by,
+                          created_at: (promo as any).created_at,
                         }}
                       />
                     ))}
