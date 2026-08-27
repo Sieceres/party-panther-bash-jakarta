@@ -1441,26 +1441,26 @@ export const EventDetailPage = () => {
                                 </Button>
                               )}
 
+                              {canManagePayments && event.track_payments && (
+                                <Button
+                                  variant={attendee.payment_status ? "outline" : "default"}
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleTogglePayment(attendee.id, attendee.payment_status);
+                                  }}
+                                  className={
+                                    attendee.payment_status
+                                      ? "border-green-500 text-green-500"
+                                      : "bg-green-500 hover:bg-green-600"
+                                  }
+                                >
+                                  {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
+                                </Button>
+                              )}
+
                               {isAdmin && (
                                 <>
-                                  {/* Payment status toggle - only if payment tracking is enabled */}
-                                  {event.track_payments && (
-                                    <Button
-                                      variant={attendee.payment_status ? "outline" : "default"}
-                                      size="sm"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleTogglePayment(attendee.id, attendee.payment_status);
-                                      }}
-                                      className={
-                                        attendee.payment_status
-                                          ? "border-green-500 text-green-500"
-                                          : "bg-green-500 hover:bg-green-600"
-                                      }
-                                    >
-                                      {attendee.payment_status ? "Mark Unpaid" : "Mark Paid"}
-                                    </Button>
-                                  )}
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                       <Button
