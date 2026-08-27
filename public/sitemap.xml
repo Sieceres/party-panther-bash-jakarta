@@ -53,7 +53,7 @@
   </url>
   <url>
     <loc>https://partypanther.net/e/angkot-pub-crawl-viii</loc>
-    <lastmod>2026-08-26</lastmod>
+    <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -275,12 +275,6 @@
   </url>
   <url>
     <loc>https://partypanther.net/p/costess-ladies-night</loc>
-    <lastmod>2026-08-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://partypanther.net/p/demo-free-flow-beer</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -964,12 +958,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://partypanther.net/p/demo-free-flow-beer-1</loc>
-    <lastmod>2026-08-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://partypanther.net/p/egg-hotel-cocktail-promo-1</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
@@ -1474,12 +1462,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://partypanther.net/p/test-promo</loc>
-    <lastmod>2026-08-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://partypanther.net/v/gaise</loc>
     <lastmod>2026-04-08</lastmod>
     <changefreq>weekly</changefreq>
@@ -1528,8 +1510,8 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://partypanther.net/v/demo</loc>
-    <lastmod>2026-03-24</lastmod>
+    <loc>https://partypanther.net/v/afrokosa</loc>
+    <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1548,12 +1530,6 @@
   <url>
     <loc>https://partypanther.net/v/slits</loc>
     <lastmod>2026-04-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://partypanther.net/v/kismet-copper-30</loc>
-    <lastmod>2026-03-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
