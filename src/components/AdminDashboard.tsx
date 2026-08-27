@@ -294,6 +294,39 @@ export const AdminDashboard = () => {
     setPendingAction(null);
   };
 
+  const handleClearAllPromos = async () => {
+    setClearingPromos(true);
+    let deleted = 0;
+    let failed = 0;
+    try {
+      const { data: allPromos, error } = await supabase.from('promos').select('id');
+      if (error) throw error;
+
+      for (const p of allPromos || []) {
+        const { data, error: fnError } = await supabase.functions.invoke('secure-delete', {
+          body: { promo_id: p.id, type: 'promo' }
+        });
+        if (fnError || !data?.success) failed++;
+        else deleted++;
+      }
+
+      toast({
+        title: "Promos cleared",
+        description: `${deleted} promo${deleted === 1 ? '' : 's'} deleted${failed ? `, ${failed} failed` : ''}.`,
+        variant: failed ? "destructive" : undefined,
+      });
+      await fetchData();
+    } catch (e: any) {
+      console.error('Error clearing promos:', e);
+      toast({ title: "Error", description: "Failed to clear promos. Please try again.", variant: "destructive" });
+    } finally {
+      setClearingPromos(false);
+      setClearPromosOpen(false);
+      setClearPromosConfirm("");
+    }
+  };
+
+
   const handleBanUser = async (userId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
