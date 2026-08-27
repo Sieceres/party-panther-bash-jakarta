@@ -270,6 +270,11 @@ export const PromoDetailPage = () => {
                       </Badge>
                     )}
                   </div>
+                  {promo.created_at && (
+                    <p className="text-muted-foreground" style={{ fontSize: 'clamp(0.75rem, 1.1vw, 0.813rem)' }}>
+                      Added {new Date(promo.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 text-muted-foreground" style={{ fontSize: 'clamp(0.813rem, 1.2vw, 0.875rem)' }}>
                   <Star className="w-4 h-4 text-yellow-400 fill-current" />

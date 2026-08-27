@@ -81,6 +81,9 @@ export const AdminDashboard = () => {
     isCurrentlyAdmin?: boolean;
     isCurrentlySuperAdmin?: boolean;
   } | null>(null);
+  const [clearPromosOpen, setClearPromosOpen] = useState(false);
+  const [clearPromosConfirm, setClearPromosConfirm] = useState("");
+  const [clearingPromos, setClearingPromos] = useState(false);
   const [refreshingPromoStats, setRefreshingPromoStats] = useState(false);
   const [refreshingEventStats, setRefreshingEventStats] = useState(false);
   const [backfillingPromos, setBackfillingPromos] = useState(false);
@@ -290,6 +293,39 @@ export const AdminDashboard = () => {
     }
     setPendingAction(null);
   };
+
+  const handleClearAllPromos = async () => {
+    setClearingPromos(true);
+    let deleted = 0;
+    let failed = 0;
+    try {
+      const { data: allPromos, error } = await supabase.from('promos').select('id');
+      if (error) throw error;
+
+      for (const p of allPromos || []) {
+        const { data, error: fnError } = await supabase.functions.invoke('secure-delete', {
+          body: { promo_id: p.id, type: 'promo' }
+        });
+        if (fnError || !data?.success) failed++;
+        else deleted++;
+      }
+
+      toast({
+        title: "Promos cleared",
+        description: `${deleted} promo${deleted === 1 ? '' : 's'} deleted${failed ? `, ${failed} failed` : ''}.`,
+        variant: failed ? "destructive" : undefined,
+      });
+      await fetchData();
+    } catch (e: any) {
+      console.error('Error clearing promos:', e);
+      toast({ title: "Error", description: "Failed to clear promos. Please try again.", variant: "destructive" });
+    } finally {
+      setClearingPromos(false);
+      setClearPromosOpen(false);
+      setClearPromosConfirm("");
+    }
+  };
+
 
   const handleBanUser = async (userId: string) => {
     try {
@@ -990,8 +1026,17 @@ export const AdminDashboard = () => {
 
           <TabsContent value="promos" className="space-y-4">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
                 <CardTitle>Manage Promos</CardTitle>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={clearingPromos || promos.length === 0}
+                  onClick={() => { setClearPromosConfirm(""); setClearPromosOpen(true); }}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {clearingPromos ? "Clearing..." : "Clear all promos"}
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -1610,6 +1655,35 @@ export const AdminDashboard = () => {
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setPendingAction(null)}>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={confirmAction}>Confirm</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={clearPromosOpen} onOpenChange={(open) => { if (!clearingPromos) { setClearPromosOpen(open); if (!open) setClearPromosConfirm(""); } }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete all promos?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently deletes all {promos.length} promos along with their reviews and comments. This cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="clearPromosConfirm">Type DELETE to confirm</Label>
+              <Input
+                id="clearPromosConfirm"
+                value={clearPromosConfirm}
+                onChange={(e) => setClearPromosConfirm(e.target.value)}
+                placeholder="DELETE"
+              />
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={clearingPromos}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                disabled={clearPromosConfirm !== "DELETE" || clearingPromos}
+                onClick={(e) => { e.preventDefault(); handleClearAllPromos(); }}
+              >
+                {clearingPromos ? "Deleting..." : "Delete all"}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
