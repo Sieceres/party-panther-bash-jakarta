@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { HomeContent } from "@/components/sections/HomeContent";
 import { EventsSection } from "@/components/sections/EventsSection";
@@ -19,6 +19,7 @@ interface IndexProps {
 const Index = ({ initialSection = "home" }: IndexProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState(initialSection);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showCreatePromo, setShowCreatePromo] = useState(false);
