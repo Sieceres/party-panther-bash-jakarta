@@ -46,6 +46,9 @@ interface Promo {
   total_reviews?: number;
   is_favorite?: boolean;
   created_at?: string;
+  discounted_price_amount?: number | null;
+  original_price_amount?: number | null;
+  price_currency?: string | null;
 }
 
 interface PromoCardProps {
