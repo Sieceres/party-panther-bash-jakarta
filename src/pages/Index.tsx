@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { HomeContent } from "@/components/sections/HomeContent";
 import { EventsSection } from "@/components/sections/EventsSection";
@@ -19,6 +19,7 @@ interface IndexProps {
 const Index = ({ initialSection = "home" }: IndexProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState(initialSection);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [showCreatePromo, setShowCreatePromo] = useState(false);
@@ -80,16 +81,24 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
     }
   };
 
-  // Persist promo filters in sessionStorage so they survive navigation
+  // Promo filters: URL query params take priority (shareable links),
+  // sessionStorage is the fallback so filters survive in-app navigation.
   const storedFilters = typeof window !== 'undefined' ? sessionStorage.getItem('promoFilters') : null;
   const parsedFilters = storedFilters ? JSON.parse(storedFilters) : null;
 
-  const [dayFilter, setDayFilter] = useState<string[]>(parsedFilters?.dayFilter || ["all"]);
-  const [areaFilter, setAreaFilter] = useState<string[]>(parsedFilters?.areaFilter || ["all"]);
-  const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(parsedFilters?.drinkTypeFilter || ["all"]);
-  const [promoTypeFilter, setPromoTypeFilter] = useState<string[]>(parsedFilters?.promoTypeFilter || ["all"]);
-  const [promoSortBy, setPromoSortBy] = useState(parsedFilters?.promoSortBy || "newest");
-  const [promoSearchQuery, setPromoSearchQuery] = useState(parsedFilters?.promoSearchQuery || "");
+  const paramList = (key: string, fallback: string[]) => {
+    const raw = searchParams.get(key);
+    if (!raw) return fallback || ["all"];
+    const values = raw.split(',').map(v => v.trim()).filter(Boolean);
+    return values.length ? values : ["all"];
+  };
+
+  const [dayFilter, setDayFilter] = useState<string[]>(paramList('day', parsedFilters?.dayFilter || ["all"]));
+  const [areaFilter, setAreaFilter] = useState<string[]>(paramList('area', parsedFilters?.areaFilter || ["all"]));
+  const [drinkTypeFilter, setDrinkTypeFilter] = useState<string[]>(paramList('drink', parsedFilters?.drinkTypeFilter || ["all"]));
+  const [promoTypeFilter, setPromoTypeFilter] = useState<string[]>(paramList('type', parsedFilters?.promoTypeFilter || ["all"]));
+  const [promoSortBy, setPromoSortBy] = useState(searchParams.get('sort') || parsedFilters?.promoSortBy || "newest");
+  const [promoSearchQuery, setPromoSearchQuery] = useState(searchParams.get('q') || parsedFilters?.promoSearchQuery || "");
   const storedEventFilters = typeof window !== 'undefined' ? sessionStorage.getItem('eventFilters') : null;
   const parsedEventFilters = storedEventFilters ? JSON.parse(storedEventFilters) : null;
   const [eventSortBy, setEventSortBy] = useState(parsedEventFilters?.eventSortBy || "date-asc");
@@ -102,6 +111,24 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
       dayFilter, areaFilter, drinkTypeFilter, promoTypeFilter, promoSortBy, promoSearchQuery
     }));
   }, [dayFilter, areaFilter, drinkTypeFilter, promoTypeFilter, promoSortBy, promoSearchQuery]);
+
+  // Mirror promo filters into the URL so a filtered view can be shared
+  useEffect(() => {
+    if (activeSection !== 'promos') return;
+    const params = new URLSearchParams();
+    const setList = (key: string, values: string[]) => {
+      if (values.length && !values.includes('all')) params.set(key, values.join(','));
+    };
+    setList('day', dayFilter);
+    setList('area', areaFilter);
+    setList('drink', drinkTypeFilter);
+    setList('type', promoTypeFilter);
+    if (promoSearchQuery.trim()) params.set('q', promoSearchQuery.trim());
+    if (promoSortBy && promoSortBy !== 'newest') params.set('sort', promoSortBy);
+    setSearchParams(params, { replace: true });
+  }, [activeSection, dayFilter, areaFilter, drinkTypeFilter, promoTypeFilter, promoSearchQuery, promoSortBy, setSearchParams]);
+
+
 
   // Save event filters to sessionStorage whenever they change
   useEffect(() => {

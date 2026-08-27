@@ -46,6 +46,9 @@ interface Promo {
   total_reviews?: number;
   is_favorite?: boolean;
   created_at?: string;
+  discounted_price_amount?: number | null;
+  original_price_amount?: number | null;
+  price_currency?: string | null;
 }
 
 interface PromoCardProps {
@@ -57,8 +60,14 @@ interface PromoCardProps {
   isVenueOwner?: boolean;
 }
 
-import { format } from "date-fns";
 import { getPromoUrl, getEditPromoUrl, getVenueUrl } from "@/lib/slug-utils";
+
+const formatPrice = (amount: number, currency?: string | null) => {
+  const code = currency || "IDR";
+  const formatted = new Intl.NumberFormat("id-ID").format(amount);
+  return code === "IDR" ? `Rp ${formatted}` : `${code} ${formatted}`;
+};
+
 
 export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0, isSelected = false, isVenueOwner = false }: PromoCardProps) => {
   const navigate = useNavigate();
@@ -375,18 +384,29 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
               return [dayStr, expiry].filter(Boolean).join(' · ') || 'No expiry';
             })()}
           </p>
+          {(promo.discounted_price_amount != null || promo.original_price_amount != null) && (
+            <div className="flex items-baseline gap-2">
+              {promo.discounted_price_amount != null && (
+                <span className="text-base sm:text-lg font-bold text-primary">
+                  {formatPrice(promo.discounted_price_amount, promo.price_currency)}
+                </span>
+              )}
+              {promo.original_price_amount != null &&
+                promo.original_price_amount !== promo.discounted_price_amount && (
+                <span className="text-xs sm:text-sm text-muted-foreground line-through">
+                  {formatPrice(promo.original_price_amount, promo.price_currency)}
+                </span>
+              )}
+            </div>
+          )}
         </div>
+
 
         {/* Rating/Reviews */}
         <div className="flex items-center justify-between pt-2 border-t border-border/30">
           <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
             <Star className="w-4 h-4 text-yellow-400 fill-current" />
             <span>{totalReviews > 0 ? averageRating.toFixed(1) : "No rating"}</span>
-            {promo.created_at && (
-              <span className="text-[11px] sm:text-xs text-muted-foreground/80">
-                · Added {format(new Date(promo.created_at), "d MMM yyyy")}
-              </span>
-            )}
           </div>
           <Button
             variant="ghost"

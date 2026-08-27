@@ -488,6 +488,9 @@ export const VenueDetailPage = () => {
                           drinkType: promo.drink_type || [],
                           created_by: promo.created_by,
                           created_at: (promo as any).created_at,
+                          discounted_price_amount: (promo as any).discounted_price_amount,
+                          original_price_amount: (promo as any).original_price_amount,
+                          price_currency: (promo as any).price_currency,
                         }}
                       />
                     ))}
