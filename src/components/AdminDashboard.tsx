@@ -1026,8 +1026,17 @@ export const AdminDashboard = () => {
 
           <TabsContent value="promos" className="space-y-4">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
                 <CardTitle>Manage Promos</CardTitle>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={clearingPromos || promos.length === 0}
+                  onClick={() => { setClearPromosConfirm(""); setClearPromosOpen(true); }}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {clearingPromos ? "Clearing..." : "Clear all promos"}
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
