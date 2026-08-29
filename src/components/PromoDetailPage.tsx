@@ -10,6 +10,8 @@ import { GoogleMap } from "./GoogleMap";
 import { ReviewsList } from "./ReviewsList";
 import { ReportDialog } from "./ReportDialog";
 import { SpinningPaws } from "./ui/spinning-paws";
+import { ZoomableImage } from "./ZoomableImage";
+
 import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
