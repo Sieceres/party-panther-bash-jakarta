@@ -1427,6 +1427,11 @@ export const EventDetailPage = () => {
                                       {attendee.payment_status && event.track_payments && (
                                         <span className="text-base sm:text-lg">💰</span>
                                       )}
+                                      {(attendee.guest_count || 0) > 0 && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          +{attendee.guest_count} guest{attendee.guest_count === 1 ? "" : "s"}
+                                        </Badge>
+                                      )}
                                       {!attendee.payment_status &&
                                         attendee.payment_claimed_at &&
                                         event.track_payments && (
@@ -1434,6 +1439,7 @@ export const EventDetailPage = () => {
                                             Pending
                                           </Badge>
                                         )}
+
                                     </div>
                                     {!isAnon && attendee.profiles?.bio && (
                                       <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
