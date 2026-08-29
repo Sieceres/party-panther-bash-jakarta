@@ -1105,6 +1105,24 @@ export const EventDetailPage = () => {
                           </TooltipProvider>
                         </div>
                       </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-1.5">
+                          <UserIcon className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">Bringing extra guests?</span>
+                        </div>
+                        <select
+                          value={guestCount}
+                          onChange={(e) => setGuestCount(Number(e.target.value))}
+                          className="h-9 rounded-md border border-border bg-background px-2 text-sm"
+                          aria-label="Number of extra guests"
+                        >
+                          {Array.from({ length: MAX_GUESTS + 1 }, (_, n) => (
+                            <option key={n} value={n}>
+                              {n === 0 ? "Just me" : `+${n}`}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                       <Button variant="cta" onClick={handleJoinEvent} disabled={joiningEvent} className="w-full">
                         {joiningEvent ? (
                           <span className="flex items-center gap-2">
@@ -1118,15 +1136,39 @@ export const EventDetailPage = () => {
                     </div>
                   )}
                   {user && hasJoined && (
-                    <Button
-                      variant="outline"
-                      onClick={handleUnjoinEvent}
-                      disabled={leavingEvent}
-                      className="w-full border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-white"
-                    >
-                      {leavingEvent ? "Leaving..." : "✓ Joined - Click to Leave"}
-                    </Button>
+                    <div className="space-y-3">
+                      {currentAttendee && (
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-1.5">
+                            <UserIcon className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">Extra guests</span>
+                          </div>
+                          <select
+                            value={currentAttendee.guest_count || 0}
+                            disabled={savingGuests}
+                            onChange={(e) => updateGuestCount(Number(e.target.value))}
+                            className="h-9 rounded-md border border-border bg-background px-2 text-sm"
+                            aria-label="Number of extra guests"
+                          >
+                            {Array.from({ length: MAX_GUESTS + 1 }, (_, n) => (
+                              <option key={n} value={n}>
+                                {n === 0 ? "Just me" : `+${n}`}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                      <Button
+                        variant="outline"
+                        onClick={handleUnjoinEvent}
+                        disabled={leavingEvent}
+                        className="w-full border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-white"
+                      >
+                        {leavingEvent ? "Leaving..." : "✓ Joined - Click to Leave"}
+                      </Button>
+                    </div>
                   )}
+
 
                   <Dialog open={joiningDialogOpen} onOpenChange={setJoiningDialogOpen}>
                     <DialogContent className="sm:max-w-md">
