@@ -1010,9 +1010,14 @@ export const EventDetailPage = () => {
               {/* Event Image */}
               {event.image_url && (
                 <div className="rounded-lg overflow-hidden bg-muted/40 flex items-center justify-center max-h-[80vh]">
-                  <img src={event.image_url} alt={event.title} className="w-full h-auto max-h-[80vh] object-contain" />
+                  <ZoomableImage
+                    src={event.image_url}
+                    alt={event.title}
+                    className="w-full h-auto max-h-[80vh] object-contain"
+                  />
                 </div>
               )}
+
 
               {/* Event Description */}
               <Card>
