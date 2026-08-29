@@ -1331,7 +1331,7 @@ export const EventDetailPage = () => {
                 <CardHeader className="p-4 sm:p-5 md:p-6">
                   <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     <UserIcon className="w-5 h-5 flex-shrink-0" />
-                    <span>Attendees ({attendees.length})</span>
+                    <span>Attendees ({totalWithGuests})</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
