@@ -412,6 +412,7 @@ export const EventDetailPage = () => {
           const { data: joined, error } = await (supabase as any).rpc("join_event", {
             _event_id: event.id,
             _is_anonymous: joinAnonymously,
+            _guest_count: guestCount,
           });
 
           if (error) {
@@ -423,7 +424,8 @@ export const EventDetailPage = () => {
           }
 
           setHasJoined(true);
-          setTotalAttendees((prev) => prev + 1);
+          setTotalAttendees((prev) => prev + 1 + guestCount);
+
 
           // Refresh attendees list
           await refreshAttendees();
