@@ -723,6 +723,32 @@ export const EventDetailPage = () => {
   const canDelete = isOwner || isAdmin;
   const canManagePayments = isOwner || isCoOrganizer || isAdmin;
   const currentAttendee = user ? attendees.find((a) => a.user_id === user.id) : null;
+  const MAX_GUESTS = 5;
+  const totalWithGuests = attendees.reduce((sum, a) => sum + 1 + (a.guest_count || 0), 0);
+
+  const updateGuestCount = async (value: number) => {
+    if (!currentAttendee) return;
+    const next = Math.min(Math.max(value, 0), MAX_GUESTS);
+    setSavingGuests(true);
+    try {
+      const { error } = await supabase
+        .from("event_attendees")
+        .update({ guest_count: next } as any)
+        .eq("id", currentAttendee.id);
+      if (error) throw error;
+      setAttendees((prev) => prev.map((a) => (a.id === currentAttendee.id ? { ...a, guest_count: next } : a)));
+      setTotalAttendees((prev) => Math.max(0, prev - (currentAttendee.guest_count || 0) + next));
+      toast({
+        title: next > 0 ? `Bringing ${next} extra ${next === 1 ? "guest" : "guests"}` : "Guests removed",
+      });
+    } catch (error: any) {
+      console.error("Error updating guest count:", error);
+      toast({ title: "Error", description: "Could not update guests.", variant: "destructive" });
+    } finally {
+      setSavingGuests(false);
+    }
+  };
+
 
   // Helper functions for pagination
   const displayedAttendees = showAllAttendees ? attendees : attendees.slice(0, 10);
