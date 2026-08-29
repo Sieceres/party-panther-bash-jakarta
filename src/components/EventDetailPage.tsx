@@ -358,7 +358,8 @@ export const EventDetailPage = () => {
       }
 
       setHasJoined(true);
-      setTotalAttendees((prev) => prev + 1);
+      setTotalAttendees((prev) => prev + 1 + guestCount);
+
 
       // Refresh attendees list
       await refreshAttendees();
