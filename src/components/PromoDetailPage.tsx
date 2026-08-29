@@ -10,6 +10,8 @@ import { GoogleMap } from "./GoogleMap";
 import { ReviewsList } from "./ReviewsList";
 import { ReportDialog } from "./ReportDialog";
 import { SpinningPaws } from "./ui/spinning-paws";
+import { ZoomableImage } from "./ZoomableImage";
+
 import { Header } from "./Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -288,13 +290,15 @@ export const PromoDetailPage = () => {
             {/* Promo Image */}
             {promo.image_url && (
               <div className="aspect-video rounded-lg overflow-hidden bg-muted">
-                <img 
-                  src={promo.image_url} 
+                <ZoomableImage
+                  src={promo.image_url}
                   alt={promo.title}
+                  wrapperClassName="h-full"
                   className="w-full h-full object-cover object-center"
                 />
               </div>
             )}
+
 
             {/* Claim Button - prominent placement */}
             <div className="md:hidden">

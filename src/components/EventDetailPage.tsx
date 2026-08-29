@@ -38,6 +38,8 @@ import { CommentActions } from "./CommentActions";
 import { ReportDialog } from "./ReportDialog";
 import { EventPaymentInfo } from "./EventPaymentInfo";
 import { PawLoader } from "./PawLoader";
+import { ZoomableImage } from "./ZoomableImage";
+
 import { Header } from "./Header";
 import { EventTags } from "./EventTags";
 import { supabase } from "@/integrations/supabase/client";
@@ -118,6 +120,9 @@ export const EventDetailPage = () => {
   const [eventTags, setEventTags] = useState<any[]>([]);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [joinAnonymously, setJoinAnonymously] = useState(false);
+  const [guestCount, setGuestCount] = useState(0);
+  const [savingGuests, setSavingGuests] = useState(false);
+
   const [venueSlug, setVenueSlug] = useState<string | null>(null);
   const [linkedVenueAddress, setLinkedVenueAddress] = useState<string | null>(null);
 
@@ -339,6 +344,8 @@ export const EventDetailPage = () => {
       const { data: joined, error } = await (supabase as any).rpc("join_event", {
         _event_id: event.id,
         _is_anonymous: joinAnonymously,
+        _guest_count: guestCount,
+
       });
 
       if (error) {
@@ -351,7 +358,8 @@ export const EventDetailPage = () => {
       }
 
       setHasJoined(true);
-      setTotalAttendees((prev) => prev + 1);
+      setTotalAttendees((prev) => prev + 1 + guestCount);
+
 
       // Refresh attendees list
       await refreshAttendees();
@@ -404,6 +412,7 @@ export const EventDetailPage = () => {
           const { data: joined, error } = await (supabase as any).rpc("join_event", {
             _event_id: event.id,
             _is_anonymous: joinAnonymously,
+            _guest_count: guestCount,
           });
 
           if (error) {
@@ -415,7 +424,8 @@ export const EventDetailPage = () => {
           }
 
           setHasJoined(true);
-          setTotalAttendees((prev) => prev + 1);
+          setTotalAttendees((prev) => prev + 1 + guestCount);
+
 
           // Refresh attendees list
           await refreshAttendees();
@@ -457,7 +467,7 @@ export const EventDetailPage = () => {
       if (error) throw error;
 
       setHasJoined(false);
-      setTotalAttendees((prev) => Math.max(0, prev - 1));
+      setTotalAttendees((prev) => Math.max(0, prev - 1 - (currentAttendee?.guest_count || 0)));
       toast({
         title: "Left event",
         description: "You have left this event.",
@@ -713,6 +723,32 @@ export const EventDetailPage = () => {
   const canDelete = isOwner || isAdmin;
   const canManagePayments = isOwner || isCoOrganizer || isAdmin;
   const currentAttendee = user ? attendees.find((a) => a.user_id === user.id) : null;
+  const MAX_GUESTS = 5;
+  const totalWithGuests = attendees.reduce((sum, a) => sum + 1 + (a.guest_count || 0), 0);
+
+  const updateGuestCount = async (value: number) => {
+    if (!currentAttendee) return;
+    const next = Math.min(Math.max(value, 0), MAX_GUESTS);
+    setSavingGuests(true);
+    try {
+      const { error } = await supabase
+        .from("event_attendees")
+        .update({ guest_count: next } as any)
+        .eq("id", currentAttendee.id);
+      if (error) throw error;
+      setAttendees((prev) => prev.map((a) => (a.id === currentAttendee.id ? { ...a, guest_count: next } : a)));
+      setTotalAttendees((prev) => Math.max(0, prev - (currentAttendee.guest_count || 0) + next));
+      toast({
+        title: next > 0 ? `Bringing ${next} extra ${next === 1 ? "guest" : "guests"}` : "Guests removed",
+      });
+    } catch (error: any) {
+      console.error("Error updating guest count:", error);
+      toast({ title: "Error", description: "Could not update guests.", variant: "destructive" });
+    } finally {
+      setSavingGuests(false);
+    }
+  };
+
 
   // Helper functions for pagination
   const displayedAttendees = showAllAttendees ? attendees : attendees.slice(0, 10);
@@ -1010,9 +1046,14 @@ export const EventDetailPage = () => {
               {/* Event Image */}
               {event.image_url && (
                 <div className="rounded-lg overflow-hidden bg-muted/40 flex items-center justify-center max-h-[80vh]">
-                  <img src={event.image_url} alt={event.title} className="w-full h-auto max-h-[80vh] object-contain" />
+                  <ZoomableImage
+                    src={event.image_url}
+                    alt={event.title}
+                    className="w-full h-auto max-h-[80vh] object-contain"
+                  />
                 </div>
               )}
+
 
               {/* Event Description */}
               <Card>
@@ -1064,6 +1105,24 @@ export const EventDetailPage = () => {
                           </TooltipProvider>
                         </div>
                       </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-1.5">
+                          <UserIcon className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">Bringing extra guests?</span>
+                        </div>
+                        <select
+                          value={guestCount}
+                          onChange={(e) => setGuestCount(Number(e.target.value))}
+                          className="h-9 rounded-md border border-border bg-background px-2 text-sm"
+                          aria-label="Number of extra guests"
+                        >
+                          {Array.from({ length: MAX_GUESTS + 1 }, (_, n) => (
+                            <option key={n} value={n}>
+                              {n === 0 ? "Just me" : `+${n}`}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                       <Button variant="cta" onClick={handleJoinEvent} disabled={joiningEvent} className="w-full">
                         {joiningEvent ? (
                           <span className="flex items-center gap-2">
@@ -1077,15 +1136,39 @@ export const EventDetailPage = () => {
                     </div>
                   )}
                   {user && hasJoined && (
-                    <Button
-                      variant="outline"
-                      onClick={handleUnjoinEvent}
-                      disabled={leavingEvent}
-                      className="w-full border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-white"
-                    >
-                      {leavingEvent ? "Leaving..." : "✓ Joined - Click to Leave"}
-                    </Button>
+                    <div className="space-y-3">
+                      {currentAttendee && (
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-1.5">
+                            <UserIcon className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">Extra guests</span>
+                          </div>
+                          <select
+                            value={currentAttendee.guest_count || 0}
+                            disabled={savingGuests}
+                            onChange={(e) => updateGuestCount(Number(e.target.value))}
+                            className="h-9 rounded-md border border-border bg-background px-2 text-sm"
+                            aria-label="Number of extra guests"
+                          >
+                            {Array.from({ length: MAX_GUESTS + 1 }, (_, n) => (
+                              <option key={n} value={n}>
+                                {n === 0 ? "Just me" : `+${n}`}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                      <Button
+                        variant="outline"
+                        onClick={handleUnjoinEvent}
+                        disabled={leavingEvent}
+                        className="w-full border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-white"
+                      >
+                        {leavingEvent ? "Leaving..." : "✓ Joined - Click to Leave"}
+                      </Button>
+                    </div>
                   )}
+
 
                   <Dialog open={joiningDialogOpen} onOpenChange={setJoiningDialogOpen}>
                     <DialogContent className="sm:max-w-md">
@@ -1290,7 +1373,7 @@ export const EventDetailPage = () => {
                 <CardHeader className="p-4 sm:p-5 md:p-6">
                   <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     <UserIcon className="w-5 h-5 flex-shrink-0" />
-                    <span>Attendees ({attendees.length})</span>
+                    <span>Attendees ({totalWithGuests})</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
@@ -1344,6 +1427,11 @@ export const EventDetailPage = () => {
                                       {attendee.payment_status && event.track_payments && (
                                         <span className="text-base sm:text-lg">💰</span>
                                       )}
+                                      {(attendee.guest_count || 0) > 0 && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          +{attendee.guest_count} guest{attendee.guest_count === 1 ? "" : "s"}
+                                        </Badge>
+                                      )}
                                       {!attendee.payment_status &&
                                         attendee.payment_claimed_at &&
                                         event.track_payments && (
@@ -1351,6 +1439,7 @@ export const EventDetailPage = () => {
                                             Pending
                                           </Badge>
                                         )}
+
                                     </div>
                                     {!isAnon && attendee.profiles?.bio && (
                                       <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
