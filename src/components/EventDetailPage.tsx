@@ -467,7 +467,7 @@ export const EventDetailPage = () => {
       if (error) throw error;
 
       setHasJoined(false);
-      setTotalAttendees((prev) => Math.max(0, prev - 1));
+      setTotalAttendees((prev) => Math.max(0, prev - 1 - (currentAttendee?.guest_count || 0)));
       toast({
         title: "Left event",
         description: "You have left this event.",
