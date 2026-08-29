@@ -120,6 +120,9 @@ export const EventDetailPage = () => {
   const [eventTags, setEventTags] = useState<any[]>([]);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [joinAnonymously, setJoinAnonymously] = useState(false);
+  const [guestCount, setGuestCount] = useState(0);
+  const [savingGuests, setSavingGuests] = useState(false);
+
   const [venueSlug, setVenueSlug] = useState<string | null>(null);
   const [linkedVenueAddress, setLinkedVenueAddress] = useState<string | null>(null);
 
