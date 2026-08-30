@@ -63,7 +63,7 @@ export const EventPhotoGallery = ({ eventId, isJoined, canManage }: EventPhotoGa
     loadUserPhotoCount();
 
     const channel = supabase
-      .channel('photos-changes')
+      .channel(`photos-changes-${eventId}-${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         {
