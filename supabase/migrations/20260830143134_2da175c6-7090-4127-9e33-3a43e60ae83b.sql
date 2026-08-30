@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.join_event(uuid, boolean);
