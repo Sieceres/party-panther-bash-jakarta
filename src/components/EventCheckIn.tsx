@@ -46,7 +46,7 @@ export const EventCheckIn = ({
     loadCheckIns();
 
     const channel = supabase
-      .channel('check-ins-changes')
+      .channel(`check-ins-changes-${eventId}-${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         {
