@@ -193,12 +193,13 @@
   .home-photo-bg::before {
     content: "";
     position: fixed;
-    inset: 0;
+    inset: -20px;
     z-index: -2;
     background-image: url("/og-default-v2.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    filter: blur(10px) brightness(0.85);
   }
 
   .home-photo-bg::after {
