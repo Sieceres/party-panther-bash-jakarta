@@ -469,36 +469,43 @@ export const PromosSection = ({
         </div>
 
         {/* Results */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading ? (
-            <div className="col-span-full flex justify-center items-center py-20">
-              <SpinningPaws size="lg" />
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <SpinningPaws size="lg" />
+          </div>
+        ) : filteredPromos.length === 0 ? (
+          <div className="text-center py-16 sm:py-20 px-4">
+            <div className="max-w-md mx-auto space-y-4">
+              <div className="text-6xl mb-4">🍹</div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white">No promos match your filters</h3>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Try adjusting your filters to discover amazing drink deals and promotions! 🎊
+              </p>
+              {hasActiveFilters && (
+                <Button
+                  onClick={resetAllFilters}
+                  variant="default"
+                  size="lg"
+                  className="mt-4"
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Reset All Filters
+                </Button>
+              )}
             </div>
-          ) : filteredPromos.length === 0 ? (
-            <div className="col-span-full text-center py-16 sm:py-20 px-4">
-              <div className="max-w-md mx-auto space-y-4">
-                <div className="text-6xl mb-4">🍹</div>
-                <h3 className="text-xl sm:text-2xl font-bold text-white">No promos match your filters</h3>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Try adjusting your filters to discover amazing drink deals and promotions! 🎊
-                </p>
-                {hasActiveFilters && (
-                  <Button 
-                    onClick={resetAllFilters}
-                    variant="default"
-                    size="lg"
-                    className="mt-4"
-                  >
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Reset All Filters
-                  </Button>
-                )}
-              </div>
-            </div>
-          ) : (
-            filteredPromos.map((promo, index) => (
-               <PromoCard 
-                key={promo.id} 
+          </div>
+        ) : viewMode === "list" ? (
+          <PromoListView
+            promos={filteredPromos}
+            sortKey={listSortKey}
+            sortDir={listSortDir}
+            onSortChange={handleListSortChange}
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPromos.map((promo, index) => (
+              <PromoCard
+                key={promo.id}
                 promo={{
                   ...promo,
                   discount: promo.discount_text || "",
@@ -515,9 +522,9 @@ export const PromosSection = ({
                 onFavoriteToggle={onFavoriteToggle}
                 index={index}
               />
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Load More Button */}
         {!loading && hasMore && filteredPromos.length > 0 && (
