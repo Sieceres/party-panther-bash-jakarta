@@ -9,6 +9,15 @@
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
 
+    /* Dark veil over the home hero photo — keeps content readable */
+    --gradient-hero-overlay: linear-gradient(
+      180deg,
+      hsla(222, 60%, 5%, 0.78) 0%,
+      hsla(222, 60%, 4%, 0.84) 45%,
+      hsla(222, 65%, 3%, 0.93) 100%
+    );
+
+
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
 
