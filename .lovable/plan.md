@@ -26,9 +26,20 @@ A 5-column table doesn't fit on a phone. On screens under 768px the list view sw
 - **On reload:** browsers restore the previous scroll position. Set `history.scrollRestoration = 'manual'` and force `window.scrollTo(0, 0)` on app mount (`App.tsx`), so a reload always lands at the top.
 - Keep the existing `ScrollToTop` route-change behavior, switched to instant (`behavior: 'auto'`) on initial load only, smooth after.
 
+## 4. Cooler promo cards
+
+The current cards (especially ones using the category placeholder images) look flat. Restyle `PromoCard` with a neon treatment that fits the existing cyan identity:
+
+- **Backdrop**: keep the drink image but deepen it — dark gradient overlay from the bottom, subtle cyan radial glow that intensifies on hover; card border brightens and gains a soft cyan glow shadow on hover.
+- **Badges/buttons**: promo-type pill and heart button become frosted glass (blur + translucent border) instead of flat black/white circles.
+- **Content block**: title over a dark gradient scrim, venue in small uppercase tracking, day chips, and the price as a bold cyan figure with the original price struck through.
+- **Hover CTA**: keep the existing "View Promo Details" slide-up but give it the cyan gradient treatment.
+- Applies everywhere `PromoCard` is used (home + promos page grid), so both stay consistent.
+
 ## Files
 
 - `src/components/sections/PromosSection.tsx` — view toggle, list/table rendering, sortable headers, mobile compact rows
+- `src/components/PromoCard.tsx` — card visual restyle
 - `src/pages/Index.tsx` — list-sort state + URL/sessionStorage persistence (same pattern as existing filters)
 - `src/lib/area-config.ts` — reuse for area grouping
 - `src/App.tsx` — scrollRestoration manual + scroll to top on mount
