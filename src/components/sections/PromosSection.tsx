@@ -11,7 +11,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { LoginDialog } from "@/components/LoginDialog";
-import { Star, Lock, Filter, RotateCcw, ArrowUpDown, Download, Search, ClipboardCheck, Share2 } from "lucide-react";
+import { Star, Lock, Filter, RotateCcw, ArrowUpDown, Download, Search, ClipboardCheck, Share2, LayoutGrid, List } from "lucide-react";
+import { PromoListView, PromoSortKey, SortDirection } from "@/components/PromoListView";
 import { exportPromosToExcel } from "@/lib/promo-export";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -72,6 +73,34 @@ export const PromosSection = ({
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [viewMode, setViewMode] = useState<"cards" | "list">(() => {
+    if (typeof window === "undefined") return "cards";
+    return sessionStorage.getItem("promoViewMode") === "list" ? "list" : "cards";
+  });
+  const [listSortKey, setListSortKey] = useState<PromoSortKey>(() => {
+    if (typeof window === "undefined") return "name";
+    return (sessionStorage.getItem("promoListSortKey") as PromoSortKey) || "name";
+  });
+  const [listSortDir, setListSortDir] = useState<SortDirection>(() => {
+    if (typeof window === "undefined") return "asc";
+    return (sessionStorage.getItem("promoListSortDir") as SortDirection) || "asc";
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem("promoViewMode", viewMode);
+  }, [viewMode]);
+
+  useEffect(() => {
+    sessionStorage.setItem("promoListSortKey", listSortKey);
+    sessionStorage.setItem("promoListSortDir", listSortDir);
+  }, [listSortKey, listSortDir]);
+
+  const handleListSortChange = (key: PromoSortKey, dir: SortDirection) => {
+    setListSortKey(key);
+    setListSortDir(dir);
+  };
+
+  
 
   
   useEffect(() => {
@@ -385,6 +414,31 @@ export const PromosSection = ({
               </SelectContent>
             </Select>
           </div>
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-white/90">View</label>
+            <div className="flex rounded-md overflow-hidden border border-border/50">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setViewMode("cards")}
+                className={`rounded-none px-3 ${viewMode === "cards" ? "bg-primary/20 text-primary" : "text-muted-foreground"}`}
+              >
+                <LayoutGrid className="w-4 h-4 mr-1" />
+                Cards
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setViewMode("list")}
+                className={`rounded-none px-3 ${viewMode === "list" ? "bg-primary/20 text-primary" : "text-muted-foreground"}`}
+              >
+                <List className="w-4 h-4 mr-1" />
+                List
+              </Button>
+            </div>
+          </div>
           <Button
             onClick={async () => {
               try {
@@ -415,36 +469,43 @@ export const PromosSection = ({
         </div>
 
         {/* Results */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading ? (
-            <div className="col-span-full flex justify-center items-center py-20">
-              <SpinningPaws size="lg" />
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <SpinningPaws size="lg" />
+          </div>
+        ) : filteredPromos.length === 0 ? (
+          <div className="text-center py-16 sm:py-20 px-4">
+            <div className="max-w-md mx-auto space-y-4">
+              <div className="text-6xl mb-4">🍹</div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white">No promos match your filters</h3>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Try adjusting your filters to discover amazing drink deals and promotions! 🎊
+              </p>
+              {hasActiveFilters && (
+                <Button
+                  onClick={resetAllFilters}
+                  variant="default"
+                  size="lg"
+                  className="mt-4"
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Reset All Filters
+                </Button>
+              )}
             </div>
-          ) : filteredPromos.length === 0 ? (
-            <div className="col-span-full text-center py-16 sm:py-20 px-4">
-              <div className="max-w-md mx-auto space-y-4">
-                <div className="text-6xl mb-4">🍹</div>
-                <h3 className="text-xl sm:text-2xl font-bold text-white">No promos match your filters</h3>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Try adjusting your filters to discover amazing drink deals and promotions! 🎊
-                </p>
-                {hasActiveFilters && (
-                  <Button 
-                    onClick={resetAllFilters}
-                    variant="default"
-                    size="lg"
-                    className="mt-4"
-                  >
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Reset All Filters
-                  </Button>
-                )}
-              </div>
-            </div>
-          ) : (
-            filteredPromos.map((promo, index) => (
-               <PromoCard 
-                key={promo.id} 
+          </div>
+        ) : viewMode === "list" ? (
+          <PromoListView
+            promos={filteredPromos}
+            sortKey={listSortKey}
+            sortDir={listSortDir}
+            onSortChange={handleListSortChange}
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPromos.map((promo, index) => (
+              <PromoCard
+                key={promo.id}
                 promo={{
                   ...promo,
                   discount: promo.discount_text || "",
@@ -461,9 +522,9 @@ export const PromosSection = ({
                 onFavoriteToggle={onFavoriteToggle}
                 index={index}
               />
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Load More Button */}
         {!loading && hasMore && filteredPromos.length > 0 && (
