@@ -42,11 +42,24 @@ import { Footer } from "@/components/Footer";
 
 const queryClient = new QueryClient();
 
-// Component to handle scroll to top on route change
+// Component to handle scroll to top on route change (and on reload)
 const ScrollToTop = () => {
   const { pathname } = useLocation();
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
+    // Prevent the browser from restoring the previous scroll position on reload
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      return;
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [pathname]);
 
