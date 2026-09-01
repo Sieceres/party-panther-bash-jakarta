@@ -175,6 +175,37 @@
 }
 
 @layer utilities {
+  /* Home hero background: nightlife bar photo behind a dark gradient veil */
+  .home-photo-bg {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .home-photo-bg::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background-image: url("/og-default-v2.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .home-photo-bg::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--gradient-hero-overlay);
+  }
+
+  @media (max-width: 768px) {
+    .home-photo-bg::before {
+      background-position: 60% center;
+    }
+  }
+
   /* Utility classes for visual effects */
   .neon-glow {
     box-shadow: 0 0 12px hsla(var(--neon-cyan), 0.3);
