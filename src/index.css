@@ -9,6 +9,15 @@
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
 
+    /* Dark veil over the home hero photo — keeps content readable */
+    --gradient-hero-overlay: linear-gradient(
+      180deg,
+      hsla(222, 60%, 5%, 0.55) 0%,
+      hsla(222, 60%, 4%, 0.68) 45%,
+      hsla(222, 65%, 3%, 0.88) 100%
+    );
+
+
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
 
@@ -175,6 +184,38 @@
 }
 
 @layer utilities {
+  /* Home hero background: nightlife bar photo behind a dark gradient veil */
+  .home-photo-bg {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .home-photo-bg::before {
+    content: "";
+    position: fixed;
+    inset: -20px;
+    z-index: -2;
+    background-image: url("/og-default-v2.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(10px) brightness(0.85);
+  }
+
+  .home-photo-bg::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--gradient-hero-overlay);
+  }
+
+  @media (max-width: 768px) {
+    .home-photo-bg::before {
+      background-position: 60% center;
+    }
+  }
+
   /* Utility classes for visual effects */
   .neon-glow {
     box-shadow: 0 0 12px hsla(var(--neon-cyan), 0.3);

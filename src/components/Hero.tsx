@@ -69,7 +69,7 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
         <div className="absolute inset-0 hero-edge-glow"></div>
       </div>
       {/* Vibrant Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0d1b3e] via-[#1a1a2e] to-[#0d1b3e]">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0d1b3e]/60 via-[#1a1a2e]/50 to-[#0d1b3e]/60">
         <div className="absolute inset-0 animated-hero-gradient"></div>
         {/* Text readability overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"></div>
