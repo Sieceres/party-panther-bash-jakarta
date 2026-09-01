@@ -414,6 +414,31 @@ export const PromosSection = ({
               </SelectContent>
             </Select>
           </div>
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-white/90">View</label>
+            <div className="flex rounded-md overflow-hidden border border-border/50">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setViewMode("cards")}
+                className={`rounded-none px-3 ${viewMode === "cards" ? "bg-primary/20 text-primary" : "text-muted-foreground"}`}
+              >
+                <LayoutGrid className="w-4 h-4 mr-1" />
+                Cards
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setViewMode("list")}
+                className={`rounded-none px-3 ${viewMode === "list" ? "bg-primary/20 text-primary" : "text-muted-foreground"}`}
+              >
+                <List className="w-4 h-4 mr-1" />
+                List
+              </Button>
+            </div>
+          </div>
           <Button
             onClick={async () => {
               try {
