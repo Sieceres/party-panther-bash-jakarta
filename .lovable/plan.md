@@ -26,20 +26,28 @@ A 5-column table doesn't fit on a phone. On screens under 768px the list view sw
 - **On reload:** browsers restore the previous scroll position. Set `history.scrollRestoration = 'manual'` and force `window.scrollTo(0, 0)` on app mount (`App.tsx`), so a reload always lands at the top.
 - Keep the existing `ScrollToTop` route-change behavior, switched to instant (`behavior: 'auto'`) on initial load only, smooth after.
 
-## 4. Cooler promo cards
+## 4. Better placeholder drink images
 
-The current cards (especially ones using the category placeholder images) look flat. Restyle `PromoCard` with a neon treatment that fits the existing cyan identity:
+The text and layout of the cards stay as they are. The problem is the placeholder artwork: flat vector-style drinks on solid gradient backgrounds. Replace all 7 with photographic, realistic images that actually look like the drink the promo is about:
 
-- **Backdrop**: keep the drink image but deepen it — dark gradient overlay from the bottom, subtle cyan radial glow that intensifies on hover; card border brightens and gains a soft cyan glow shadow on hover.
-- **Badges/buttons**: promo-type pill and heart button become frosted glass (blur + translucent border) instead of flat black/white circles.
-- **Content block**: title over a dark gradient scrim, venue in small uppercase tracking, day chips, and the price as a bold cyan figure with the original price struck through.
-- **Hover CTA**: keep the existing "View Promo Details" slide-up but give it the cyan gradient treatment.
-- Applies everywhere `PromoCard` is used (home + promos page grid), so both stay consistent.
+- `wine.jpg` — glass(es) of red/white wine on a dark bar counter
+- `beer.jpg` — cold draft beer, condensation on the glass
+- `cocktail.jpg` — a real garnished cocktail under moody bar lighting
+- `spirits.jpg` — whisky/spirit pour over ice, bottles behind
+- `coffee.jpg` — espresso/latte on a cafe surface
+- `food.jpg` — bar-food plate, appetizing and warmly lit
+- `drink.jpg` — generic bar scene fallback, mixed drinks on a counter
+
+Shared look so the grid stays coherent: dark, moody, low-key nightlife lighting with a cyan/magenta rim-light hint to match the Party Panther palette, shallow depth of field, 16:9 crop, no text, no people's faces, subject centered-ish so the card crop doesn't cut it.
+
+The existing dark gradient scrim and badges on the card keep the title legible over the photos; the scrim strength gets a small bump if any image reads too bright behind the text.
 
 ## Files
 
+- `public/placeholders/*.jpg` — regenerate the 7 placeholder images (same filenames, so no mapping change needed)
+- `src/lib/drink-categories.ts` — unchanged unless a path needs adjusting
+- `src/components/PromoCard.tsx` — minor scrim/contrast tweak only if needed for legibility
 - `src/components/sections/PromosSection.tsx` — view toggle, list/table rendering, sortable headers, mobile compact rows
-- `src/components/PromoCard.tsx` — card visual restyle
 - `src/pages/Index.tsx` — list-sort state + URL/sessionStorage persistence (same pattern as existing filters)
 - `src/lib/area-config.ts` — reuse for area grouping
 - `src/App.tsx` — scrollRestoration manual + scroll to top on mount
