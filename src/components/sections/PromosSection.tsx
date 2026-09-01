@@ -73,6 +73,34 @@ export const PromosSection = ({
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [viewMode, setViewMode] = useState<"cards" | "list">(() => {
+    if (typeof window === "undefined") return "cards";
+    return sessionStorage.getItem("promoViewMode") === "list" ? "list" : "cards";
+  });
+  const [listSortKey, setListSortKey] = useState<PromoSortKey>(() => {
+    if (typeof window === "undefined") return "name";
+    return (sessionStorage.getItem("promoListSortKey") as PromoSortKey) || "name";
+  });
+  const [listSortDir, setListSortDir] = useState<SortDirection>(() => {
+    if (typeof window === "undefined") return "asc";
+    return (sessionStorage.getItem("promoListSortDir") as SortDirection) || "asc";
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem("promoViewMode", viewMode);
+  }, [viewMode]);
+
+  useEffect(() => {
+    sessionStorage.setItem("promoListSortKey", listSortKey);
+    sessionStorage.setItem("promoListSortDir", listSortDir);
+  }, [listSortKey, listSortDir]);
+
+  const handleListSortChange = (key: PromoSortKey, dir: SortDirection) => {
+    setListSortKey(key);
+    setListSortDir(dir);
+  };
+
+  
 
   
   useEffect(() => {
