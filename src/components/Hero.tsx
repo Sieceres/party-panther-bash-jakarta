@@ -68,12 +68,13 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 hero-edge-glow"></div>
       </div>
-      {/* Nightlife bar photo background */}
+      {/* Nightlife bar photo background — heavily blurred so baked-in
+          logo/text in the OG image dissolves into pure bokeh ambience */}
       <div
-        className="absolute -inset-4 bg-cover bg-center bg-no-repeat"
+        className="absolute -inset-10 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: 'url("/og-default-v2.jpg")',
-          filter: 'blur(6px) brightness(0.9)',
+          filter: 'blur(18px) brightness(0.85) saturate(1.2)',
         }}
       ></div>
       {/* Text readability overlay */}
