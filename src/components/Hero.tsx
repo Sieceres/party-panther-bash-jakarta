@@ -68,12 +68,18 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 hero-edge-glow"></div>
       </div>
-      {/* Vibrant Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0d1b3e]/60 via-[#1a1a2e]/50 to-[#0d1b3e]/60">
-        <div className="absolute inset-0 animated-hero-gradient"></div>
-        {/* Text readability overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"></div>
-      </div>
+      {/* Nightlife bar photo background — heavily blurred so baked-in
+          logo/text in the OG image dissolves into pure bokeh ambience */}
+      <div
+        className="absolute -inset-10 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: 'url("/og-default-v2.jpg")',
+          filter: 'blur(18px) brightness(0.85) saturate(1.2)',
+        }}
+      ></div>
+      {/* Text readability overlay */}
+      <div className="absolute inset-0" style={{ background: 'var(--gradient-hero-overlay)' }}></div>
+      <div className="absolute inset-0 animated-hero-gradient opacity-40 pointer-events-none"></div>
 
       {/* Moving Light Streaks - Enhanced */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">

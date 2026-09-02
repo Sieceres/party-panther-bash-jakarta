@@ -410,7 +410,7 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
   const meta = seoMeta[activeSection] || seoMeta.home;
 
   return (
-    <div className={`min-h-screen ${activeSection === "home" || activeSection === "" ? "home-photo-bg bg-transparent" : "bg-background"}`}>
+    <div className="min-h-screen bg-background">
       <Helmet>
         <title>{meta.title}</title>
         <meta name="description" content={meta.description} />
