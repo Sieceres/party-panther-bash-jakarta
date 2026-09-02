@@ -91,7 +91,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
     promo.discount || '',
     Array.isArray(promo.drinkType) ? promo.drinkType : promo.drinkType ? [promo.drinkType] : []
   );
-  const categoryPlaceholder = getPlaceholderImage(drinkCategory);
+  const categoryPlaceholder = getPlaceholderImage(drinkCategory, promo.promoType);
 
   useEffect(() => {
     const getCurrentUser = async () => {

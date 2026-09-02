@@ -669,7 +669,7 @@ export const AdminDashboard = () => {
     try {
       const { data: allPromos, error } = await supabase
         .from('promos')
-        .select('id, title, description, discount_text, drink_type, image_url');
+        .select('id, title, description, discount_text, drink_type, image_url, promo_type');
 
       if (error) throw error;
       if (!allPromos || allPromos.length === 0) {
@@ -683,7 +683,7 @@ export const AdminDashboard = () => {
         const category = detectDrinkCategory(
           p.title || '', p.description || '', p.discount_text || '', drinkTypes
         );
-        const placeholder = getPlaceholderImage(category);
+        const placeholder = getPlaceholderImage(category, (p as any).promo_type);
         const enrichedTypes = enrichDrinkTypes(drinkTypes, category);
 
         const needsImageUpdate = !p.image_url || p.image_url.includes('unsplash.com') || p.image_url.trim() === '';

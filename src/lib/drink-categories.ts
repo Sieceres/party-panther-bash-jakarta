@@ -84,9 +84,21 @@ export function detectDrinkCategory(
 }
 
 /**
- * Get placeholder image URL for a drink category.
+ * Promo-type-specific placeholders take precedence over the drink category.
  */
-export function getPlaceholderImage(category: DrinkCategory): string {
+const PROMO_TYPE_PLACEHOLDERS: Record<string, string> = {
+  "Bottle Promo": "/placeholders/bottles.jpg",
+  "Beer Deal": "/placeholders/beer-bucket.jpg",
+};
+
+/**
+ * Get placeholder image URL, preferring a promo-type-specific image
+ * (e.g. Bottle Promo → spirit bottles, Beer Deal → beer bucket).
+ */
+export function getPlaceholderImage(category: DrinkCategory, promoType?: string | null): string {
+  if (promoType && PROMO_TYPE_PLACEHOLDERS[promoType]) {
+    return PROMO_TYPE_PLACEHOLDERS[promoType];
+  }
   return PLACEHOLDER_IMAGES[category];
 }
 
