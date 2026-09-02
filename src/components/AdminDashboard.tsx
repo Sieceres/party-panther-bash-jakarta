@@ -669,21 +669,9 @@ export const AdminDashboard = () => {
     try {
       const { data: allPromos, error } = await supabase
         .from('promos')
-        .select('id, title, description, discount_text, drink_type, image_url');
-
-      if (error) throw error;
-      if (!allPromos || allPromos.length === 0) {
-        toast({ title: "No promos found", description: "There are no promos to backfill." });
-        return;
-      }
-
-      let updatedCount = 0;
-      for (const p of allPromos) {
-        const drinkTypes = Array.isArray(p.drink_type) ? p.drink_type : [];
-        const category = detectDrinkCategory(
-          p.title || '', p.description || '', p.discount_text || '', drinkTypes
-        );
-        const placeholder = getPlaceholderImage(category);
+        .select('id, title, description, discount_text, drink_type, image_url, promo_type');
+...
+        const placeholder = getPlaceholderImage(category, (p as any).promo_type);
         const enrichedTypes = enrichDrinkTypes(drinkTypes, category);
 
         const needsImageUpdate = !p.image_url || p.image_url.includes('unsplash.com') || p.image_url.trim() === '';
