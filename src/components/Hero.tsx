@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { User as SupabaseUser } from '@supabase/supabase-js';
+import heroNightlifeBg from "@/assets/hero-nightlife-bg.jpg";
 
 interface HeroProps {
   onSectionChange: (section: string) => void;
@@ -68,18 +69,20 @@ export const Hero = ({ onSectionChange }: HeroProps) => {
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 hero-edge-glow"></div>
       </div>
-      {/* Nightlife bar photo background — heavily blurred so baked-in
-          logo/text in the OG image dissolves into pure bokeh ambience */}
-      <div
-        className="absolute -inset-10 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: 'url("/og-default-v2.jpg")',
-          filter: 'blur(18px) brightness(0.85) saturate(1.2)',
-        }}
-      ></div>
+      {/* Nightlife bar photo background — generated asset, no baked-in text,
+          shown mostly sharp with a soft focus for depth */}
+      <img
+        src={heroNightlifeBg}
+        alt=""
+        aria-hidden="true"
+        width={1920}
+        height={1080}
+        className="absolute inset-0 w-full h-full object-cover object-center"
+        style={{ filter: 'brightness(0.9) saturate(1.15)' }}
+      />
       {/* Text readability overlay */}
       <div className="absolute inset-0" style={{ background: 'var(--gradient-hero-overlay)' }}></div>
-      <div className="absolute inset-0 animated-hero-gradient opacity-40 pointer-events-none"></div>
+      <div className="absolute inset-0 animated-hero-gradient opacity-30 pointer-events-none"></div>
 
       {/* Moving Light Streaks - Enhanced */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
