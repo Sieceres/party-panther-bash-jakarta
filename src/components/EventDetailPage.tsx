@@ -29,6 +29,8 @@ import {
   BadgeCheck,
   EyeOff,
   HelpCircle,
+  Download,
+
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -726,6 +728,95 @@ export const EventDetailPage = () => {
   const MAX_GUESTS = 5;
   const totalWithGuests = attendees.reduce((sum, a) => sum + 1 + (a.guest_count || 0), 0);
 
+  // Names of the organizers/admins who confirmed payments (for the hover popup)
+  const [markerNames, setMarkerNames] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const ids = [...new Set(attendees.map((a) => a.payment_marked_by).filter(Boolean))] as string[];
+    const missing = ids.filter((id) => !markerNames[id]);
+    if (missing.length === 0) return;
+    (async () => {
+      const { data } = await (supabase as any).rpc("get_public_profiles", { _user_ids: missing });
+      if (data) {
+        setMarkerNames((prev) => {
+          const next = { ...prev };
+          (data as any[]).forEach((p) => {
+            next[p.user_id] = p.display_name || "Unknown";
+          });
+          return next;
+        });
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attendees]);
+
+  const [exportingGuests, setExportingGuests] = useState(false);
+  const handleExportGuestList = async () => {
+    if (!event) return;
+    setExportingGuests(true);
+    try {
+      const { data, error } = await (supabase as any).rpc("get_event_guest_list", { _event_id: event.id });
+      if (error) throw error;
+      const rows = (data as any[]) || [];
+      const headers = [
+        "Name",
+        "Email",
+        "Extra guests",
+        "Joined at",
+        "Anonymous",
+        "Co-organizer",
+        "Payment status",
+        "Marked paid by",
+        "Payment confirmed at",
+        "Attendee claimed paid at",
+        "Receipt",
+        "Note",
+      ];
+      const esc = (v: any) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+      const csv = [
+        headers.map(esc).join(","),
+        ...rows.map((r) =>
+          [
+            r.display_name,
+            r.email,
+            r.guest_count ?? 0,
+            r.joined_at ? new Date(r.joined_at).toISOString() : "",
+            r.is_anonymous ? "Yes" : "No",
+            r.is_co_organizer ? "Yes" : "No",
+            r.payment_status ? "Paid" : r.payment_claimed_at ? "Claimed (unconfirmed)" : "Unpaid",
+            r.payment_status ? r.payment_marked_by_name || "Unknown" : "",
+            r.payment_date ? new Date(r.payment_date).toISOString() : "",
+            r.payment_claimed_at ? new Date(r.payment_claimed_at).toISOString() : "",
+            r.receipt_url || "",
+            r.note || "",
+          ]
+            .map(esc)
+            .join(","),
+        ),
+      ].join("\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `guest-list-${(event.title || "event").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast({ title: "Guest list exported", description: `${rows.length} attendees included.` });
+    } catch (error: any) {
+      console.error("Error exporting guest list:", error);
+      toast({
+        title: "Export failed",
+        description: error?.message || "Could not export the guest list.",
+        variant: "destructive",
+      });
+    } finally {
+      setExportingGuests(false);
+    }
+  };
+
+
   const updateGuestCount = async (value: number) => {
     if (!currentAttendee) return;
     const next = Math.min(Math.max(value, 0), MAX_GUESTS);
@@ -1207,6 +1298,20 @@ export const EventDetailPage = () => {
                     />
                   )}
 
+                  {canManagePayments && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleExportGuestList}
+                      disabled={exportingGuests}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      {exportingGuests ? "Exporting..." : "Export guest list (CSV)"}
+                    </Button>
+                  )}
+
+
+
                   <Button
                     variant="outline"
                     className="w-full"
@@ -1425,8 +1530,23 @@ export const EventDetailPage = () => {
                                           ` (anon: ${attendee.profiles?.display_name || "Unknown"})`}
                                       </span>
                                       {attendee.payment_status && event.track_payments && (
-                                        <span className="text-base sm:text-lg">💰</span>
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <span className="text-base sm:text-lg cursor-help">💰</span>
+                                            </TooltipTrigger>
+                                            <TooltipContent className="text-xs">
+                                              {attendee.payment_marked_by
+                                                ? `Marked as paid by ${markerNames[attendee.payment_marked_by] || "…"}`
+                                                : "Marked as paid"}
+                                              {attendee.payment_date
+                                                ? ` on ${format(new Date(attendee.payment_date), "MMM d, yyyy HH:mm")}`
+                                                : ""}
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
                                       )}
+
                                       {(attendee.guest_count || 0) > 0 && (
                                         <Badge variant="secondary" className="text-xs">
                                           +{attendee.guest_count} guest{attendee.guest_count === 1 ? "" : "s"}
