@@ -12,6 +12,7 @@ import { BasicEventInfo } from "./form-components/BasicEventInfo";
 import { EventDateTime } from "./form-components/EventDateTime";
 import { EventVenue } from "./form-components/EventVenue";
 import { EventOrganizer } from "./form-components/EventOrganizer";
+import { EventPrice } from "./form-components/EventPrice";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { EventTagSelector } from "./form-components/EventTagSelector";
 import { EventPrivacySettings } from "./form-components/EventPrivacySettings";
@@ -59,6 +60,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [venueArea, setVenueArea] = useState(initialData?.venue_address || ""); // area stored in venue_address for now
   const [aiAutoFilledVenue, setAiAutoFilledVenue] = useState(false);
   const [customSlug, setCustomSlug] = useState<string>((initialData as any)?.custom_slug || "");
+  const [priceAmount, setPriceAmount] = useState<number | null>((initialData as any)?.price_amount ?? null);
+  const [priceCurrency, setPriceCurrency] = useState<string>((initialData as any)?.price_currency || "IDR");
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
@@ -107,6 +110,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
       setSelectedVenueId(initialData.venue_id || null);
       setVenueArea(initialData.venue_address || "");
       setCustomSlug((initialData as any).custom_slug || "");
+      setPriceAmount((initialData as any).price_amount ?? null);
+      setPriceCurrency((initialData as any).price_currency || "IDR");
       setEventDate(
         initialData.date 
           ? (() => {
@@ -325,6 +330,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         organizer_name: formData.organizer,
         organizer_whatsapp: formData.whatsapp,
         image_url: formData.image,
+        price_amount: priceAmount,
+        price_currency: priceCurrency,
         is_recurrent: isRecurrent,
         track_payments: trackPayments,
         payment_info: trackPayments ? (paymentInfo || null) : null,
@@ -525,6 +532,13 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               whatsapp={formData.whatsapp}
               onOrganizerChange={(value) => handleInputChange("organizer", value)}
               onWhatsappChange={(value) => handleInputChange("whatsapp", value)}
+            />
+
+            <EventPrice
+              priceAmount={priceAmount}
+              priceCurrency={priceCurrency}
+              onPriceAmountChange={(v) => { setPriceAmount(v); setHasUnsavedChanges(true); }}
+              onPriceCurrencyChange={(v) => { setPriceCurrency(v); setHasUnsavedChanges(true); }}
             />
 
             <ImageUpload

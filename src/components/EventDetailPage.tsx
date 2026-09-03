@@ -794,7 +794,23 @@ export const EventDetailPage = () => {
         ),
       ].join("\n");
 
-      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const price = Number((event as any).price_amount) || 0;
+      const currency = (event as any).price_currency || "IDR";
+      const totalParticipants = rows.reduce((sum, r) => sum + 1 + (Number(r.guest_count) || 0), 0);
+      const paidParticipants = rows.reduce(
+        (sum, r) => sum + (r.payment_status ? 1 + (Number(r.guest_count) || 0) : 0),
+        0,
+      );
+      const summary = [
+        "",
+        [esc("SUMMARY"), esc("")].join(","),
+        [esc("Total participants (incl. guests)"), esc(totalParticipants)].join(","),
+        [esc("Paid participants (incl. guests)"), esc(paidParticipants)].join(","),
+        [esc(`Price per person (${currency})`), esc(price)].join(","),
+        [esc(`Total fees paid (${currency})`), esc(paidParticipants * price)].join(","),
+      ].join("\n");
+
+      const blob = new Blob(["\uFEFF" + csv + summary], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
