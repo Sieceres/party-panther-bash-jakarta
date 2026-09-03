@@ -771,36 +771,38 @@ export const EventDetailPage = () => {
         "Receipt",
         "Note",
       ];
-      const fmt = (d: any) => (d ? new Date(d).toLocaleString() : "");
-      const aoa = [
-        headers,
-        ...rows.map((r) => [
-          r.display_name || "",
-          r.email || "",
-          r.guest_count ?? 0,
-          fmt(r.joined_at),
-          r.is_anonymous ? "Yes" : "No",
-          r.is_co_organizer ? "Yes" : "No",
-          r.payment_status ? "Paid" : r.payment_claimed_at ? "Claimed (unconfirmed)" : "Unpaid",
-          r.payment_status ? r.payment_marked_by_name || "Unknown" : "",
-          fmt(r.payment_date),
-          fmt(r.payment_claimed_at),
-          r.receipt_url || "",
-          r.note || "",
-        ]),
-      ];
-      const XLSX = await import("xlsx");
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      ws["!cols"] = [
-        { wch: 24 }, { wch: 28 }, { wch: 12 }, { wch: 20 }, { wch: 11 }, { wch: 13 },
-        { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 22 }, { wch: 30 }, { wch: 30 },
-      ];
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Guest list");
-      XLSX.writeFile(
-        wb,
-        `guest-list-${(event.title || "event").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.xlsx`,
-      );
+      const esc = (v: any) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+      const csv = [
+        headers.map(esc).join(","),
+        ...rows.map((r) =>
+          [
+            r.display_name,
+            r.email,
+            r.guest_count ?? 0,
+            r.joined_at ? new Date(r.joined_at).toISOString() : "",
+            r.is_anonymous ? "Yes" : "No",
+            r.is_co_organizer ? "Yes" : "No",
+            r.payment_status ? "Paid" : r.payment_claimed_at ? "Claimed (unconfirmed)" : "Unpaid",
+            r.payment_status ? r.payment_marked_by_name || "Unknown" : "",
+            r.payment_date ? new Date(r.payment_date).toISOString() : "",
+            r.payment_claimed_at ? new Date(r.payment_claimed_at).toISOString() : "",
+            r.receipt_url || "",
+            r.note || "",
+          ]
+            .map(esc)
+            .join(","),
+        ),
+      ].join("\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `guest-list-${(event.title || "event").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       toast({ title: "Guest list exported", description: `${rows.length} attendees included.` });
     } catch (error: any) {
       console.error("Error exporting guest list:", error);
@@ -1304,7 +1306,7 @@ export const EventDetailPage = () => {
                       disabled={exportingGuests}
                     >
                       <Download className="w-4 h-4 mr-2" />
-                      {exportingGuests ? "Exporting..." : "Export guest list (Excel)"}
+                      {exportingGuests ? "Exporting..." : "Export guest list (CSV)"}
                     </Button>
                   )}
 
