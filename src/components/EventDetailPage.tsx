@@ -1514,8 +1514,23 @@ export const EventDetailPage = () => {
                                           ` (anon: ${attendee.profiles?.display_name || "Unknown"})`}
                                       </span>
                                       {attendee.payment_status && event.track_payments && (
-                                        <span className="text-base sm:text-lg">💰</span>
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <span className="text-base sm:text-lg cursor-help">💰</span>
+                                            </TooltipTrigger>
+                                            <TooltipContent className="text-xs">
+                                              {attendee.payment_marked_by
+                                                ? `Marked as paid by ${markerNames[attendee.payment_marked_by] || "…"}`
+                                                : "Marked as paid"}
+                                              {attendee.payment_date
+                                                ? ` on ${format(new Date(attendee.payment_date), "MMM d, yyyy HH:mm")}`
+                                                : ""}
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
                                       )}
+
                                       {(attendee.guest_count || 0) > 0 && (
                                         <Badge variant="secondary" className="text-xs">
                                           +{attendee.guest_count} guest{attendee.guest_count === 1 ? "" : "s"}
