@@ -35,6 +35,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
+import * as XLSX from "xlsx";
 import { CommentItem, Comment } from "./CommentItem";
 import { CommentActions } from "./CommentActions";
 import { ReportDialog } from "./ReportDialog";
