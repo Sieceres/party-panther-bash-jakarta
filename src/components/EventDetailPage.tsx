@@ -772,28 +772,20 @@ export const EventDetailPage = () => {
         "Receipt",
         "Note",
       ];
-      const esc = (v: any) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-      const csv = [
-        headers.map(esc).join(","),
-        ...rows.map((r) =>
-          [
-            r.display_name,
-            r.email,
-            r.guest_count ?? 0,
-            r.joined_at ? new Date(r.joined_at).toISOString() : "",
-            r.is_anonymous ? "Yes" : "No",
-            r.is_co_organizer ? "Yes" : "No",
-            r.payment_status ? "Paid" : r.payment_claimed_at ? "Claimed (unconfirmed)" : "Unpaid",
-            r.payment_status ? r.payment_marked_by_name || "Unknown" : "",
-            r.payment_date ? new Date(r.payment_date).toISOString() : "",
-            r.payment_claimed_at ? new Date(r.payment_claimed_at).toISOString() : "",
-            r.receipt_url || "",
-            r.note || "",
-          ]
-            .map(esc)
-            .join(","),
-        ),
-      ].join("\n");
+      const dataRows = rows.map((r) => [
+        r.display_name ?? "",
+        r.email ?? "",
+        r.guest_count ?? 0,
+        r.joined_at ? new Date(r.joined_at).toISOString() : "",
+        r.is_anonymous ? "Yes" : "No",
+        r.is_co_organizer ? "Yes" : "No",
+        r.payment_status ? "Paid" : r.payment_claimed_at ? "Claimed (unconfirmed)" : "Unpaid",
+        r.payment_status ? r.payment_marked_by_name || "Unknown" : "",
+        r.payment_date ? new Date(r.payment_date).toISOString() : "",
+        r.payment_claimed_at ? new Date(r.payment_claimed_at).toISOString() : "",
+        r.receipt_url || "",
+        r.note || "",
+      ]);
 
       const price = Number((event as any).price_amount) || 0;
       const currency = (event as any).price_currency || "IDR";
@@ -802,24 +794,27 @@ export const EventDetailPage = () => {
         (sum, r) => sum + (r.payment_status ? 1 + (Number(r.guest_count) || 0) : 0),
         0,
       );
-      const summary = [
-        "",
-        [esc("SUMMARY"), esc("")].join(","),
-        [esc("Total participants (incl. guests)"), esc(totalParticipants)].join(","),
-        [esc("Paid participants (incl. guests)"), esc(paidParticipants)].join(","),
-        [esc(`Price per person (${currency})`), esc(price)].join(","),
-        [esc(`Total fees paid (${currency})`), esc(paidParticipants * price)].join(","),
-      ].join("\n");
 
-      const blob = new Blob(["\uFEFF" + csv + summary], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `guest-list-${(event.title || "event").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      const aoa: (string | number)[][] = [
+        headers,
+        ...dataRows,
+        [],
+        ["SUMMARY", ""],
+        ["Total participants (incl. guests)", totalParticipants],
+        ["Paid participants (incl. guests)", paidParticipants],
+        [`Price per person (${currency})`, price],
+        [`Total fees paid (${currency})`, paidParticipants * price],
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws["!cols"] = [
+        { wch: 24 }, { wch: 30 }, { wch: 12 }, { wch: 24 }, { wch: 10 }, { wch: 12 },
+        { wch: 20 }, { wch: 20 }, { wch: 24 }, { wch: 24 }, { wch: 30 }, { wch: 30 },
+      ];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Guest list");
+      const filename = `guest-list-${(event.title || "event").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.xls`;
+      XLSX.writeFile(wb, filename, { bookType: "biff8" });
       toast({ title: "Guest list exported", description: `${rows.length} attendees included.` });
     } catch (error: any) {
       console.error("Error exporting guest list:", error);
