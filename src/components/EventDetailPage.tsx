@@ -1296,6 +1296,20 @@ export const EventDetailPage = () => {
                     />
                   )}
 
+                  {canManagePayments && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleExportGuestList}
+                      disabled={exportingGuests}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      {exportingGuests ? "Exporting..." : "Export guest list (CSV)"}
+                    </Button>
+                  )}
+
+
+
                   <Button
                     variant="outline"
                     className="w-full"
