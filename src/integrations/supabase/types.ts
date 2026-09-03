@@ -465,6 +465,7 @@ export type Database = {
           payment_info: string | null
           payment_methods: Json
           payment_qr_url: string | null
+          price_amount: number | null
           price_currency: string | null
           slug: string | null
           time: string
@@ -497,6 +498,7 @@ export type Database = {
           payment_info?: string | null
           payment_methods?: Json
           payment_qr_url?: string | null
+          price_amount?: number | null
           price_currency?: string | null
           slug?: string | null
           time: string
@@ -529,6 +531,7 @@ export type Database = {
           payment_info?: string | null
           payment_methods?: Json
           payment_qr_url?: string | null
+          price_amount?: number | null
           price_currency?: string | null
           slug?: string | null
           time?: string
