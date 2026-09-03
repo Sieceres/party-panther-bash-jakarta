@@ -1623,6 +1623,25 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_event_guest_list: {
+        Args: { _event_id: string }
+        Returns: {
+          display_name: string
+          email: string
+          guest_count: number
+          is_anonymous: boolean
+          is_co_organizer: boolean
+          joined_at: string
+          note: string
+          payment_claimed_at: string
+          payment_date: string
+          payment_marked_by: string
+          payment_marked_by_name: string
+          payment_status: boolean
+          receipt_url: string
+          user_id: string
+        }[]
+      }
       get_event_tags_by_category: {
         Args: never
         Returns: {
