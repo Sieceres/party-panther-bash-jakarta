@@ -1318,7 +1318,7 @@ export const EventDetailPage = () => {
                       disabled={exportingGuests}
                     >
                       <Download className="w-4 h-4 mr-2" />
-                      {exportingGuests ? "Exporting..." : "Export guest list (CSV)"}
+                      {exportingGuests ? "Exporting..." : "Export guest list (Excel)"}
                     </Button>
                   )}
 
