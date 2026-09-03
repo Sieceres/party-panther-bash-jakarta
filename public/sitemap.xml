@@ -53,7 +53,7 @@
   </url>
   <url>
     <loc>https://partypanther.net/e/angkot-pub-crawl-viii</loc>
-    <lastmod>2026-08-27</lastmod>
+    <lastmod>2026-09-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1510,12 +1510,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://partypanther.net/v/afrokosa</loc>
-    <lastmod>2026-08-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://partypanther.net/v/movenpick</loc>
     <lastmod>2026-04-08</lastmod>
     <changefreq>weekly</changefreq>
@@ -1530,6 +1524,12 @@
   <url>
     <loc>https://partypanther.net/v/slits</loc>
     <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/v/afrokosa</loc>
+    <lastmod>2026-09-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
