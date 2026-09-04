@@ -140,13 +140,29 @@ export const EventDetailPage = () => {
     const fetchData = async () => {
       if (!id) return;
 
-      try {
-        const { data: eventData, error: eventError } = await getEventBySlugOrId(id);
-        if (eventError || !eventData) {
-          throw new Error("Event not found");
-        }
+    try {
+      let eventData: any = null;
+      const { data: foundEvent, error: eventError } = await getEventBySlugOrId(id);
+      if (!eventError && foundEvent) {
+        eventData = foundEvent;
+      } else if (inviteCode.trim()) {
+        // A participants-only event can be viewed with a valid invite code
+        const { data: unlockedEvent, error: unlockError } = await (supabase as any).rpc(
+          "get_event_for_invite_code",
+          {
+            _identifier: id,
+            _code: inviteCode.trim(),
+          },
+        );
+        if (unlockError) console.error("Error unlocking event:", unlockError);
+        eventData = unlockedEvent || null;
+      }
 
-        setEvent(eventData);
+      if (!eventData) {
+        throw new Error("Event not found");
+      }
+
+      setEvent(eventData);
 
         // Fetch venue slug if venue_id exists
         if (eventData.venue_id) {
