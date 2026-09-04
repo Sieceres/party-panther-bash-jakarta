@@ -128,6 +128,7 @@ export const EventDetailPage = () => {
   const [joinAnonymously, setJoinAnonymously] = useState(false);
   const [guestCount, setGuestCount] = useState(0);
   const [savingGuests, setSavingGuests] = useState(false);
+  const [inviteCode, setInviteCode] = useState(searchParams.get("code") || "");
 
   const [venueSlug, setVenueSlug] = useState<string | null>(null);
   const [linkedVenueAddress, setLinkedVenueAddress] = useState<string | null>(null);
