@@ -1875,7 +1875,12 @@ export const EventDetailPage = () => {
             <div className="space-y-6">
               {/* Invite Codes Management - only for organizers of private events */}
               {(isOwner || isCoOrganizer) && event.access_level !== "public" && (
-                <EventInviteCodes eventId={event.id} eventDate={event.date} eventTime={event.time} />
+                <EventInviteCodes
+                  eventId={event.id}
+                  eventDate={event.date}
+                  eventTime={event.time}
+                  shareUrl={getEventShareUrl(event)}
+                />
               )}
             </div>
           </div>
