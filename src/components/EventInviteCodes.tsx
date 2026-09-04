@@ -24,6 +24,7 @@ interface EventInviteCodesProps {
   eventId: string;
   eventDate: string;
   eventTime: string;
+  shareUrl: string;
 }
 
 export const EventInviteCodes = ({ eventId, eventDate, eventTime }: EventInviteCodesProps) => {
