@@ -55,18 +55,9 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime, shareUrl }: Ev
   };
 
   const handleGenerateCode = async () => {
-    if (!newEmail.trim()) {
-      toast({
-        title: "Email required",
-        description: "Please enter an email for this invite code.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setLoading(true);
     const { data: session } = await supabase.auth.getSession();
-    
+
     if (!session?.session?.user) {
       toast({
         title: "Not authenticated",
@@ -84,7 +75,7 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime, shareUrl }: Ev
       .insert({
         event_id: eventId,
         code,
-        invited_user_email: newEmail,
+        invited_user_email: newEmail.trim() || null,
         created_by: session.session.user.id,
         expires_at: eventDateTime.toISOString()
       });
