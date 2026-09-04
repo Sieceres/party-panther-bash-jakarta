@@ -1961,6 +1961,10 @@ export type Database = {
         Args: { event_id_param: string; user_id_param: string }
         Returns: boolean
       }
+      is_event_participant: {
+        Args: { _event_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_removed_from_event: {
         Args: { _event_id: string; _user_id: string }
         Returns: boolean

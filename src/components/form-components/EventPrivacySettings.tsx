@@ -68,6 +68,7 @@ export const EventPrivacySettings = ({
             <SelectItem value="private">Private - Visible but requires invite code</SelectItem>
             <SelectItem value="invite_only">Invite Only - Hidden from listings</SelectItem>
             <SelectItem value="secret">Secret - Hidden, direct link only</SelectItem>
+            <SelectItem value="participants_only">Participants Only - Only registered attendees can open</SelectItem>
           </SelectContent>
         </Select>
         {accessLevel !== 'public' && (
@@ -75,6 +76,7 @@ export const EventPrivacySettings = ({
             {accessLevel === 'private' && "Event will be visible but location and description are hidden. Users need an invite code to join."}
             {accessLevel === 'invite_only' && "Event won't appear in public listings. Only users with invite code or direct link can access."}
             {accessLevel === 'secret' && "Event is completely hidden. Only accessible via direct link and invite code."}
+            {accessLevel === 'participants_only' && "Event is invisible to everyone except you, co-organizers and registered attendees — even with the direct link. No new people can join."}
           </p>
         )}
       </div>
