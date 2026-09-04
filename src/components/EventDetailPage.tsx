@@ -441,10 +441,12 @@ export const EventDetailPage = () => {
   useEffect(() => {
     const processPendingJoin = async () => {
       const pendingEventId = localStorage.getItem("pendingEventJoin");
+      const pendingInviteCode = localStorage.getItem("pendingInviteCode");
 
       if (pendingEventId && user && event && pendingEventId === event.id && !hasJoined) {
         // Clear the pending intent
         localStorage.removeItem("pendingEventJoin");
+        localStorage.removeItem("pendingInviteCode");
 
         // Auto-join the event by calling the join logic directly
         setJoiningEvent(true);
@@ -454,6 +456,7 @@ export const EventDetailPage = () => {
             _event_id: event.id,
             _is_anonymous: joinAnonymously,
             _guest_count: guestCount,
+            _invite_code: pendingInviteCode || null,
           });
 
           if (error) {
