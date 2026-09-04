@@ -341,6 +341,12 @@ export const EventDetailPage = () => {
     );
   };
 
+  const refreshEvent = async () => {
+    if (!id) return;
+    const { data: eventData } = await getEventBySlugOrId(id);
+    if (eventData) setEvent(eventData);
+  };
+
   const handleJoinEvent = async () => {
     if (!user) {
       // Store join intent in localStorage
