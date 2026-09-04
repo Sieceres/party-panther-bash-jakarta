@@ -174,7 +174,7 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime, shareUrl }: Ev
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="email">Invited Person's Email</Label>
+                  <Label htmlFor="email">Invited Person's Email (optional)</Label>
                   <Input
                     id="email"
                     type="email"
@@ -183,7 +183,7 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime, shareUrl }: Ev
                     placeholder="person@example.com"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    One code per person. Expires when event starts.
+                    Leave blank for a reusable link. If you add an email, only a user signed in with that email can redeem it. Expires when event starts.
                   </p>
                 </div>
                 <Button onClick={handleGenerateCode} disabled={loading} className="w-full">
