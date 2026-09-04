@@ -1084,7 +1084,7 @@ export const EventDetailPage = () => {
         <Header activeSection="events" />
         <div className="min-h-screen bg-background pt-20 px-4">
           <div className="container mx-auto">
-            <div className="text-center">Event not found</div>
+            <div className="text-center">Event not found, or only visible to its participants</div>
           </div>
         </div>
       </>
