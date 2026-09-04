@@ -229,7 +229,16 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime, shareUrl }: Ev
                       <Button
                         size="sm"
                         variant="ghost"
+                        onClick={() => handleCopyInviteLink(code.code)}
+                        title="Copy invite link"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
                         onClick={() => handleCopyCode(code.code)}
+                        title="Copy code"
                       >
                         <Copy className="w-4 h-4" />
                       </Button>
@@ -237,6 +246,7 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime, shareUrl }: Ev
                         size="sm"
                         variant="ghost"
                         onClick={() => handleRevokeCode(code.id)}
+                        title="Revoke code"
                       >
                         <Ban className="w-4 h-4" />
                       </Button>
