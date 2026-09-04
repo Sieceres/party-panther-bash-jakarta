@@ -346,6 +346,9 @@ export const EventDetailPage = () => {
       // Store join intent in localStorage
       if (event) {
         localStorage.setItem("pendingEventJoin", event.id);
+        if (inviteCode.trim()) {
+          localStorage.setItem("pendingInviteCode", inviteCode.trim());
+        }
       }
       setLoginDialogOpen(true);
       return;
@@ -361,6 +364,21 @@ export const EventDetailPage = () => {
       });
       return;
     }
+
+    // Participants-only events require a valid invite code for non-participants
+    if (
+      event.access_level === "participants_only" &&
+      !hasJoined &&
+      !inviteCode.trim()
+    ) {
+      toast({
+        title: "Invite code required",
+        description: "This event is participants only. Enter an invite code to join.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setJoiningEvent(true);
     if (event.track_payments) setJoiningDialogOpen(true);
     try {
@@ -368,7 +386,7 @@ export const EventDetailPage = () => {
         _event_id: event.id,
         _is_anonymous: joinAnonymously,
         _guest_count: guestCount,
-
+        _invite_code: inviteCode.trim() || null,
       });
 
       if (error) {
