@@ -1626,6 +1626,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_event_for_invite_code: {
+        Args: { _code: string; _identifier: string }
+        Returns: Json
+      }
       get_event_guest_list: {
         Args: { _event_id: string }
         Returns: {
@@ -1971,14 +1975,24 @@ export type Database = {
       }
       is_reserved_slug: { Args: { _slug: string }; Returns: boolean }
       is_user_banned: { Args: { _user_id: string }; Returns: boolean }
-      join_event: {
-        Args: {
-          _event_id: string
-          _guest_count?: number
-          _is_anonymous?: boolean
-        }
-        Returns: boolean
-      }
+      join_event:
+        | {
+            Args: {
+              _event_id: string
+              _guest_count?: number
+              _is_anonymous?: boolean
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              _event_id: string
+              _guest_count?: number
+              _invite_code?: string
+              _is_anonymous?: boolean
+            }
+            Returns: boolean
+          }
       refresh_event_attendee_stats: { Args: never; Returns: undefined }
       refresh_promo_review_stats: { Args: never; Returns: undefined }
       should_show_organizer_contact: { Args: never; Returns: boolean }

@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   AlertDialog,
@@ -94,6 +96,7 @@ interface Event {
 
 export const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [event, setEvent] = useState<Event | null>(null);
@@ -125,6 +128,7 @@ export const EventDetailPage = () => {
   const [joinAnonymously, setJoinAnonymously] = useState(false);
   const [guestCount, setGuestCount] = useState(0);
   const [savingGuests, setSavingGuests] = useState(false);
+  const [inviteCode, setInviteCode] = useState(searchParams.get("code") || "");
 
   const [venueSlug, setVenueSlug] = useState<string | null>(null);
   const [linkedVenueAddress, setLinkedVenueAddress] = useState<string | null>(null);
@@ -136,13 +140,29 @@ export const EventDetailPage = () => {
     const fetchData = async () => {
       if (!id) return;
 
-      try {
-        const { data: eventData, error: eventError } = await getEventBySlugOrId(id);
-        if (eventError || !eventData) {
-          throw new Error("Event not found");
-        }
+    try {
+      let eventData: any = null;
+      const { data: foundEvent, error: eventError } = await getEventBySlugOrId(id);
+      if (!eventError && foundEvent) {
+        eventData = foundEvent;
+      } else if (inviteCode.trim()) {
+        // A participants-only event can be viewed with a valid invite code
+        const { data: unlockedEvent, error: unlockError } = await (supabase as any).rpc(
+          "get_event_for_invite_code",
+          {
+            _identifier: id,
+            _code: inviteCode.trim(),
+          },
+        );
+        if (unlockError) console.error("Error unlocking event:", unlockError);
+        eventData = unlockedEvent || null;
+      }
 
-        setEvent(eventData);
+      if (!eventData) {
+        throw new Error("Event not found");
+      }
+
+      setEvent(eventData);
 
         // Fetch venue slug if venue_id exists
         if (eventData.venue_id) {
@@ -321,11 +341,20 @@ export const EventDetailPage = () => {
     );
   };
 
+  const refreshEvent = async () => {
+    if (!id) return;
+    const { data: eventData } = await getEventBySlugOrId(id);
+    if (eventData) setEvent(eventData);
+  };
+
   const handleJoinEvent = async () => {
     if (!user) {
       // Store join intent in localStorage
       if (event) {
         localStorage.setItem("pendingEventJoin", event.id);
+        if (inviteCode.trim()) {
+          localStorage.setItem("pendingInviteCode", inviteCode.trim());
+        }
       }
       setLoginDialogOpen(true);
       return;
@@ -341,6 +370,21 @@ export const EventDetailPage = () => {
       });
       return;
     }
+
+    // Participants-only events require a valid invite code for non-participants
+    if (
+      event.access_level === "participants_only" &&
+      !hasJoined &&
+      !inviteCode.trim()
+    ) {
+      toast({
+        title: "Invite code required",
+        description: "This event is participants only. Enter an invite code to join.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setJoiningEvent(true);
     if (event.track_payments) setJoiningDialogOpen(true);
     try {
@@ -348,7 +392,7 @@ export const EventDetailPage = () => {
         _event_id: event.id,
         _is_anonymous: joinAnonymously,
         _guest_count: guestCount,
-
+        _invite_code: inviteCode.trim() || null,
       });
 
       if (error) {
@@ -364,8 +408,10 @@ export const EventDetailPage = () => {
       setTotalAttendees((prev) => prev + 1 + guestCount);
 
 
-      // Refresh attendees list
+      // Refresh attendees list and event details (needed when the event was
+      // initially loaded through the invite-code RPC without private fields)
       await refreshAttendees();
+      await refreshEvent();
 
       if (event.track_payments) {
         // Merge the joined confirmation into the payment dialog
@@ -403,10 +449,12 @@ export const EventDetailPage = () => {
   useEffect(() => {
     const processPendingJoin = async () => {
       const pendingEventId = localStorage.getItem("pendingEventJoin");
+      const pendingInviteCode = localStorage.getItem("pendingInviteCode");
 
       if (pendingEventId && user && event && pendingEventId === event.id && !hasJoined) {
         // Clear the pending intent
         localStorage.removeItem("pendingEventJoin");
+        localStorage.removeItem("pendingInviteCode");
 
         // Auto-join the event by calling the join logic directly
         setJoiningEvent(true);
@@ -416,6 +464,7 @@ export const EventDetailPage = () => {
             _event_id: event.id,
             _is_anonymous: joinAnonymously,
             _guest_count: guestCount,
+            _invite_code: pendingInviteCode || null,
           });
 
           if (error) {
@@ -430,8 +479,9 @@ export const EventDetailPage = () => {
           setTotalAttendees((prev) => prev + 1 + guestCount);
 
 
-          // Refresh attendees list
+          // Refresh attendees list and event details
           await refreshAttendees();
+          await refreshEvent();
 
           if (event.track_payments) {
             setJoinedBanner(true);
@@ -1226,6 +1276,21 @@ export const EventDetailPage = () => {
                           ))}
                         </select>
                       </div>
+                      {event.access_level === "participants_only" && (
+                        <div className="space-y-2">
+                          <Label htmlFor="invite-code">Invite code</Label>
+                          <Input
+                            id="invite-code"
+                            value={inviteCode}
+                            onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                            placeholder="Enter your invite code"
+                            className="font-mono"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            This event is only visible to participants. You need an invite code to join.
+                          </p>
+                        </div>
+                      )}
                       <Button variant="cta" onClick={handleJoinEvent} disabled={joiningEvent} className="w-full">
                         {joiningEvent ? (
                           <span className="flex items-center gap-2">
@@ -1819,7 +1884,12 @@ export const EventDetailPage = () => {
             <div className="space-y-6">
               {/* Invite Codes Management - only for organizers of private events */}
               {(isOwner || isCoOrganizer) && event.access_level !== "public" && (
-                <EventInviteCodes eventId={event.id} eventDate={event.date} eventTime={event.time} />
+                <EventInviteCodes
+                  eventId={event.id}
+                  eventDate={event.date}
+                  eventTime={event.time}
+                  shareUrl={getEventShareUrl(event)}
+                />
               )}
             </div>
           </div>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Copy, Plus, Trash2, Ban, Check } from "lucide-react";
+import { Copy, Plus, Trash2, Ban, Check, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -24,9 +24,10 @@ interface EventInviteCodesProps {
   eventId: string;
   eventDate: string;
   eventTime: string;
+  shareUrl: string;
 }
 
-export const EventInviteCodes = ({ eventId, eventDate, eventTime }: EventInviteCodesProps) => {
+export const EventInviteCodes = ({ eventId, eventDate, eventTime, shareUrl }: EventInviteCodesProps) => {
   const [codes, setCodes] = useState<InviteCode[]>([]);
   const [newEmail, setNewEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,18 +55,9 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime }: EventInviteC
   };
 
   const handleGenerateCode = async () => {
-    if (!newEmail.trim()) {
-      toast({
-        title: "Email required",
-        description: "Please enter an email for this invite code.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setLoading(true);
     const { data: session } = await supabase.auth.getSession();
-    
+
     if (!session?.session?.user) {
       toast({
         title: "Not authenticated",
@@ -83,7 +75,7 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime }: EventInviteC
       .insert({
         event_id: eventId,
         code,
-        invited_user_email: newEmail,
+        invited_user_email: newEmail.trim() || null,
         created_by: session.session.user.id,
         expires_at: eventDateTime.toISOString()
       });
@@ -112,6 +104,14 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime }: EventInviteC
     toast({
       title: "Copied!",
       description: "Invite code copied to clipboard."
+    });
+  };
+
+  const handleCopyInviteLink = (code: string) => {
+    navigator.clipboard.writeText(`${shareUrl}?code=${code}`);
+    toast({
+      title: "Invite link copied!",
+      description: "Share this link to let someone join."
     });
   };
 
@@ -174,7 +174,7 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime }: EventInviteC
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="email">Invited Person's Email</Label>
+                  <Label htmlFor="email">Invited Person's Email (optional)</Label>
                   <Input
                     id="email"
                     type="email"
@@ -183,7 +183,7 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime }: EventInviteC
                     placeholder="person@example.com"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    One code per person. Expires when event starts.
+                    Leave blank for a reusable link. If you add an email, only a user signed in with that email can redeem it. Expires when event starts.
                   </p>
                 </div>
                 <Button onClick={handleGenerateCode} disabled={loading} className="w-full">
@@ -229,7 +229,16 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime }: EventInviteC
                       <Button
                         size="sm"
                         variant="ghost"
+                        onClick={() => handleCopyInviteLink(code.code)}
+                        title="Copy invite link"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
                         onClick={() => handleCopyCode(code.code)}
+                        title="Copy code"
                       >
                         <Copy className="w-4 h-4" />
                       </Button>
@@ -237,6 +246,7 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime }: EventInviteC
                         size="sm"
                         variant="ghost"
                         onClick={() => handleRevokeCode(code.id)}
+                        title="Revoke code"
                       >
                         <Ban className="w-4 h-4" />
                       </Button>
