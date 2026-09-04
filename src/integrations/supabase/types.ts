@@ -1980,7 +1980,12 @@ export type Database = {
       should_show_organizer_contact: { Args: never; Returns: boolean }
     }
     Enums: {
-      event_access_level: "public" | "private" | "invite_only" | "secret"
+      event_access_level:
+        | "public"
+        | "private"
+        | "invite_only"
+        | "secret"
+        | "participants_only"
       flag_type:
         | "spam_reviews"
         | "spam_comments"
@@ -2114,7 +2119,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      event_access_level: ["public", "private", "invite_only", "secret"],
+      event_access_level: [
+        "public",
+        "private",
+        "invite_only",
+        "secret",
+        "participants_only",
+      ],
       flag_type: [
         "spam_reviews",
         "spam_comments",
