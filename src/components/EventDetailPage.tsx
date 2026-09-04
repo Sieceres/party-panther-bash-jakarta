@@ -1267,6 +1267,21 @@ export const EventDetailPage = () => {
                           ))}
                         </select>
                       </div>
+                      {event.access_level === "participants_only" && (
+                        <div className="space-y-2">
+                          <Label htmlFor="invite-code">Invite code</Label>
+                          <Input
+                            id="invite-code"
+                            value={inviteCode}
+                            onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                            placeholder="Enter your invite code"
+                            className="font-mono"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            This event is only visible to participants. You need an invite code to join.
+                          </p>
+                        </div>
+                      )}
                       <Button variant="cta" onClick={handleJoinEvent} disabled={joiningEvent} className="w-full">
                         {joiningEvent ? (
                           <span className="flex items-center gap-2">
