@@ -408,8 +408,10 @@ export const EventDetailPage = () => {
       setTotalAttendees((prev) => prev + 1 + guestCount);
 
 
-      // Refresh attendees list
+      // Refresh attendees list and event details (needed when the event was
+      // initially loaded through the invite-code RPC without private fields)
       await refreshAttendees();
+      await refreshEvent();
 
       if (event.track_payments) {
         // Merge the joined confirmation into the payment dialog
