@@ -479,8 +479,9 @@ export const EventDetailPage = () => {
           setTotalAttendees((prev) => prev + 1 + guestCount);
 
 
-          // Refresh attendees list
+          // Refresh attendees list and event details
           await refreshAttendees();
+          await refreshEvent();
 
           if (event.track_payments) {
             setJoinedBanner(true);
