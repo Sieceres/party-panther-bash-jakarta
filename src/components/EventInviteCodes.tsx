@@ -27,7 +27,7 @@ interface EventInviteCodesProps {
   shareUrl: string;
 }
 
-export const EventInviteCodes = ({ eventId, eventDate, eventTime }: EventInviteCodesProps) => {
+export const EventInviteCodes = ({ eventId, eventDate, eventTime, shareUrl }: EventInviteCodesProps) => {
   const [codes, setCodes] = useState<InviteCode[]>([]);
   const [newEmail, setNewEmail] = useState("");
   const [loading, setLoading] = useState(false);
