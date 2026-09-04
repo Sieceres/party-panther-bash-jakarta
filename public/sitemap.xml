@@ -52,12 +52,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://partypanther.net/e/angkot-pub-crawl-viii</loc>
-    <lastmod>2026-09-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://partypanther.net/e/jazz-brazilian-night-at-dock-of-tuna</loc>
     <lastmod>2026-04-22</lastmod>
     <changefreq>weekly</changefreq>
@@ -72,6 +66,12 @@
   <url>
     <loc>https://partypanther.net/e/ufo-unidentified-funk-oligarch</loc>
     <lastmod>2026-04-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/e/angkot-pub-crawl-viii</loc>
+    <lastmod>2026-09-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
