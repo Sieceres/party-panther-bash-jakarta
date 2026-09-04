@@ -1,0 +1,1 @@
+ALTER TYPE public.event_access_level ADD VALUE IF NOT EXISTS 'participants_only';
