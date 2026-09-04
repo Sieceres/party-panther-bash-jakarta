@@ -107,6 +107,14 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime, shareUrl }: Ev
     });
   };
 
+  const handleCopyInviteLink = (code: string) => {
+    navigator.clipboard.writeText(`${shareUrl}?code=${code}`);
+    toast({
+      title: "Invite link copied!",
+      description: "Share this link to let someone join."
+    });
+  };
+
   const handleRevokeCode = async (codeId: string) => {
     const { error } = await supabase
       .from('event_invite_codes')
