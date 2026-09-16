@@ -1020,6 +1020,7 @@ export type Database = {
           original_price_amount: number | null
           price_currency: string | null
           promo_type: string | null
+          promo_types: string[] | null
           slug: string | null
           title: string
           updated_at: string
@@ -1048,6 +1049,7 @@ export type Database = {
           original_price_amount?: number | null
           price_currency?: string | null
           promo_type?: string | null
+          promo_types?: string[] | null
           slug?: string | null
           title: string
           updated_at?: string
@@ -1076,6 +1078,7 @@ export type Database = {
           original_price_amount?: number | null
           price_currency?: string | null
           promo_type?: string | null
+          promo_types?: string[] | null
           slug?: string | null
           title?: string
           updated_at?: string

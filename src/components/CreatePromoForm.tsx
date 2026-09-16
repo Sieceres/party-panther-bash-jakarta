@@ -35,7 +35,7 @@ export const CreatePromoForm = () => {
     description: "",
     venue: "",
     address: "",
-    promoType: "",
+    promoTypes: [] as string[],
     dayOfWeek: [] as string[],
     area: "",
     drinkType: [] as string[],
@@ -50,7 +50,7 @@ export const CreatePromoForm = () => {
     title: formData.title,
     venue: formData.venue,
     description: formData.description,
-    promoType: formData.promoType,
+    promoType: formData.promoTypes[0] || "",
     area: formData.area,
   });
 
@@ -144,7 +144,7 @@ export const CreatePromoForm = () => {
       description: data.description || prev.description,
       venue: data.venue_name || prev.venue,
       address: data.venue_address || prev.address,
-      promoType: data.promo_type ? normalizePromoType(data.promo_type) : prev.promoType,
+      promoTypes: data.promo_type ? [normalizePromoType(data.promo_type)] : prev.promoTypes,
       dayOfWeek: data.day_of_week && data.day_of_week.length ? data.day_of_week : prev.dayOfWeek,
       area: resolvedArea || prev.area,
       drinkType: data.drink_type && data.drink_type.length ? data.drink_type : prev.drinkType,
@@ -189,7 +189,7 @@ export const CreatePromoForm = () => {
     if (!formData.title.trim()) errors.push("Title is required");
     if (!formData.description.trim()) errors.push("Description is required");
     if (!formData.venue.trim()) errors.push("Venue name is required");
-    if (!formData.promoType) errors.push("Promo type is required");
+    if (formData.promoTypes.length === 0) errors.push("Promo type is required");
     return errors;
   };
 
@@ -197,7 +197,7 @@ export const CreatePromoForm = () => {
     const baseValid = formData.title.trim() && 
            formData.description.trim() && 
            formData.venue.trim() && 
-           formData.promoType;
+           formData.promoTypes.length > 0;
     if (duplicates.length > 0 && !duplicateConfirmed) return false;
     return baseValid;
   };
@@ -258,12 +258,13 @@ export const CreatePromoForm = () => {
       const { data: newPromo, error } = await supabase.from('promos').insert({
         title: formData.title,
         description: formData.description,
-        discount_text: formData.promoType,
+        discount_text: formData.promoTypes.join(", "),
         venue_name: formData.venue,
         venue_address: formData.address,
         venue_latitude: null,
         venue_longitude: null,
-        promo_type: formData.promoType,
+        promo_type: formData.promoTypes[0] || null,
+        promo_types: formData.promoTypes,
         price_currency: "IDR",
         original_price_amount: formData.originalPrice ? Number(formData.originalPrice) : null,
         discounted_price_amount: formData.discountedPrice ? Number(formData.discountedPrice) : null,
@@ -284,7 +285,7 @@ export const CreatePromoForm = () => {
         body: {
           type: 'new_promo',
           title: formData.title,
-          details: { Venue: formData.venue, Type: formData.promoType, Area: formData.area || 'N/A' },
+          details: { Venue: formData.venue, Type: formData.promoTypes.join(", "), Area: formData.area || 'N/A' },
           link: `/promo/${newPromo?.slug || newPromo?.id}`,
         }
       }).catch(err => console.error('Notify failed:', err));
@@ -338,12 +339,12 @@ export const CreatePromoForm = () => {
 
 
             <PromoDetails
-              promoType={formData.promoType}
+              promoTypes={formData.promoTypes}
               dayOfWeek={formData.dayOfWeek}
               area={formData.area}
               drinkType={formData.drinkType}
               discountedPrice={formData.discountedPrice}
-              onPromoTypeChange={(value) => handleInputChange("promoType", value)}
+              onPromoTypesChange={(values) => handleInputChange("promoTypes", values)}
               onDayOfWeekChange={(values) => handleInputChange("dayOfWeek", values)}
               onAreaChange={(value) => handleInputChange("area", value)}
               onDrinkTypeChange={(values) => handleInputChange("drinkType", values)}

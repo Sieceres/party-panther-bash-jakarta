@@ -167,7 +167,9 @@ const Index = ({ initialSection = "home" }: IndexProps) => {
           promo.drink_type.some((drink: string) => drinkTypeFilter.includes(drink?.toLowerCase() || "")) :
           drinkTypeFilter.includes((promo.drink_type as string)?.toLowerCase() || ""));
       const promoTypeMatch = promoTypeFilter.includes("all") || 
-        promoTypeFilter.includes(promo.promo_type || "");
+        promoTypeFilter.includes(promo.promo_type || "") ||
+        (Array.isArray((promo as any).promo_types) &&
+          (promo as any).promo_types.some((t: string) => promoTypeFilter.includes(t)));
       return dayMatch && areaMatch && drinkTypeMatch && promoTypeMatch;
     })
     .sort((a, b) => {
