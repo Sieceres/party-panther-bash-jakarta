@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Party Panther — CTA</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cyan:     #3dd6f5;
+  --cyan-dim: rgba(61,214,245,0.45);
+  --white:    #ffffff;
+}
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden; background: #000;
+  display: flex; align-items: center; justify-content: center;
+}
+/* 4:5 = 1080×1350 */
+.canvas-wrapper { width: 1080px; height: 1350px; position: absolute; }
+.canvas {
+  width: 1080px; height: 1350px;
+  background: radial-gradient(ellipse at 20% 30%, #1a2a6e 0%, #0d1333 45%, #080e24 100%);
+  position: relative; overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  display: flex; align-items: center; justify-content: center;
+}
+.canvas::before {
+  content: ''; position: absolute;
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(40,80,200,0.3) 0%, transparent 70%);
+  top: -100px; left: -150px; pointer-events: none;
+}
+.canvas::after {
+  content: ''; position: absolute;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(80,40,200,0.2) 0%, transparent 70%);
+  bottom: -80px; right: -80px; pointer-events: none;
+}
+.grid-bg {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(61,214,245,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61,214,245,0.04) 1px, transparent 1px);
+  background-size: 54px 54px;
+}
+.scanline {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(61,214,245,0.25), transparent);
+  animation: scan 3s linear infinite; pointer-events: none;
+}
+@keyframes scan { from { top: -2px; } to { top: 100%; } }
+.scanline-v {
+  position: absolute; top: 0; bottom: 0; width: 2px;
+  background: linear-gradient(180deg, transparent, rgba(61,214,245,0.12), transparent);
+  animation: scanv 6s linear infinite; pointer-events: none;
+}
+@keyframes scanv { from { left: -2px; } to { left: 100%; } }
+.corner {
+  position: absolute; width: 50px; height: 50px;
+  border-color: var(--cyan); border-style: solid; opacity: 0.5;
+}
+.corner.tl { top: 30px; left: 30px; border-width: 2px 0 0 2px; }
+.corner.tr { top: 30px; right: 30px; border-width: 2px 2px 0 0; }
+.corner.bl { bottom: 30px; left: 30px; border-width: 0 0 2px 2px; }
+.corner.br { bottom: 30px; right: 30px; border-width: 0 2px 2px 0; }
+
+/* ── CTA vertical layout ── */
+.cta-outer {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  width: 100%; padding: 60px 80px;
+}
+.cta-logo {
+  width: 220px; height: 220px;
+  border-radius: 50%; object-fit: cover;
+  opacity: 0; transform: scale(0.6);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  margin-bottom: 50px;
+  filter: drop-shadow(0 0 20px rgba(61,214,245,0.5));
+}
+.cta-logo.show { opacity: 1; transform: scale(1); }
+
+.cta-brand {
+  font-size: 100px; font-weight: 700;
+  letter-spacing: 8px; color: var(--white);
+  text-align: center; line-height: 1;
+  opacity: 0; white-space: nowrap;
+}
+.cta-brand.flicker { animation: neon-flicker 1.4s steps(1) forwards; }
+@keyframes neon-flicker {
+  0%   { opacity: 0; text-shadow: none; }
+  8%   { opacity: 1; text-shadow: 0 0 30px rgba(61,214,245,0.9), 0 0 60px rgba(61,214,245,0.5); }
+  16%  { opacity: 0; text-shadow: none; }
+  24%  { opacity: 1; text-shadow: 0 0 30px rgba(61,214,245,0.9), 0 0 60px rgba(61,214,245,0.5); }
+  32%  { opacity: 0; text-shadow: none; }
+  50%  { opacity: 0; text-shadow: none; }
+  55%  { opacity: 1; text-shadow: 0 0 40px rgba(61,214,245,1), 0 0 80px rgba(61,214,245,0.6); }
+  60%  { opacity: 0; text-shadow: none; }
+  65%  { opacity: 1; text-shadow: 0 0 40px rgba(61,214,245,1), 0 0 80px rgba(61,214,245,0.6); }
+  70%  { opacity: 0; text-shadow: none; }
+  75%  { opacity: 1; text-shadow: 0 0 40px rgba(61,214,245,1), 0 0 80px rgba(61,214,245,0.6); }
+  80%  { opacity: 0; text-shadow: none; }
+  90%  { opacity: 1; text-shadow: 0 0 20px rgba(61,214,245,1), 0 0 60px rgba(61,214,245,0.7), 0 0 120px rgba(61,214,245,0.3); }
+  100% { opacity: 1; text-shadow: 0 0 20px rgba(61,214,245,0.8), 0 0 50px rgba(61,214,245,0.5); }
+}
+.cta-brand-cyan { color: var(--cyan); text-shadow: 0 0 60px rgba(61,214,245,0.5); }
+
+.cta-divider {
+  width: 700px; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(61,214,245,0.5), transparent);
+  margin: 60px 0;
+  opacity: 0; transition: opacity 0.5s ease;
+}
+.cta-divider.show { opacity: 1; }
+
+.cta-url {
+  font-size: 52px; font-weight: 600;
+  letter-spacing: 5px; color: var(--cyan);
+  text-shadow: 0 0 30px rgba(61,214,245,0.4);
+  opacity: 0; transition: opacity 0.5s ease;
+  margin-bottom: 50px;
+}
+.cta-url.show { opacity: 1; }
+
+.cta-btn {
+  background: linear-gradient(135deg, #3dd6f5 0%, #5a9ef8 100%);
+  color: #0a1230;
+  font-family: 'Poppins', sans-serif;
+  font-size: 40px; font-weight: 700;
+  letter-spacing: 8px; text-transform: uppercase;
+  padding: 34px 100px;
+  border: none; border-radius: 999px; cursor: pointer;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  animation: btn-pulse 2.5s ease-in-out 1.5s infinite;
+  margin-bottom: 50px;
+}
+.cta-btn.show { opacity: 1; transform: translateY(0); }
+@keyframes btn-pulse {
+  0%,100% { box-shadow: 0 0 30px rgba(61,214,245,0.4); }
+  50%      { box-shadow: 0 0 70px rgba(61,214,245,0.8), 0 0 120px rgba(90,158,248,0.3); }
+}
+.cta-tagline {
+  font-size: 24px; font-weight: 300;
+  letter-spacing: 10px; text-transform: uppercase;
+  color: var(--cyan-dim);
+  opacity: 0; transition: opacity 0.6s ease;
+}
+.cta-tagline.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="canvas-wrapper" id="canvasWrapper">
+  <div class="canvas">
+    <div class="grid-bg"></div>
+    <div class="scanline"></div>
+    <div class="scanline-v"></div>
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+    <div class="cta-outer">
+      <img class="cta-logo" id="cta-logo"
+        src="https://i.ibb.co/ZzB6SW1K/Screenshot-20260510-111428-Opera.jpg"
+        alt="Party Panther Logo" />
+      <div class="cta-brand" id="cta-brand">
+        PARTY <span class="cta-brand-cyan">PANTHER</span>
+      </div>
+      <div class="cta-divider" id="cta-divider"></div>
+      <div class="cta-url" id="cta-url">PARTYPANTHER.NET</div>
+      <button class="cta-btn" id="cta-btn">VISIT NOW</button>
+      <div class="cta-tagline" id="cta-tagline">THE PARTY HUNT BEGINS</div>
+    </div>
+  </div>
+</div>
+<script>
+  function scaleToFit() {
+    const w = document.getElementById('canvasWrapper');
+    const scale = Math.min(window.innerWidth / 1080, window.innerHeight / 1350);
+    w.style.transform       = `scale(${scale})`;
+    w.style.transformOrigin = 'top left';
+    w.style.position        = 'absolute';
+    w.style.left            = `${(window.innerWidth  - 1080 * scale) / 2}px`;
+    w.style.top             = `${(window.innerHeight - 1350 * scale) / 2}px`;
+  }
+  scaleToFit();
+  window.addEventListener('resize', scaleToFit);
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  async function animate() {
+    await sleep(300);
+    document.getElementById('cta-logo').classList.add('show');
+    await sleep(700);
+    document.getElementById('cta-brand').classList.add('flicker');
+    await sleep(2200);
+    document.getElementById('cta-divider').classList.add('show');
+    await sleep(2500);
+    document.getElementById('cta-url').classList.add('show');
+    await sleep(3500);
+    document.getElementById('cta-btn').classList.add('show');
+    await sleep(4800);
+    document.getElementById('cta-tagline').classList.add('show');
+  }
+  animate();
+</script>
+</body>
+</html>
