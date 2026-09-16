@@ -21,12 +21,12 @@ interface PromoDetailsProps {
 
 
 export const PromoDetails = ({ 
-  promoType,
+  promoTypes,
   dayOfWeek, 
   area, 
   drinkType,
   discountedPrice,
-  onPromoTypeChange,
+  onPromoTypesChange,
   onDayOfWeekChange, 
   onAreaChange, 
   onDrinkTypeChange,
@@ -35,19 +35,16 @@ export const PromoDetails = ({
 
   return (
     <>
-      {promoType !== undefined && onPromoTypeChange && (
+      {promoTypes !== undefined && onPromoTypesChange && (
         <div className="space-y-2">
           <Label htmlFor="promoType">Promo Type *</Label>
-          <Select value={promoType} onValueChange={onPromoTypeChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select promo type" />
-            </SelectTrigger>
-            <SelectContent>
-              {PROMO_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>{type}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MultiSelect
+            options={PROMO_TYPES.map((type) => ({ value: type, label: type }))}
+            selectedValues={promoTypes}
+            onSelectionChange={onPromoTypesChange}
+            placeholder="Select promo type(s)"
+          />
+          <p className="text-xs text-muted-foreground">You can pick more than one type.</p>
         </div>
       )}
 
