@@ -7,12 +7,12 @@ import { JAKARTA_AREAS } from "@/lib/area-config";
 import { PROMO_TYPES } from "@/lib/promo-types";
 
 interface PromoDetailsProps {
-  promoType?: string;
+  promoTypes?: string[];
   dayOfWeek: string[];
   area: string;
   drinkType: string[];
   discountedPrice?: string;
-  onPromoTypeChange?: (type: string) => void;
+  onPromoTypesChange?: (types: string[]) => void;
   onDayOfWeekChange: (days: string[]) => void;
   onAreaChange: (area: string) => void;
   onDrinkTypeChange: (types: string[]) => void;
