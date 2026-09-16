@@ -189,7 +189,7 @@ export const CreatePromoForm = () => {
     if (!formData.title.trim()) errors.push("Title is required");
     if (!formData.description.trim()) errors.push("Description is required");
     if (!formData.venue.trim()) errors.push("Venue name is required");
-    if (!formData.promoType) errors.push("Promo type is required");
+    if (formData.promoTypes.length === 0) errors.push("Promo type is required");
     return errors;
   };
 
@@ -197,7 +197,7 @@ export const CreatePromoForm = () => {
     const baseValid = formData.title.trim() && 
            formData.description.trim() && 
            formData.venue.trim() && 
-           formData.promoType;
+           formData.promoTypes.length > 0;
     if (duplicates.length > 0 && !duplicateConfirmed) return false;
     return baseValid;
   };
