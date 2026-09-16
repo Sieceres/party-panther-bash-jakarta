@@ -73,7 +73,7 @@ export function MultiSelect({
           aria-expanded={open}
           className={cn(
             "w-full justify-between text-left font-normal",
-            selectedValues.length === 0 && "text-muted-foreground",
+            canonical.length === 0 && "text-muted-foreground",
             className
           )}
         >
@@ -90,7 +90,7 @@ export function MultiSelect({
               onClick={() => handleOptionToggle(option.value)}
             >
               <Checkbox
-                checked={selectedValues.includes(option.value)}
+                checked={isSelected(option.value)}
                 onChange={() => handleOptionToggle(option.value)}
               />
               <label
@@ -99,7 +99,7 @@ export function MultiSelect({
               >
                 {option.label}
               </label>
-              {selectedValues.includes(option.value) && (
+              {isSelected(option.value) && (
                 <Check className="h-4 w-4 text-primary" />
               )}
             </div>
