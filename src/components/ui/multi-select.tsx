@@ -27,23 +27,41 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
+  const norm = (v: string) => (v ?? "").toString().trim().toLowerCase();
+
+  // Map any incoming value (different casing, or the label instead of the value)
+  // onto the canonical option value so checkmarks always reflect the selection.
+  const canonical = React.useMemo(() => {
+    return selectedValues
+      .map((v) => {
+        const match = options.find(
+          (opt) => norm(opt.value) === norm(v) || norm(opt.label) === norm(v)
+        );
+        return match ? match.value : null;
+      })
+      .filter((v): v is string => v !== null);
+  }, [selectedValues, options]);
+
+  const isSelected = (optionValue: string) => canonical.includes(optionValue);
+
   const handleOptionToggle = (optionValue: string) => {
-    const newValues = selectedValues.includes(optionValue)
-      ? selectedValues.filter(value => value !== optionValue)
-      : [...selectedValues, optionValue];
-    
+    const newValues = isSelected(optionValue)
+      ? canonical.filter((value) => value !== optionValue)
+      : [...canonical, optionValue];
+
     onSelectionChange(newValues);
   };
 
   const getDisplayText = () => {
-    if (selectedValues.length === 0) {
+    if (canonical.length === 0) {
       return placeholder;
     }
-    if (selectedValues.length === 1) {
-      const option = options.find(opt => opt.value === selectedValues[0]);
-      return option?.label || selectedValues[0];
+    if (canonical.length <= 2) {
+      return canonical
+        .map((v) => options.find((opt) => opt.value === v)?.label || v)
+        .join(", ");
     }
-    return `${selectedValues.length} selected`;
+    return `${canonical.length} selected`;
   };
 
   return (
