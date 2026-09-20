@@ -10,7 +10,7 @@ interface PromoPreviewDialogProps {
     title: string;
     description: string;
     venue: string;
-    promoType: string;
+    promoTypes: string[];
     area: string;
     drinkType: string[];
     image: string;
@@ -20,8 +20,10 @@ interface PromoPreviewDialogProps {
 
 export const PromoPreviewDialog = ({ formData }: PromoPreviewDialogProps) => {
   const hasMinData = formData.title.trim();
-  const drinkCategory = detectDrinkCategory(formData.title, formData.description, formData.promoType, formData.drinkType);
-  const placeholderImage = getPlaceholderImage(drinkCategory, formData.promoType);
+  const promoTypes = formData.promoTypes ?? [];
+  const primaryType = promoTypes[0] || "";
+  const drinkCategory = detectDrinkCategory(formData.title, formData.description, promoTypes.join(" "), formData.drinkType);
+  const placeholderImage = getPlaceholderImage(drinkCategory, primaryType);
 
   return (
     <Dialog>
@@ -45,10 +47,14 @@ export const PromoPreviewDialog = ({ formData }: PromoPreviewDialogProps) => {
                 e.currentTarget.src = placeholderImage;
               }}
             />
-            {formData.promoType && (
-              <Badge className="absolute top-3 right-3 bg-primary/90 text-primary-foreground text-xs">
-                {formData.promoType}
-              </Badge>
+            {promoTypes.length > 0 && (
+              <div className="absolute top-3 right-3 flex flex-wrap justify-end gap-1">
+                {promoTypes.map((type) => (
+                  <Badge key={type} className="bg-primary/90 text-primary-foreground text-xs">
+                    {type}
+                  </Badge>
+                ))}
+              </div>
             )}
           </div>
           <CardContent className="p-4 space-y-3">
