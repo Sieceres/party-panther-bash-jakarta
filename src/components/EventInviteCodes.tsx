@@ -211,20 +211,20 @@ export const EventInviteCodes = ({ eventId, eventDate, eventTime, shareUrl }: Ev
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <code className="font-mono font-bold">{code.code}</code>
-                    {code.used_by && <Check className="w-4 h-4 text-green-500" />}
+                    {(code.used_by || (!code.invited_user_email && code.used_at)) && <Check className="w-4 h-4 text-green-500" />}
                     {code.is_revoked && <Ban className="w-4 h-4 text-red-500" />}
                   </div>
                   <p className="text-sm text-muted-foreground truncate">
-                    {code.invited_user_email}
+                    {code.invited_user_email || "Reusable link (anyone with it can join)"}
                   </p>
                   {code.used_at && (
                     <p className="text-xs text-muted-foreground">
-                      Used {format(new Date(code.used_at), 'MMM d, h:mm a')}
+                      {code.invited_user_email ? "Used" : "Last used"} {format(new Date(code.used_at), 'MMM d, h:mm a')}
                     </p>
                   )}
                 </div>
                 <div className="flex gap-1">
-                  {!code.is_revoked && !code.used_by && (
+                  {!code.is_revoked && (!code.used_by || !code.invited_user_email) && (
                     <>
                       <Button
                         size="sm"
