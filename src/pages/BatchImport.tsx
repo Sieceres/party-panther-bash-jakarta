@@ -799,6 +799,22 @@ const BatchImport = () => {
               </Button>
             </div>
 
+            {importType === "promo" && (
+              <div className="flex items-start gap-3 rounded-lg border border-border/60 p-3">
+                <Checkbox
+                  id="replace-existing-promos"
+                  checked={replaceExisting}
+                  onCheckedChange={(v) => setReplaceExisting(v === true)}
+                />
+                <label htmlFor="replace-existing-promos" className="text-sm leading-snug cursor-pointer">
+                  <span className="font-medium">Delete existing promos at these venues first</span>
+                  <span className="block text-muted-foreground">
+                    All current promos for the venues in this import are removed before the new ones are added. This cannot be undone.
+                  </span>
+                </label>
+              </div>
+            )}
+
             <BatchImportReview
               type={importType}
               items={items}
