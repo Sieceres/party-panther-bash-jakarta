@@ -174,12 +174,21 @@ export const PromoListView = ({
         <ul className="divide-y divide-border/30">
           {sorted.map((promo) => (
             <li key={promo.id} className={selectedIds.includes(promo.id) ? "bg-primary/10" : undefined}>
-              <button
-                type="button"
-                onClick={() =>
-                  selectMode ? onToggleSelect?.(promo.id) : navigate(getPromoUrl(promo as never))
-                }
-                className="w-full text-left px-4 py-3 hover:bg-primary/10 transition-colors"
+              <a
+                href={getPromoUrl(promo as never)}
+                onClick={(e) => {
+                  if (selectMode) {
+                    e.preventDefault();
+                    onToggleSelect?.(promo.id);
+                    return;
+                  }
+                  // Let the browser handle Ctrl/Cmd+click, middle-click and
+                  // right-click "open in new tab"; plain clicks navigate in-app.
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                  e.preventDefault();
+                  navigate(getPromoUrl(promo as never));
+                }}
+                className="block w-full text-left px-4 py-3 hover:bg-primary/10 transition-colors cursor-pointer"
               >
                 {/* Desktop row */}
                 <div className="hidden md:flex items-center">
@@ -245,7 +254,7 @@ export const PromoListView = ({
                     {promo.area && <span>· {promo.area}</span>}
                   </div>
                 </div>
-              </button>
+              </a>
             </li>
           ))}
         </ul>
