@@ -13,6 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Star, Lock, Filter, RotateCcw, ArrowUpDown, Download, Search, ClipboardCheck, Share2, LayoutGrid, List } from "lucide-react";
 import { PromoListView, PromoSortKey, SortDirection } from "@/components/PromoListView";
+import { SelectableItem } from "@/components/SelectableItem";
+import { BulkDeleteBar } from "@/components/BulkDeleteBar";
+import { CheckSquare } from "lucide-react";
 import { exportPromosToExcel } from "@/lib/promo-export";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -99,6 +102,13 @@ export const PromosSection = ({
     setListSortKey(key);
     setListSortDir(dir);
   };
+
+  const isAdmin = !!(userAdminStatus?.is_admin || userAdminStatus?.is_super_admin);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   
 
@@ -205,6 +215,18 @@ export const PromosSection = ({
                   >
                     <ClipboardCheck className="w-5 h-5 mr-2" />
                     Review Categories
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setSelectMode((v) => !v);
+                      setSelectedIds([]);
+                    }}
+                    size="lg"
+                    variant={selectMode ? "default" : "outline"}
+                    className="min-h-[44px]"
+                  >
+                    <CheckSquare className="w-5 h-5 mr-2" />
+                    {selectMode ? "Cancel selection" : "Select promos"}
                   </Button>
                 </>
               )}
@@ -500,30 +522,44 @@ export const PromosSection = ({
             sortKey={listSortKey}
             sortDir={listSortDir}
             onSortChange={handleListSortChange}
+            selectMode={selectMode}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelect}
+            showCreatedAt={isAdmin}
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPromos.map((promo, index) => (
-              <PromoCard
+              <SelectableItem
                 key={promo.id}
-                promo={{
-                  ...promo,
-                  discount: promo.discount_text || "",
-                  venue: promo.venue_name || "",
-                  validUntil: promo.valid_until || "",
-                  image: promo.image_url || "",
-                  category: promo.category || "",
-                  promoType: promo.promo_type || "",
-                  day: promo.day_of_week || [],
-                  area: promo.area || "",
-                  drinkType: promo.drink_type || []
-                }}
-                userAdminStatus={userAdminStatus}
-                onFavoriteToggle={onFavoriteToggle}
-                index={index}
-              />
+                selectMode={selectMode}
+                selected={selectedIds.includes(promo.id)}
+                onToggle={() => toggleSelect(promo.id)}
+              >
+                <PromoCard
+                  promo={{
+                    ...promo,
+                    discount: promo.discount_text || "",
+                    venue: promo.venue_name || "",
+                    validUntil: promo.valid_until || "",
+                    image: promo.image_url || "",
+                    category: promo.category || "",
+                    promoType: promo.promo_type || "",
+                    day: promo.day_of_week || [],
+                    area: promo.area || "",
+                    drinkType: promo.drink_type || []
+                  }}
+                  userAdminStatus={userAdminStatus}
+                  onFavoriteToggle={onFavoriteToggle}
+                  index={index}
+                />
+              </SelectableItem>
             ))}
           </div>
+        )}
+
+        {selectMode && (
+          <BulkDeleteBar ids={selectedIds} type="promo" onClear={() => setSelectedIds([])} />
         )}
 
         {/* Load More Button */}

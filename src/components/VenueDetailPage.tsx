@@ -4,7 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil, Trash2, ShieldCheck } from "lucide-react";
+import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil, Trash2, ShieldCheck, LayoutGrid, List, CheckSquare } from "lucide-react";
+import { PromoListView, PromoSortKey, SortDirection } from "./PromoListView";
+import { SelectableItem } from "./SelectableItem";
+import { BulkDeleteBar } from "./BulkDeleteBar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -108,6 +111,25 @@ export const VenueDetailPage = () => {
       setDeleting(false);
     }
   };
+
+  const [promoViewMode, setPromoViewMode] = useState<"cards" | "list">(
+    () => (typeof window !== "undefined" && sessionStorage.getItem("venuePromoViewMode") === "list" ? "list" : "cards")
+  );
+  const [promoSortKey, setPromoSortKey] = useState<PromoSortKey>("name");
+  const [promoSortDir, setPromoSortDir] = useState<SortDirection>("asc");
+  const [promoSelectMode, setPromoSelectMode] = useState(false);
+  const [selectedPromoIds, setSelectedPromoIds] = useState<string[]>([]);
+  const [eventSelectMode, setEventSelectMode] = useState(false);
+  const [selectedEventIds, setSelectedEventIds] = useState<string[]>([]);
+
+  const togglePromoSelect = (id: string) =>
+    setSelectedPromoIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const toggleEventSelect = (id: string) =>
+    setSelectedEventIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  useEffect(() => {
+    sessionStorage.setItem("venuePromoViewMode", promoViewMode);
+  }, [promoViewMode]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -467,46 +489,142 @@ export const VenueDetailPage = () => {
               {/* Promos at this venue */}
               {promos.length > 0 && (
                 <div>
-                  <h2 className="text-xl font-bold mb-4">Promos at {venue.name}</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {promos.map((promo, i) => (
-                      <PromoCard
-                        key={promo.id}
-                        index={i}
-                        isVenueOwner={venue.claim_status === "approved" && venue.claimed_by === currentUserId}
-                        promo={{
-                          id: promo.id,
-                          title: promo.title,
-                          description: promo.description,
-                          discount: promo.discount_text,
-                          venue: promo.venue_name,
-                          validUntil: promo.valid_until || "",
-                          image: promo.image_url || "",
-                          category: promo.category || "",
-                          day: promo.day_of_week || [],
-                          area: promo.area || "",
-                          drinkType: promo.drink_type || [],
-                          created_by: promo.created_by,
-                          created_at: (promo as any).created_at,
-                          discounted_price_amount: (promo as any).discounted_price_amount,
-                          original_price_amount: (promo as any).original_price_amount,
-                          price_currency: (promo as any).price_currency,
-                        }}
-                      />
-                    ))}
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 className="text-xl font-bold">Promos at {venue.name}</h2>
+                    <div className="flex items-center gap-2">
+                      {isAdmin && (
+                        <Button
+                          size="sm"
+                          variant={promoSelectMode ? "default" : "outline"}
+                          onClick={() => {
+                            setPromoSelectMode((v) => !v);
+                            setSelectedPromoIds([]);
+                          }}
+                        >
+                          <CheckSquare className="w-4 h-4 mr-1" />
+                          {promoSelectMode ? "Cancel" : "Select"}
+                        </Button>
+                      )}
+                      <div className="flex rounded-md border border-border/60 overflow-hidden">
+                        <Button
+                          size="sm"
+                          variant={promoViewMode === "cards" ? "default" : "ghost"}
+                          className="rounded-none"
+                          onClick={() => setPromoViewMode("cards")}
+                        >
+                          <LayoutGrid className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={promoViewMode === "list" ? "default" : "ghost"}
+                          className="rounded-none"
+                          onClick={() => setPromoViewMode("list")}
+                        >
+                          <List className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
+
+                  {promoViewMode === "list" ? (
+                    <PromoListView
+                      promos={promos as never}
+                      sortKey={promoSortKey}
+                      sortDir={promoSortDir}
+                      onSortChange={(k, d) => {
+                        setPromoSortKey(k);
+                        setPromoSortDir(d);
+                      }}
+                      selectMode={promoSelectMode}
+                      selectedIds={selectedPromoIds}
+                      onToggleSelect={togglePromoSelect}
+                      showCreatedAt={isAdmin}
+                    />
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {promos.map((promo, i) => (
+                        <SelectableItem
+                          key={promo.id}
+                          selectMode={promoSelectMode}
+                          selected={selectedPromoIds.includes(promo.id)}
+                          onToggle={() => togglePromoSelect(promo.id)}
+                        >
+                          <PromoCard
+                            index={i}
+                            isVenueOwner={venue.claim_status === "approved" && venue.claimed_by === currentUserId}
+                            userAdminStatus={{ is_admin: isAdmin, is_super_admin: false }}
+                            promo={{
+                              id: promo.id,
+                              title: promo.title,
+                              description: promo.description,
+                              discount: promo.discount_text,
+                              venue: promo.venue_name,
+                              validUntil: promo.valid_until || "",
+                              image: promo.image_url || "",
+                              category: promo.category || "",
+                              day: promo.day_of_week || [],
+                              area: promo.area || "",
+                              drinkType: promo.drink_type || [],
+                              created_by: promo.created_by,
+                              created_at: (promo as any).created_at,
+                              discounted_price_amount: (promo as any).discounted_price_amount,
+                              original_price_amount: (promo as any).original_price_amount,
+                              price_currency: (promo as any).price_currency,
+                            }}
+                          />
+                        </SelectableItem>
+                      ))}
+                    </div>
+                  )}
+
+                  {promoSelectMode && (
+                    <BulkDeleteBar
+                      ids={selectedPromoIds}
+                      type="promo"
+                      onClear={() => setSelectedPromoIds([])}
+                    />
+                  )}
                 </div>
               )}
 
               {/* Events at this venue */}
               {events.length > 0 && (
                 <div>
-                  <h2 className="text-xl font-bold mb-4">Events at {venue.name}</h2>
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 className="text-xl font-bold">Events at {venue.name}</h2>
+                    {isAdmin && (
+                      <Button
+                        size="sm"
+                        variant={eventSelectMode ? "default" : "outline"}
+                        onClick={() => {
+                          setEventSelectMode((v) => !v);
+                          setSelectedEventIds([]);
+                        }}
+                      >
+                        <CheckSquare className="w-4 h-4 mr-1" />
+                        {eventSelectMode ? "Cancel" : "Select"}
+                      </Button>
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {events.map((event) => (
-                      <EventCard key={event.id} event={event} isVenueOwner={venue.claim_status === "approved" && venue.claimed_by === currentUserId} />
+                      <SelectableItem
+                        key={event.id}
+                        selectMode={eventSelectMode}
+                        selected={selectedEventIds.includes(event.id)}
+                        onToggle={() => toggleEventSelect(event.id)}
+                      >
+                        <EventCard event={event} isVenueOwner={venue.claim_status === "approved" && venue.claimed_by === currentUserId} />
+                      </SelectableItem>
                     ))}
                   </div>
+                  {eventSelectMode && (
+                    <BulkDeleteBar
+                      ids={selectedEventIds}
+                      type="event"
+                      onClear={() => setSelectedEventIds([])}
+                    />
+                  )}
                 </div>
               )}
 

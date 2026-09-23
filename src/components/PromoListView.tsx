@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tables } from "@/integrations/supabase/types";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import { getPromoUrl } from "@/lib/slug-utils";
@@ -55,9 +56,22 @@ interface PromoListViewProps {
   sortKey: PromoSortKey;
   sortDir: SortDirection;
   onSortChange: (key: PromoSortKey, dir: SortDirection) => void;
+  selectMode?: boolean;
+  selectedIds?: string[];
+  onToggleSelect?: (id: string) => void;
+  showCreatedAt?: boolean;
 }
 
-export const PromoListView = ({ promos, sortKey, sortDir, onSortChange }: PromoListViewProps) => {
+export const PromoListView = ({
+  promos,
+  sortKey,
+  sortDir,
+  onSortChange,
+  selectMode = false,
+  selectedIds = [],
+  onToggleSelect,
+  showCreatedAt = false,
+}: PromoListViewProps) => {
   const navigate = useNavigate();
 
   const sorted = useMemo(() => {
@@ -141,6 +155,7 @@ export const PromoListView = ({ promos, sortKey, sortDir, onSortChange }: PromoL
       <div className="rounded-lg border border-border/40 overflow-hidden bg-background/40 backdrop-blur-sm">
         {/* Desktop header */}
         <div className="hidden md:flex items-center px-4 py-2 border-b border-border/40 bg-white/5">
+          {selectMode && <span className="w-8 shrink-0" />}
           {columns.map((col) => (
             <button
               key={col.key}
@@ -158,17 +173,29 @@ export const PromoListView = ({ promos, sortKey, sortDir, onSortChange }: PromoL
 
         <ul className="divide-y divide-border/30">
           {sorted.map((promo) => (
-            <li key={promo.id}>
+            <li key={promo.id} className={selectedIds.includes(promo.id) ? "bg-primary/10" : undefined}>
               <button
                 type="button"
-                onClick={() => navigate(getPromoUrl(promo as never))}
+                onClick={() =>
+                  selectMode ? onToggleSelect?.(promo.id) : navigate(getPromoUrl(promo as never))
+                }
                 className="w-full text-left px-4 py-3 hover:bg-primary/10 transition-colors"
               >
                 {/* Desktop row */}
                 <div className="hidden md:flex items-center">
+                  {selectMode && (
+                    <span className="w-8 shrink-0">
+                      <Checkbox checked={selectedIds.includes(promo.id)} className="pointer-events-none" />
+                    </span>
+                  )}
                   <div className="w-[34%] pr-3 min-w-0">
                     <div className="font-medium text-white truncate">{promo.title}</div>
                     <div className="text-xs text-muted-foreground truncate">{promo.venue_name}</div>
+                    {showCreatedAt && promo.created_at && (
+                      <div className="text-[11px] text-muted-foreground">
+                        Added {new Date(promo.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                      </div>
+                    )}
                   </div>
                   <div className="w-[16%] pr-3 min-w-0">
                     {promo.promo_type ? (
@@ -192,9 +219,19 @@ export const PromoListView = ({ promos, sortKey, sortDir, onSortChange }: PromoL
                 {/* Mobile compact row */}
                 <div className="md:hidden space-y-1">
                   <div className="flex items-start justify-between gap-2">
+                    {selectMode && (
+                      <span className="pt-0.5">
+                        <Checkbox checked={selectedIds.includes(promo.id)} className="pointer-events-none" />
+                      </span>
+                    )}
                     <div className="min-w-0">
                       <div className="font-medium text-white truncate">{promo.title}</div>
                       <div className="text-xs text-muted-foreground truncate">{promo.venue_name}</div>
+                      {showCreatedAt && promo.created_at && (
+                        <div className="text-[11px] text-muted-foreground">
+                          Added {new Date(promo.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                        </div>
+                      )}
                     </div>
                     <div className="text-sm font-semibold text-primary whitespace-nowrap">
                       {formatPrice(promo.discounted_price_amount, promo.price_currency)}

@@ -7,7 +7,9 @@ import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { LoginDialog } from "@/components/LoginDialog";
 import { ContinuousStarfield } from "@/components/ContinuousStarfield";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Lock, ArrowUpDown } from "lucide-react";
+import { Star, Lock, ArrowUpDown, CheckSquare } from "lucide-react";
+import { SelectableItem } from "@/components/SelectableItem";
+import { BulkDeleteBar } from "@/components/BulkDeleteBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -186,6 +188,12 @@ export const EventsSection = ({
     setPastEventsSelectedTagIds([]);
   };
 
+  const isAdmin = !!(userAdminStatus?.is_admin || userAdminStatus?.is_super_admin);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
   return (
     <div className="relative">
       <ContinuousStarfield />
@@ -229,6 +237,20 @@ export const EventsSection = ({
                   Login to Create Event
                 </>
               )}
+            </Button>
+          )}
+          {isAdmin && (
+            <Button
+              onClick={() => {
+                setSelectMode((v) => !v);
+                setSelectedIds([]);
+              }}
+              size="lg"
+              variant={selectMode ? "default" : "outline"}
+              className="min-h-[44px] ml-3"
+            >
+              <CheckSquare className="w-5 h-5 mr-2" />
+              {selectMode ? "Cancel selection" : "Select events"}
             </Button>
           )}
         </div>
@@ -290,24 +312,34 @@ export const EventsSection = ({
             </div>
           ) : (
             upcomingEvents.map((event) => (
-              <EventCard
+              <SelectableItem
                 key={event.id}
-                event={{
-                  ...event,
-                  venue: event.venue_name,
-                  image:
-                    event.image_url ||
-                    "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop",
-                  attendees: event.attendees || 0,
-                  rating: 4.5 + Math.random() * 0.5,
-                  organizer: event.organizer_name,
-                }}
-                onJoin={onJoinEvent}
-                userAdminStatus={userAdminStatus}
-              />
+                selectMode={selectMode}
+                selected={selectedIds.includes(event.id)}
+                onToggle={() => toggleSelect(event.id)}
+              >
+                <EventCard
+                  event={{
+                    ...event,
+                    venue: event.venue_name,
+                    image:
+                      event.image_url ||
+                      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop",
+                    attendees: event.attendees || 0,
+                    rating: 4.5 + Math.random() * 0.5,
+                    organizer: event.organizer_name,
+                  }}
+                  onJoin={onJoinEvent}
+                  userAdminStatus={userAdminStatus}
+                />
+              </SelectableItem>
             ))
           )}
         </div>
+
+        {selectMode && (
+          <BulkDeleteBar ids={selectedIds} type="event" onClear={() => setSelectedIds([])} />
+        )}
 
         {/* Load More Button for Upcoming Events */}
         {!loading && hasMore && upcomingEvents.length > 0 && (
@@ -372,21 +404,27 @@ export const EventsSection = ({
                 </div>
               ) : (
                 pastEvents.map((event) => (
-                  <EventCard
+                  <SelectableItem
                     key={event.id}
-                    event={{
-                      ...event,
-                      venue: event.venue_name,
-                      image:
-                        event.image_url ||
-                        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop",
-                      attendees: event.attendees || 0,
-                      rating: 4.5 + Math.random() * 0.5,
-                      organizer: event.organizer_name,
-                    }}
-                    onJoin={onJoinEvent}
-                    userAdminStatus={userAdminStatus}
-                  />
+                    selectMode={selectMode}
+                    selected={selectedIds.includes(event.id)}
+                    onToggle={() => toggleSelect(event.id)}
+                  >
+                    <EventCard
+                      event={{
+                        ...event,
+                        venue: event.venue_name,
+                        image:
+                          event.image_url ||
+                          "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=600&fit=crop",
+                        attendees: event.attendees || 0,
+                        rating: 4.5 + Math.random() * 0.5,
+                        organizer: event.organizer_name,
+                      }}
+                      onJoin={onJoinEvent}
+                      userAdminStatus={userAdminStatus}
+                    />
+                  </SelectableItem>
                 ))
               )}
             </div>

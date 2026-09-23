@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Loader2, FileImage, CheckCircle, ArrowLeft, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +35,7 @@ const BatchImport = () => {
   const [extractionStatus, setExtractionStatus] = useState("Uploading image...");
   const [textInput, setTextInput] = useState("");
   const [inputMode, setInputMode] = useState<"file" | "text" | "photos">("file");
+  const [replaceExisting, setReplaceExisting] = useState(false);
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -507,6 +509,27 @@ const BatchImport = () => {
       }
     } else if (importType === "promo") {
       const promos = selected as ExtractedPromo[];
+
+      if (replaceExisting) {
+        const venueNames = Array.from(
+          new Set(promos.map(p => (p.venue_name || "").trim()).filter(Boolean))
+        );
+        for (const name of venueNames) {
+          const { data: existing } = await supabase
+            .from("promos")
+            .select("id")
+            .ilike("venue_name", name);
+          for (const row of existing || []) {
+            const res = await supabase.functions.invoke("secure-delete", {
+              body: { type: "promo", promo_id: row.id },
+            });
+            if (res.error || !res.data?.success) {
+              errors.push(res.data?.error || res.error?.message || `Could not delete an existing promo at ${name}`);
+            }
+          }
+        }
+      }
+
       const validPromoTypes = ["Free Flow", "Ladies Night", "Bottle Promo", "Other"];
       const promoTypeMap: Record<string, string> = {
         happy_hour: "Free Flow",
@@ -776,6 +799,22 @@ const BatchImport = () => {
                 )}
               </Button>
             </div>
+
+            {importType === "promo" && (
+              <div className="flex items-start gap-3 rounded-lg border border-border/60 p-3">
+                <Checkbox
+                  id="replace-existing-promos"
+                  checked={replaceExisting}
+                  onCheckedChange={(v) => setReplaceExisting(v === true)}
+                />
+                <label htmlFor="replace-existing-promos" className="text-sm leading-snug cursor-pointer">
+                  <span className="font-medium">Delete existing promos at these venues first</span>
+                  <span className="block text-muted-foreground">
+                    All current promos for the venues in this import are removed before the new ones are added. This cannot be undone.
+                  </span>
+                </label>
+              </div>
+            )}
 
             <BatchImportReview
               type={importType}
