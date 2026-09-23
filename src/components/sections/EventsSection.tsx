@@ -239,6 +239,20 @@ export const EventsSection = ({
               )}
             </Button>
           )}
+          {isAdmin && (
+            <Button
+              onClick={() => {
+                setSelectMode((v) => !v);
+                setSelectedIds([]);
+              }}
+              size="lg"
+              variant={selectMode ? "default" : "outline"}
+              className="min-h-[44px] ml-3"
+            >
+              <CheckSquare className="w-5 h-5 mr-2" />
+              {selectMode ? "Cancel selection" : "Select events"}
+            </Button>
+          )}
         </div>
 
         {showCreateEvent && (
