@@ -154,6 +154,7 @@ export const PromoListView = ({
       <div className="rounded-lg border border-border/40 overflow-hidden bg-background/40 backdrop-blur-sm">
         {/* Desktop header */}
         <div className="hidden md:flex items-center px-4 py-2 border-b border-border/40 bg-white/5">
+          {selectMode && <span className="w-8 shrink-0" />}
           {columns.map((col) => (
             <button
               key={col.key}
