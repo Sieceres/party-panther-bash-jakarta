@@ -105,6 +105,14 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
     navigate(getPromoUrl(promo));
   };
 
+  // Anchor handler: let the browser handle modified clicks (Ctrl/Cmd+click,
+  // middle-click, right-click "open in new tab"); plain clicks navigate in-app.
+  const handleCardNav = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    navigate(getPromoUrl(promo));
+  };
+
   const handleReviewsChange = (avgRating: number, total: number) => {
     // This function can be kept for ReviewsList compatibility but doesn't need to update state
     // since we're using optimized data from the hook
@@ -231,6 +239,12 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
   const canDelete = isOwner || isAdmin || isVenueOwner;
 
   return (
+    <a
+      href={getPromoUrl(promo)}
+      onClick={handleCardNav}
+      className="block"
+      aria-label={promo.title}
+    >
     <Card 
       id={`promo-card-${promo.id}`}
       className={cn(
@@ -238,7 +252,6 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
         isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background"
       )}
       style={{ animationDelay: `${index * 80}ms` }}
-      onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -264,6 +277,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
               size="sm"
               variant="ghost"
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 handleEdit();
               }}
@@ -276,7 +290,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                   className="bg-red-600 hover:bg-red-700 text-white p-2 h-8 w-8"
                   disabled={isDeleting}
                 >
@@ -311,6 +325,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
               size="sm"
               variant="ghost"
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 toggleFavorite();
               }}
@@ -337,6 +352,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
             size="default"
             className="w-full min-h-[44px] font-semibold"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               handleCardClick();
             }}
@@ -356,6 +372,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
           <p 
             className="text-sm sm:text-base font-semibold text-white truncate hover:text-primary cursor-pointer transition-colors"
             onClick={async (e) => {
+              e.preventDefault();
               e.stopPropagation();
               if (promo.venue_id) {
                 const { data: venue } = await supabase.from('venues').select('slug, id').eq('id', promo.venue_id).maybeSingle();
@@ -417,6 +434,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
             variant="ghost"
             size="sm"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               setShowReviews(!showReviews);
             }}
@@ -438,5 +456,6 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
         </CardFooter>
       )}
     </Card>
+    </a>
   );
 };
