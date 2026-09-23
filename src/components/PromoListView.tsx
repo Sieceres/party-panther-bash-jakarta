@@ -172,17 +172,29 @@ export const PromoListView = ({
 
         <ul className="divide-y divide-border/30">
           {sorted.map((promo) => (
-            <li key={promo.id}>
+            <li key={promo.id} className={selectedIds.includes(promo.id) ? "bg-primary/10" : undefined}>
               <button
                 type="button"
-                onClick={() => navigate(getPromoUrl(promo as never))}
+                onClick={() =>
+                  selectMode ? onToggleSelect?.(promo.id) : navigate(getPromoUrl(promo as never))
+                }
                 className="w-full text-left px-4 py-3 hover:bg-primary/10 transition-colors"
               >
                 {/* Desktop row */}
                 <div className="hidden md:flex items-center">
+                  {selectMode && (
+                    <span className="w-8 shrink-0">
+                      <Checkbox checked={selectedIds.includes(promo.id)} className="pointer-events-none" />
+                    </span>
+                  )}
                   <div className="w-[34%] pr-3 min-w-0">
                     <div className="font-medium text-white truncate">{promo.title}</div>
                     <div className="text-xs text-muted-foreground truncate">{promo.venue_name}</div>
+                    {showCreatedAt && promo.created_at && (
+                      <div className="text-[11px] text-muted-foreground">
+                        Added {new Date(promo.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                      </div>
+                    )}
                   </div>
                   <div className="w-[16%] pr-3 min-w-0">
                     {promo.promo_type ? (
