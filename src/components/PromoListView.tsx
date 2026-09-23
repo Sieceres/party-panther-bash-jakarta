@@ -55,9 +55,22 @@ interface PromoListViewProps {
   sortKey: PromoSortKey;
   sortDir: SortDirection;
   onSortChange: (key: PromoSortKey, dir: SortDirection) => void;
+  selectMode?: boolean;
+  selectedIds?: string[];
+  onToggleSelect?: (id: string) => void;
+  showCreatedAt?: boolean;
 }
 
-export const PromoListView = ({ promos, sortKey, sortDir, onSortChange }: PromoListViewProps) => {
+export const PromoListView = ({
+  promos,
+  sortKey,
+  sortDir,
+  onSortChange,
+  selectMode = false,
+  selectedIds = [],
+  onToggleSelect,
+  showCreatedAt = false,
+}: PromoListViewProps) => {
   const navigate = useNavigate();
 
   const sorted = useMemo(() => {

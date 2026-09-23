@@ -384,6 +384,11 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
               return [dayStr, expiry].filter(Boolean).join(' · ') || 'No expiry';
             })()}
           </p>
+          {isAdmin && promo.created_at && (
+            <p className="text-[11px] text-muted-foreground">
+              Added {new Date(promo.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+            </p>
+          )}
           {(promo.discounted_price_amount != null || promo.original_price_amount != null) && (
             <div className="flex items-baseline gap-2">
               {promo.discounted_price_amount != null && (
