@@ -219,9 +219,19 @@ export const PromoListView = ({
                 {/* Mobile compact row */}
                 <div className="md:hidden space-y-1">
                   <div className="flex items-start justify-between gap-2">
+                    {selectMode && (
+                      <span className="pt-0.5">
+                        <Checkbox checked={selectedIds.includes(promo.id)} className="pointer-events-none" />
+                      </span>
+                    )}
                     <div className="min-w-0">
                       <div className="font-medium text-white truncate">{promo.title}</div>
                       <div className="text-xs text-muted-foreground truncate">{promo.venue_name}</div>
+                      {showCreatedAt && promo.created_at && (
+                        <div className="text-[11px] text-muted-foreground">
+                          Added {new Date(promo.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                        </div>
+                      )}
                     </div>
                     <div className="text-sm font-semibold text-primary whitespace-nowrap">
                       {formatPrice(promo.discounted_price_amount, promo.price_currency)}
