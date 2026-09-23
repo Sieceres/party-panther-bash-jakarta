@@ -507,6 +507,27 @@ const BatchImport = () => {
       }
     } else if (importType === "promo") {
       const promos = selected as ExtractedPromo[];
+
+      if (replaceExisting) {
+        const venueNames = Array.from(
+          new Set(promos.map(p => (p.venue_name || "").trim()).filter(Boolean))
+        );
+        for (const name of venueNames) {
+          const { data: existing } = await supabase
+            .from("promos")
+            .select("id")
+            .ilike("venue_name", name);
+          for (const row of existing || []) {
+            const res = await supabase.functions.invoke("secure-delete", {
+              body: { type: "promo", promo_id: row.id },
+            });
+            if (res.error || !res.data?.success) {
+              errors.push(res.data?.error || res.error?.message || `Could not delete an existing promo at ${name}`);
+            }
+          }
+        }
+      }
+
       const validPromoTypes = ["Free Flow", "Ladies Night", "Bottle Promo", "Other"];
       const promoTypeMap: Record<string, string> = {
         happy_hour: "Free Flow",
