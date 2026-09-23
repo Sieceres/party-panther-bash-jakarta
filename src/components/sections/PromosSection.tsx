@@ -500,30 +500,44 @@ export const PromosSection = ({
             sortKey={listSortKey}
             sortDir={listSortDir}
             onSortChange={handleListSortChange}
+            selectMode={selectMode}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelect}
+            showCreatedAt={isAdmin}
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPromos.map((promo, index) => (
-              <PromoCard
+              <SelectableItem
                 key={promo.id}
-                promo={{
-                  ...promo,
-                  discount: promo.discount_text || "",
-                  venue: promo.venue_name || "",
-                  validUntil: promo.valid_until || "",
-                  image: promo.image_url || "",
-                  category: promo.category || "",
-                  promoType: promo.promo_type || "",
-                  day: promo.day_of_week || [],
-                  area: promo.area || "",
-                  drinkType: promo.drink_type || []
-                }}
-                userAdminStatus={userAdminStatus}
-                onFavoriteToggle={onFavoriteToggle}
-                index={index}
-              />
+                selectMode={selectMode}
+                selected={selectedIds.includes(promo.id)}
+                onToggle={() => toggleSelect(promo.id)}
+              >
+                <PromoCard
+                  promo={{
+                    ...promo,
+                    discount: promo.discount_text || "",
+                    venue: promo.venue_name || "",
+                    validUntil: promo.valid_until || "",
+                    image: promo.image_url || "",
+                    category: promo.category || "",
+                    promoType: promo.promo_type || "",
+                    day: promo.day_of_week || [],
+                    area: promo.area || "",
+                    drinkType: promo.drink_type || []
+                  }}
+                  userAdminStatus={userAdminStatus}
+                  onFavoriteToggle={onFavoriteToggle}
+                  index={index}
+                />
+              </SelectableItem>
             ))}
           </div>
+        )}
+
+        {selectMode && (
+          <BulkDeleteBar ids={selectedIds} type="promo" onClear={() => setSelectedIds([])} />
         )}
 
         {/* Load More Button */}
