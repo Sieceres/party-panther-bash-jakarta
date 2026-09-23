@@ -112,6 +112,25 @@ export const VenueDetailPage = () => {
     }
   };
 
+  const [promoViewMode, setPromoViewMode] = useState<"cards" | "list">(
+    () => (typeof window !== "undefined" && sessionStorage.getItem("venuePromoViewMode") === "list" ? "list" : "cards")
+  );
+  const [promoSortKey, setPromoSortKey] = useState<PromoSortKey>("name");
+  const [promoSortDir, setPromoSortDir] = useState<SortDirection>("asc");
+  const [promoSelectMode, setPromoSelectMode] = useState(false);
+  const [selectedPromoIds, setSelectedPromoIds] = useState<string[]>([]);
+  const [eventSelectMode, setEventSelectMode] = useState(false);
+  const [selectedEventIds, setSelectedEventIds] = useState<string[]>([]);
+
+  const togglePromoSelect = (id: string) =>
+    setSelectedPromoIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const toggleEventSelect = (id: string) =>
+    setSelectedEventIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  useEffect(() => {
+    sessionStorage.setItem("venuePromoViewMode", promoViewMode);
+  }, [promoViewMode]);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
