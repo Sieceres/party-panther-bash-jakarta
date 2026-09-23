@@ -7,7 +7,9 @@ import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { LoginDialog } from "@/components/LoginDialog";
 import { ContinuousStarfield } from "@/components/ContinuousStarfield";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Lock, ArrowUpDown } from "lucide-react";
+import { Star, Lock, ArrowUpDown, CheckSquare } from "lucide-react";
+import { SelectableItem } from "@/components/SelectableItem";
+import { BulkDeleteBar } from "@/components/BulkDeleteBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -185,6 +187,12 @@ export const EventsSection = ({
     setPastEventsSearchTerm("");
     setPastEventsSelectedTagIds([]);
   };
+
+  const isAdmin = !!(userAdminStatus?.is_admin || userAdminStatus?.is_super_admin);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   return (
     <div className="relative">
