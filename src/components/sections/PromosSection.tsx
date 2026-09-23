@@ -13,6 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { LoginDialog } from "@/components/LoginDialog";
 import { Star, Lock, Filter, RotateCcw, ArrowUpDown, Download, Search, ClipboardCheck, Share2, LayoutGrid, List } from "lucide-react";
 import { PromoListView, PromoSortKey, SortDirection } from "@/components/PromoListView";
+import { SelectableItem } from "@/components/SelectableItem";
+import { BulkDeleteBar } from "@/components/BulkDeleteBar";
+import { CheckSquare } from "lucide-react";
 import { exportPromosToExcel } from "@/lib/promo-export";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -99,6 +102,13 @@ export const PromosSection = ({
     setListSortKey(key);
     setListSortDir(dir);
   };
+
+  const isAdmin = !!(userAdminStatus?.is_admin || userAdminStatus?.is_super_admin);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   
 
