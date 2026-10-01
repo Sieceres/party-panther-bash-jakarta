@@ -38,7 +38,10 @@ serve(async (req) => {
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
-      .single()
+      .in('role', ['user','admin','superadmin'])
+      .order('role', { ascending: false })
+      .limit(1)
+      .maybeSingle()
 
     if (roleError || !currentUserRole) {
       console.error('Error fetching user role:', roleError)
@@ -105,7 +108,8 @@ serve(async (req) => {
       .from('user_roles')
       .select('role')
       .eq('user_id', target_user_id)
-      .single()
+      .eq('role', 'superadmin')
+      .maybeSingle()
 
     if (targetUserRole?.role === 'superadmin' && !isSuperAdmin) {
       return new Response(
@@ -128,7 +132,9 @@ serve(async (req) => {
       .from('user_roles')
       .select('id')
       .eq('user_id', target_user_id)
-      .single()
+      .neq('role', 'kam')
+      .limit(1)
+      .maybeSingle()
 
     let result
     if (existingRole) {
@@ -136,7 +142,7 @@ serve(async (req) => {
       result = await supabaseServiceClient
         .from('user_roles')
         .update({ role: new_role, updated_at: new Date().toISOString() })
-        .eq('user_id', target_user_id)
+        .eq('id', existingRole.id)
         .select()
     } else {
       // Insert new role
