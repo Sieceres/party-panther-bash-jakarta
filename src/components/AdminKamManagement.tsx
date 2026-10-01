@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
@@ -33,6 +34,8 @@ export function AdminKamManagement() {
   const [busy, setBusy] = useState(false);
   const [search, setSearch] = useState("");
   const [kamFilter, setKamFilter] = useState("all");
+  const [onlyWithPromos, setOnlyWithPromos] = useState(true);
+  const [keepExisting, setKeepExisting] = useState(true);
 
   const load = async () => {
     setLoading(true);
@@ -54,7 +57,15 @@ export function AdminKamManagement() {
     if (!kams.length) return toast.error("No Key Account Managers found");
     setBusy(true);
     try {
-      const map = distributeVenues(rows.map((r) => ({ id: r.id, area: r.area, promoCount: r.promoCount })), kams.map((k) => k.user_id));
+      const kamIds = kams.map((k) => k.user_id);
+      const target = rows.filter((r) => (!onlyWithPromos || r.promoCount > 0) && (!keepExisting || !r.kam_id));
+      if (!target.length) { toast.success("Nothing to assign"); return; }
+      const existing = keepExisting ? rows.filter((r) => r.kam_id) : [];
+      const map = distributeVenues(
+        target.map((r) => ({ id: r.id, area: r.area, promoCount: r.promoCount })),
+        kamIds,
+        existing as any,
+      );
       // group by KAM to minimise requests
       const byKam: Record<string, string[]> = {};
       Object.entries(map).forEach(([v, k]) => { (byKam[k] ||= []).push(v); });
@@ -64,7 +75,7 @@ export function AdminKamManagement() {
           if (error) throw error;
         }
       }
-      toast.success("Venues distributed");
+      toast.success(`${target.length} venues distributed`);
       await load();
     } catch (e: any) {
       toast.error(e.message || "Distribution failed");
@@ -116,9 +127,24 @@ export function AdminKamManagement() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Redistribute all venues?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  All {rows.length} venues will be shared evenly between {kams.length} KAMs, balancing promo counts and
-                  keeping areas together. Existing assignments will be replaced.
+                  Venues are shared evenly between {kams.length} KAMs, balancing promo counts and keeping areas together.
                 </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="space-y-3 text-sm">
+                <label className="flex items-center gap-2">
+                  <Checkbox checked={onlyWithPromos} onCheckedChange={(v) => setOnlyWithPromos(!!v)} />
+                  Only venues with promos ({rows.filter((r) => r.promoCount > 0).length})
+                </label>
+                <label className="flex items-center gap-2">
+                  <Checkbox checked={keepExisting} onCheckedChange={(v) => setKeepExisting(!!v)} />
+                  Keep existing assignments (only assign unassigned venues)
+                </label>
+                <p className="text-muted-foreground">
+                  {rows.filter((r) => (!onlyWithPromos || r.promoCount > 0) && (!keepExisting || !r.kam_id)).length} venues will be assigned
+                  {!keepExisting && " — all current assignments for these venues are replaced"}.
+                </p>
+              </div>
+              <AlertDialogHeader className="hidden">
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
