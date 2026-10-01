@@ -22,10 +22,9 @@ export function MyVenuesSection({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const { data: venues } = await supabase
-      .from("venues")
+    const { data: venues } = await (supabase.from("venues") as any)
       .select("id, name, slug, area, last_checked_at")
-      .eq("kam_id" as any, userId)
+      .eq("kam_id", userId)
       .order("name");
     const ids = (venues || []).map((v: any) => v.id);
     const { data: promos } = ids.length
