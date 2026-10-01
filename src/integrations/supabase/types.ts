@@ -2012,7 +2012,7 @@ export type Database = {
         | "spam_comments"
         | "spam_reports"
         | "rapid_activity"
-      user_role: "user" | "admin" | "superadmin"
+      user_role: "user" | "admin" | "superadmin" | "kam"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2153,7 +2153,7 @@ export const Constants = {
         "spam_reports",
         "rapid_activity",
       ],
-      user_role: ["user", "admin", "superadmin"],
+      user_role: ["user", "admin", "superadmin", "kam"],
     },
   },
 } as const
