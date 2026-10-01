@@ -44,6 +44,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { UserVouchers } from "./UserVouchers";
 import { TelegramLinkSection } from "./TelegramLinkSection";
 import { MyVenuesSection } from "./MyVenuesSection";
+import { AccountSecuritySection } from "./AccountSecuritySection";
 import { isCurrentUserKam } from "@/lib/kam";
 
 interface Profile {
@@ -1863,6 +1864,11 @@ export const UserProfile = () => {
       )}
       {!isSharedProfile && !isAdminView && profile && (
         <UserVouchers userId={profile.user_id} />
+      )}
+      {!isSharedProfile && !isAdminView && profile && (
+        <div className="container mx-auto px-4 max-w-4xl mb-6">
+          <AccountSecuritySection />
+        </div>
       )}
       {/* Report Option for Shared Profiles */}
       {isSharedProfile && profile && (
