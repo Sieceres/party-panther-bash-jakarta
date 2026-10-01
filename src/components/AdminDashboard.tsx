@@ -903,11 +903,13 @@ export const AdminDashboard = () => {
               ]},
               { id: 'venues', label: 'Venues', tabs: [
                 { value: 'venues', label: 'All Venues' },
-                { value: 'kams', label: 'KAMs' },
                 { value: 'venue-claims', label: 'Claims' },
                 { value: 'venue-edits', label: 'Edits' },
                 { value: 'venue-audit', label: 'Audit' },
                 { value: 'venue-merge', label: 'Merge' },
+              ]},
+              { id: 'kams', label: 'KAMs', tabs: [
+                { value: 'kams', label: 'Key Account Managers' },
               ]},
               { id: 'users', label: 'Users', tabs: [
                 { value: 'users', label: 'All Users' },
