@@ -1499,6 +1499,8 @@ export type Database = {
           id: string
           image_url: string | null
           instagram: string | null
+          kam_id: string | null
+          last_checked_at: string | null
           latitude: number | null
           longitude: number | null
           name: string
@@ -1520,6 +1522,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           instagram?: string | null
+          kam_id?: string | null
+          last_checked_at?: string | null
           latitude?: number | null
           longitude?: number | null
           name: string
@@ -1541,6 +1545,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           instagram?: string | null
+          kam_id?: string | null
+          last_checked_at?: string | null
           latitude?: number | null
           longitude?: number | null
           name?: string
@@ -1978,6 +1984,7 @@ export type Database = {
       }
       is_reserved_slug: { Args: { _slug: string }; Returns: boolean }
       is_user_banned: { Args: { _user_id: string }; Returns: boolean }
+      is_venue_kam: { Args: { _venue_id: string }; Returns: boolean }
       join_event:
         | {
             Args: {
