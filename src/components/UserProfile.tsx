@@ -43,6 +43,8 @@ import { SpinningPaws } from "@/components/ui/spinning-paws";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { UserVouchers } from "./UserVouchers";
 import { TelegramLinkSection } from "./TelegramLinkSection";
+import { MyVenuesSection } from "./MyVenuesSection";
+import { isCurrentUserKam } from "@/lib/kam";
 
 interface Profile {
   id: string;
@@ -80,6 +82,10 @@ export const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isKam, setIsKam] = useState(false);
+  useEffect(() => {
+    if (user?.id) isCurrentUserKam(user.id).then(setIsKam);
+  }, [user?.id]);
   const [showVenueDialog, setShowVenueDialog] = useState(false);
   const [venueCtaDismissed, setVenueCtaDismissed] = useState(() => {
     // Try to read from localStorage immediately to prevent flash
@@ -1850,6 +1856,11 @@ export const UserProfile = () => {
       </div>
 
       {/* Vouchers Section - only for own profile */}
+      {!isSharedProfile && !isAdminView && profile && isKam && (
+        <div className="container mx-auto px-4 max-w-4xl mb-6">
+          <MyVenuesSection userId={profile.user_id} />
+        </div>
+      )}
       {!isSharedProfile && !isAdminView && profile && (
         <UserVouchers userId={profile.user_id} />
       )}

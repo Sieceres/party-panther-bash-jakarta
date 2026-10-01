@@ -704,7 +704,7 @@ export const VenueDetailPage = () => {
           open={showEditDialog}
           onOpenChange={setShowEditDialog}
           onSaved={() => setFetchKey(k => k + 1)}
-          isAdmin={isAdmin}
+          isAdmin={isAdmin || (!!currentUserId && (venue as any).kam_id === currentUserId)}
         />
       )}
     </>
