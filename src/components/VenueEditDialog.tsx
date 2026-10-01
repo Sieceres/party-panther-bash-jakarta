@@ -122,7 +122,7 @@ export function VenueEditDialog({ venue, open, onOpenChange, onSaved, isAdmin }:
         // Direct edit - apply changes immediately
         const { error } = await supabase
           .from("venues")
-          .update(changes)
+          .update({ ...changes, last_checked_at: new Date().toISOString() } as any)
           .eq("id", venue.id);
         if (error) throw error;
 

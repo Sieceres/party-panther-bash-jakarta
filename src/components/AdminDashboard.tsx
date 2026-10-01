@@ -14,6 +14,7 @@ import { AdminReceiptManagement } from "./AdminReceiptManagement";
 import { AdminAnalytics } from "./AdminAnalytics";
 import { AdminImageMigration } from "./AdminImageMigration";
 import { AdminVenueManagement } from "./AdminVenueManagement";
+import { AdminKamManagement } from "./AdminKamManagement";
 import { AdminVenueEdits } from "./AdminVenueEdits";
 import { AdminVenueAudit } from "./AdminVenueAudit";
 import { AdminTagManagement } from "./AdminTagManagement";
@@ -902,6 +903,7 @@ export const AdminDashboard = () => {
               ]},
               { id: 'venues', label: 'Venues', tabs: [
                 { value: 'venues', label: 'All Venues' },
+                { value: 'kams', label: 'KAMs' },
                 { value: 'venue-claims', label: 'Claims' },
                 { value: 'venue-edits', label: 'Edits' },
                 { value: 'venue-audit', label: 'Audit' },
@@ -1232,6 +1234,10 @@ export const AdminDashboard = () => {
               </Button>
             </div>
             <AdminVenueManagement />
+          </TabsContent>
+
+          <TabsContent value="kams" className="space-y-4">
+            <AdminKamManagement />
           </TabsContent>
 
           <TabsContent value="venue-claims" className="space-y-4">
