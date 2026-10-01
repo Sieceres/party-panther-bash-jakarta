@@ -154,18 +154,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://partypanther.net/p/office-recharge-monday</loc>
-    <lastmod>2026-09-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://partypanther.net/p/tipsy-tuesday</loc>
-    <lastmod>2026-09-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://partypanther.net/p/blue-grass-happy-hour-cocktails</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
@@ -178,19 +166,31 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://partypanther.net/p/office-recharge-monday</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/p/tipsy-tuesday</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://partypanther.net/p/wine-nesday</loc>
     <lastmod>2026-09-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://partypanther.net/p/gincredible-thursday</loc>
+    <loc>https://partypanther.net/p/friday-clock-out</loc>
     <lastmod>2026-09-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://partypanther.net/p/friday-clock-out</loc>
+    <loc>https://partypanther.net/p/gincredible-thursday</loc>
     <lastmod>2026-09-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -216,6 +216,12 @@
   <url>
     <loc>https://partypanther.net/p/noru-everyday-happy-hour-beer</loc>
     <lastmod>2026-08-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/p/free-flow-wine</loc>
+    <lastmod>2026-09-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -274,6 +280,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://partypanther.net/p/baron-free-flow-whisky</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://partypanther.net/p/camden-bintang-bucket-promo</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
@@ -294,6 +306,12 @@
   <url>
     <loc>https://partypanther.net/p/artiz-bar-beer-promo</loc>
     <lastmod>2026-08-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/p/baron-free-flow-wine</loc>
+    <lastmod>2026-09-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -480,12 +498,6 @@
   <url>
     <loc>https://partypanther.net/p/noru-everyday-happy-hour-beer-1</loc>
     <lastmod>2026-08-27</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://partypanther.net/p/bart-kuningan-free-flow-wine-1</loc>
-    <lastmod>2026-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -749,18 +761,6 @@
   </url>
   <url>
     <loc>https://partypanther.net/p/koi-cocktail-promo</loc>
-    <lastmod>2026-09-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://partypanther.net/p/bart-kuningan-free-flow-gin</loc>
-    <lastmod>2026-09-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://partypanther.net/p/bart-kuningan-cocktail-promo</loc>
     <lastmod>2026-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -1570,6 +1570,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://partypanther.net/v/bart-kuningan-5</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/v/bart-kuningan-6</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://partypanther.net/v/the-bank-bar-and-burgers</loc>
     <lastmod>2026-03-24</lastmod>
     <changefreq>weekly</changefreq>
@@ -1816,6 +1828,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://partypanther.net/v/juni</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://partypanther.net/v/humble-house</loc>
     <lastmod>2026-04-08</lastmod>
     <changefreq>weekly</changefreq>
@@ -1926,6 +1944,12 @@
   <url>
     <loc>https://partypanther.net/v/demo-kitchen-and-bar</loc>
     <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/v/baron</loc>
+    <lastmod>2026-09-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2188,6 +2212,24 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://partypanther.net/v/bart-kuningan-1</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/v/bart-kuningan-2</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/v/bart-kuningan-3</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://partypanther.net/v/duck-down-bar</loc>
     <lastmod>2026-04-08</lastmod>
     <changefreq>weekly</changefreq>
@@ -2214,6 +2256,12 @@
   <url>
     <loc>https://partypanther.net/v/the-bar-at-park-hyatt-jakarta</loc>
     <lastmod>2026-04-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/v/bart-kuningan-4</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
