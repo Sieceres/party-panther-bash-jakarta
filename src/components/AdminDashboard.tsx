@@ -908,11 +908,9 @@ export const AdminDashboard = () => {
                 { value: 'venue-audit', label: 'Audit' },
                 { value: 'venue-merge', label: 'Merge' },
               ]},
-              { id: 'kams', label: 'KAMs', tabs: [
-                { value: 'kams', label: 'Key Account Managers' },
-              ]},
               { id: 'users', label: 'Users', tabs: [
                 { value: 'users', label: 'All Users' },
+                { value: 'kams', label: 'Key Account Managers' },
                 { value: 'receipts', label: 'Receipts' },
               ]},
               { id: 'system', label: 'System', tabs: [
