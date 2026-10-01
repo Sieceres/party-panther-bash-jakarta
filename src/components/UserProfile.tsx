@@ -1465,6 +1465,11 @@ export const UserProfile = () => {
                   </div>
                 </div>
               ))}
+              {userEvents.length > 3 && (
+                <Button variant="ghost" size="sm" className="w-full" onClick={() => setShowAllEvents(v => !v)}>
+                  {showAllEvents ? "Show less" : `Show all (${userEvents.length})`}
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
@@ -1532,6 +1537,11 @@ export const UserProfile = () => {
                   </div>
                 </div>
               ))}
+              {userPromos.length > 3 && (
+                <Button variant="ghost" size="sm" className="w-full" onClick={() => setShowAllPromos(v => !v)}>
+                  {showAllPromos ? "Show less" : `Show all (${userPromos.length})`}
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
