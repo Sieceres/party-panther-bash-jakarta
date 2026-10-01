@@ -99,6 +99,8 @@ export const UserProfile = () => {
   });
   const [userEvents, setUserEvents] = useState<EventWithSlug[]>([]);
   const [userPromos, setUserPromos] = useState<PromoWithSlug[]>([]);
+  const [showAllEvents, setShowAllEvents] = useState(false);
+  const [showAllPromos, setShowAllPromos] = useState(false);
   const [joinedEvents, setJoinedEvents] = useState<EventWithSlug[]>([]);
   const [favoritePromos, setFavoritePromos] = useState<PromoWithSlug[]>([]);
   const [badgeStats, setBadgeStats] = useState({
@@ -268,7 +270,8 @@ export const UserProfile = () => {
           });
         } else {
           // Filter events by the target user ID
-          const filteredEvents = eventsData?.filter((event: any) => event.created_by === targetUserId) || [];
+          const filteredEvents = (eventsData?.filter((event: any) => event.created_by === targetUserId) || [])
+            .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
           setUserEvents(filteredEvents.map((event: any) => ({ ...event, slug: event.slug || null })) as EventWithSlug[]);
         }
 
@@ -1410,7 +1413,7 @@ export const UserProfile = () => {
             <p className="text-muted-foreground">Haven't created any events yet.</p>
           ) : (
             <div className="space-y-4">
-              {userEvents.map((event) => (
+              {(showAllEvents ? userEvents : userEvents.slice(0, 3)).map((event) => (
                 <div key={event.id} className="flex items-center justify-between border-b pb-2 last:pb-0 last:border-b-0">
                   <div>
                     <p className="font-medium">{event.title}</p>
@@ -1462,6 +1465,11 @@ export const UserProfile = () => {
                   </div>
                 </div>
               ))}
+              {userEvents.length > 3 && (
+                <Button variant="ghost" size="sm" className="w-full" onClick={() => setShowAllEvents(v => !v)}>
+                  {showAllEvents ? "Show less" : `Show all (${userEvents.length})`}
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
@@ -1480,7 +1488,7 @@ export const UserProfile = () => {
             <p className="text-muted-foreground">Haven't created any promos yet.</p>
           ) : (
             <div className="space-y-4">
-              {userPromos.map((promo) => (
+              {(showAllPromos ? userPromos : userPromos.slice(0, 3)).map((promo) => (
                 <div key={promo.id} className="flex items-center justify-between border-b pb-2 last:pb-0 last:border-b-0">
                   <div>
                     <p className="font-medium">{promo.title}</p>
@@ -1529,6 +1537,11 @@ export const UserProfile = () => {
                   </div>
                 </div>
               ))}
+              {userPromos.length > 3 && (
+                <Button variant="ghost" size="sm" className="w-full" onClick={() => setShowAllPromos(v => !v)}>
+                  {showAllPromos ? "Show less" : `Show all (${userPromos.length})`}
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
