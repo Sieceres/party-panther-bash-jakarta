@@ -35,15 +35,23 @@ export const PromoDiscount = ({
         selectedVenueId={selectedVenueId}
       />
 
-      <div className="space-y-2">
-        <Label htmlFor="address">Address</Label>
-        <Input
-          id="address"
-          placeholder="Full address"
-          value={address}
-          onChange={(e) => onAddressChange(e.target.value)}
-        />
-      </div>
+      {selectedVenueId ? (
+        address ? (
+          <div className="text-sm text-muted-foreground">
+            <span className="font-medium">Address:</span> {address}
+          </div>
+        ) : null
+      ) : (
+        <div className="space-y-2">
+          <Label htmlFor="address">Address</Label>
+          <Input
+            id="address"
+            placeholder="Full address"
+            value={address}
+            onChange={(e) => onAddressChange(e.target.value)}
+          />
+        </div>
+      )}
     </>
   );
 };

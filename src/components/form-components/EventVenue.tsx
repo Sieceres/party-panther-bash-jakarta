@@ -170,15 +170,6 @@ export const EventVenue = ({
         </div>
       )}
 
-      {/* If venue is from directory but has no coordinates, allow manual entry */}
-      {selectedVenueId && !location && !isLoadingVenueDetails && (
-        <LocationAutocomplete
-          location={location}
-          onLocationSelect={onLocationChange}
-          label="Venue Location (not yet mapped)"
-          placeholder="Search for venue address..."
-        />
-      )}
     </>
   );
 };
