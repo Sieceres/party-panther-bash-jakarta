@@ -38,19 +38,33 @@ export interface VenueLoad {
  * have venue capacity. Ties prefer a KAM already covering the same area so each
  * person's venues stay geographically close.
  */
-export const distributeVenues = (venues: VenueLoad[], kamIds: string[]) => {
+export const distributeVenues = (
+  venues: VenueLoad[],
+  kamIds: string[],
+  existing: VenueLoad[] & { kam_id?: string | null }[] = [],
+) => {
   const n = kamIds.length;
-  const base = Math.floor(venues.length / n);
-  let extra = venues.length % n;
-  const cap: Record<string, number> = {};
-  kamIds.forEach((k) => { cap[k] = base + (extra-- > 0 ? 1 : 0); });
   const count: Record<string, number> = Object.fromEntries(kamIds.map((k) => [k, 0]));
   const promos: Record<string, number> = Object.fromEntries(kamIds.map((k) => [k, 0]));
   const areas: Record<string, Set<string>> = Object.fromEntries(kamIds.map((k) => [k, new Set<string>()]));
+  // Start from current assignments so later rounds keep things balanced
+  (existing as any[]).forEach((v) => {
+    if (v.kam_id && v.kam_id in count) {
+      count[v.kam_id]++;
+      promos[v.kam_id] += v.promoCount;
+      if (v.area) areas[v.kam_id].add(v.area);
+    }
+  });
+  const total = venues.length + Object.values(count).reduce((a, b) => a + b, 0);
+  const base = Math.floor(total / n);
+  let extra = total % n;
+  const cap: Record<string, number> = {};
+  [...kamIds].sort((a, b) => count[b] - count[a]).forEach((k) => { cap[k] = base + (extra-- > 0 ? 1 : 0); });
   const result: Record<string, string> = {};
   const sorted = [...venues].sort((a, b) => b.promoCount - a.promoCount || (a.area || "").localeCompare(b.area || ""));
   for (const v of sorted) {
-    const open = kamIds.filter((k) => count[k] < cap[k]);
+    let open = kamIds.filter((k) => count[k] < cap[k]);
+    if (!open.length) open = [...kamIds];
     open.sort((a, b) => {
       const d = promos[a] - promos[b];
       if (d !== 0) return d;
