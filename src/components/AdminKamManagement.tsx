@@ -143,6 +143,7 @@ export function AdminKamManagement() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
           <CardTitle>Key Account Managers</CardTitle>
+          <div className="flex flex-wrap gap-2">
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button disabled={busy || loading}>
@@ -197,6 +198,7 @@ export function AdminKamManagement() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
