@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface Promo {
+  last_confirmed_at?: string | null;
   id: string;
   title: string;
   description: string;
