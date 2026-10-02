@@ -1017,6 +1017,8 @@ export type Database = {
           drink_type: string[] | null
           id: string
           image_url: string | null
+          last_confirmed_at: string | null
+          last_confirmed_by: string | null
           original_price_amount: number | null
           price_currency: string | null
           promo_type: string | null
@@ -1046,6 +1048,8 @@ export type Database = {
           drink_type?: string[] | null
           id?: string
           image_url?: string | null
+          last_confirmed_at?: string | null
+          last_confirmed_by?: string | null
           original_price_amount?: number | null
           price_currency?: string | null
           promo_type?: string | null
@@ -1075,6 +1079,8 @@ export type Database = {
           drink_type?: string[] | null
           id?: string
           image_url?: string | null
+          last_confirmed_at?: string | null
+          last_confirmed_by?: string | null
           original_price_amount?: number | null
           price_currency?: string | null
           promo_type?: string | null
@@ -1598,6 +1604,7 @@ export type Database = {
         Args: { _event_id: string; _slug: string }
         Returns: string
       }
+      confirm_promo: { Args: { _promo_id: string }; Returns: string }
       find_venue_by_name: { Args: { _name: string }; Returns: string }
       generate_slug: { Args: { input_text: string }; Returns: string }
       get_event_attendee_counts: {
