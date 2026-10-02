@@ -1924,12 +1924,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://partypanther.net/v/lithium-rooftop</loc>
-    <lastmod>2026-04-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://partypanther.net/v/pot-boy-aru</loc>
     <lastmod>2026-04-08</lastmod>
     <changefreq>weekly</changefreq>
@@ -1950,6 +1944,12 @@
   <url>
     <loc>https://partypanther.net/v/baron</loc>
     <lastmod>2026-09-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/v/lithium-rooftop</loc>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
