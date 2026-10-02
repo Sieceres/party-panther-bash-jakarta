@@ -686,6 +686,36 @@ export type Database = {
         }
         Relationships: []
       }
+      kam_activity: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json
+          id: string
+          kam_id: string
+          promo_id: string | null
+          venue_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json
+          id?: string
+          kam_id: string
+          promo_id?: string | null
+          venue_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          kam_id?: string
+          promo_id?: string | null
+          venue_id?: string | null
+        }
+        Relationships: []
+      }
       notification_settings: {
         Row: {
           enabled: boolean

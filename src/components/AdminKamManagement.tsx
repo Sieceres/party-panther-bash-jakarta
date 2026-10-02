@@ -14,6 +14,7 @@ import { RotateCcw, Shuffle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { distributeVenues, fetchKamUsers, isStale, KamUser } from "@/lib/kam";
 import { toast } from "@/lib/toast";
+import { AdminKamReport, KamPromoStats } from "./AdminKamReport";
 
 interface Row {
   id: string;
@@ -23,6 +24,7 @@ interface Row {
   kam_id: string | null;
   last_checked_at: string | null;
   promoCount: number;
+  upToDate: number;
 }
 
 const UNASSIGNED = "__none__";
@@ -42,19 +44,22 @@ export function AdminKamManagement() {
     const [k, { data: venues }, { data: promos }] = await Promise.all([
       fetchKamUsers(),
       supabase.from("venues").select("id, name, slug, area, kam_id, last_checked_at").order("name").range(0, 4999),
-      supabase.from("promos").select("venue_id, venue_name").range(0, 9999),
+      supabase.from("promos").select("venue_id, venue_name, last_confirmed_at").range(0, 9999),
     ]);
     // Many promos are only linked by venue name, so match by id first, then by name
     const norm = (s: string | null | undefined) => (s || "").toLowerCase().replace(/^the\s+/, "").replace(/[^a-z0-9]/g, "");
     const byName: Record<string, string> = {};
     ((venues as any[]) || []).forEach((v) => { byName[norm(v.name)] = v.id; });
     const counts: Record<string, number> = {};
+    const fresh: Record<string, number> = {};
     (promos || []).forEach((p: any) => {
       const id = p.venue_id || byName[norm(p.venue_name)];
-      if (id) counts[id] = (counts[id] || 0) + 1;
+      if (!id) return;
+      counts[id] = (counts[id] || 0) + 1;
+      if (!isStale(p.last_confirmed_at)) fresh[id] = (fresh[id] || 0) + 1;
     });
     setKams(k);
-    setRows(((venues as any[]) || []).map((v) => ({ ...v, promoCount: counts[v.id] || 0 })));
+    setRows(((venues as any[]) || []).map((v) => ({ ...v, promoCount: counts[v.id] || 0, upToDate: fresh[v.id] || 0 })));
     setLoading(false);
   };
 
@@ -125,11 +130,21 @@ export function AdminKamManagement() {
           ...k,
           venues: mine.length,
           promos: mine.reduce((s, r) => s + r.promoCount, 0),
-          stale: mine.filter((r) => isStale(r.last_checked_at)).length,
+          stale: mine.filter((r) => r.upToDate < r.promoCount).length,
         };
       }),
     [kams, rows],
   );
+  const promoStats = useMemo(() => {
+    const out: KamPromoStats = {};
+    rows.forEach((r) => {
+      if (!r.kam_id) return;
+      const s = (out[r.kam_id] ||= { total: 0, upToDate: 0 });
+      s.total += r.promoCount;
+      s.upToDate += r.upToDate;
+    });
+    return out;
+  }, [rows]);
   const unassigned = rows.filter((r) => !r.kam_id).length;
 
   const filtered = rows.filter(
@@ -217,6 +232,8 @@ export function AdminKamManagement() {
         </CardContent>
       </Card>
 
+      {!loading && <AdminKamReport kams={kams} promoStats={promoStats} />}
+
       <Card>
         <CardHeader className="flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
           <CardTitle>Venue assignments</CardTitle>
@@ -243,7 +260,7 @@ export function AdminKamManagement() {
                     <Link to={`/venue/${r.slug || r.id}`} className="font-medium hover:text-primary truncate block">{r.name}</Link>
                     <div className="text-xs text-muted-foreground">
                       {r.area || "No area"} · {r.promoCount} promos
-                      {isStale(r.last_checked_at) && " · outdated"}
+                      {r.upToDate < r.promoCount && " · outdated"}
                     </div>
                   </div>
                   <Select value={r.kam_id || UNASSIGNED} onValueChange={(v) => changeKam(r.id, v)}>
