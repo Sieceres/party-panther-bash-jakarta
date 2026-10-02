@@ -29,6 +29,20 @@ const norm = (n: string | null | undefined) =>
   (n || "").toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/^\s*the\s+/, "").replace(/\s+/g, " ").trim();
 
 export function MyVenuesSection({ userId }: { userId: string }) {
+  const [allowed, setAllowed] = useState<boolean | null>(null);
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || user.id !== userId) return setAllowed(false);
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+      setAllowed(!!data?.some((r: any) => ["kam", "admin", "superadmin"].includes(r.role)));
+    })();
+  }, [userId]);
+  if (!allowed) return null;
+  return <MyVenuesSectionInner userId={userId} />;
+}
+
+function MyVenuesSectionInner({ userId }: { userId: string }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
 
