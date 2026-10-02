@@ -1598,6 +1598,7 @@ export type Database = {
         Args: { _event_id: string; _slug: string }
         Returns: string
       }
+      find_venue_by_name: { Args: { _name: string }; Returns: string }
       generate_slug: { Args: { input_text: string }; Returns: string }
       get_event_attendee_counts: {
         Args: never
@@ -2003,6 +2004,7 @@ export type Database = {
             }
             Returns: boolean
           }
+      normalize_venue_name: { Args: { _name: string }; Returns: string }
       refresh_event_attendee_stats: { Args: never; Returns: undefined }
       refresh_promo_review_stats: { Args: never; Returns: undefined }
       should_show_organizer_contact: { Args: never; Returns: boolean }
