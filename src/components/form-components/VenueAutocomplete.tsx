@@ -50,7 +50,14 @@ export const VenueAutocomplete = ({
       return;
     }
 
-    if (selectedVenueId) return;
+    if (selectedVenueId) {
+      setShowSuggestions(false);
+      setSuggestions([]);
+      setHasSearched(false);
+      setIsSearching(false);
+      return;
+    }
+    let cancelled = false;
 
     setIsSearching(true);
     searchTimeoutRef.current = setTimeout(async () => {
@@ -61,12 +68,14 @@ export const VenueAutocomplete = ({
           .ilike("name", `%${venue}%`)
           .limit(8);
 
+        if (cancelled) return;
         if (!error && data) {
           setSuggestions(data);
         }
       } catch (err) {
         console.error("Venue search error:", err);
       } finally {
+        if (cancelled) return;
         setIsSearching(false);
         setHasSearched(true);
         setShowSuggestions(true);
@@ -74,6 +83,7 @@ export const VenueAutocomplete = ({
     }, 300);
 
     return () => {
+      cancelled = true;
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     };
   }, [venue, selectedVenueId]);
@@ -92,7 +102,7 @@ export const VenueAutocomplete = ({
     }
   };
 
-  const noResults = hasSearched && suggestions.length === 0 && venue.length >= 2 && !isSearching;
+  const noResults = !selectedVenueId && hasSearched && suggestions.length === 0 && venue.length >= 2 && !isSearching;
 
   return (
     <div className="space-y-2">
@@ -118,7 +128,7 @@ export const VenueAutocomplete = ({
           )}
         </div>
 
-        {showSuggestions && suggestions.length > 0 && (
+        {showSuggestions && !selectedVenueId && suggestions.length > 0 && (
           <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
             {suggestions.map((s) => (
               <button
