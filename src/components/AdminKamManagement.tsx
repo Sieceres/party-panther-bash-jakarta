@@ -10,7 +10,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Shuffle } from "lucide-react";
+import { RotateCcw, Shuffle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { distributeVenues, fetchKamUsers, isStale, KamUser } from "@/lib/kam";
 import { toast } from "@/lib/toast";
@@ -86,6 +86,25 @@ export function AdminKamManagement() {
       await load();
     } catch (e: any) {
       toast.error(e.message || "Distribution failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const resetDistribution = async () => {
+    const assigned = rows.filter((r) => r.kam_id);
+    if (!assigned.length) { toast.info("No venues are assigned"); return; }
+    setBusy(true);
+    try {
+      const ids = assigned.map((r) => r.id);
+      for (let i = 0; i < ids.length; i += 200) {
+        const { error } = await supabase.from("venues").update({ kam_id: null } as any).in("id", ids.slice(i, i + 200));
+        if (error) throw error;
+      }
+      toast.success(`${assigned.length} venues unassigned`);
+      await load();
+    } catch (e: any) {
+      toast.error(e.message || "Reset failed");
     } finally {
       setBusy(false);
     }
