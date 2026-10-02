@@ -178,6 +178,25 @@ export function AdminKamManagement() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" disabled={busy || loading || !rows.some((r) => r.kam_id)}>
+                <RotateCcw className="w-4 h-4 mr-2" /> Reset distribution
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset the distribution?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  All {rows.filter((r) => r.kam_id).length} assigned venues will lose their KAM. You can run "Auto-distribute venues" again to start fresh.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={resetDistribution}>Reset</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
