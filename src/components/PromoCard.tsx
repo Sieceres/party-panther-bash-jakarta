@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Star, MessageSquare, Edit2, Trash2, Heart } from "lucide-react";
+import { User, Star, MessageSquare, Edit2, Trash2, Heart, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReviewsList } from "./ReviewsList";
 import { useNavigate } from "react-router-dom";
@@ -58,6 +58,7 @@ interface PromoCardProps {
   index?: number;
   isSelected?: boolean;
   isVenueOwner?: boolean;
+  canConfirm?: boolean;
 }
 
 import { getPromoUrl, getEditPromoUrl, getVenueUrl } from "@/lib/slug-utils";
@@ -69,7 +70,18 @@ const formatPrice = (amount: number, currency?: string | null) => {
 };
 
 
-export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0, isSelected = false, isVenueOwner = false }: PromoCardProps) => {
+export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0, isSelected = false, isVenueOwner = false, canConfirm = false }: PromoCardProps) => {
+  const [confirmedAt, setConfirmedAt] = useState<string | null>((promo as any).last_confirmed_at ?? null);
+  const [confirming, setConfirming] = useState(false);
+  const handleConfirm = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    setConfirming(true);
+    const { data, error } = await (supabase.rpc as any)("confirm_promo", { _promo_id: promo.id });
+    setConfirming(false);
+    if (error) return toast({ title: "Could not confirm", description: error.message, variant: "destructive" });
+    setConfirmedAt(data as string);
+    toast({ title: `Confirmed "${promo.title}"` });
+  };
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showReviews, setShowReviews] = useState(false);
@@ -405,6 +417,16 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
             <p className="text-[11px] text-muted-foreground">
               Added {new Date(promo.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
             </p>
+          )}
+          {canConfirm && (
+            <div className="flex items-center justify-between gap-2 rounded-md bg-muted/40 px-2 py-1.5">
+              <span className="text-[11px] text-muted-foreground">
+                {confirmedAt ? `Confirmed ${new Date(confirmedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : "Never confirmed"}
+              </span>
+              <Button size="sm" disabled={confirming} onClick={handleConfirm}>
+                <BadgeCheck className="w-4 h-4 mr-1" /> CONFIRM
+              </Button>
+            </div>
           )}
           {(promo.discounted_price_amount != null || promo.original_price_amount != null) && (
             <div className="flex items-baseline gap-2">

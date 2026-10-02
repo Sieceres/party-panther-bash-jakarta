@@ -553,7 +553,9 @@ export const VenueDetailPage = () => {
                             index={i}
                             isVenueOwner={venue.claim_status === "approved" && venue.claimed_by === currentUserId}
                             userAdminStatus={{ is_admin: isAdmin, is_super_admin: false }}
+                            canConfirm={isAdmin || (!!currentUserId && (venue as any).kam_id === currentUserId)}
                             promo={{
+                              last_confirmed_at: (promo as any).last_confirmed_at,
                               id: promo.id,
                               title: promo.title,
                               description: promo.description,

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, CheckCircle2, ChevronDown, ChevronRight, BadgeCheck } from "lucide-react";
+import { Building2, ChevronDown, ChevronRight, BadgeCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isStale } from "@/lib/kam";
 import { toast } from "@/lib/toast";
@@ -68,13 +68,6 @@ function MyVenuesSectionInner({ userId }: { userId: string }) {
 
   useEffect(() => { load(); }, [userId]);
 
-  const markChecked = async (id: string) => {
-    const { error } = await supabase.from("venues").update({ last_checked_at: new Date().toISOString() } as any).eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Marked as checked");
-    load();
-  };
-
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -92,7 +85,8 @@ function MyVenuesSectionInner({ userId }: { userId: string }) {
     );
   };
 
-  const staleCount = rows.filter((r) => isStale(r.last_checked_at)).length;
+  const venueStale = (r: Row) => r.promos.some((p) => isStale(p.last_confirmed_at));
+  const staleCount = rows.filter(venueStale).length;
 
   return (
     <Card className="bg-card/80 backdrop-blur-sm">
@@ -111,7 +105,7 @@ function MyVenuesSectionInner({ userId }: { userId: string }) {
         ) : (
           <div className="divide-y divide-border">
             {[...rows]
-              .sort((a, b) => Number(isStale(b.last_checked_at)) - Number(isStale(a.last_checked_at)))
+              .sort((a, b) => Number(venueStale(b)) - Number(venueStale(a)))
               .map((r) => (
                 <div key={r.id} className="py-2">
                 <div className="flex items-center gap-3">
@@ -129,14 +123,10 @@ function MyVenuesSectionInner({ userId }: { userId: string }) {
                       {r.name}
                     </Link>
                     <div className="text-xs text-muted-foreground">
-                      {r.area || "No area"} · {r.promoCount} promos ·{" "}
-                      {r.last_checked_at ? `checked ${new Date(r.last_checked_at).toLocaleDateString()}` : "never checked"}
+                      {r.area || "No area"} · {r.promoCount} promos
                     </div>
                   </div>
-                  {isStale(r.last_checked_at) && <Badge variant="destructive">Outdated</Badge>}
-                  <Button size="sm" variant="outline" onClick={() => markChecked(r.id)}>
-                    <CheckCircle2 className="w-4 h-4 mr-1" /> Checked
-                  </Button>
+                  {r.promos.some((p) => isStale(p.last_confirmed_at)) && <Badge variant="destructive">Outdated</Badge>}
                 </div>
                 {open[r.id] && r.promos.length > 0 && (
                   <div className="ml-7 mt-2 space-y-1">
