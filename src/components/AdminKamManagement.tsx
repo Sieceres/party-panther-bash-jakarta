@@ -10,7 +10,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Shuffle } from "lucide-react";
+import { RotateCcw, Shuffle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { distributeVenues, fetchKamUsers, isStale, KamUser } from "@/lib/kam";
 import { toast } from "@/lib/toast";
@@ -91,6 +91,25 @@ export function AdminKamManagement() {
     }
   };
 
+  const resetDistribution = async () => {
+    const assigned = rows.filter((r) => r.kam_id);
+    if (!assigned.length) { toast.info("No venues are assigned"); return; }
+    setBusy(true);
+    try {
+      const ids = assigned.map((r) => r.id);
+      for (let i = 0; i < ids.length; i += 200) {
+        const { error } = await supabase.from("venues").update({ kam_id: null } as any).in("id", ids.slice(i, i + 200));
+        if (error) throw error;
+      }
+      toast.success(`${assigned.length} venues unassigned`);
+      await load();
+    } catch (e: any) {
+      toast.error(e.message || "Reset failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const changeKam = async (venueId: string, value: string) => {
     const kam_id = value === UNASSIGNED ? null : value;
     const { error } = await supabase.from("venues").update({ kam_id } as any).eq("id", venueId);
@@ -124,6 +143,7 @@ export function AdminKamManagement() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
           <CardTitle>Key Account Managers</CardTitle>
+          <div className="flex flex-wrap gap-2">
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button disabled={busy || loading}>
@@ -159,6 +179,26 @@ export function AdminKamManagement() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" disabled={busy || loading || !rows.some((r) => r.kam_id)}>
+                <RotateCcw className="w-4 h-4 mr-2" /> Reset distribution
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset the distribution?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  All {rows.filter((r) => r.kam_id).length} assigned venues will lose their KAM. You can run "Auto-distribute venues" again to start fresh.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={resetDistribution}>Reset</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
