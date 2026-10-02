@@ -130,7 +130,7 @@ export function AdminKamManagement() {
           ...k,
           venues: mine.length,
           promos: mine.reduce((s, r) => s + r.promoCount, 0),
-          stale: mine.filter((r) => isStale(r.last_checked_at)).length,
+          stale: mine.filter((r) => r.upToDate < r.promoCount).length,
         };
       }),
     [kams, rows],
@@ -260,7 +260,7 @@ export function AdminKamManagement() {
                     <Link to={`/venue/${r.slug || r.id}`} className="font-medium hover:text-primary truncate block">{r.name}</Link>
                     <div className="text-xs text-muted-foreground">
                       {r.area || "No area"} · {r.promoCount} promos
-                      {isStale(r.last_checked_at) && " · outdated"}
+                      {r.upToDate < r.promoCount && " · outdated"}
                     </div>
                   </div>
                   <Select value={r.kam_id || UNASSIGNED} onValueChange={(v) => changeKam(r.id, v)}>
