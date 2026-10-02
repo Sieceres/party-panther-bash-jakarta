@@ -42,10 +42,17 @@ export function AdminKamManagement() {
     const [k, { data: venues }, { data: promos }] = await Promise.all([
       fetchKamUsers(),
       supabase.from("venues").select("id, name, slug, area, kam_id, last_checked_at").order("name").range(0, 4999),
-      supabase.from("promos").select("venue_id").not("venue_id", "is", null).range(0, 9999),
+      supabase.from("promos").select("venue_id, venue_name").range(0, 9999),
     ]);
+    // Many promos are only linked by venue name, so match by id first, then by name
+    const norm = (s: string | null | undefined) => (s || "").toLowerCase().replace(/^the\s+/, "").replace(/[^a-z0-9]/g, "");
+    const byName: Record<string, string> = {};
+    ((venues as any[]) || []).forEach((v) => { byName[norm(v.name)] = v.id; });
     const counts: Record<string, number> = {};
-    (promos || []).forEach((p: any) => { counts[p.venue_id] = (counts[p.venue_id] || 0) + 1; });
+    (promos || []).forEach((p: any) => {
+      const id = p.venue_id || byName[norm(p.venue_name)];
+      if (id) counts[id] = (counts[id] || 0) + 1;
+    });
     setKams(k);
     setRows(((venues as any[]) || []).map((v) => ({ ...v, promoCount: counts[v.id] || 0 })));
     setLoading(false);
