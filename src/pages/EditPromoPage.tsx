@@ -1,3 +1,4 @@
+import { findVenueIdByName } from "@/lib/venue-lookup";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -160,6 +161,9 @@ export const EditPromoPage = () => {
       // Auto-create venue if needed
       let venueId = selectedVenueId;
       if (!venueId && formData.venue.trim()) {
+        venueId = await findVenueIdByName(formData.venue);
+      }
+      if (!venueId && formData.venue.trim()) {
         const { data: newVenue, error: venueError } = await supabase
           .from('venues')
           .insert({
@@ -172,7 +176,9 @@ export const EditPromoPage = () => {
           .select('id')
           .single();
 
-        if (!venueError && newVenue) {
+        if (venueError) {
+          venueId = await findVenueIdByName(formData.venue);
+        } else if (newVenue) {
           venueId = newVenue.id;
           supabase.functions.invoke('scrape-venue-images', {
             body: { venue_id: newVenue.id, mode: 'all' }
