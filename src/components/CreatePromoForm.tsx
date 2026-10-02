@@ -1,3 +1,4 @@
+import { findVenueIdByName } from "@/lib/venue-lookup";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -227,8 +228,9 @@ export const CreatePromoForm = () => {
       if (!venueId && formData.venue.trim()) {
         // Final safety net: case-insensitive match before creating a duplicate
         const match = await findMatchingVenue(formData.venue, formData.address);
-        if (match) {
-          venueId = match.id;
+        const existingId = match ? match.id : await findVenueIdByName(formData.venue);
+        if (existingId) {
+          venueId = existingId;
         } else {
         const { data: newVenue, error: venueError } = await supabase
           .from('venues')
@@ -244,6 +246,7 @@ export const CreatePromoForm = () => {
 
         if (venueError) {
           console.error('Error creating venue:', venueError);
+          venueId = await findVenueIdByName(formData.venue);
           // Continue without venue_id — non-blocking
         } else if (newVenue) {
           venueId = newVenue.id;

@@ -1,3 +1,4 @@
+import { findVenueIdByName } from "@/lib/venue-lookup";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -291,8 +292,9 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
           (v) => v.name.trim().toLowerCase() === venueNameTrimmed.toLowerCase()
         );
 
-        if (exactMatch) {
-          venueId = exactMatch.id;
+        const existingId = exactMatch?.id ?? (await findVenueIdByName(venueNameTrimmed));
+        if (existingId) {
+          venueId = existingId;
         } else {
           const { data: newVenue, error: venueError } = await supabase
             .from('venues')
@@ -307,7 +309,9 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
             .select('id')
             .single();
 
-          if (!venueError && newVenue) {
+          if (venueError) {
+            venueId = await findVenueIdByName(venueNameTrimmed);
+          } else if (newVenue) {
             venueId = newVenue.id;
             // Fire-and-forget: enrich venue with scraper
             supabase.functions.invoke('scrape-venue-images', {
