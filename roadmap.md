@@ -1,0 +1,4 @@
+- [ ] Popup form setup and respondent registration
+- [ ] Removable Name, Email, WhatsApp defaults with compatible saved forms
+- [ ] Multiple choice and updated prefill/privacy text
+- [ ] Verify registration interactions
