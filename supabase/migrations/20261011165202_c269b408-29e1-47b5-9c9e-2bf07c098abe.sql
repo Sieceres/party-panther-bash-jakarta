@@ -1,0 +1,1 @@
+GRANT SELECT (registration_enabled, registration_fields, registration_capacity) ON public.events TO anon;
