@@ -1,11 +1,13 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowDown, ArrowUp, ClipboardList, Plus, Trash2, X } from "lucide-react";
-import { FIELD_TYPE_LABELS, RegField, RegFieldType, isChoice, newField } from "@/lib/registration";
+import { FIELD_TYPE_LABELS, RegField, RegFieldType, isChoice, newField, REGISTRATION_PRIVACY_TEXT } from "@/lib/registration";
 
 interface Props {
   enabled: boolean;
@@ -17,6 +19,7 @@ interface Props {
 }
 
 export const RegistrationFormBuilder = ({ enabled, fields, capacity, onEnabledChange, onFieldsChange, onCapacityChange }: Props) => {
+  const [open, setOpen] = useState(false);
   const update = (i: number, patch: Partial<RegField>) =>
     onFieldsChange(fields.map((f, idx) => (idx === i ? { ...f, ...patch } : f)));
   const move = (i: number, d: number) => {
@@ -28,18 +31,27 @@ export const RegistrationFormBuilder = ({ enabled, fields, capacity, onEnabledCh
   };
 
   return (
+    <>
     <Card className="border-border">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between gap-3 text-base">
           <span className="flex items-center gap-2"><ClipboardList className="w-4 h-4 text-primary" /> Registration form</span>
-          <Switch checked={enabled} onCheckedChange={onEnabledChange} aria-label="Enable registration form" />
+          <Switch checked={enabled} onCheckedChange={(v) => { onEnabledChange(v); if (v) setOpen(true); }} aria-label="Enable registration form" />
         </CardTitle>
-        <p className="text-xs text-muted-foreground">
-          Let people sign up with a form, even without an account. Name and email are always asked. You get notified for every registration.
-        </p>
       </CardHeader>
       {enabled && (
-        <CardContent className="space-y-4">
+        <CardContent>
+          <Button type="button" variant="outline" onClick={() => setOpen(true)}><ClipboardList className="w-4 h-4 mr-2" /> Edit registration form</Button>
+        </CardContent>
+      )}
+    </Card>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="max-w-2xl w-[calc(100%-2rem)] max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Registration form</DialogTitle>
+          <DialogDescription>{REGISTRATION_PRIVACY_TEXT}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
           <div className="space-y-2 max-w-xs">
             <Label htmlFor="reg-capacity">Maximum registrations (optional)</Label>
             <Input
@@ -65,7 +77,7 @@ export const RegistrationFormBuilder = ({ enabled, fields, capacity, onEnabledCh
                 <Select
                   value={f.type}
                   onValueChange={(t: RegFieldType) =>
-                    update(i, { type: t, options: isChoice(t) ? f.options?.length ? f.options : ["Option 1"] : undefined })
+                    update(i, { type: t, contact: undefined, options: isChoice(t) ? f.options?.length ? f.options : ["Option 1"] : undefined })
                   }
                 >
                   <SelectTrigger className="sm:w-56"><SelectValue /></SelectTrigger>
@@ -82,10 +94,10 @@ export const RegistrationFormBuilder = ({ enabled, fields, capacity, onEnabledCh
                       <Input
                         value={o}
                         maxLength={100}
-                        onChange={(e) => update(i, { options: f.options!.map((x, k) => (k === oi ? e.target.value : x)) })}
+                         onChange={(e) => update(i, { options: (f.options || []).map((x, k) => (k === oi ? e.target.value : x)) })}
                       />
                       <Button type="button" variant="ghost" size="icon" aria-label="Remove option"
-                        onClick={() => update(i, { options: f.options!.filter((_, k) => k !== oi) })}>
+                        onClick={() => update(i, { options: (f.options || []).filter((_, k) => k !== oi) })}>
                         <X className="w-4 h-4" />
                       </Button>
                     </div>
@@ -102,11 +114,13 @@ export const RegistrationFormBuilder = ({ enabled, fields, capacity, onEnabledCh
                   <label className="flex items-center gap-2 text-sm">
                     <Switch checked={f.required} onCheckedChange={(v) => update(i, { required: v })} /> Required
                   </label>
-                  {(f.type === "short_text" || f.type === "phone" || f.type === "number" || f.type === "single_choice") && (
+                  {(f.type === "short_text" || f.type === "email" || f.type === "phone" || f.type === "number" || f.type === "single_choice") && (
                     <Select value={f.prefill || "none"} onValueChange={(v) => update(i, { prefill: v === "none" ? null : (v as any) })}>
                       <SelectTrigger className="h-8 w-48 text-xs"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">No profile prefill</SelectItem>
+                        <SelectItem value="none">Prefill from profile?</SelectItem>
+                        <SelectItem value="display_name">Prefill: Name</SelectItem>
+                        <SelectItem value="email">Prefill: Email</SelectItem>
                         <SelectItem value="instagram">Prefill: Instagram</SelectItem>
                         <SelectItem value="whatsapp">Prefill: WhatsApp</SelectItem>
                         <SelectItem value="gender">Prefill: Gender</SelectItem>
@@ -127,11 +141,18 @@ export const RegistrationFormBuilder = ({ enabled, fields, capacity, onEnabledCh
             </div>
           ))}
 
+          <div className="flex flex-wrap gap-2">
           <Button type="button" variant="outline" onClick={() => onFieldsChange([...fields, newField()])}>
             <Plus className="w-4 h-4 mr-1" /> Add question
           </Button>
-        </CardContent>
-      )}
-    </Card>
+          <Button type="button" variant="outline" onClick={() => onFieldsChange([...fields, newField("single_choice")])}>
+            <Plus className="w-4 h-4 mr-1" /> Add multiple choice
+          </Button>
+          </div>
+          <Button type="button" className="w-full" onClick={() => setOpen(false)}>Done</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 };
