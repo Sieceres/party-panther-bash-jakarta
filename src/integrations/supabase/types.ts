@@ -384,6 +384,47 @@ export type Database = {
           },
         ]
       }
+      event_registrations: {
+        Row: {
+          answers: Json
+          created_at: string
+          email_sent_at: string | null
+          event_id: string
+          id: string
+          respondent_email: string | null
+          respondent_name: string | null
+          user_id: string | null
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          email_sent_at?: string | null
+          event_id: string
+          id?: string
+          respondent_email?: string | null
+          respondent_name?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          email_sent_at?: string | null
+          event_id?: string
+          id?: string
+          respondent_email?: string | null
+          respondent_name?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_tag_assignments: {
         Row: {
           event_id: string
@@ -467,6 +508,9 @@ export type Database = {
           payment_qr_url: string | null
           price_amount: number | null
           price_currency: string | null
+          registration_capacity: number | null
+          registration_enabled: boolean
+          registration_fields: Json
           slug: string | null
           time: string
           title: string
@@ -500,6 +544,9 @@ export type Database = {
           payment_qr_url?: string | null
           price_amount?: number | null
           price_currency?: string | null
+          registration_capacity?: number | null
+          registration_enabled?: boolean
+          registration_fields?: Json
           slug?: string | null
           time: string
           title: string
@@ -533,6 +580,9 @@ export type Database = {
           payment_qr_url?: string | null
           price_amount?: number | null
           price_currency?: string | null
+          registration_capacity?: number | null
+          registration_enabled?: boolean
+          registration_fields?: Json
           slug?: string | null
           time?: string
           title?: string
@@ -1696,6 +1746,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_event_registration_count: {
+        Args: { _event_id: string }
+        Returns: number
+      }
       get_event_tags_by_category: {
         Args: never
         Returns: {
@@ -2045,6 +2099,15 @@ export type Database = {
       refresh_event_attendee_stats: { Args: never; Returns: undefined }
       refresh_promo_review_stats: { Args: never; Returns: undefined }
       should_show_organizer_contact: { Args: never; Returns: boolean }
+      submit_event_registration: {
+        Args: {
+          _answers: Json
+          _email: string
+          _event_id: string
+          _name: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       event_access_level:
