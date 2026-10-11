@@ -28,7 +28,10 @@ export const getEventBySlugOrId = async (identifier: string) => {
     enable_photos,
     venue_id,
     custom_slug,
-    custom_slug_expires_at
+    custom_slug_expires_at,
+    registration_enabled,
+    registration_fields,
+    registration_capacity
   `;
 
   const withPrivateFields = async (event: any) => {
