@@ -52,6 +52,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://partypanther.net/e/diwaloween</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://partypanther.net/e/jazz-brazilian-night-at-dock-of-tuna</loc>
     <lastmod>2026-04-22</lastmod>
     <changefreq>weekly</changefreq>
@@ -1536,6 +1542,12 @@
   <url>
     <loc>https://partypanther.net/v/demo-kitchen-and-bar</loc>
     <lastmod>2026-10-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/v/tikka-talk</loc>
+    <lastmod>2026-10-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
