@@ -17,6 +17,8 @@ import { EventPrice } from "./form-components/EventPrice";
 import { ImageUpload } from "./form-components/ImageUpload";
 import { EventTagSelector } from "./form-components/EventTagSelector";
 import { EventPrivacySettings } from "./form-components/EventPrivacySettings";
+import { RegistrationFormBuilder } from "./form-components/RegistrationFormBuilder";
+import type { RegField } from "@/lib/registration";
 import { EventAIExtract } from "./form-components/EventAIExtract";
 import { CustomLinkField } from "./form-components/CustomLinkField";
 import { EventPreviewDialog } from "./EventPreviewDialog";
@@ -63,6 +65,9 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [customSlug, setCustomSlug] = useState<string>((initialData as any)?.custom_slug || "");
   const [priceAmount, setPriceAmount] = useState<number | null>((initialData as any)?.price_amount ?? null);
   const [priceCurrency, setPriceCurrency] = useState<string>((initialData as any)?.price_currency || "IDR");
+  const [registrationEnabled, setRegistrationEnabled] = useState<boolean>(!!(initialData as any)?.registration_enabled);
+  const [registrationFields, setRegistrationFields] = useState<RegField[]>(((initialData as any)?.registration_fields as RegField[]) || []);
+  const [registrationCapacity, setRegistrationCapacity] = useState<number | null>((initialData as any)?.registration_capacity ?? null);
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
@@ -345,7 +350,12 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
         access_level: accessLevel as "public" | "private" | "invite_only" | "secret",
         max_attendees: maxAttendees,
         enable_check_in: !!enableCheckIn,
-        enable_photos: !!enablePhotos
+        enable_photos: !!enablePhotos,
+        registration_enabled: registrationEnabled,
+        registration_fields: registrationFields
+          .filter((f) => f.label.trim())
+          .map((f) => ({ ...f, label: f.label.trim(), options: f.options?.map((o) => o.trim()).filter(Boolean) })) as any,
+        registration_capacity: registrationEnabled ? registrationCapacity : null,
       };
 
       let error;
@@ -582,6 +592,15 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
               onPaymentInfoChange={setPaymentInfo}
               onPaymentMethodsChange={setPaymentMethods}
               onPaymentQrUrlChange={setPaymentQrUrl}
+            />
+
+            <RegistrationFormBuilder
+              enabled={registrationEnabled}
+              fields={registrationFields}
+              capacity={registrationCapacity}
+              onEnabledChange={setRegistrationEnabled}
+              onFieldsChange={setRegistrationFields}
+              onCapacityChange={setRegistrationCapacity}
             />
 
             {/* Duplicate Warning - only for new events */}

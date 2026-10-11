@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.maps-key]
 verify_jwt = false
+
+[functions.notify-registration]
+verify_jwt = false

@@ -57,6 +57,8 @@ import { AttendeeNoteDialog } from "./AttendeeNoteDialog";
 import { EventCheckIn } from "./EventCheckIn";
 import { EventPhotoGallery } from "./EventPhotoGallery";
 import { EventInviteCodes } from "./EventInviteCodes";
+import { EventRegistrationForm } from "./EventRegistrationForm";
+import { EventRegistrationsPanel } from "./EventRegistrationsPanel";
 import { LoginDialog } from "./LoginDialog";
 import InstagramEmbed from "./InstagramEmbed";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -1882,6 +1884,21 @@ export const EventDetailPage = () => {
 
             {/* Sidebar */}
             <div className="space-y-6">
+              {(event as any).registration_enabled && (
+                <EventRegistrationForm
+                  eventId={event.id}
+                  fields={((event as any).registration_fields as any[]) || []}
+                  capacity={(event as any).registration_capacity ?? null}
+                />
+              )}
+              {canManagePayments && ((event as any).registration_enabled || false) && (
+                <EventRegistrationsPanel
+                  eventId={event.id}
+                  eventTitle={event.title}
+                  fields={((event as any).registration_fields as any[]) || []}
+                  capacity={(event as any).registration_capacity ?? null}
+                />
+              )}
               {/* Invite Codes Management - only for organizers of private events */}
               {(isOwner || isCoOrganizer) && event.access_level !== "public" && (
                 <EventInviteCodes
