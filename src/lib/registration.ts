@@ -6,8 +6,9 @@ export interface RegField {
   type: RegFieldType;
   required: boolean;
   options?: string[];
+  contact?: "name" | "email" | "whatsapp";
   /** Which profile value to prefill with, if any */
-  prefill?: "instagram" | "whatsapp" | "gender" | "age" | null;
+  prefill?: "display_name" | "email" | "instagram" | "whatsapp" | "gender" | "age" | null;
 }
 
 export const FIELD_TYPE_LABELS: Record<RegFieldType, string> = {
@@ -30,6 +31,14 @@ export const newField = (type: RegFieldType = "short_text"): RegField => ({
 });
 
 export const isChoice = (t: RegFieldType) => t === "single_choice" || t === "multi_choice";
+
+export const REGISTRATION_PRIVACY_TEXT = "The information below is only shared with the organizer, not Party Panther.";
+
+export const defaultRegistrationFields = (): RegField[] => [
+  { ...newField(), label: "Name", required: true, contact: "name", prefill: "display_name" },
+  { ...newField("email"), label: "Email", required: true, contact: "email", prefill: "email" },
+  { ...newField("phone"), label: "WhatsApp", contact: "whatsapp", prefill: "whatsapp" },
+];
 
 export const formatAnswer = (v: unknown) =>
   Array.isArray(v) ? v.join(", ") : v === null || v === undefined ? "" : String(v);
