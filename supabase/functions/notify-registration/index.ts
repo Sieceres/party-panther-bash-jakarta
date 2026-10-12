@@ -25,8 +25,8 @@ Deno.serve(async (req) => {
       .update({ email_sent_at: new Date().toISOString() })
       .eq("id", registration_id)
       .is("email_sent_at", null)
-      .gte("created_at", new Date(Date.now() - 15 * 60 * 1000).toISOString())
-      .select("id, event_id, respondent_name, respondent_email, answers, created_at")
+      .gte("created_at", new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString())
+      .select("id, event_id, respondent_name, respondent_email, answers, fields_snapshot, created_at")
       .maybeSingle();
     if (!reg) return json({ skipped: "already sent or not found" });
 
@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
       .select("id", { count: "exact", head: true })
       .eq("event_id", reg.event_id);
 
-    const fields = (ev.registration_fields as any[]) || [];
+    const fields = ((reg as any).fields_snapshot as any[]) || (ev.registration_fields as any[]) || [];
     const rows = fields
       .map((f) => {
         const v = reg.answers?.[f.id];
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
       method: "POST",
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: Deno.env.get("RESEND_FROM") || "Party Panther <onboarding@resend.dev>",
+        from: Deno.env.get("RESEND_FROM") || "Party Panther <admin@partypanther.net>",
         to: [to],
         reply_to: reg.respondent_email || undefined,
         subject: `New registration: ${ev.title}`,
