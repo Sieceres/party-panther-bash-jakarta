@@ -14,6 +14,7 @@ interface Registration {
   respondent_name: string | null;
   respondent_email: string | null;
   answers: Record<string, any>;
+  fields_snapshot: RegField[] | null;
   user_id: string | null;
   created_at: string;
 }
@@ -31,12 +32,30 @@ export function EventRegistrationsPanel({ eventId, eventTitle, fields, capacity 
 
   const load = async () => {
     const { data } = await (supabase.from("event_registrations" as any) as any)
-      .select("id, respondent_name, respondent_email, answers, user_id, created_at")
+      .select("id, respondent_name, respondent_email, answers, fields_snapshot, user_id, created_at")
       .eq("event_id", eventId)
       .order("created_at", { ascending: false });
     setRows(data || []);
   };
   useEffect(() => { load(); }, [eventId]);
+
+  // Show each response with the questions as they were when the person registered,
+  // so answers survive later edits to the form.
+  const entriesFor = (r: Registration) => {
+    const base = r.fields_snapshot?.length ? r.fields_snapshot : fields;
+    const seen = new Set<string>();
+    const out: { id: string; label: string; value: string }[] = [];
+    base.forEach((f) => {
+      seen.add(f.id);
+      out.push({ id: f.id, label: f.label || "Untitled question", value: formatAnswer(r.answers?.[f.id]) });
+    });
+    Object.keys(r.answers || {}).forEach((k) => {
+      if (seen.has(k)) return;
+      const cur = fields.find((f) => f.id === k);
+      out.push({ id: k, label: cur?.label || "Earlier question", value: formatAnswer(r.answers[k]) });
+    });
+    return out;
+  };
 
   const perDay = useMemo(() => {
     const m: Record<string, number> = {};
@@ -71,7 +90,11 @@ export function EventRegistrationsPanel({ eventId, eventTitle, fields, capacity 
         Email: r.respondent_email,
         "Has account": r.user_id ? "Yes" : "No",
       };
-      fields.forEach((f) => { o[f.label] = formatAnswer(r.answers?.[f.id]); });
+      entriesFor(r).forEach((e) => {
+        let key = e.label;
+        if (["Registered at", "Name", "Email", "Has account"].includes(key)) key = `${key} (answer)`;
+        o[key] = o[key] ? `${o[key]}; ${e.value}` : e.value;
+      });
       return o;
     });
     const ws = XLSX.utils.json_to_sheet(data);
@@ -174,12 +197,12 @@ export function EventRegistrationsPanel({ eventId, eventTitle, fields, capacity 
                           <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
                       </div>
-                      {fields.length > 0 && (
+                      {entriesFor(r).length > 0 && (
                         <dl className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
-                          {fields.map((f) => (
-                            <div key={f.id}>
-                              <dt className="text-xs text-muted-foreground">{f.label}</dt>
-                              <dd className="break-words">{formatAnswer(r.answers?.[f.id]) || "—"}</dd>
+                          {entriesFor(r).map((e) => (
+                            <div key={e.id}>
+                              <dt className="text-xs text-muted-foreground">{e.label}</dt>
+                              <dd className="break-words">{e.value || "—"}</dd>
                             </div>
                           ))}
                         </dl>
