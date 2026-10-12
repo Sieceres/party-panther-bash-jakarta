@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.snapshot_registration_fields() FROM PUBLIC, anon, authenticated;
