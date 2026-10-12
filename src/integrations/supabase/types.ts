@@ -390,6 +390,7 @@ export type Database = {
           created_at: string
           email_sent_at: string | null
           event_id: string
+          fields_snapshot: Json | null
           id: string
           respondent_email: string | null
           respondent_name: string | null
@@ -400,6 +401,7 @@ export type Database = {
           created_at?: string
           email_sent_at?: string | null
           event_id: string
+          fields_snapshot?: Json | null
           id?: string
           respondent_email?: string | null
           respondent_name?: string | null
@@ -410,6 +412,7 @@ export type Database = {
           created_at?: string
           email_sent_at?: string | null
           event_id?: string
+          fields_snapshot?: Json | null
           id?: string
           respondent_email?: string | null
           respondent_name?: string | null
