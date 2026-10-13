@@ -77,7 +77,7 @@ export const RegistrationFormBuilder = ({ enabled, fields, capacity, onEnabledCh
                 <Select
                   value={f.type}
                   onValueChange={(t: RegFieldType) =>
-                    update(i, { type: t, contact: undefined, options: isChoice(t) ? f.options?.length ? f.options : ["Option 1"] : undefined })
+                    update(i, { type: t, contact: undefined, ...(isChoice(t) ? { prefill: null } : {}), options: isChoice(t) ? f.options?.length ? f.options : ["Option 1"] : undefined })
                   }
                 >
                   <SelectTrigger className="sm:w-56"><SelectValue /></SelectTrigger>
@@ -114,7 +114,12 @@ export const RegistrationFormBuilder = ({ enabled, fields, capacity, onEnabledCh
                   <label className="flex items-center gap-2 text-sm">
                     <Switch checked={f.required} onCheckedChange={(v) => update(i, { required: v })} /> Required
                   </label>
-                  {(f.type === "short_text" || f.type === "email" || f.type === "phone" || f.type === "number" || f.type === "single_choice") && (
+                  {isChoice(f.type) && (
+                    <label className="flex items-center gap-2 text-sm">
+                      <Switch checked={f.type === "multi_choice"} onCheckedChange={(v) => update(i, { type: v ? "multi_choice" : "single_choice", prefill: null })} /> Allow multiple answers
+                    </label>
+                  )}
+                  {(f.type === "short_text" || f.type === "email" || f.type === "phone" || f.type === "number") && (
                     <Select value={f.prefill || "none"} onValueChange={(v) => update(i, { prefill: v === "none" ? null : (v as any) })}>
                       <SelectTrigger className="h-8 w-48 text-xs"><SelectValue /></SelectTrigger>
                       <SelectContent>
