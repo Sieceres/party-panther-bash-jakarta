@@ -118,6 +118,30 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
     }
   };
 
+  const handlePasteButton = async () => {
+    try {
+      const img = await readClipboardImage();
+      if (!img) { toast.error("No image found on your clipboard"); return; }
+      await extractFromImage(img);
+    } catch {
+      toast.error("Couldn't read the clipboard", { description: "Press Ctrl+V / ⌘+V instead" });
+    }
+  };
+
+  // While open, pasting an image anywhere on the page sends it to autofill
+  useEffect(() => {
+    if (!isOpen) return;
+    const onPaste = async (e: ClipboardEvent) => {
+      if (isExtracting || !hasPastedImage(e)) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const img = await imageFromPasteEvent(e);
+      if (img) extractFromImage(img);
+    };
+    window.addEventListener("paste", onPaste, true);
+    return () => window.removeEventListener("paste", onPaste, true);
+  });
+
   return (
     <div className="rounded-lg overflow-hidden border border-white/20">
       <button
@@ -260,6 +284,10 @@ export const EventAIExtract = ({ onExtracted }: EventAIExtractProps) => {
                   </>
                 )}
               </Button>
+              <Button type="button" variant="outline" onClick={handlePasteButton} disabled={isExtracting} className="w-full">
+                <ClipboardPaste className="w-4 h-4 mr-2" />Paste Image
+              </Button>
+              <p className="text-[11px] text-muted-foreground">Tip: you can also press Ctrl+V / ⌘+V while this box is open.</p>
             </div>
           )}
 
