@@ -162,13 +162,9 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
 
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from('promos')
-        .delete()
-        .eq('id', promo.id);
-
-      if (error) {
-        throw error;
+      const res = await supabase.functions.invoke('secure-delete', { body: { type: 'promo', promo_id: promo.id } });
+      if (res.error || !res.data?.success) {
+        throw new Error(res.data?.error || res.error?.message || 'Delete failed');
       }
 
       toast({
@@ -285,7 +281,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
           </Badge>
         )}
         {canDelete && (
-          <div className="absolute top-3 right-20 flex gap-2">
+          <div className="absolute top-3 right-20 flex gap-2" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
             <Button
               size="sm"
               variant="ghost"
@@ -303,7 +299,7 @@ export const PromoCard = ({ promo, userAdminStatus, onFavoriteToggle, index = 0,
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onClick={(e) => e.stopPropagation()}
                   className="bg-red-600 hover:bg-red-700 text-white p-2 h-8 w-8"
                   disabled={isDeleting}
                 >

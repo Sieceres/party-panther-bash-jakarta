@@ -187,7 +187,7 @@ export const EventCard = ({ event, onJoin, userAdminStatus, isVenueOwner = false
           {format(new Date(event.date + 'T00:00:00'), 'MMM dd')}
         </div>
         {canDelete && (
-          <div className="absolute top-3 right-20 flex gap-2">
+          <div className="absolute top-3 right-20 flex gap-2" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
             <Button
               size="sm"
               variant="ghost"
@@ -205,7 +205,7 @@ export const EventCard = ({ event, onJoin, userAdminStatus, isVenueOwner = false
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onClick={(e) => e.stopPropagation()}
                   className="bg-red-600 hover:bg-red-700 text-white p-2 h-8 w-8"
                   disabled={isDeleting}
                 >
