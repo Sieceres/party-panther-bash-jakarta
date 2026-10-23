@@ -97,6 +97,30 @@ export const PromoAIExtract = ({ onExtracted }: PromoAIExtractProps) => {
     }
   };
 
+  const handlePasteButton = async () => {
+    try {
+      const img = await readClipboardImage();
+      if (!img) { toast.error("No image found on your clipboard"); return; }
+      await extractFromImage(img);
+    } catch {
+      toast.error("Couldn't read the clipboard", { description: "Press Ctrl+V / ⌘+V instead" });
+    }
+  };
+
+  // While open, pasting an image anywhere on the page sends it to autofill
+  useEffect(() => {
+    if (!isOpen) return;
+    const onPaste = async (e: ClipboardEvent) => {
+      if (isExtracting || !hasPastedImage(e)) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const img = await imageFromPasteEvent(e);
+      if (img) extractFromImage(img);
+    };
+    window.addEventListener("paste", onPaste, true);
+    return () => window.removeEventListener("paste", onPaste, true);
+  });
+
   return (
     <div className="rounded-lg overflow-hidden border border-white/20">
       <button
@@ -149,9 +173,15 @@ export const PromoAIExtract = ({ onExtracted }: PromoAIExtractProps) => {
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">Upload a promo poster or flyer — AI will extract the title, deal, venue, and more.</p>
               <Input ref={fileInputRef} type="file" accept="image/*" onChange={handlePosterUpload} className="hidden" disabled={isExtracting} />
-              <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isExtracting} className="w-full">
-                {isExtracting ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" />Extracting promo details...</>) : (<><Upload className="w-4 h-4 mr-2" />Choose Poster Image</>)}
-              </Button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isExtracting} className="w-full">
+                  {isExtracting ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" />Extracting promo details...</>) : (<><Upload className="w-4 h-4 mr-2" />Choose Poster Image</>)}
+                </Button>
+                <Button type="button" variant="outline" onClick={handlePasteButton} disabled={isExtracting} className="w-full">
+                  <ClipboardPaste className="w-4 h-4 mr-2" />Paste Image
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">Tip: you can also press Ctrl+V / ⌘+V while this box is open.</p>
             </div>
           )}
 
