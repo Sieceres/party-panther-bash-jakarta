@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Upload, FileText, Loader2, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { Sparkles, Upload, FileText, Loader2, ChevronDown, ChevronUp, Pencil, ClipboardPaste } from "lucide-react";
+import { readClipboardImage, imageFromPasteEvent, hasPastedImage } from "@/lib/clipboard-image";
 import { toast } from "@/lib/toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { invokeExtraction } from "@/lib/extraction";
