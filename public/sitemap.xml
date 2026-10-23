@@ -52,8 +52,8 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://partypanther.net/e/diwaloween</loc>
-    <lastmod>2026-10-12</lastmod>
+    <loc>https://partypanther.net/e/my-event</loc>
+    <lastmod>2026-10-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1966,18 +1966,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://partypanther.net/v/bluegrass</loc>
-    <lastmod>2026-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://partypanther.net/v/big-brother-kemang</loc>
-    <lastmod>2026-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://partypanther.net/v/blu-martini</loc>
     <lastmod>2026-10-02</lastmod>
     <changefreq>weekly</changefreq>
@@ -2004,6 +1992,12 @@
   <url>
     <loc>https://partypanther.net/v/brew-barrel</loc>
     <lastmod>2026-10-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/v/bluegrass</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
