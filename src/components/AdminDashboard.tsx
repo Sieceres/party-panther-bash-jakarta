@@ -12,6 +12,7 @@ import { Calendar, Star, Users, Trash2, Edit, Eye, ArrowLeft, Database, RefreshC
 import { Header } from "./Header";
 import { AdminReceiptManagement } from "./AdminReceiptManagement";
 import { AdminAnalytics } from "./AdminAnalytics";
+import { AdminAI } from "./AdminAI";
 import { AdminImageMigration } from "./AdminImageMigration";
 import { AdminVenueManagement } from "./AdminVenueManagement";
 import { AdminKamManagement } from "./AdminKamManagement";
@@ -890,6 +891,7 @@ export const AdminDashboard = () => {
             const categories: { id: string; label: string; tabs: { value: string; label: string; icon?: JSX.Element; badge?: number }[] }[] = [
               { id: 'overview', label: 'Overview', tabs: [
                 { value: 'analytics', label: 'Analytics' },
+                { value: 'ai-assistant', label: 'AI Assistant' },
               ]},
               { id: 'moderation', label: 'Moderation', tabs: [
                 { value: 'reports', label: 'Reports', badge: pendingReportCount },
@@ -970,6 +972,9 @@ export const AdminDashboard = () => {
 
           <TabsContent value="analytics">
             <AdminAnalytics />
+          </TabsContent>
+          <TabsContent value="ai-assistant">
+            <AdminAI />
           </TabsContent>
 
           <TabsContent value="reports">

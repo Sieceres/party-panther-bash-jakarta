@@ -1,5 +1,7 @@
 # Architecture rules
 
+- The admin AI assistant translates questions into validated allowlisted read-only report filters, queries through the caller's RLS after server-side admin checks, streams reasoning and results, and persists gateway access blocks; never execute AI-generated SQL or expose private user data.
+
 - Registration contact questions live in registration_fields with a contact discriminator; never hardcode mandatory contact inputs outside the configured questions, so organizers can remove them.
 - Convert legacy implicit contact questions to explicit configured questions when migrating; the registration RPC derives contact metadata from configured answers so client-supplied metadata cannot restore removed fields.
 - Initialize registration defaults only for unconfigured, disabled forms; preserve saved enabled forms (including empty forms), and let organizers explicitly assign compatible contact roles so deleted contacts stay deleted unless restored.

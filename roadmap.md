@@ -4,6 +4,7 @@
 - [x] Verify registration interactions (isolated browser test; no real registration submitted)
 - [x] Fix default contacts when adding registration to an existing event, allow restoring contacts, and test saved-form preservation (9 tests passed; authenticated live submission unavailable)
 - [x] Add safe automatic promo venue linking and admin preview/apply repair
-- [ ] Add admin-only read-only AI questions without daily caps or cooldowns
-- [ ] Verify assistant query rules, access protection, live AI response, and admin interface
+- [x] Add admin-only read-only AI questions without daily caps or cooldowns
+- [x] Verify assistant query rules (4 tests), UI streaming/errors/repeated questions (2 tests), live AI structured response, and signed-out access protection
+- [ ] Verify a signed-in admin question end-to-end — blocked by unavailable managed sessions on external Supabase
 - [x] Test linking safeguards (live rolled-back database fixtures and 7 frontend tests passed); authenticated admin end-to-end testing unavailable for external Supabase

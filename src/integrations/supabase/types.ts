@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_ai_access_state: {
+        Row: {
+          created_at: string
+          model: string
+          reason: string
+          status: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          model: string
+          reason: string
+          status: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          model?: string
+          reason?: string
+          status?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       banned_users: {
         Row: {
           banned_at: string
