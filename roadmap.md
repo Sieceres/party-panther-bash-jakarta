@@ -3,5 +3,5 @@
 - [x] Multiple choice and updated prefill/privacy text
 - [x] Verify registration interactions (isolated browser test; no real registration submitted)
 - [x] Fix default contacts when adding registration to an existing event, allow restoring contacts, and test saved-form preservation (9 tests passed; authenticated live submission unavailable)
-- [ ] Add safe automatic promo venue linking and admin preview/apply repair
-- [ ] Test linking safeguards and verify available admin flow
+- [x] Add safe automatic promo venue linking and admin preview/apply repair
+- [x] Test linking safeguards (live rolled-back database fixtures and 7 frontend tests passed); authenticated admin end-to-end testing unavailable for external Supabase
