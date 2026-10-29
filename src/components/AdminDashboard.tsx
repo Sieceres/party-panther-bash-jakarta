@@ -17,6 +17,7 @@ import { AdminVenueManagement } from "./AdminVenueManagement";
 import { AdminKamManagement } from "./AdminKamManagement";
 import { AdminVenueEdits } from "./AdminVenueEdits";
 import { AdminVenueAudit } from "./AdminVenueAudit";
+import { AdminVenueLinkAudit } from "./AdminVenueLinkAudit";
 import { AdminTagManagement } from "./AdminTagManagement";
 import { AdminReportManagement } from "./AdminReportManagement";
 import { AdminUserFlags } from "./AdminUserFlags";
@@ -1249,6 +1250,7 @@ export const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="venue-audit" className="space-y-4">
+            <AdminVenueLinkAudit />
             <AdminVenueAudit />
           </TabsContent>
 
