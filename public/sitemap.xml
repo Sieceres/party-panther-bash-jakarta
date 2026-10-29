@@ -161,13 +161,13 @@
   </url>
   <url>
     <loc>https://partypanther.net/p/blue-grass-happy-hour-cocktails</loc>
-    <lastmod>2026-08-27</lastmod>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://partypanther.net/p/blue-grass-everyday-happy-hour</loc>
-    <lastmod>2026-08-27</lastmod>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -485,13 +485,13 @@
   </url>
   <url>
     <loc>https://partypanther.net/p/blue-grass-happy-hour-cocktails-1</loc>
-    <lastmod>2026-08-27</lastmod>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://partypanther.net/p/blue-grass-everyday-happy-hour-1</loc>
-    <lastmod>2026-08-27</lastmod>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1564,6 +1564,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://partypanther.net/v/the-bank-bar-and-burgers</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://partypanther.net/v/slits</loc>
     <lastmod>2026-04-23</lastmod>
     <changefreq>weekly</changefreq>
@@ -1572,12 +1578,6 @@
   <url>
     <loc>https://partypanther.net/v/afrokosa</loc>
     <lastmod>2026-09-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://partypanther.net/v/the-bank-bar-and-burgers</loc>
-    <lastmod>2026-03-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1758,6 +1758,12 @@
   <url>
     <loc>https://partypanther.net/v/brotherhood-gunawarman</loc>
     <lastmod>2026-10-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://partypanther.net/v/den-of-kalaha</loc>
+    <lastmod>2026-10-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

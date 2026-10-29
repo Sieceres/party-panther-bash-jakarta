@@ -20,6 +20,7 @@ interface Venue {
   instagram: string | null;
   whatsapp: string | null;
   website: string | null;
+  booking_url?: string | null;
   opening_hours: string | null;
   image_url: string | null;
   google_maps_link?: string | null;
@@ -41,6 +42,7 @@ const EDITABLE_FIELDS = [
   { key: "instagram", label: "Instagram", type: "text" },
   { key: "whatsapp", label: "WhatsApp", type: "text" },
   { key: "website", label: "Website", type: "text" },
+  { key: "booking_url", label: "Booking Link (e.g. Chope)", type: "text" },
   { key: "opening_hours", label: "Opening Hours", type: "text" },
   { key: "google_maps_link", label: "Google Maps Link", type: "text" },
   { key: "image_url", label: "Image URL", type: "text" },

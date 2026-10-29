@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil, Trash2, ShieldCheck, LayoutGrid, List, CheckSquare } from "lucide-react";
+import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil, Trash2, ShieldCheck, LayoutGrid, List, CheckSquare, Sparkles } from "lucide-react";
 import { PromoListView, PromoSortKey, SortDirection } from "./PromoListView";
 import { SelectableItem } from "./SelectableItem";
 import { BulkDeleteBar } from "./BulkDeleteBar";
@@ -24,6 +24,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { Helmet } from "react-helmet-async";
 import { VenueEditDialog } from "./VenueEditDialog";
 import { VenuePinSetup } from "./VenuePinSetup";
+import { VenueReservation } from "./VenueReservation";
 import { getRegionLabelForArea } from "@/lib/area-config";
 
 interface Venue {
@@ -36,6 +37,7 @@ interface Venue {
   description: string | null;
   instagram: string | null;
   whatsapp: string | null;
+  booking_url?: string | null;
   website: string | null;
   opening_hours: string | null;
   image_url: string | null;
@@ -78,6 +80,23 @@ export const VenueDetailPage = () => {
   const [claimMessage, setClaimMessage] = useState("");
   const [submittingClaim, setSubmittingClaim] = useState(false);
   const [existingClaim, setExistingClaim] = useState<string | null>(null);
+  const [scraping, setScraping] = useState(false);
+
+  const handleScrape = async () => {
+    if (!venue?.id) return;
+    setScraping(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("scrape-venue-images", { body: { venue_id: venue.id, mode: "all" } });
+      if (error) throw error;
+      const r = data?.results?.[0];
+      toast({ title: r?.status === "found" ? "Venue info updated" : "Nothing new found", description: r?.found?.length ? `Found: ${r.found.join(", ")}` : undefined });
+      setFetchKey(k => k + 1);
+    } catch (e: any) {
+      toast({ title: "Scraping failed", description: e.message, variant: "destructive" });
+    } finally {
+      setScraping(false);
+    }
+  };
 
   const handleDeleteVenue = async () => {
     if (!venue?.id) return;
@@ -397,6 +416,11 @@ export const VenueDetailPage = () => {
                   <Badge variant="secondary" className="text-xs">✓ Claimed Venue</Badge>
                 )}
                 {/* Venue PIN Setup - for venue owners and admins */}
+                {isAdmin && venue.id && (
+                  <Button size="sm" variant="outline" className="text-xs" onClick={handleScrape} disabled={scraping}>
+                    <Sparkles className="w-3 h-3 mr-1" /> {scraping ? "Scraping..." : "Scrape venue info"}
+                  </Button>
+                )}
                 {venue.id && (venue.claimed_by === currentUserId || isAdmin) && (
                   <VenuePinSetup venueId={venue.id} />
                 )}
@@ -641,6 +665,7 @@ export const VenueDetailPage = () => {
 
             {/* Sidebar */}
             <div className="space-y-6">
+              <VenueReservation venueName={venue.name} whatsapp={venue.whatsapp} bookingUrl={venue.booking_url ?? null} />
               <Card>
                 <CardHeader><CardTitle>Venue Info</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
