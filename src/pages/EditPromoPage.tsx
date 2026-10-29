@@ -1,4 +1,5 @@
 import { findVenueIdByName } from "@/lib/venue-lookup";
+import { getPromoBySlugOrId } from "@/lib/slug-utils";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +24,7 @@ export const EditPromoPage = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [promoId, setPromoId] = useState<string | null>(null);
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
   const [voucherEnabled, setVoucherEnabled] = useState(false);
   const [voucherMode, setVoucherMode] = useState("single");
@@ -54,19 +56,16 @@ export const EditPromoPage = () => {
           return;
         }
 
-        const { data: promo, error } = await supabase
-          .from('promos')
-          .select('*')
-          .eq('id', id)
-          .eq('created_by', user.id)
-          .single();
+        const { data: promo, error } = await getPromoBySlugOrId(id);
 
-        if (error) {
-          console.error('Error fetching promo:', error);
-          toast({ title: "Error", description: "Failed to load promo data.", variant: "destructive" });
-          navigate('/profile');
+        if (error || !promo) {
+          if (error) console.error('Error fetching promo:', error);
+          toast({ title: "Promo not found", description: "This promo may have been removed.", variant: "destructive" });
+          navigate('/promos');
           return;
         }
+
+        setPromoId(promo.id);
 
         if (promo) {
           setFormData({
@@ -147,7 +146,7 @@ export const EditPromoPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id) return;
+    if (!promoId) return;
     
     setIsSubmitting(true);
 
@@ -207,11 +206,16 @@ export const EditPromoPage = () => {
         updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase
+      const { data: updated, error } = await supabase
         .from('promos')
         .update(promoData)
-        .eq('id', id)
-        .eq('created_by', user.id);
+        .eq('id', promoId)
+        .select('id');
+
+      if (!error && (!updated || updated.length === 0)) {
+        toast({ title: "Not allowed", description: "You don't have permission to edit this promo.", variant: "destructive" });
+        return;
+      }
 
       if (error) {
         console.error('Error updating promo:', error);
