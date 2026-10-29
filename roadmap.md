@@ -2,4 +2,4 @@
 - [x] Removable Name, Email, WhatsApp defaults with compatible saved forms
 - [x] Multiple choice and updated prefill/privacy text
 - [x] Verify registration interactions (isolated browser test; no real registration submitted)
-- [ ] Fix default contacts when adding registration to an existing event, allow restoring contacts, and test saved-form preservation
+- [x] Fix default contacts when adding registration to an existing event, allow restoring contacts, and test saved-form preservation (9 tests passed; authenticated live submission unavailable)
