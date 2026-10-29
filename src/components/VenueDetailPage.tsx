@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil, Trash2, ShieldCheck, LayoutGrid, List, CheckSquare, Sparkles } from "lucide-react";
+import { MapPin, ArrowLeft, Clock, Globe, Phone, Instagram, Store, Pencil, Trash2, ShieldCheck, LayoutGrid, List, CheckSquare, Sparkles, Plus, CalendarPlus, X } from "lucide-react";
 import { PromoListView, PromoSortKey, SortDirection } from "./PromoListView";
 import { SelectableItem } from "./SelectableItem";
 import { BulkDeleteBar } from "./BulkDeleteBar";
@@ -25,6 +25,9 @@ import { Helmet } from "react-helmet-async";
 import { VenueEditDialog } from "./VenueEditDialog";
 import { VenuePinSetup } from "./VenuePinSetup";
 import { VenueReservation } from "./VenueReservation";
+import { CreatePromoForm } from "./CreatePromoForm";
+import { EventForm } from "./EventForm";
+import { LoginDialog } from "./LoginDialog";
 import { getRegionLabelForArea } from "@/lib/area-config";
 
 interface Venue {
@@ -81,6 +84,19 @@ export const VenueDetailPage = () => {
   const [submittingClaim, setSubmittingClaim] = useState(false);
   const [existingClaim, setExistingClaim] = useState<string | null>(null);
   const [scraping, setScraping] = useState(false);
+  const [createType, setCreateType] = useState<"promo" | "event" | null>(null);
+  const [pendingCreateType, setPendingCreateType] = useState<"promo" | "event" | null>(null);
+  const [showCreateLogin, setShowCreateLogin] = useState(false);
+
+  const handleCreate = async (type: "promo" | "event") => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setPendingCreateType(type);
+      setShowCreateLogin(true);
+      return;
+    }
+    setCreateType(type);
+  };
 
   const handleScrape = async () => {
     if (!venue?.id) return;
@@ -657,10 +673,41 @@ export const VenueDetailPage = () => {
               {promos.length === 0 && events.length === 0 && (
                 <Card>
                   <CardContent className="py-12 text-center text-muted-foreground">
-                    No promos or events at this venue yet.
+                    <p>No promos or events at this venue yet.</p>
+                    <div className="mt-6 flex flex-wrap justify-center gap-3">
+                      <Button onClick={() => handleCreate("promo")}>
+                        <Plus className="mr-2 h-4 w-4" />Add promo
+                      </Button>
+                      <Button variant="outline" onClick={() => handleCreate("event")}>
+                        <CalendarPlus className="mr-2 h-4 w-4" />Add event
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               )}
+              {createType && (
+                <div className="space-y-3">
+                  <div className="flex justify-end">
+                    <Button variant="ghost" size="sm" onClick={() => setCreateType(null)}>
+                      <X className="mr-2 h-4 w-4" />Cancel
+                    </Button>
+                  </div>
+                  {createType === "promo" ? (
+                    <CreatePromoForm initialVenue={venue} />
+                  ) : (
+                    <EventForm initialVenue={venue} />
+                  )}
+                </div>
+              )}
+              <LoginDialog
+                open={showCreateLogin}
+                onOpenChange={setShowCreateLogin}
+                onSuccess={() => {
+                  setShowCreateLogin(false);
+                  setCreateType(pendingCreateType);
+                  setPendingCreateType(null);
+                }}
+              />
             </div>
 
             {/* Sidebar */}

@@ -20,25 +20,25 @@ import { VoucherSettings } from "./VoucherSettings";
 import { PromoPreviewDialog } from "./PromoPreviewDialog";
 import type { VenueResult } from "./form-components/VenueAutocomplete";
 
-export const CreatePromoForm = () => {
+export const CreatePromoForm = ({ initialVenue }: { initialVenue?: VenueResult }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [duplicateConfirmed, setDuplicateConfirmed] = useState(false);
-  const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
+  const [selectedVenueId, setSelectedVenueId] = useState<string | null>(initialVenue?.id || null);
   const [voucherEnabled, setVoucherEnabled] = useState(false);
   const [voucherMode, setVoucherMode] = useState("single");
   const [voucherCooldownDays, setVoucherCooldownDays] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    venue: "",
-    address: "",
+    venue: initialVenue?.name || "",
+    address: initialVenue?.address || "",
     promoTypes: [] as string[],
     dayOfWeek: [] as string[],
-    area: "",
+    area: initialVenue?.area || "",
     drinkType: [] as string[],
     originalPrice: "",
     discountedPrice: "",

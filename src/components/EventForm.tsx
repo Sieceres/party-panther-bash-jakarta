@@ -31,10 +31,11 @@ import { getEventUrl } from "@/lib/slug-utils";
 
 interface EventFormProps {
   initialData?: Tables<'events'>; // Optional initial data for editing
+  initialVenue?: Pick<Tables<'venues'>, 'id' | 'name' | 'address' | 'area' | 'latitude' | 'longitude'>;
   onSuccess?: () => void; // Callback for successful submission
 }
 
-export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
+export const EventForm = ({ initialData, initialVenue, onSuccess }: EventFormProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,8 +61,8 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [enableCheckIn, setEnableCheckIn] = useState(initialData?.enable_check_in || false);
   const [enablePhotos, setEnablePhotos] = useState(initialData?.enable_photos ?? true);
   const [instagramPostUrl, setInstagramPostUrl] = useState(initialData?.instagram_post_url || "");
-  const [selectedVenueId, setSelectedVenueId] = useState<string | null>(initialData?.venue_id || null);
-  const [venueArea, setVenueArea] = useState(initialData?.venue_address || ""); // area stored in venue_address for now
+  const [selectedVenueId, setSelectedVenueId] = useState<string | null>(initialData?.venue_id || initialVenue?.id || null);
+  const [venueArea, setVenueArea] = useState(initialData?.venue_address || initialVenue?.area || ""); // area stored in venue_address for now
   const [aiAutoFilledVenue, setAiAutoFilledVenue] = useState(false);
   const [customSlug, setCustomSlug] = useState<string>((initialData as any)?.custom_slug || "");
   const [priceAmount, setPriceAmount] = useState<number | null>((initialData as any)?.price_amount ?? null);
@@ -73,7 +74,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
     title: initialData?.title || "",
     description: initialData?.description || "",
     time: initialData?.time || "",
-    venue: initialData?.venue_name || "",
+    venue: initialData?.venue_name || initialVenue?.name || "",
     organizer: initialData?.organizer_name || "",
     whatsapp: initialData?.organizer_whatsapp || "",
     image: initialData?.image_url || ""
@@ -81,7 +82,9 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(
     initialData?.venue_latitude && initialData?.venue_longitude
       ? { lat: initialData.venue_latitude, lng: initialData.venue_longitude, address: initialData.venue_address || "" }
-      : null
+      : initialVenue?.latitude != null && initialVenue?.longitude != null
+        ? { lat: initialVenue.latitude, lng: initialVenue.longitude, address: initialVenue.address || "" }
+        : null
   );
 
   // Duplicate detection - only for new events
