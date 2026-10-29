@@ -1678,6 +1678,7 @@ export type Database = {
       }
     }
     Functions: {
+      apply_promo_venue_repairs: { Args: { _matches: Json }; Returns: number }
       can_manage_event_attendees: {
         Args: { event_id_param: string }
         Returns: boolean
@@ -2102,6 +2103,16 @@ export type Database = {
             Returns: boolean
           }
       normalize_venue_name: { Args: { _name: string }; Returns: string }
+      preview_promo_venue_repairs: {
+        Args: never
+        Returns: {
+          current_venue_name: string
+          matched_venue_id: string
+          matched_venue_name: string
+          promo_id: string
+          promo_title: string
+        }[]
+      }
       refresh_event_attendee_stats: { Args: never; Returns: undefined }
       refresh_promo_review_stats: { Args: never; Returns: undefined }
       should_show_organizer_contact: { Args: never; Returns: boolean }
@@ -2114,6 +2125,8 @@ export type Database = {
         }
         Returns: string
       }
+      unique_venue_link_match: { Args: { _name: string }; Returns: string }
+      venue_link_match_key: { Args: { _name: string }; Returns: string }
     }
     Enums: {
       event_access_level:
