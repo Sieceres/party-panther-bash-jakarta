@@ -40,5 +40,30 @@ export const defaultRegistrationFields = (): RegField[] => [
   { ...newField("phone"), label: "WhatsApp", contact: "whatsapp", prefill: "whatsapp" },
 ];
 
+/** Seed only new forms; an enabled form may intentionally have no contacts or questions. */
+export const initialRegistrationFields = (event?: {
+  registration_enabled?: boolean;
+  registration_fields?: unknown;
+}): RegField[] => {
+  const saved = Array.isArray(event?.registration_fields) ? event.registration_fields as RegField[] : [];
+  if (saved.length || event?.registration_enabled) return saved;
+  return defaultRegistrationFields();
+};
+
+export const contactOptionsForType = (type: RegFieldType): NonNullable<RegField["contact"]>[] => {
+  if (type === "short_text" || type === "long_text") return ["name"];
+  if (type === "email") return ["email"];
+  if (type === "phone") return ["whatsapp"];
+  return [];
+};
+
+export const changeRegistrationFieldType = (field: RegField, type: RegFieldType): RegField => ({
+  ...field,
+  type,
+  contact: field.contact && contactOptionsForType(type).includes(field.contact) ? field.contact : undefined,
+  prefill: isChoice(type) ? null : field.prefill,
+  options: isChoice(type) ? field.options?.length ? field.options : ["Option 1"] : undefined,
+});
+
 export const formatAnswer = (v: unknown) =>
   Array.isArray(v) ? v.join(", ") : v === null || v === undefined ? "" : String(v);
