@@ -19,7 +19,7 @@ import { EventTagSelector } from "./form-components/EventTagSelector";
 import { EventPrivacySettings } from "./form-components/EventPrivacySettings";
 import { RegistrationFormBuilder } from "./form-components/RegistrationFormBuilder";
 import type { RegField } from "@/lib/registration";
-import { defaultRegistrationFields } from "@/lib/registration";
+import { initialRegistrationFields } from "@/lib/registration";
 import { EventAIExtract } from "./form-components/EventAIExtract";
 import { CustomLinkField } from "./form-components/CustomLinkField";
 import { EventPreviewDialog } from "./EventPreviewDialog";
@@ -67,7 +67,7 @@ export const EventForm = ({ initialData, onSuccess }: EventFormProps) => {
   const [priceAmount, setPriceAmount] = useState<number | null>((initialData as any)?.price_amount ?? null);
   const [priceCurrency, setPriceCurrency] = useState<string>((initialData as any)?.price_currency || "IDR");
   const [registrationEnabled, setRegistrationEnabled] = useState<boolean>(!!(initialData as any)?.registration_enabled);
-  const [registrationFields, setRegistrationFields] = useState<RegField[]>(() => initialData ? ((initialData as any).registration_fields || []) : defaultRegistrationFields());
+  const [registrationFields, setRegistrationFields] = useState<RegField[]>(() => initialRegistrationFields(initialData));
   const [registrationCapacity, setRegistrationCapacity] = useState<number | null>((initialData as any)?.registration_capacity ?? null);
   const [formData, setFormData] = useState({
     title: initialData?.title || "",

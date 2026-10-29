@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowDown, ArrowUp, ClipboardList, Plus, Trash2, X } from "lucide-react";
-import { FIELD_TYPE_LABELS, RegField, RegFieldType, isChoice, newField, REGISTRATION_PRIVACY_TEXT } from "@/lib/registration";
+import { FIELD_TYPE_LABELS, RegField, RegFieldType, isChoice, newField, REGISTRATION_PRIVACY_TEXT, contactOptionsForType, changeRegistrationFieldType } from "@/lib/registration";
 
 interface Props {
   enabled: boolean;
@@ -77,7 +77,7 @@ export const RegistrationFormBuilder = ({ enabled, fields, capacity, onEnabledCh
                 <Select
                   value={f.type}
                   onValueChange={(t: RegFieldType) =>
-                    update(i, { type: t, contact: undefined, ...(isChoice(t) ? { prefill: null } : {}), options: isChoice(t) ? f.options?.length ? f.options : ["Option 1"] : undefined })
+                    update(i, changeRegistrationFieldType(f, t))
                   }
                 >
                   <SelectTrigger className="sm:w-56"><SelectValue /></SelectTrigger>
@@ -130,6 +130,19 @@ export const RegistrationFormBuilder = ({ enabled, fields, capacity, onEnabledCh
                         <SelectItem value="whatsapp">Prefill: WhatsApp</SelectItem>
                         <SelectItem value="gender">Prefill: Gender</SelectItem>
                         <SelectItem value="age">Prefill: Age</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                  {contactOptionsForType(f.type).length > 0 && (
+                    <Select value={f.contact || "none"} onValueChange={(v) => update(i, { contact: v === "none" ? undefined : v as RegField["contact"] })}>
+                      <SelectTrigger aria-label="Contact field" className="h-8 w-48 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Not a contact field</SelectItem>
+                        {contactOptionsForType(f.type).map((contact) => (
+                          <SelectItem key={contact} value={contact}>
+                            {contact === "name" ? "Respondent name" : contact === "email" ? "Respondent email" : "Respondent WhatsApp"}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   )}
