@@ -1579,6 +1579,7 @@ export type Database = {
         Row: {
           address: string | null
           area: string | null
+          booking_url: string | null
           claim_status: string
           claimed_by: string | null
           created_at: string
@@ -1602,6 +1603,7 @@ export type Database = {
         Insert: {
           address?: string | null
           area?: string | null
+          booking_url?: string | null
           claim_status?: string
           claimed_by?: string | null
           created_at?: string
@@ -1625,6 +1627,7 @@ export type Database = {
         Update: {
           address?: string | null
           area?: string | null
+          booking_url?: string | null
           claim_status?: string
           claimed_by?: string | null
           created_at?: string
