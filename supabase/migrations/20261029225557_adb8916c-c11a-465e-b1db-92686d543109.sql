@@ -1,0 +1,1 @@
+CREATE POLICY "Admins can update promos" ON public.promos FOR UPDATE TO authenticated USING (public.is_current_user_admin()) WITH CHECK (public.is_current_user_admin());
